@@ -29,8 +29,14 @@ public class FoodRepository {
 
     public int insertFood(Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", food.getId())
-                .addValue("name", food.getName());
+                .addValue("id", 1)
+                .addValue("name", food.getName())
+                .addValue("unit", food.getUnit())
+                .addValue("unitname", food.getUnitName())
+                .addValue("optionalgrams", food.getOptionalGrams())
+                .addValue("protein", food.getProtein())
+                .addValue("fat", food.getFat())
+                .addValue("carbs", food.getCarbs());
         return template.update(INSERT_SQL, params);
     }
 
@@ -40,7 +46,14 @@ class FoodWrapper implements RowMapper {
 
     @Override
     public Object mapRow(ResultSet rs, int i) throws SQLException {
-        return new Food(rs.getInt("id"), rs.getString("name"));
+        return new Food(rs.getString("name"),
+                rs.getString("unit"),
+                rs.getString("unitname"),
+                rs.getInt("optionalgrams"),
+                rs.getInt("protein"),
+                rs.getInt("fat"),
+                rs.getInt("carbs")
+                );
     }
 
 }

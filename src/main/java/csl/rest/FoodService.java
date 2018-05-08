@@ -28,25 +28,29 @@ public class FoodService {
     }
 
     // Post with params
-    @CrossOrigin(origins = {"*", "http://localhost:4200"})
-    @RequestMapping(value = "/newFood",
-            method = POST,
-            headers = {"Content-Type=application/json"},
-            params = {"name"})
-    public void insertFood(@RequestParam("name") String name) {
-        int insertedRows = foodRepository.insertFood(new Food(1, name));
-        System.out.println(insertedRows + " row(s) inserted");
-    }
-
-    // Example without params with String JSON
 //    @CrossOrigin(origins = {"*", "http://localhost:4200"})
-//    @RequestMapping(value = "/newFoodTwo",
+//    @RequestMapping(value = "/newFood",
 //            method = POST,
-//            headers = {"Content-Type=application/json"})
-//    public void insertFoodTwo(@RequestBody String name) {
-//        System.out.println(name);
-//        int insertedRows = foodRepository.insertFood(new Food(1, name));
+//            headers = {"Content-Type=application/json"},
+//            params = {"name"})
+//    public void insertFood(@RequestParam("name") String name) {
+//
+//        Food food = new Food(name, null, null, null, null, null, null);
+//
+//        int insertedRows = foodRepository.insertFood(food);
 //        System.out.println(insertedRows + " row(s) inserted");
 //    }
+
+    // Example without params with String JSON
+    @CrossOrigin(origins = {"*", "http://localhost:4200"})
+    @RequestMapping(value = "/newFoodTwo",
+            method = POST,
+            headers = {"Content-Type=application/json"})
+    public void insertFoodTwo(@RequestBody Food food) {
+        System.out.println("Inside new food 2");
+        System.out.println(food);
+//        int insertedRows = foodRepository.insertFood(new Food(1, name));
+//        System.out.println(insertedRows + " row(s) inserted");
+    }
 
 }
