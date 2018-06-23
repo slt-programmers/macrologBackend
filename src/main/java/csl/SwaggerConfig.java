@@ -27,7 +27,7 @@ public class SwaggerConfig {
                 .title("Macrolog Backend REST API")
                 .description("\"Spring Boot REST API for the Macrolog application\"")
                 .version("1.0.0")
-                .contact(new Contact("Arjan Tienkamp","","arjan.tienkamp@gmail.com"))
+                .contact(new Contact("Carmen Scholte Lubberink en Arjan Tienkamp","http://carmenscholte.com","arjan.tienkamp@gmail.com;carmenscholtelubberink@gmail.com"))
                 .build();
     }
 }
