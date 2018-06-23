@@ -4,8 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.util.Properties;
 
 /**
  * Created by Carmen on 17-3-2018.
@@ -15,13 +18,27 @@ public class DatabaseHelper implements DataSource{
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHelper.class);
 
     private static DatabaseHelper instance;
-    private static final String CONNECTION_URL = "jdbc:mysql://localhost/test";
+    private static String CONNECTION_URL;
+    private static String DB_USER;
+    private static String DB_PASSWORD;
 
     private DatabaseHelper() {
     }
 
     public static DatabaseHelper getInstance() {
         if (instance == null) {
+
+            Properties p = new Properties();
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            InputStream stream = loader.getResourceAsStream("application.properties");
+            try {
+                p.load(stream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            CONNECTION_URL = p.getProperty("spring.datasource.url");
+            DB_USER = p.getProperty("spring.datasource.username");
+            DB_PASSWORD = p.getProperty("spring.datasource.password");
             instance = new DatabaseHelper();
         }
         return instance;
@@ -29,7 +46,7 @@ public class DatabaseHelper implements DataSource{
 
     @Override
     public Connection getConnection() throws SQLException {
-        return getConnection("root", "admin");
+        return getConnection(DB_USER ,DB_PASSWORD);
     }
 
     @Override

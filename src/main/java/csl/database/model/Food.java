@@ -13,6 +13,9 @@ public class Food {
     private Integer fat;
     private Integer carbs;
 
+    public Food() {
+    }
+
     public Food(String name,
                 String unit,
                 String unitName,
