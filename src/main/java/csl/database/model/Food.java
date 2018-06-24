@@ -7,18 +7,18 @@ public class Food {
 
     private String name;
     private String unit;
-    private Integer protein;
-    private Integer fat;
-    private Integer carbs;
+    private Double protein;
+    private Double fat;
+    private Double carbs;
 
     public Food() {
     }
 
     public Food(String name,
                 String unit,
-                Integer protein,
-                Integer fat,
-                Integer carbs) {
+                Double protein,
+                Double fat,
+                Double carbs) {
         this.name = name;
         this.unit = unit;
         this.protein = protein;
@@ -43,27 +43,27 @@ public class Food {
     }
 
 
-    public Integer getProtein() {
+    public Double getProtein() {
         return protein;
     }
 
-    public void setProtein(Integer protein) {
+    public void setProtein(Double protein) {
         this.protein = protein;
     }
 
-    public Integer getFat() {
+    public Double getFat() {
         return fat;
     }
 
-    public void setFat(Integer fat) {
+    public void setFat(Double fat) {
         this.fat = fat;
     }
 
-    public Integer getCarbs() {
+    public Double getCarbs() {
         return carbs;
     }
 
-    public void setCarbs(Integer carbs) {
+    public void setCarbs(Double carbs) {
         this.carbs = carbs;
     }
 

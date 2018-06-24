@@ -102,9 +102,9 @@ class FoodWrapper implements RowMapper {
     public Object mapRow(ResultSet rs, int i) throws SQLException {
         return new Food(rs.getString("name"),
                 rs.getString("per"),
-                rs.getInt("proteins"),
-                rs.getInt("fats"),
-                rs.getInt("carbs")
+                rs.getDouble("proteins"),
+                rs.getDouble("fats"),
+                rs.getDouble("carbs")
                 );
     }
 }
