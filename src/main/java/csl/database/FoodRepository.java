@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -79,9 +80,6 @@ public class FoodRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                .addValue("id", null)
                 .addValue("name", food.getName())
-                //.addValue("unit", food.getUnit())
-                //.addValue("unitname", food.getUnitName())
-                //.addValue("optionalgrams", food.getOptionalGrams())
                 .addValue("protein", food.getProtein())
                 .addValue("fats", food.getFat())
                 .addValue("per", "100g")
@@ -89,6 +87,13 @@ public class FoodRepository {
         return template.update(INSERT_SQL, params);
     }
 
+    public List<Food> getFood(String name) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", name);
+        String myFood = SELECT_SQL + " WHERE  "+ COL_NAME + "= :name";
+        List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
+        return queryResults;
+    }
 }
 
 class FoodWrapper implements RowMapper {
@@ -97,8 +102,6 @@ class FoodWrapper implements RowMapper {
     public Object mapRow(ResultSet rs, int i) throws SQLException {
         return new Food(rs.getString("name"),
                 rs.getString("per"),
-                "",//rs.getString("unitname"),
-                0,//rs.getInt("optionalgrams"),
                 rs.getInt("proteins"),
                 rs.getInt("fats"),
                 rs.getInt("carbs")

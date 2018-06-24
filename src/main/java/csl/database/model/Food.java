@@ -7,8 +7,6 @@ public class Food {
 
     private String name;
     private String unit;
-    private String unitName;
-    private Integer optionalGrams;
     private Integer protein;
     private Integer fat;
     private Integer carbs;
@@ -18,15 +16,11 @@ public class Food {
 
     public Food(String name,
                 String unit,
-                String unitName,
-                Integer optionalGrams,
                 Integer protein,
                 Integer fat,
                 Integer carbs) {
         this.name = name;
         this.unit = unit;
-        this.unitName = unitName;
-        this.optionalGrams = optionalGrams;
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
@@ -48,21 +42,6 @@ public class Food {
         this.unit = unit;
     }
 
-    public String getUnitName() {
-        return unitName;
-    }
-
-    public void setUnitName(String unitName) {
-        this.unitName = unitName;
-    }
-
-    public Integer getOptionalGrams() {
-        return optionalGrams;
-    }
-
-    public void setOptionalGrams(Integer optionalGrams) {
-        this.optionalGrams = optionalGrams;
-    }
 
     public Integer getProtein() {
         return protein;
