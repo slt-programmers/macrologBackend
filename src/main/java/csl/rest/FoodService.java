@@ -2,6 +2,8 @@ package csl.rest;
 
 import csl.database.FoodRepository;
 import csl.database.model.Food;
+import csl.dto.AddFoodMacroRequest;
+import csl.dto.AddUnitAliasRequest;
 import csl.dto.FoodMacros;
 import csl.dto.Macro;
 import io.swagger.annotations.Api;
@@ -50,11 +52,15 @@ public class FoodService {
             for (Food food : foodList) {
                 FoodMacros curr = new FoodMacros();
                 curr.setName(food.getName());
+                curr.setAmountUnit(food.getAmountUnit());
+
                 Macro macro = new Macro();
                 macro.setCarbs(food.getCarbs());
                 macro.setFat(food.getFat());
                 macro.setProteins(food.getProtein());
-                curr.addMacroPerUnit("100g", macro);
+                curr.addMacroPerUnit(food.getAmountNumber(), macro);
+
+
                 foodMacros.add(curr);
             }
             return ResponseEntity.ok(foodMacros.get(0));
@@ -65,18 +71,24 @@ public class FoodService {
     @RequestMapping(value = "/{name}",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeFood(@PathVariable("name") String name, @RequestBody Macro macrovalues) throws URISyntaxException {
+    public ResponseEntity storeFood(@PathVariable("name") String name,
+                                    @RequestBody AddFoodMacroRequest addFoodMacroRequest) throws URISyntaxException {
         List<Food> foodList = foodRepository.getFood(name);
         if (foodList.size() > 0) {
             return ResponseEntity.badRequest().build();
         } else {
             Food newFood = new Food();
             newFood.setName(name);
-            newFood.setCarbs(macrovalues.getCarbs());
-            newFood.setFat(macrovalues.getFat());
-            newFood.setProtein(macrovalues.getProteins());
-            newFood.setUnit("default");
+            newFood.setAmountUnit(addFoodMacroRequest.getDefaultUnitname());
+            newFood.setAmountNumber(addFoodMacroRequest.getDefaultAmount());
+
+            Macro macroPerUnit = addFoodMacroRequest.getMacroPerUnit();
+            newFood.setCarbs(macroPerUnit.getCarbs());
+            newFood.setFat(macroPerUnit.getFat());
+            newFood.setProtein(macroPerUnit.getProteins());
+
             int insertedRows = foodRepository.insertFood(newFood);
+
             URI location = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .buildAndExpand(newFood.getName()).toUri();
@@ -84,4 +96,27 @@ public class FoodService {
             return ResponseEntity.created(location).build();
         }
     }
+
+    @ApiOperation(value = "Adds an alias for a food")
+    @RequestMapping(value = "/{name}/alias",
+            method = POST,
+            headers = {"Content-Type=application/json"})
+    public ResponseEntity addAlias(@PathVariable("name") String name,
+                                   @RequestBody AddUnitAliasRequest addUnitAliasRequest) throws URISyntaxException {
+        List<Food> foodList = foodRepository.getFood(name);
+        if (foodList.size() > 0) {
+            return ResponseEntity.badRequest().build();
+        } else {
+
+
+//            int insertedRows = foodRepository.insertFood(newFood);
+
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .buildAndExpand("da").toUri();
+
+            return ResponseEntity.created(location).build();
+        }
+    }
+
 }

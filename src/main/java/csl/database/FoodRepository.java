@@ -15,6 +15,8 @@ import java.sql.*;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static csl.database.FoodRepository.*;
+
 /**
  * Created by Carmen on 18-3-2018.
  */
@@ -27,7 +29,8 @@ public class FoodRepository {
     public static final String COL_PROTEINS = "proteins";
     public static final String COL_FATS = "fats";
     public static final String COL_CARBS = "carbs";
-    public static final String COL_PER = "per";
+    public static final String COL_DEFAULT_AMOUNT = "amount";
+    public static final String COL_DEFAULT_AMOUNT_UNIT = "unitname";
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
@@ -36,13 +39,14 @@ public class FoodRepository {
                     COL_PROTEINS + " DEC(5,2)  NOT NULL, " +
                     COL_FATS + " DEC(5,2) NOT NULL, " +
                     COL_CARBS + " DEC(5,2) NOT NULL," +
-                    COL_PER + " TEXT NOT NULL)" ;
+                    COL_DEFAULT_AMOUNT + " DEC(5,2) NOT NULL," +
+                    COL_DEFAULT_AMOUNT_UNIT + " TEXT NOT NULL)" ;
 
     public static final String TABLE_DELETE =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String SELECT_SQL = "select * from food";
-    private static final String INSERT_SQL = "insert into food( name,proteins,fats,carbs,per) values(:name,:protein,:fats,:carbs,:per)";
+    private static final String INSERT_SQL = "insert into food( name,proteins,fats,carbs,amount,unitname) values(:name,:protein,:fats,:carbs,:amount,:unitname)";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -80,9 +84,10 @@ public class FoodRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                .addValue("id", null)
                 .addValue("name", food.getName())
+                .addValue("amount", food.getAmountNumber())
+                .addValue("unitname", food.getAmountUnit())
                 .addValue("protein", food.getProtein())
                 .addValue("fats", food.getFat())
-                .addValue("per", "100g")
                 .addValue("carbs", food.getCarbs());
         return template.update(INSERT_SQL, params);
     }
@@ -100,11 +105,12 @@ class FoodWrapper implements RowMapper {
 
     @Override
     public Object mapRow(ResultSet rs, int i) throws SQLException {
-        return new Food(rs.getString("name"),
-                rs.getString("per"),
-                rs.getDouble("proteins"),
-                rs.getDouble("fats"),
-                rs.getDouble("carbs")
+        return new Food(rs.getString(COL_NAME),
+                rs.getDouble(COL_DEFAULT_AMOUNT),
+                rs.getString(COL_DEFAULT_AMOUNT_UNIT),
+                rs.getDouble(COL_PROTEINS),
+                rs.getDouble(COL_FATS),
+                rs.getDouble(COL_CARBS)
                 );
     }
 }

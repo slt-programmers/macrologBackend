@@ -5,7 +5,8 @@ import java.util.HashMap;
 public class FoodMacros {
 
     private String name;
-    private HashMap<String,Macro> macroPerUnit;
+    private String amountUnit;
+    private HashMap<Double,Macro> macroPerUnit;
 
     public String getName() {
         return name;
@@ -15,19 +16,27 @@ public class FoodMacros {
         this.name = name;
     }
 
-    public HashMap<String, Macro> getMacroPerUnit() {
+    public HashMap<Double, Macro> getMacroPerUnit() {
         if (this.macroPerUnit == null){
             this.macroPerUnit = new HashMap<>();
         }
         return macroPerUnit;
     }
 
-    public void setMacroPerUnit(HashMap<String, Macro> macroPerUnit) {
+    public void setMacroPerUnit(HashMap<Double, Macro> macroPerUnit) {
         this.macroPerUnit = macroPerUnit;
     }
 
-    public void addMacroPerUnit(String unit, Macro macro) {
+    public void addMacroPerUnit(Double unit, Macro macro) {
 
        getMacroPerUnit().put(unit,macro);
+    }
+
+    public String getAmountUnit() {
+        return amountUnit;
+    }
+
+    public void setAmountUnit(String amountUnit) {
+        this.amountUnit = amountUnit;
     }
 }

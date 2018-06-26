@@ -6,7 +6,8 @@ package csl.database.model;
 public class Food {
 
     private String name;
-    private String unit;
+    private Double amountNumber;
+    private String amountUnit;
     private Double protein;
     private Double fat;
     private Double carbs;
@@ -15,12 +16,14 @@ public class Food {
     }
 
     public Food(String name,
-                String unit,
+                Double amountNumber,
+                String amountUnit,
                 Double protein,
                 Double fat,
                 Double carbs) {
         this.name = name;
-        this.unit = unit;
+        this.amountNumber = amountNumber;
+        this.amountUnit = amountUnit;
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
@@ -34,13 +37,6 @@ public class Food {
         this.name = name;
     }
 
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
 
 
     public Double getProtein() {
@@ -67,6 +63,22 @@ public class Food {
         this.carbs = carbs;
     }
 
+    public String getAmountUnit() {
+        return amountUnit;
+    }
+
+    public void setAmountUnit(String amountUnit) {
+        this.amountUnit = amountUnit;
+    }
+
+    public Double getAmountNumber() {
+        return amountNumber;
+    }
+
+    public void setAmountNumber(Double amountNumber) {
+        this.amountNumber = amountNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -75,13 +87,15 @@ public class Food {
         Food food = (Food) o;
 
         if (!name.equals(food.name)) return false;
-        return unit.equals(food.unit);
+        if (!amountUnit.equals(food.amountUnit)) return false;
+        return amountNumber.equals(food.amountNumber);
     }
 
     @Override
     public int hashCode() {
         int result = name.hashCode();
-        result = 31 * result + unit.hashCode();
+        result = 31 * result + amountUnit.hashCode();
+        result = 31 * result + amountNumber.hashCode();
         return result;
     }
 
