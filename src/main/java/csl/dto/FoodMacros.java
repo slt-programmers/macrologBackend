@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 public class FoodMacros {
 
+    private Long foodId;
     private String name;
     private String amountUnit;
     private HashMap<Double,Macro> macroPerUnit;
@@ -38,5 +39,17 @@ public class FoodMacros {
 
     public void setAmountUnit(String amountUnit) {
         this.amountUnit = amountUnit;
+    }
+
+    public String toString(){
+        return "[foodId="+foodId+",name "+name+"]";
+    }
+
+    public void setFoodId(Long id) {
+        this.foodId=id;
+    }
+
+    public Long getFoodId() {
+        return foodId;
     }
 }

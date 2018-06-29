@@ -14,6 +14,15 @@ public class Macro {
     @ApiModelProperty(notes = "Number of carbs",required=true)
     private Double carbs;
 
+    public Macro(Double proteins, Double fat, Double carbs) {
+        this.proteins = proteins;
+        this.fat = fat;
+        this.carbs = carbs;
+    }
+
+    public Macro() {
+    }
+
     public Double getProteins() {
         return proteins;
     }

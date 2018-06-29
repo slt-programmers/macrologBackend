@@ -5,6 +5,7 @@ package csl.database.model;
  */
 public class Food {
 
+    private Long id;
     private String name;
     private Double amountNumber;
     private String amountUnit;
@@ -15,18 +16,28 @@ public class Food {
     public Food() {
     }
 
-    public Food(String name,
+    public Food(Long id,
+                String name,
                 Double amountNumber,
                 String amountUnit,
                 Double protein,
                 Double fat,
                 Double carbs) {
+        this.id = id;
         this.name = name;
         this.amountNumber = amountNumber;
         this.amountUnit = amountUnit;
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {

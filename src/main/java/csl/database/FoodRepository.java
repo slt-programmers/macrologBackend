@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -75,13 +76,22 @@ public class FoodRepository {
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
         return queryResults;
     }
+    public Food getFoodById(Long id) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id);
+        String myFood = SELECT_SQL + " WHERE  " + COL_ID+ "= :id";
+        List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
+        Assert.isTrue(queryResults.size() <=1);
+        return queryResults.isEmpty()?null:queryResults.get(0);
+    }
 }
 
 class FoodWrapper implements RowMapper {
 
     @Override
     public Object mapRow(ResultSet rs, int i) throws SQLException {
-        return new Food(rs.getString(COL_NAME),
+        return new Food(rs.getLong(COL_ID),
+                rs.getString(COL_NAME),
                 rs.getDouble(COL_DEFAULT_AMOUNT),
                 rs.getString(COL_DEFAULT_AMOUNT_UNIT),
                 rs.getDouble(COL_PROTEINS),

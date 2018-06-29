@@ -1,13 +1,16 @@
 package csl.rest;
 
+import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
 import csl.database.model.Food;
+import csl.database.model.FoodAlias;
 import csl.dto.AddFoodMacroRequest;
 import csl.dto.AddUnitAliasRequest;
 import csl.dto.FoodMacros;
 import csl.dto.Macro;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +30,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class FoodService {
 
     private FoodRepository foodRepository = new FoodRepository();
+    private FoodAliasRepository foodAliasRepository = new FoodAliasRepository();
 
     @ApiOperation(value = "Retrieve all stored foods")
     @CrossOrigin(origins = "http://localhost:4200")
@@ -51,6 +55,7 @@ public class FoodService {
             List<FoodMacros> foodMacros = new ArrayList<>();
             for (Food food : foodList) {
                 FoodMacros curr = new FoodMacros();
+                curr.setFoodId(food.getId());
                 curr.setName(food.getName());
                 curr.setAmountUnit(food.getAmountUnit());
 
@@ -89,33 +94,36 @@ public class FoodService {
 
             int insertedRows = foodRepository.insertFood(newFood);
 
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .buildAndExpand(newFood.getName()).toUri();
+//            URI location = ServletUriComponentsBuilder
+//                    .fromCurrentRequest()
+//                    .buildAndExpand(newFood.getAliasname()).toUri();
 
-            return ResponseEntity.created(location).build();
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         }
     }
 
     @ApiOperation(value = "Adds an alias for a food")
-    @RequestMapping(value = "/{name}/alias",
+    @RequestMapping(value = "/{id}/alias",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity addAlias(@PathVariable("name") String name,
+    public ResponseEntity addAlias(@PathVariable("id") Long foodId,
                                    @RequestBody AddUnitAliasRequest addUnitAliasRequest) throws URISyntaxException {
-        List<Food> foodList = foodRepository.getFood(name);
-        if (foodList.size() > 0) {
+        Food food = foodRepository.getFoodById(foodId);
+        if (food == null) {
             return ResponseEntity.badRequest().build();
         } else {
 
+            FoodAlias foodAlias = new FoodAlias();
+            foodAlias.setAliasname(addUnitAliasRequest.getAliasName());
+            foodAlias.setAmountNumber(addUnitAliasRequest.getAliasAmount());
+            foodAlias.setAmountUnit(addUnitAliasRequest.getAliasUnitName());
+            foodAlias.setFoodId(foodId);
+            foodAliasRepository.addFoodAlias(food,foodAlias);
 
 //            int insertedRows = foodRepository.insertFood(newFood);
 
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .buildAndExpand("da").toUri();
 
-            return ResponseEntity.created(location).build();
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         }
     }
 
