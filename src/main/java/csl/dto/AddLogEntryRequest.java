@@ -6,30 +6,32 @@ import org.joda.time.DateTime;
 /**
  * Class voor het bewaren van de macros
  */
-public class LogEntry {
+public class AddLogEntryRequest {
 
-    private FoodMacros food;
-    private FoodAlias foodAlias;
-
+    @ApiModelProperty(notes = "Defines what food has been eaten",required=true,example = "5")
+    private Long foodId;
+    @ApiModelProperty(notes = "MeasurementUnit ID. If left omitted the default measurement of the food will be used",required=false,example = "3")
+    private Long aliasIdUsed;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
     @ApiModelProperty(notes = "Time of log",required=true)
     private DateTime timestamp;
 
-    public FoodMacros getFood() {
-        return food;
+
+    public Long getFoodId() {
+        return foodId;
     }
 
-    public void setFood(FoodMacros food) {
-        this.food = food;
+    public void setFoodId(Long foodId) {
+        this.foodId = foodId;
     }
 
-    public FoodAlias getFoodAlias() {
-        return foodAlias;
+    public Long getAliasIdUsed() {
+        return aliasIdUsed;
     }
 
-    public void setFoodAlias(FoodAlias foodAlias) {
-        this.foodAlias = foodAlias;
+    public void setAliasIdUsed(Long aliasIdUsed) {
+        this.aliasIdUsed = aliasIdUsed;
     }
 
     public Double getMultiplier() {

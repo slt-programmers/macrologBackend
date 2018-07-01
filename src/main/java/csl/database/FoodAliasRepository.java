@@ -33,14 +33,14 @@ public class FoodAliasRepository {
                     COL_ALIASNAME + " TEXT NOT NULL, " +
                     COL_DEFAULT_AMOUNT + " DEC(5,2) NOT NULL," +
                     COL_DEFAULT_AMOUNT_UNIT + " TEXT NOT NULL," +
-                    "FOREIGN KEY ("+COL_FOOD_ID+") REFERENCES "+FoodRepository.TABLE_NAME+"("+FoodRepository.COL_ID+")" +
+                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
                     ")";
 
     public static final String TABLE_DELETE =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
-    private static final String SELECT_SQL = "select * from "+ TABLE_NAME;
-    private static final String INSERT_SQL = "insert into "+TABLE_NAME+"( food_Id,aliasname,amount,unitname) values(:foodId,:aliasname,:amount,:unitname)";
+    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,aliasname,amount,unitname) values(:foodId,:aliasname,:amount,:unitname)";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -56,7 +56,7 @@ public class FoodAliasRepository {
     public int addFoodAlias(Food food, FoodAlias foodAlias) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
-                .addValue("foodId",food.getId())
+                .addValue("foodId", food.getId())
                 .addValue("aliasname", foodAlias.getAliasname())
                 .addValue("amount", foodAlias.getAmountNumber())
                 .addValue("unitname", foodAlias.getAmountUnit());
@@ -67,7 +67,32 @@ public class FoodAliasRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("aliasname", name);
         String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ALIASNAME + "= :aliasname";
-        List<FoodAlias> queryResults = template.query(myFoodAlias, params, new FoodWrapper());
+        List<FoodAlias> queryResults = template.query(myFoodAlias, params, new FoodAliasWrapper());
+        return queryResults;
+    }
+
+    public FoodAlias getFoodAlias(Long aliasId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("aliasId", aliasId);
+        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ID + "= :aliasId";
+        List<FoodAlias> queryResults = template.query(myFoodAlias, params, new FoodAliasWrapper());
+        return queryResults.isEmpty() ? null : queryResults.get(0);
+    }
+
+    public FoodAlias getFoodAlias(Long foodId, String name) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("aliasname", name)
+                .addValue("foodId", foodId);
+        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ALIASNAME + "= :aliasname AND " + COL_FOOD_ID + "=:foodId";
+        List<FoodAlias> queryResults = template.query(myFoodAlias, params, new FoodAliasWrapper());
+        return queryResults.isEmpty() ? null : queryResults.get(0);
+    }
+
+    public List<FoodAlias> getAliasesForFood(Long id) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("foodId", id);
+        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_FOOD_ID + "= :foodId";
+        List<FoodAlias> queryResults = template.query(myFoodAlias, params, new FoodAliasWrapper());
         return queryResults;
     }
 }
@@ -78,8 +103,9 @@ class FoodAliasWrapper implements RowMapper {
     public Object mapRow(ResultSet rs, int i) throws SQLException {
         return new FoodAlias(rs.getString(COL_ALIASNAME),
                 rs.getDouble(COL_DEFAULT_AMOUNT),
-                rs.getString(COL_DEFAULT_AMOUNT_UNIT)
-                );
+                rs.getString(COL_DEFAULT_AMOUNT_UNIT),
+                rs.getLong(COL_ID)
+        );
     }
 }
 

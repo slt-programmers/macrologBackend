@@ -69,12 +69,12 @@ public class FoodRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public List<Food> getFood(String name) {
+    public Food getFood(String name) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", name);
         String myFood = SELECT_SQL + " WHERE  " + COL_NAME + "= :name";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
-        return queryResults;
+        return queryResults.isEmpty()?null:queryResults.get(0);
     }
     public Food getFoodById(Long id) {
         SqlParameterSource params = new MapSqlParameterSource()

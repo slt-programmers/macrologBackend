@@ -3,11 +3,11 @@ package csl;
 import csl.database.DatabaseHelper;
 import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
-import csl.dto.AddFoodMacroRequest;
-import csl.dto.AddUnitAliasRequest;
-import csl.dto.FoodMacros;
-import csl.dto.Macro;
+import csl.database.LogEntryRepository;
+import csl.dto.*;
 import csl.rest.FoodService;
+import csl.rest.LogsService;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -22,6 +22,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 
@@ -47,28 +48,79 @@ public class Application {
             createTables();
 
             FoodService foodService = new FoodService();
+            FoodRepository foodRepository = new FoodRepository();
+            FoodAliasRepository foodAliasRepository = new FoodAliasRepository();
+            LogsService logService = new LogsService();
 
 
-            String brood = "Brood: Goudeerlijk bus fijn volkoren Jumbo";
-            foodService.storeFood(brood, createAddFoodMacroRequest(11.1, 2.0, 38.0));
-            ResponseEntity foodInformation = foodService.getFoodInformation(brood);
-            FoodMacros broodMacro = (FoodMacros) foodInformation.getBody();
-            LOGGER.debug("Brood : " + broodMacro);
-            AddUnitAliasRequest aliasRequest = new AddUnitAliasRequest();
-            aliasRequest.setAliasName("snee");
-            aliasRequest.setAliasAmount(30.0);
-            aliasRequest.setAliasUnitName("gram");
+            String BROOD = "Brood: Goudeerlijk bus fijn volkoren Jumbo";
+            String BROOD_SNEE = "snee";
 
-            foodService.addAlias(broodMacro.getFoodId(), aliasRequest);
+            foodService.storeFood(BROOD, createAddFoodMacroRequest(11.1, 2.0, 38.0));
+            Long BROOD_ID = foodRepository.getFood(BROOD).getId();
 
-            foodService.storeFood("Jordans Muesli de luxe ", createAddFoodMacroRequest(9.4, 9.2, 59.3));
-            foodService.storeFood("Yoghurt vol Jumbo", createAddFoodMacroRequest(4.1, 3.1, 4.2));
-            foodService.storeFood("Calvé pindakaas", createAddFoodMacroRequest(20, 55, 15));
+            AddUnitAliasRequest aliasRequest = getAddUnitAliasRequest(BROOD_SNEE, 30.0, "gram");
+            foodService.addAlias(BROOD_ID, aliasRequest);
+
+            String MUESLI = "Jordans Muesli de luxe";
+            String MUESLI_SCHAAL = "schaal Muesli";
+
+            foodService.storeFood(MUESLI, createAddFoodMacroRequest(9.4, 9.2, 59.3));
+            Long MUESLI_FOOD_ID = foodRepository.getFood(MUESLI).getId();
+            aliasRequest = getAddUnitAliasRequest(MUESLI_SCHAAL, 80, "gram");
+            foodService.addAlias(MUESLI_FOOD_ID, aliasRequest);
+
+            String YOGHURT_VOL_JUMBO = "Yoghurt vol Jumbo";
+            String YOGHURT_VOL_SCHAAL = "schaal Yoghurt Vol";
+
+            foodService.storeFood(YOGHURT_VOL_JUMBO, createAddFoodMacroRequest(4.1, 3.1, 4.2));
+            Long YOGHURT_FOOD_ID = foodRepository.getFood(YOGHURT_VOL_JUMBO).getId();
+            aliasRequest = getAddUnitAliasRequest(YOGHURT_VOL_SCHAAL, 200, "gram");
+            foodService.addAlias(YOGHURT_FOOD_ID, aliasRequest);
+
+            String CALVE_PINDAKAAS = "Calvé pindakaas";
+            String CALVE_PINDAKAAS_BELEG_2 = "2 boterhammen pindakaas beleg";
+
+            foodService.storeFood(CALVE_PINDAKAAS, createAddFoodMacroRequest(20, 55, 15));
+            Long CALVE_PINDAKAAS_FOOD_ID = foodRepository.getFood(CALVE_PINDAKAAS).getId();
+
+            aliasRequest = getAddUnitAliasRequest(CALVE_PINDAKAAS_BELEG_2, 20, "gram");
+            foodService.addAlias(CALVE_PINDAKAAS_FOOD_ID, aliasRequest);
+
             foodService.storeFood("Ei hardgekookt", createAddFoodMacroRequest(12.3, 9.1, 0.2));
-//
+            aliasRequest = getAddUnitAliasRequest("ei", 58.0, "gram");
+            foodService.addAlias(foodRepository.getFood( "Ei hardgekookt").getId(), aliasRequest);
+
+            AddLogEntryRequest logEntry1 = new AddLogEntryRequest();
+            logEntry1.setTimestamp(new DateTime(2018,6,21,7,0));
+            logEntry1.setFoodId(MUESLI_FOOD_ID);
+            logEntry1.setAliasIdUsed(foodAliasRepository.getFoodAlias(MUESLI_FOOD_ID,MUESLI_SCHAAL).getAliasId());
+            logEntry1.setMultiplier(1.0);
+            logService.storeLogEntry(logEntry1);
+
+            AddLogEntryRequest logEntry2 = new AddLogEntryRequest();
+            logEntry2.setTimestamp(new DateTime(2018,6,21,7,0));
+            logEntry2.setFoodId(YOGHURT_FOOD_ID);
+            logEntry2.setAliasIdUsed(foodAliasRepository.getFoodAlias(YOGHURT_FOOD_ID,YOGHURT_VOL_SCHAAL).getAliasId());
+            logEntry2.setMultiplier(1.0);
+            logService.storeLogEntry(logEntry2);
+
 
         }
 
+    }
+
+    private static FoodMacros getFoodMacro(FoodService foodService, Long  foodId) {
+        ResponseEntity foodInformation = foodService.getFoodInformation(foodId);
+        return (FoodMacros) foodInformation.getBody();
+    }
+
+    private static AddUnitAliasRequest getAddUnitAliasRequest(String aliasname, double aliasAmount, String aliasUnit) {
+        AddUnitAliasRequest aliasRequest = new AddUnitAliasRequest();
+        aliasRequest.setAliasName(aliasname);
+        aliasRequest.setAliasAmount(aliasAmount);
+        aliasRequest.setAliasUnitName(aliasUnit);
+        return aliasRequest;
     }
 
     private static AddFoodMacroRequest createAddFoodMacroRequest(double proteins, double fat, double carbs) {
@@ -94,17 +146,26 @@ public class Application {
             e.printStackTrace();
         }
         try {
+            callableStatement = connection.prepareCall(LogEntryRepository.TABLE_DELETE);
+            execute = execute || callableStatement.execute();
+        } catch (SQLException e) {
+            LOGGER.debug("Failed to delete table " + LogEntryRepository.TABLE_NAME);
+            e.printStackTrace();
+        }
+        try {
             callableStatement = connection.prepareCall(FoodAliasRepository.TABLE_DELETE);
             execute = execute || callableStatement.execute();
         } catch (SQLException e) {
+            LOGGER.debug("Failed to delete table " + FoodAliasRepository.TABLE_NAME);
             e.printStackTrace();
         }
        try{
             callableStatement = connection.prepareCall(FoodRepository.TABLE_DELETE);
             execute = execute || callableStatement.execute();
 
-            LOGGER.debug("Succes REMOVE: " + execute);
+            LOGGER.debug("Succes REMOVE");
         } catch (SQLException e) {
+           LOGGER.debug("Failed to delete table " + FoodRepository.TABLE_NAME);
             e.printStackTrace();
         }
     }
@@ -112,12 +173,17 @@ public class Application {
     private static void createTables() {
         try {
             Connection connection = DatabaseHelper.getInstance().getConnection();
+
             CallableStatement callableStatement = connection.prepareCall(FoodRepository.TABLE_CREATE);
             boolean execute = callableStatement.execute();
+
             callableStatement = connection.prepareCall(FoodAliasRepository.TABLE_CREATE);
             execute = execute || callableStatement.execute();
 
-            LOGGER.debug("Succes INSTALL: " + execute);
+            callableStatement = connection.prepareCall(LogEntryRepository.TABLE_CREATE);
+            execute = execute || callableStatement.execute();
+
+            LOGGER.debug("Succes INSTALL");
         } catch (SQLException e) {
             e.printStackTrace();
         }

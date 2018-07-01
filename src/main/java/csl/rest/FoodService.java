@@ -14,11 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -43,17 +40,15 @@ public class FoodService {
 
     @ApiOperation(value = "Retrieve information about specific food")
     @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping(value = "/{name}",
+    @RequestMapping(value = "/{id}",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getFoodInformation(@PathVariable("name") String name) {
+    public ResponseEntity getFoodInformation(@PathVariable("id") Long id) {
 
-        List<Food> foodList = foodRepository.getFood(name);
-        if (foodList.size() != 1) {
+        Food food = foodRepository.getFoodById(id);
+        if (food==null) {
             return ResponseEntity.noContent().build();
         } else {
-            List<FoodMacros> foodMacros = new ArrayList<>();
-            for (Food food : foodList) {
                 FoodMacros curr = new FoodMacros();
                 curr.setFoodId(food.getId());
                 curr.setName(food.getName());
@@ -65,10 +60,23 @@ public class FoodService {
                 macro.setProteins(food.getProtein());
                 curr.addMacroPerUnit(food.getAmountNumber(), macro);
 
+            List<FoodAlias> aliasesForFood = foodAliasRepository.getAliasesForFood(food.getId());
+            for (FoodAlias foodAlias : aliasesForFood) {
+                csl.dto.FoodAlias currDto = new csl.dto.FoodAlias();
+                currDto.setAliasName(foodAlias.getAliasname());
+                currDto.setAmountNumber(foodAlias.getAmountNumber());
+                currDto.setAmountUnit(foodAlias.getAmountUnit());
 
-                foodMacros.add(curr);
+                currDto.setAliasCarbs(food.getCarbs()/100 * currDto.getAmountNumber());
+                currDto.setAliasProtein(food.getProtein()/100 * currDto.getAmountNumber());
+                currDto.setAliasFat(food.getFat()/100 * currDto.getAmountNumber());
+
+
+                curr.addFoodAlias(foodAlias.getAliasname(),currDto);
             }
-            return ResponseEntity.ok(foodMacros.get(0));
+
+
+            return ResponseEntity.ok(curr);
         }
     }
 
@@ -78,8 +86,8 @@ public class FoodService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeFood(@PathVariable("name") String name,
                                     @RequestBody AddFoodMacroRequest addFoodMacroRequest) throws URISyntaxException {
-        List<Food> foodList = foodRepository.getFood(name);
-        if (foodList.size() > 0) {
+        Food food = foodRepository.getFood(name);
+        if (food!=null) {
             return ResponseEntity.badRequest().build();
         } else {
             Food newFood = new Food();

@@ -1,7 +1,11 @@
 package csl.rest;
 
+import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
+import csl.database.LogEntryRepository;
 import csl.database.model.Food;
+import csl.database.model.FoodAlias;
+import csl.dto.AddLogEntryRequest;
 import csl.dto.FoodMacros;
 import csl.dto.LogEntry;
 import csl.dto.Macro;
@@ -26,6 +30,10 @@ public class LogsService {
 
     // :o omg even een static in memory lijstje :p
     private static List<LogEntry> inMemory = new ArrayList<>();
+    private FoodRepository foodRepository = new FoodRepository();
+    private FoodAliasRepository foodAliasRepository = new FoodAliasRepository();
+    private LogEntryRepository logEntryRepository = new LogEntryRepository();
+
 
     @ApiOperation(value = "Retrieve all stored logentries")
     @CrossOrigin(origins = "http://localhost:4200")
@@ -33,15 +41,63 @@ public class LogsService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllLogEntries() {
-        return ResponseEntity.ok(inMemory);
+
+        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries();
+
+        List<LogEntry> allDtos = new ArrayList<>();
+        for (csl.database.model.LogEntry logEntry : allLogEntries) {
+
+            Food food = foodRepository.getFoodById(logEntry.getFoodId());
+            FoodMacros curr = new FoodMacros();
+            curr.setFoodId(food.getId());
+            curr.setName(food.getName());
+            curr.setAmountUnit(food.getAmountUnit());
+
+            Macro macro = new Macro();
+            macro.setCarbs(food.getCarbs());
+            macro.setFat(food.getFat());
+            macro.setProteins(food.getProtein());
+            curr.addMacroPerUnit(food.getAmountNumber(), macro);
+
+            FoodAlias foodAlias = foodAliasRepository.getFoodAlias(logEntry.getAliasIdUsed());
+            csl.dto.FoodAlias currDto = new csl.dto.FoodAlias();
+            currDto.setAliasName(foodAlias.getAliasname());
+            currDto.setAmountNumber(foodAlias.getAmountNumber());
+            currDto.setAmountUnit(foodAlias.getAmountUnit());
+
+            currDto.setAliasCarbs(food.getCarbs()/100 * currDto.getAmountNumber());
+            currDto.setAliasProtein(food.getProtein()/100 * currDto.getAmountNumber());
+            currDto.setAliasFat(food.getFat()/100 * currDto.getAmountNumber());
+
+            LogEntry dto = new LogEntry();
+            dto.setFood(curr);
+            dto.setFoodAlias(currDto);
+            dto.setMultiplier(logEntry.getMultiplier());
+            dto.setTimestamp(logEntry.getTimestamp());
+
+            allDtos.add(dto);
+
+        }
+
+
+        return ResponseEntity.ok(allDtos);
+
+
     }
 
     @ApiOperation(value = "Store new logentry")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeLogEntry(@RequestBody LogEntry logEntry) {
-        inMemory.add(logEntry);
+    public ResponseEntity storeLogEntry(@RequestBody AddLogEntryRequest logEntry) {
+
+        csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
+        entry.setAliasIdUsed(logEntry.getAliasIdUsed());
+        entry.setFoodId(logEntry.getFoodId());
+        entry.setMultiplier(logEntry.getMultiplier());
+        entry.setTimestamp(logEntry.getTimestamp());
+        logEntryRepository.insertLogEntry(entry);
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }
