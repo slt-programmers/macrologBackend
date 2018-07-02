@@ -71,11 +71,30 @@ public class LogsService {
             currDto.setAliasFat(food.getFat()/100 * currDto.getAmountNumber());
 
             LogEntry dto = new LogEntry();
-            dto.setFood(curr);
+            dto.setFoodId(curr.getFoodId());
+            dto.setFoodName(curr.getName());
             dto.setFoodAlias(currDto);
-            dto.setMultiplier(logEntry.getMultiplier());
+            Double multiplier = logEntry.getMultiplier();
+            dto.setMultiplier(multiplier);
             dto.setDay(logEntry.getDay());
             dto.setMeal(logEntry.getMeal());
+
+            Macro macrosCalculated = new Macro();
+            if (foodAlias != null){
+                Double defaultProtein = (foodAlias.getAmountNumber()* food.getProtein())/food.getAmountNumber();
+                Double defaultFat = (foodAlias.getAmountNumber() * food.getFat())/food.getAmountNumber();
+                Double defaultCarbs = (foodAlias.getAmountNumber() * food.getCarbs())/food.getAmountNumber();
+                macrosCalculated.setCarbs(multiplier * defaultCarbs);
+                macrosCalculated.setFat(multiplier * defaultFat);
+                macrosCalculated.setProteins(multiplier * defaultProtein);
+
+            } else {
+                macrosCalculated.setCarbs(multiplier * food.getCarbs());
+                macrosCalculated.setFat(multiplier * food.getFat());
+                macrosCalculated.setProteins(multiplier * food.getProtein());
+            }
+            dto.setMacrosCalculated(macrosCalculated);
+
 
             allDtos.add(dto);
 

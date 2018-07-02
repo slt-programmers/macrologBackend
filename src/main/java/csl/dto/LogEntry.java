@@ -10,24 +10,32 @@ import java.util.Date;
  */
 public class LogEntry {
 
-    private FoodMacros food;
+    private String foodName;
+    private Long foodId;
     private FoodAlias foodAlias;
-
+    private Macro macrosCalculated;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
-    @ApiModelProperty(notes = "Time of log",required=true)
+    @ApiModelProperty(notes = "Day of log",required=true)
     private Date day;
     @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK",required=true, example="BREAKFAST")
     private String meal;
 
 
-
-    public FoodMacros getFood() {
-        return food;
+    public String getFoodName() {
+        return foodName;
     }
 
-    public void setFood(FoodMacros food) {
-        this.food = food;
+    public void setFoodName(String foodName) {
+        this.foodName = foodName;
+    }
+
+    public Long getFoodId() {
+        return foodId;
+    }
+
+    public void setFoodId(Long foodId) {
+        this.foodId = foodId;
     }
 
     public FoodAlias getFoodAlias() {
@@ -60,5 +68,13 @@ public class LogEntry {
 
     public void setMeal(String meal) {
         this.meal = meal;
+    }
+
+    public Macro getMacrosCalculated() {
+        return macrosCalculated;
+    }
+
+    public void setMacrosCalculated(Macro macrosCalculated) {
+        this.macrosCalculated = macrosCalculated;
     }
 }
