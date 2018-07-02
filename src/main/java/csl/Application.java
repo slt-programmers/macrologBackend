@@ -92,17 +92,19 @@ public class Application {
             foodService.addAlias(foodRepository.getFood( "Ei hardgekookt").getId(), aliasRequest);
 
             AddLogEntryRequest logEntry1 = new AddLogEntryRequest();
-            logEntry1.setTimestamp(new DateTime(2018,6,21,7,0));
+            logEntry1.setDay(new DateTime(2018,6,21,7,0).toDate());
             logEntry1.setFoodId(MUESLI_FOOD_ID);
             logEntry1.setAliasIdUsed(foodAliasRepository.getFoodAlias(MUESLI_FOOD_ID,MUESLI_SCHAAL).getAliasId());
             logEntry1.setMultiplier(1.0);
+            logEntry1.setMeal("BREAKFAST");
             logService.storeLogEntry(logEntry1);
 
             AddLogEntryRequest logEntry2 = new AddLogEntryRequest();
-            logEntry2.setTimestamp(new DateTime(2018,6,21,7,0));
+            logEntry2.setDay(new DateTime(2018,6,21,7,0).toDate());
             logEntry2.setFoodId(YOGHURT_FOOD_ID);
             logEntry2.setAliasIdUsed(foodAliasRepository.getFoodAlias(YOGHURT_FOOD_ID,YOGHURT_VOL_SCHAAL).getAliasId());
             logEntry2.setMultiplier(1.0);
+            logEntry2.setMeal("BREAKFAST");
             logService.storeLogEntry(logEntry2);
 
 

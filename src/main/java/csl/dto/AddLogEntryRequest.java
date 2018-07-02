@@ -3,6 +3,8 @@ package csl.dto;
 import io.swagger.annotations.ApiModelProperty;
 import org.joda.time.DateTime;
 
+import java.util.Date;
+
 /**
  * Class voor het bewaren van de macros
  */
@@ -15,7 +17,9 @@ public class AddLogEntryRequest {
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
     @ApiModelProperty(notes = "Time of log",required=true)
-    private DateTime timestamp;
+    private Date day;
+    @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK",required=true, example="BREAKFAST")
+    private String meal;
 
 
     public Long getFoodId() {
@@ -42,11 +46,19 @@ public class AddLogEntryRequest {
         this.multiplier = multiplier;
     }
 
-    public DateTime getTimestamp() {
-        return timestamp;
+    public Date getDay() {
+        return day;
     }
 
-    public void setTimestamp(DateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setDay(Date day) {
+        this.day = day;
+    }
+
+    public String getMeal() {
+        return meal;
+    }
+
+    public void setMeal(String meal) {
+        this.meal = meal;
     }
 }

@@ -3,6 +3,8 @@ package csl.database.model;
 import io.swagger.annotations.ApiModelProperty;
 import org.joda.time.DateTime;
 
+import java.sql.Date;
+
 /**
  * Created by Carmen on 18-3-2018.
  */
@@ -12,17 +14,35 @@ public class LogEntry {
     private Long foodId;
     private Long aliasIdUsed;
     private Double multiplier;
-    private DateTime timestamp;
+    private Date day;
+    private String meal;
+
+    public Date getDay() {
+        return day;
+    }
+
+    public void setDay(Date day) {
+        this.day = day;
+    }
+
+    public String getMeal() {
+        return meal;
+    }
+
+    public void setMeal(String meal) {
+        this.meal = meal;
+    }
 
     public LogEntry() {
     }
 
-    public LogEntry(Long id, Long foodId, Long aliasIdUsed, Double multiplier, DateTime timestamp) {
+    public LogEntry(Long id, Long foodId, Long aliasIdUsed, Double multiplier, Date day,String meal) {
         this.id = id;
         this.foodId = foodId;
         this.aliasIdUsed = aliasIdUsed;
         this.multiplier = multiplier;
-        this.timestamp = timestamp;
+        this.day = day;
+        this.meal=meal;
     }
 
     public Long getId() {
@@ -55,13 +75,5 @@ public class LogEntry {
 
     public void setMultiplier(Double multiplier) {
         this.multiplier = multiplier;
-    }
-
-    public DateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(DateTime timestamp) {
-        this.timestamp = timestamp;
     }
 }

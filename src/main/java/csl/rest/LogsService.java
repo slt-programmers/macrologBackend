@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +74,8 @@ public class LogsService {
             dto.setFood(curr);
             dto.setFoodAlias(currDto);
             dto.setMultiplier(logEntry.getMultiplier());
-            dto.setTimestamp(logEntry.getTimestamp());
+            dto.setDay(logEntry.getDay());
+            dto.setMeal(logEntry.getMeal());
 
             allDtos.add(dto);
 
@@ -95,7 +97,8 @@ public class LogsService {
         entry.setAliasIdUsed(logEntry.getAliasIdUsed());
         entry.setFoodId(logEntry.getFoodId());
         entry.setMultiplier(logEntry.getMultiplier());
-        entry.setTimestamp(logEntry.getTimestamp());
+        entry.setDay(new Date(logEntry.getDay().getTime()));
+        entry.setMeal(logEntry.getMeal());
         logEntryRepository.insertLogEntry(entry);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
