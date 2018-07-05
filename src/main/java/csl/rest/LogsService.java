@@ -29,8 +29,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Api(value="logs", description="Operations pertaining to logentries in the macro logger applications")
 public class LogsService {
 
-    // :o omg even een static in memory lijstje :p
-    private static List<LogEntry> inMemory = new ArrayList<>();
     private FoodRepository foodRepository = new FoodRepository();
     private FoodAliasRepository foodAliasRepository = new FoodAliasRepository();
     private LogEntryRepository logEntryRepository = new LogEntryRepository();

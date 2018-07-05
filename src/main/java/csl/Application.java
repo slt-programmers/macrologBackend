@@ -87,9 +87,12 @@ public class Application {
             aliasRequest = getAddUnitAliasRequest(CALVE_PINDAKAAS_BELEG_2, 20, "gram");
             foodService.addAlias(CALVE_PINDAKAAS_FOOD_ID, aliasRequest);
 
-            foodService.storeFood("Ei hardgekookt", createAddFoodMacroRequest(12.3, 9.1, 0.2));
-            aliasRequest = getAddUnitAliasRequest("ei", 58.0, "gram");
-            foodService.addAlias(foodRepository.getFood( "Ei hardgekookt").getId(), aliasRequest);
+            String EI = "Ei hardgekookt";
+            String EI_STUK = "ei";
+            foodService.storeFood(EI, createAddFoodMacroRequest(12.3, 9.1, 0.2));
+            aliasRequest = getAddUnitAliasRequest(EI_STUK, 58.0, "gram");
+            Long EI_ID = foodRepository.getFood(EI).getId();
+            foodService.addAlias(EI_ID, aliasRequest);
 
             AddLogEntryRequest logEntry1 = new AddLogEntryRequest();
             logEntry1.setDay(new DateTime(2018,6,21,7,0).toDate());
@@ -107,6 +110,30 @@ public class Application {
             logEntry2.setMeal("BREAKFAST");
             logService.storeLogEntry(logEntry2);
 
+            AddLogEntryRequest logEntry3 = new AddLogEntryRequest();
+            logEntry3.setDay(new DateTime(2018,6,21,7,0).toDate());
+            logEntry3.setFoodId(EI_ID);
+            logEntry3.setAliasIdUsed(foodAliasRepository.getFoodAlias(EI_ID,EI_STUK).getAliasId());
+            logEntry3.setMultiplier(4.0);
+            logEntry3.setMeal("LUNCH");
+            logService.storeLogEntry(logEntry3);
+
+
+            AddLogEntryRequest logEntry4 = new AddLogEntryRequest();
+            logEntry4.setDay(new DateTime(2018,6,21,7,0).toDate());
+            logEntry4.setFoodId(BROOD_ID);
+            logEntry4.setAliasIdUsed(foodAliasRepository.getFoodAlias(BROOD_ID,BROOD_SNEE).getAliasId());
+            logEntry4.setMultiplier(4.0);
+            logEntry4.setMeal("LUNCH");
+            logService.storeLogEntry(logEntry4);
+
+            AddLogEntryRequest logEntry5 = new AddLogEntryRequest();
+            logEntry5.setDay(new DateTime(2018,6,21,7,0).toDate());
+            logEntry5.setFoodId(CALVE_PINDAKAAS_FOOD_ID);
+            logEntry5.setAliasIdUsed(foodAliasRepository.getFoodAlias(CALVE_PINDAKAAS_FOOD_ID,CALVE_PINDAKAAS_BELEG_2).getAliasId());
+            logEntry5.setMultiplier(2.0);
+            logEntry5.setMeal("LUNCH");
+            logService.storeLogEntry(logEntry5);
 
         }
 
