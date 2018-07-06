@@ -5,7 +5,7 @@ import java.util.List;
 public class AddFoodRequest {
 
     private String name;
-    private String unit;
+    private String measurementUnit;
     private String unitName;
     private Double unitGrams;
     private Double protein;
@@ -21,12 +21,12 @@ public class AddFoodRequest {
         this.name = name;
     }
 
-    public String getUnit() {
-        return unit;
+    public String getMeasurementUnit() {
+        return measurementUnit;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setMeasurementUnit(String unit) {
+        this.measurementUnit = unit;
     }
 
     public String getUnitName() {

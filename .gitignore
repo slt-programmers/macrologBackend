@@ -1,3 +1,5 @@
 .idea/*
 /target
 macrologBackend.iml
+
+src/main/resources/application.properties
