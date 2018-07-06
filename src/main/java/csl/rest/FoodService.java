@@ -4,6 +4,7 @@ import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
 import csl.database.model.Food;
 import csl.database.model.FoodAlias;
+import csl.database.model.Portion;
 import csl.dto.AddFoodRequest;
 import csl.dto.AddUnitAliasRequest;
 import csl.dto.FoodMacros;
@@ -92,15 +93,38 @@ public class FoodService {
         } else {
             Food newFood = new Food();
             newFood.setName(addFoodRequest.getName());
-//            newFood.setAmountUnit(addFoodRequest.getDefaultUnitname());
-//            newFood.setAmountNumber(addFoodRequest.getDefaultAmount());
-//
-//            Macro macroPerUnit = addFoodRequest.getMacroPerUnit();
-//            newFood.setCarbs(macroPerUnit.getCarbs());
-//            newFood.setFat(macroPerUnit.getFat());
-//            newFood.setProtein(macroPerUnit.getProteins());
+            String measurementUnit = addFoodRequest.getMeasurementUnit();
+            if ("UNIT".equals(measurementUnit)) {
+                newFood.setAmountNumber(addFoodRequest.getUnitGrams());
+                newFood.setAmountUnit(addFoodRequest.getUnitName());
+            } else {
+                newFood.setAmountNumber(100.0);
+                newFood.setAmountUnit("grams");
+            }
 
-  //          int insertedRows = foodRepository.insertFood(newFood);
+            newFood.setCarbs(addFoodRequest.getCarbs());
+            newFood.setFat(addFoodRequest.getFat());
+            newFood.setProtein(addFoodRequest.getProtein());
+
+
+            int insertedRows = foodRepository.insertFood(newFood);
+            if (insertedRows ==1  && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()){
+                Food addedFood = foodRepository.getFood(addFoodRequest.getName());
+                for (Portion portion : addFoodRequest.getPortions()) {
+                    FoodAlias foodAlias = new FoodAlias();
+                    foodAlias.setAliasname(portion.getDescription());
+                    foodAlias.setAmountUnit(measurementUnit);
+                    if ("UNIT".equals(measurementUnit)){
+                        foodAlias.setAmountNumber(portion.getUnit());
+                    } else {
+                        foodAlias.setAmountNumber(portion.getGrams());
+                    }
+                    foodAliasRepository.addFoodAlias(addedFood,foodAlias);
+                }
+
+
+            }
+
 
 //            URI location = ServletUriComponentsBuilder
 //                    .fromCurrentRequest()

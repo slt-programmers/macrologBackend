@@ -1,12 +1,17 @@
 package csl.dto;
 import csl.database.model.Portion;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 public class AddFoodRequest {
 
     private String name;
+    @ApiModelProperty(notes = "Unit van foodrequest. Of Gram of Unit",required=true, example = "GRAMS")
     private String measurementUnit;
+    @ApiModelProperty(notes = "Indien Unit geselecteerd kan hier bijvoorbeeld stuks of bord",required=false, example = "bord")
     private String unitName;
+    @ApiModelProperty(notes = "Optioneel als unit ook nog gewogen wordt. Indien Gram is dit altijd 100",required=true, example = "100")
     private Double unitGrams;
     private Double protein;
     private Double fat;
