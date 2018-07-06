@@ -1,6 +1,10 @@
 package csl.dto;
 
+import csl.dto.FoodAlias;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class FoodMacros {
 
@@ -8,6 +12,7 @@ public class FoodMacros {
     private String name;
     private String amountUnit;
     private HashMap<Double,Macro> macroPerUnit;
+    private List<FoodAlias> aliases;
 
     public String getName() {
         return name;
@@ -51,5 +56,19 @@ public class FoodMacros {
 
     public Long getFoodId() {
         return foodId;
+    }
+
+    public List<FoodAlias> getAliases() {
+        if (this.aliases == null){
+            this.aliases = new ArrayList<>();
+        }
+        return this.aliases;
+    }
+    public void addFoodAlias(String name, csl.dto.FoodAlias foodAlias){
+        getAliases().add(foodAlias);
+    }
+
+    public void setAliases(List<FoodAlias> aliases) {
+        this.aliases = aliases;
     }
 }

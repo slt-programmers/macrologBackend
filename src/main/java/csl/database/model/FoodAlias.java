@@ -8,16 +8,19 @@ public class FoodAlias {
     private String aliasname;
     private Double amountNumber;
     private String amountUnit;
+    private Long aliasId;
 
     public FoodAlias() {
     }
 
     public FoodAlias(String aliasname,
                      Double amountNumber,
-                     String amountUnit) {
+                     String amountUnit,
+                     Long aliasId) {
         this.aliasname = aliasname;
         this.amountNumber = amountNumber;
         this.amountUnit = amountUnit;
+        this.aliasId=aliasId;
 
     }
 
@@ -52,6 +55,7 @@ public class FoodAlias {
 
         FoodAlias food = (FoodAlias) o;
 
+        if (!aliasId.equals(food.aliasId)) return false;
         if (!aliasname.equals(food.aliasname)) return false;
         if (!amountUnit.equals(food.amountUnit)) return false;
         return amountNumber.equals(food.amountNumber);
@@ -60,6 +64,7 @@ public class FoodAlias {
     @Override
     public int hashCode() {
         int result = aliasname.hashCode();
+        result = 31 * result + aliasId.hashCode();
         result = 31 * result + amountUnit.hashCode();
         result = 31 * result + amountNumber.hashCode();
         return result;
@@ -72,7 +77,17 @@ public class FoodAlias {
                 '}';
     }
 
+    public Long getAliasId() {
+        return aliasId;
+    }
+
+    public void setAliasId(Long aliasId) {
+        this.aliasId = aliasId;
+    }
+
     public void setFoodId(Long foodId) {
+
+
 
     }
 }
