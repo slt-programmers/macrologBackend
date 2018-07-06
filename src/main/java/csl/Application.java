@@ -38,11 +38,9 @@ public class Application {
         boolean tableExists = isDatabaseOpgezet();
 
         if (tableExists && automaticResetDatabase) {
-            deleteTables();
+//            deleteTables();
         }
-//        if (true){
-//            return;
-//        }
+
         if (!tableExists || automaticResetDatabase) {
             createTables();
 
@@ -55,84 +53,83 @@ public class Application {
             String BROOD = "Brood: Goudeerlijk bus fijn volkoren Jumbo";
             String BROOD_SNEE = "snee";
 
-            foodService.storeFood(BROOD, createAddFoodMacroRequest(11.1, 2.0, 38.0));
-            Long BROOD_ID = foodRepository.getFood(BROOD).getId();
+//            foodService.addFood(BROOD, createAddFoodMacroRequest(11.1, 2.0, 38.0));
+//            Long BROOD_ID = foodRepository.getFood(BROOD).getId();
+//
+//            AddUnitAliasRequest aliasRequest = getAddUnitAliasRequest(BROOD_SNEE, 30.0, "gram");
+//            foodService.addAlias(BROOD_ID, aliasRequest);
+//
+//            String MUESLI = "Jordans Muesli de luxe";
+//            String MUESLI_SCHAAL = "schaal Muesli";
+//
+//            foodService.addFood(MUESLI, createAddFoodMacroRequest(9.4, 9.2, 59.3));
+//            Long MUESLI_FOOD_ID = foodRepository.getFood(MUESLI).getId();
+//            aliasRequest = getAddUnitAliasRequest(MUESLI_SCHAAL, 80, "gram");
+//            foodService.addAlias(MUESLI_FOOD_ID, aliasRequest);
+//
+//            String YOGHURT_VOL_JUMBO = "Yoghurt vol Jumbo";
+//            String YOGHURT_VOL_SCHAAL = "schaal Yoghurt Vol";
+//
+//            foodService.addFood(YOGHURT_VOL_JUMBO, createAddFoodMacroRequest(4.1, 3.1, 4.2));
+//            Long YOGHURT_FOOD_ID = foodRepository.getFood(YOGHURT_VOL_JUMBO).getId();
+//            aliasRequest = getAddUnitAliasRequest(YOGHURT_VOL_SCHAAL, 200, "gram");
+//            foodService.addAlias(YOGHURT_FOOD_ID, aliasRequest);
+//
+//            String CALVE_PINDAKAAS = "Calvé pindakaas";
+//            String CALVE_PINDAKAAS_BELEG_2 = "2 boterhammen pindakaas beleg";
+//
+//            foodService.addFood(CALVE_PINDAKAAS, createAddFoodMacroRequest(20, 55, 15));
+//            Long CALVE_PINDAKAAS_FOOD_ID = foodRepository.getFood(CALVE_PINDAKAAS).getId();
+//
+//            aliasRequest = getAddUnitAliasRequest(CALVE_PINDAKAAS_BELEG_2, 20, "gram");
+//            foodService.addAlias(CALVE_PINDAKAAS_FOOD_ID, aliasRequest);
+//
+//            String EI = "Ei hardgekookt";
+//            String EI_STUK = "ei";
+//            foodService.addFood(EI, createAddFoodMacroRequest(12.3, 9.1, 0.2));
+//            aliasRequest = getAddUnitAliasRequest(EI_STUK, 58.0, "gram");
+//            Long EI_ID = foodRepository.getFood(EI).getId();
+//            foodService.addAlias(EI_ID, aliasRequest);
 
-            AddUnitAliasRequest aliasRequest = getAddUnitAliasRequest(BROOD_SNEE, 30.0, "gram");
-            foodService.addAlias(BROOD_ID, aliasRequest);
-
-            String MUESLI = "Jordans Muesli de luxe";
-            String MUESLI_SCHAAL = "schaal Muesli";
-
-            foodService.storeFood(MUESLI, createAddFoodMacroRequest(9.4, 9.2, 59.3));
-            Long MUESLI_FOOD_ID = foodRepository.getFood(MUESLI).getId();
-            aliasRequest = getAddUnitAliasRequest(MUESLI_SCHAAL, 80, "gram");
-            foodService.addAlias(MUESLI_FOOD_ID, aliasRequest);
-
-            String YOGHURT_VOL_JUMBO = "Yoghurt vol Jumbo";
-            String YOGHURT_VOL_SCHAAL = "schaal Yoghurt Vol";
-
-            foodService.storeFood(YOGHURT_VOL_JUMBO, createAddFoodMacroRequest(4.1, 3.1, 4.2));
-            Long YOGHURT_FOOD_ID = foodRepository.getFood(YOGHURT_VOL_JUMBO).getId();
-            aliasRequest = getAddUnitAliasRequest(YOGHURT_VOL_SCHAAL, 200, "gram");
-            foodService.addAlias(YOGHURT_FOOD_ID, aliasRequest);
-
-            String CALVE_PINDAKAAS = "Calvé pindakaas";
-            String CALVE_PINDAKAAS_BELEG_2 = "2 boterhammen pindakaas beleg";
-
-            foodService.storeFood(CALVE_PINDAKAAS, createAddFoodMacroRequest(20, 55, 15));
-            Long CALVE_PINDAKAAS_FOOD_ID = foodRepository.getFood(CALVE_PINDAKAAS).getId();
-
-            aliasRequest = getAddUnitAliasRequest(CALVE_PINDAKAAS_BELEG_2, 20, "gram");
-            foodService.addAlias(CALVE_PINDAKAAS_FOOD_ID, aliasRequest);
-
-            String EI = "Ei hardgekookt";
-            String EI_STUK = "ei";
-            foodService.storeFood(EI, createAddFoodMacroRequest(12.3, 9.1, 0.2));
-            aliasRequest = getAddUnitAliasRequest(EI_STUK, 58.0, "gram");
-            Long EI_ID = foodRepository.getFood(EI).getId();
-            foodService.addAlias(EI_ID, aliasRequest);
-
-            AddLogEntryRequest logEntry1 = new AddLogEntryRequest();
-            logEntry1.setDay(new DateTime(2018,6,21,7,0).toDate());
-            logEntry1.setFoodId(MUESLI_FOOD_ID);
-            logEntry1.setAliasIdUsed(foodAliasRepository.getFoodAlias(MUESLI_FOOD_ID,MUESLI_SCHAAL).getAliasId());
-            logEntry1.setMultiplier(1.0);
-            logEntry1.setMeal("BREAKFAST");
-            logService.storeLogEntry(logEntry1);
-
-            AddLogEntryRequest logEntry2 = new AddLogEntryRequest();
-            logEntry2.setDay(new DateTime(2018,6,21,7,0).toDate());
-            logEntry2.setFoodId(YOGHURT_FOOD_ID);
-            logEntry2.setAliasIdUsed(foodAliasRepository.getFoodAlias(YOGHURT_FOOD_ID,YOGHURT_VOL_SCHAAL).getAliasId());
-            logEntry2.setMultiplier(1.0);
-            logEntry2.setMeal("BREAKFAST");
-            logService.storeLogEntry(logEntry2);
-
-            AddLogEntryRequest logEntry3 = new AddLogEntryRequest();
-            logEntry3.setDay(new DateTime(2018,6,21,7,0).toDate());
-            logEntry3.setFoodId(EI_ID);
-            logEntry3.setAliasIdUsed(foodAliasRepository.getFoodAlias(EI_ID,EI_STUK).getAliasId());
-            logEntry3.setMultiplier(4.0);
-            logEntry3.setMeal("LUNCH");
-            logService.storeLogEntry(logEntry3);
-
-
-            AddLogEntryRequest logEntry4 = new AddLogEntryRequest();
-            logEntry4.setDay(new DateTime(2018,6,21,7,0).toDate());
-            logEntry4.setFoodId(BROOD_ID);
-            logEntry4.setAliasIdUsed(foodAliasRepository.getFoodAlias(BROOD_ID,BROOD_SNEE).getAliasId());
-            logEntry4.setMultiplier(4.0);
-            logEntry4.setMeal("LUNCH");
-            logService.storeLogEntry(logEntry4);
-
-            AddLogEntryRequest logEntry5 = new AddLogEntryRequest();
-            logEntry5.setDay(new DateTime(2018,6,21,7,0).toDate());
-            logEntry5.setFoodId(CALVE_PINDAKAAS_FOOD_ID);
-            logEntry5.setAliasIdUsed(foodAliasRepository.getFoodAlias(CALVE_PINDAKAAS_FOOD_ID,CALVE_PINDAKAAS_BELEG_2).getAliasId());
-            logEntry5.setMultiplier(2.0);
-            logEntry5.setMeal("LUNCH");
-            logService.storeLogEntry(logEntry5);
+//            AddLogEntryRequest logEntry1 = new AddLogEntryRequest();
+//            logEntry1.setDay(new DateTime(2018,6,21,7,0).toDate());
+//            logEntry1.setFoodId(MUESLI_FOOD_ID);
+//            logEntry1.setAliasIdUsed(foodAliasRepository.getFoodAlias(MUESLI_FOOD_ID,MUESLI_SCHAAL).getAliasId());
+//            logEntry1.setMultiplier(1.0);
+//            logEntry1.setMeal("BREAKFAST");
+//            logService.storeLogEntry(logEntry1);
+//
+//            AddLogEntryRequest logEntry2 = new AddLogEntryRequest();
+//            logEntry2.setDay(new DateTime(2018,6,21,7,0).toDate());
+//            logEntry2.setFoodId(YOGHURT_FOOD_ID);
+//            logEntry2.setAliasIdUsed(foodAliasRepository.getFoodAlias(YOGHURT_FOOD_ID,YOGHURT_VOL_SCHAAL).getAliasId());
+//            logEntry2.setMultiplier(1.0);
+//            logEntry2.setMeal("BREAKFAST");
+//            logService.storeLogEntry(logEntry2);
+//
+//            AddLogEntryRequest logEntry3 = new AddLogEntryRequest();
+//            logEntry3.setDay(new DateTime(2018,6,21,7,0).toDate());
+//            logEntry3.setFoodId(EI_ID);
+//            logEntry3.setAliasIdUsed(foodAliasRepository.getFoodAlias(EI_ID,EI_STUK).getAliasId());
+//            logEntry3.setMultiplier(4.0);
+//            logEntry3.setMeal("LUNCH");
+//            logService.storeLogEntry(logEntry3);
+//
+//            AddLogEntryRequest logEntry4 = new AddLogEntryRequest();
+//            logEntry4.setDay(new DateTime(2018,6,21,7,0).toDate());
+//            logEntry4.setFoodId(BROOD_ID);
+//            logEntry4.setAliasIdUsed(foodAliasRepository.getFoodAlias(BROOD_ID,BROOD_SNEE).getAliasId());
+//            logEntry4.setMultiplier(4.0);
+//            logEntry4.setMeal("LUNCH");
+//            logService.storeLogEntry(logEntry4);
+//
+//            AddLogEntryRequest logEntry5 = new AddLogEntryRequest();
+//            logEntry5.setDay(new DateTime(2018,6,21,7,0).toDate());
+//            logEntry5.setFoodId(CALVE_PINDAKAAS_FOOD_ID);
+//            logEntry5.setAliasIdUsed(foodAliasRepository.getFoodAlias(CALVE_PINDAKAAS_FOOD_ID,CALVE_PINDAKAAS_BELEG_2).getAliasId());
+//            logEntry5.setMultiplier(2.0);
+//            logEntry5.setMeal("LUNCH");
+//            logService.storeLogEntry(logEntry5);
 
         }
 
@@ -157,10 +154,8 @@ public class Application {
 
     private static AddFoodRequest createAddFoodMacroRequest(double proteins, double fat, double carbs, double defaultAmount, String defaultUnitname) {
         AddFoodRequest myFood = new AddFoodRequest();
-        myFood.setDefaultAmount(defaultAmount);
-        myFood.setDefaultUnitname(defaultUnitname);
+        myFood.setUnit(defaultUnitname);
         Macro macros = new Macro(proteins, fat, carbs);
-        myFood.setMacroPerUnit(macros);
         return myFood;
     }
 

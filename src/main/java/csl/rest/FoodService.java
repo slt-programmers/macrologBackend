@@ -46,19 +46,19 @@ public class FoodService {
     public ResponseEntity getFoodInformation(@PathVariable("id") Long id) {
 
         Food food = foodRepository.getFoodById(id);
-        if (food==null) {
+        if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
-                FoodMacros curr = new FoodMacros();
-                curr.setFoodId(food.getId());
-                curr.setName(food.getName());
-                curr.setAmountUnit(food.getAmountUnit());
+            FoodMacros curr = new FoodMacros();
+            curr.setFoodId(food.getId());
+            curr.setName(food.getName());
+            curr.setAmountUnit(food.getAmountUnit());
 
-                Macro macro = new Macro();
-                macro.setCarbs(food.getCarbs());
-                macro.setFat(food.getFat());
-                macro.setProteins(food.getProtein());
-                curr.addMacroPerUnit(food.getAmountNumber(), macro);
+            Macro macro = new Macro();
+            macro.setCarbs(food.getCarbs());
+            macro.setFat(food.getFat());
+            macro.setProteins(food.getProtein());
+            curr.addMacroPerUnit(food.getAmountNumber(), macro);
 
             List<FoodAlias> aliasesForFood = foodAliasRepository.getAliasesForFood(food.getId());
             for (FoodAlias foodAlias : aliasesForFood) {
@@ -67,38 +67,37 @@ public class FoodService {
                 currDto.setAmountNumber(foodAlias.getAmountNumber());
                 currDto.setAmountUnit(foodAlias.getAmountUnit());
 
-                currDto.setAliasCarbs(food.getCarbs()/100 * currDto.getAmountNumber());
-                currDto.setAliasProtein(food.getProtein()/100 * currDto.getAmountNumber());
-                currDto.setAliasFat(food.getFat()/100 * currDto.getAmountNumber());
+                currDto.setAliasCarbs(food.getCarbs() / 100 * currDto.getAmountNumber());
+                currDto.setAliasProtein(food.getProtein() / 100 * currDto.getAmountNumber());
+                currDto.setAliasFat(food.getFat() / 100 * currDto.getAmountNumber());
 
 
-                curr.addFoodAlias(foodAlias.getAliasname(),currDto);
+                curr.addFoodAlias(foodAlias.getAliasname(), currDto);
             }
-
 
             return ResponseEntity.ok(curr);
         }
     }
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
-    @RequestMapping(value = "/{name}",
+    @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeFood(@PathVariable("name") String name,
-                                    @RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
-        Food food = foodRepository.getFood(name);
-        if (food!=null) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
+        Food food = foodRepository.getFood(addFoodRequest.getName());
+        if (food != null) {
+            String errorMessage = "This food is already in your database";
+            return ResponseEntity.badRequest().body(errorMessage);
         } else {
             Food newFood = new Food();
-            newFood.setName(name);
-            newFood.setAmountUnit(addFoodRequest.getDefaultUnitname());
-            newFood.setAmountNumber(addFoodRequest.getDefaultAmount());
-
-            Macro macroPerUnit = addFoodRequest.getMacroPerUnit();
-            newFood.setCarbs(macroPerUnit.getCarbs());
-            newFood.setFat(macroPerUnit.getFat());
-            newFood.setProtein(macroPerUnit.getProteins());
+            newFood.setName(addFoodRequest.getName());
+//            newFood.setAmountUnit(addFoodRequest.getDefaultUnitname());
+//            newFood.setAmountNumber(addFoodRequest.getDefaultAmount());
+//
+//            Macro macroPerUnit = addFoodRequest.getMacroPerUnit();
+//            newFood.setCarbs(macroPerUnit.getCarbs());
+//            newFood.setFat(macroPerUnit.getFat());
+//            newFood.setProtein(macroPerUnit.getProteins());
 
             int insertedRows = foodRepository.insertFood(newFood);
 
@@ -126,7 +125,7 @@ public class FoodService {
             foodAlias.setAmountNumber(addUnitAliasRequest.getAliasAmount());
             foodAlias.setAmountUnit(addUnitAliasRequest.getAliasUnitName());
             foodAlias.setFoodId(foodId);
-            foodAliasRepository.addFoodAlias(food,foodAlias);
+            foodAliasRepository.addFoodAlias(food, foodAlias);
 
 //            int insertedRows = foodRepository.insertFood(newFood);
 
@@ -134,19 +133,4 @@ public class FoodService {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
     }
-
-    // Post with params
-    @ApiOperation(value = "Adds a new food to the database")
-    @CrossOrigin(origins = {"*", "http://localhost:4200"})
-    @RequestMapping(value = "/addFood",
-            method = POST,
-            headers = {"Content-Type=application/json"})
-    public void addFood(@RequestBody Food food) {
-        System.out.println("Inside addFood");
-        System.out.println(food);
-//        int insertedRows = foodRepository.insertFood(new Food(1, name));
-//        System.out.println(insertedRows + " row(s) inserted");
-    }
-
-
 }

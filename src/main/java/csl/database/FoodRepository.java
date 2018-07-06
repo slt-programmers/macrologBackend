@@ -74,15 +74,16 @@ public class FoodRepository {
                 .addValue("name", name);
         String myFood = SELECT_SQL + " WHERE  " + COL_NAME + "= :name";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
-        return queryResults.isEmpty()?null:queryResults.get(0);
+        return queryResults.isEmpty() ? null : queryResults.get(0);
     }
+
     public Food getFoodById(Long id) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
-        String myFood = SELECT_SQL + " WHERE  " + COL_ID+ "= :id";
+        String myFood = SELECT_SQL + " WHERE  " + COL_ID + "= :id";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
-        Assert.isTrue(queryResults.size() <=1);
-        return queryResults.isEmpty()?null:queryResults.get(0);
+        Assert.isTrue(queryResults.size() <= 1);
+        return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 }
 

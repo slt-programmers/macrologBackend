@@ -1,11 +1,17 @@
 package csl.dto;
+import csl.database.model.Portion;
+import java.util.List;
 
 public class AddFoodRequest {
 
     private String name;
-    private Double defaultAmount;
-    private String defaultUnitname;
-    private Macro macroPerUnit;
+    private String unit;
+    private String unitName;
+    private Double unitGrams;
+    private Double protein;
+    private Double fat;
+    private Double carbs;
+    private List<Portion> portions;
 
     public String getName() {
         return name;
@@ -15,27 +21,59 @@ public class AddFoodRequest {
         this.name = name;
     }
 
-    public Double getDefaultAmount() {
-        return defaultAmount;
+    public String getUnit() {
+        return unit;
     }
 
-    public void setDefaultAmount(Double defaultAmount) {
-        this.defaultAmount = defaultAmount;
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
-    public String getDefaultUnitname() {
-        return defaultUnitname;
+    public String getUnitName() {
+        return unitName;
     }
 
-    public void setDefaultUnitname(String defaultUnitname) {
-        this.defaultUnitname = defaultUnitname;
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
     }
 
-    public Macro getMacroPerUnit() {
-        return macroPerUnit;
+    public Double getUnitGrams() {
+        return unitGrams;
     }
 
-    public void setMacroPerUnit(Macro macroPerUnit) {
-        this.macroPerUnit = macroPerUnit;
+    public void setUnitGrams(Double unitGrams) {
+        this.unitGrams = unitGrams;
+    }
+
+    public Double getProtein() {
+        return protein;
+    }
+
+    public void setProtein(Double protein) {
+        this.protein = protein;
+    }
+
+    public Double getFat() {
+        return fat;
+    }
+
+    public void setFat(Double fat) {
+        this.fat = fat;
+    }
+
+    public Double getCarbs() {
+        return carbs;
+    }
+
+    public void setCarbs(Double carbs) {
+        this.carbs = carbs;
+    }
+
+    public List<Portion> getPortions() {
+        return portions;
+    }
+
+    public void setPortions(List<Portion> portions) {
+        this.portions = portions;
     }
 }
