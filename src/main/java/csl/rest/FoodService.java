@@ -80,6 +80,7 @@ public class FoodService {
     }
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
+    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
@@ -99,7 +100,7 @@ public class FoodService {
 //            newFood.setFat(macroPerUnit.getFat());
 //            newFood.setProtein(macroPerUnit.getProteins());
 
-            int insertedRows = foodRepository.insertFood(newFood);
+  //          int insertedRows = foodRepository.insertFood(newFood);
 
 //            URI location = ServletUriComponentsBuilder
 //                    .fromCurrentRequest()
