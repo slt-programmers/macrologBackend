@@ -4,7 +4,7 @@ import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
 import csl.database.model.Food;
 import csl.database.model.FoodAlias;
-import csl.dto.AddFoodMacroRequest;
+import csl.dto.AddFoodRequest;
 import csl.dto.AddUnitAliasRequest;
 import csl.dto.FoodMacros;
 import csl.dto.Macro;
@@ -85,17 +85,17 @@ public class FoodService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeFood(@PathVariable("name") String name,
-                                    @RequestBody AddFoodMacroRequest addFoodMacroRequest) throws URISyntaxException {
+                                    @RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
         Food food = foodRepository.getFood(name);
         if (food!=null) {
             return ResponseEntity.badRequest().build();
         } else {
             Food newFood = new Food();
             newFood.setName(name);
-            newFood.setAmountUnit(addFoodMacroRequest.getDefaultUnitname());
-            newFood.setAmountNumber(addFoodMacroRequest.getDefaultAmount());
+            newFood.setAmountUnit(addFoodRequest.getDefaultUnitname());
+            newFood.setAmountNumber(addFoodRequest.getDefaultAmount());
 
-            Macro macroPerUnit = addFoodMacroRequest.getMacroPerUnit();
+            Macro macroPerUnit = addFoodRequest.getMacroPerUnit();
             newFood.setCarbs(macroPerUnit.getCarbs());
             newFood.setFat(macroPerUnit.getFat());
             newFood.setProtein(macroPerUnit.getProteins());
@@ -134,5 +134,19 @@ public class FoodService {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
     }
+
+    // Post with params
+    @ApiOperation(value = "Adds a new food to the database")
+    @CrossOrigin(origins = {"*", "http://localhost:4200"})
+    @RequestMapping(value = "/addFood",
+            method = POST,
+            headers = {"Content-Type=application/json"})
+    public void addFood(@RequestBody Food food) {
+        System.out.println("Inside addFood");
+        System.out.println(food);
+//        int insertedRows = foodRepository.insertFood(new Food(1, name));
+//        System.out.println(insertedRows + " row(s) inserted");
+    }
+
 
 }

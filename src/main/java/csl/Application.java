@@ -22,7 +22,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 
@@ -152,12 +151,12 @@ public class Application {
         return aliasRequest;
     }
 
-    private static AddFoodMacroRequest createAddFoodMacroRequest(double proteins, double fat, double carbs) {
+    private static AddFoodRequest createAddFoodMacroRequest(double proteins, double fat, double carbs) {
         return createAddFoodMacroRequest(proteins, fat, carbs, 100.0, "gram");
     }
 
-    private static AddFoodMacroRequest createAddFoodMacroRequest(double proteins, double fat, double carbs, double defaultAmount, String defaultUnitname) {
-        AddFoodMacroRequest myFood = new AddFoodMacroRequest();
+    private static AddFoodRequest createAddFoodMacroRequest(double proteins, double fat, double carbs, double defaultAmount, String defaultUnitname) {
+        AddFoodRequest myFood = new AddFoodRequest();
         myFood.setDefaultAmount(defaultAmount);
         myFood.setDefaultUnitname(defaultUnitname);
         Macro macros = new Macro(proteins, fat, carbs);

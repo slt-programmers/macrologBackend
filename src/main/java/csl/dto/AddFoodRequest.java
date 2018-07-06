@@ -1,11 +1,10 @@
 package csl.dto;
 
-public class AddFoodMacroRequest {
+public class AddFoodRequest {
 
     private String name;
-    Double defaultAmount;
-    String defaultUnitname;
-
+    private Double defaultAmount;
+    private String defaultUnitname;
     private Macro macroPerUnit;
 
     public String getName() {
