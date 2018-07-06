@@ -42,7 +42,7 @@ public class Application {
         }
 
         if (!tableExists || automaticResetDatabase) {
-            createTables();
+//            createTables();
 
             FoodService foodService = new FoodService();
             FoodRepository foodRepository = new FoodRepository();
@@ -154,7 +154,7 @@ public class Application {
 
     private static AddFoodRequest createAddFoodMacroRequest(double proteins, double fat, double carbs, double defaultAmount, String defaultUnitname) {
         AddFoodRequest myFood = new AddFoodRequest();
-        myFood.setUnit(defaultUnitname);
+        myFood.setMeasurementUnit(defaultUnitname);
         Macro macros = new Macro(proteins, fat, carbs);
         return myFood;
     }
