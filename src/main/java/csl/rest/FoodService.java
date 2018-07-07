@@ -4,6 +4,7 @@ import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
 import csl.database.model.Food;
 import csl.database.model.FoodAlias;
+import csl.database.model.MeasurementUnit;
 import csl.database.model.Portion;
 import csl.dto.AddFoodRequest;
 import csl.dto.AddUnitAliasRequest;
@@ -93,7 +94,7 @@ public class FoodService {
         } else {
             Food newFood = new Food();
             newFood.setName(addFoodRequest.getName());
-            String measurementUnit = addFoodRequest.getMeasurementUnit();
+            MeasurementUnit measurementUnit = addFoodRequest.getMeasurementUnit();
             if ("UNIT".equals(measurementUnit)) {
                 newFood.setAmountNumber(addFoodRequest.getUnitGrams());
                 newFood.setAmountUnit(addFoodRequest.getUnitName());
@@ -113,7 +114,7 @@ public class FoodService {
                 for (Portion portion : addFoodRequest.getPortions()) {
                     FoodAlias foodAlias = new FoodAlias();
                     foodAlias.setAliasname(portion.getDescription());
-                    foodAlias.setAmountUnit(measurementUnit);
+                    foodAlias.setAmountUnit(measurementUnit.toString());
                     if ("UNIT".equals(measurementUnit)){
                         foodAlias.setAmountNumber(portion.getUnit());
                     } else {

@@ -7,6 +7,8 @@ application.properties defines port for localhost
 
 To start app:
 >mvnw.cmd spring-boot:run
+or if you have Maven installed:
+>mvn spring-boot:run
 
 
 > Setup database
