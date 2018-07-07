@@ -95,7 +95,7 @@ public class FoodService {
             Food newFood = new Food();
             newFood.setName(addFoodRequest.getName());
             MeasurementUnit measurementUnit = addFoodRequest.getMeasurementUnit();
-            if ("UNIT".equals(measurementUnit)) {
+            if (MeasurementUnit.UNIT.equals(measurementUnit)) {
                 newFood.setAmountNumber(addFoodRequest.getUnitGrams());
                 newFood.setAmountUnit(addFoodRequest.getUnitName());
             } else {

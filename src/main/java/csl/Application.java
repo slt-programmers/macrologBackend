@@ -39,7 +39,6 @@ public class Application {
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
 
-        boolean tableExists = isDatabaseSetUp();
 
         //DEV/TEST purposes
         boolean fillTablesOnStartup = true;
@@ -49,6 +48,7 @@ public class Application {
             deleteTables();
         }
 
+        boolean tableExists = isDatabaseSetUp();
         if (!tableExists) {
             createTables();
         } else {

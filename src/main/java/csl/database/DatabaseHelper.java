@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Properties;
 
@@ -27,21 +29,37 @@ public class DatabaseHelper implements DataSource{
 
     public static DatabaseHelper getInstance() {
         if (instance == null) {
-
-            Properties p = new Properties();
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream stream = loader.getResourceAsStream("application.properties");
+            String hostname = null;
             try {
-                p.load(stream);
-            } catch (IOException e) {
+                hostname = InetAddress.getLocalHost().getHostName();
+                LOGGER.debug(hostname);
+            } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
+            Properties p = getProperties(hostname);
             CONNECTION_URL = p.getProperty("spring.datasource.url");
             DB_USER = p.getProperty("spring.datasource.username");
             DB_PASSWORD = p.getProperty("spring.datasource.password");
             instance = new DatabaseHelper();
         }
         return instance;
+    }
+
+    private static Properties getProperties(String hostname) {
+        Properties p = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        String namePropertiesFile = "application.properties";
+        if ("LAPTOP-HPA3TJNH".equals(hostname)) {
+                namePropertiesFile = "application-arjan.properties";
+        }
+
+        InputStream stream = loader.getResourceAsStream(namePropertiesFile);
+        try {
+            p.load(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return p;
     }
 
     @Override

@@ -8,9 +8,9 @@ import java.util.List;
 public class AddFoodRequest {
 
     private String name;
-    @ApiModelProperty(notes = "Unit van foodrequest. Of Gram of Unit",required=true, example = "GRAMS")
+    @ApiModelProperty(notes = "Unit van foodrequest. Of GRAMS of UNIT",required=true, example = "GRAMS")
     private MeasurementUnit measurementUnit;
-    @ApiModelProperty(notes = "Indien Unit geselecteerd kan hier bijvoorbeeld stuks of bord",required=false, example = "bord")
+    @ApiModelProperty(notes = "Indien Unit geselecteerd kan hier bijvoorbeeld stuks of bord.",required=false, example = "bord")
     private String unitName;
     @ApiModelProperty(notes = "Optioneel als unit ook nog gewogen wordt. Indien Gram is dit altijd 100",required=true, example = "100")
     private Double unitGrams;
