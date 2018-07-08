@@ -1,7 +1,7 @@
 package csl.database;
 
 import csl.database.model.Food;
-import csl.database.model.MeasurementUnit;
+import csl.enums.MeasurementUnit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,8 +13,6 @@ import org.springframework.util.Assert;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import static csl.database.FoodRepository.*;
 
 /**
  * Created by Carmen on 18-3-2018.
@@ -52,7 +50,8 @@ public class FoodRepository {
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-    public FoodRepository() {}
+    public FoodRepository() {
+    }
 
     public List<Food> getAllFood() {
         return template.query(SELECT_SQL, new FoodWrapper<Food>());

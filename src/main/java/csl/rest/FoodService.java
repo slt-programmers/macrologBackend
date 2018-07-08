@@ -1,15 +1,11 @@
 package csl.rest;
 
-import csl.database.FoodAliasRepository;
 import csl.database.FoodRepository;
+import csl.database.PortionRepository;
 import csl.database.model.Food;
-import csl.database.model.FoodAlias;
-import csl.database.model.MeasurementUnit;
-import csl.database.model.Portion;
 import csl.dto.AddFoodRequest;
-import csl.dto.AddUnitAliasRequest;
-import csl.dto.FoodMacros;
-import csl.dto.Macro;
+import csl.dto.Portion;
+import csl.enums.MeasurementUnit;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -29,7 +25,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class FoodService {
 
     private FoodRepository foodRepository = new FoodRepository();
-    private FoodAliasRepository foodAliasRepository = new FoodAliasRepository();
+    private PortionRepository portionRepository = new PortionRepository();
 
     @ApiOperation(value = "Retrieve all stored foods")
     @CrossOrigin(origins = "http://localhost:4200")
@@ -51,32 +47,42 @@ public class FoodService {
         if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
-            FoodMacros curr = new FoodMacros();
-            curr.setFoodId(food.getId());
-            curr.setName(food.getName());
-            curr.setAmountUnit(food.getMeasurementUnit().toString());
+//            FoodMacros curr = new FoodMacros();
+//            curr.setFoodId(food.getId());
+//            curr.setName(food.getName());
+//            curr.setAmountUnit(food.getMeasurementUnit().toString());
+//
+//            Macro macro = new Macro();
+//            macro.setCarbs(food.getCarbs());
+//            macro.setFat(food.getFat());
+//            macro.setProteins(food.getProtein());
+//            curr.addMacroPerUnit(food.getUnitGrams(), macro);
 
-            Macro macro = new Macro();
-            macro.setCarbs(food.getCarbs());
-            macro.setFat(food.getFat());
-            macro.setProteins(food.getProtein());
-            curr.addMacroPerUnit(food.getUnitGrams(), macro);
+            csl.dto.Food foodDto = new csl.dto.Food();
+            foodDto.setName(food.getName());
+            foodDto.setMeasurementUnit(food.getMeasurementUnit());
+            foodDto.setUnitGrams(food.getUnitGrams());
+            foodDto.setUnitName(food.getUnitName());
+            foodDto.setProtein(food.getProtein());
+            foodDto.setCarbs(food.getCarbs());
+            foodDto.setFat(food.getFat());
 
-            List<FoodAlias> aliasesForFood = foodAliasRepository.getAliasesForFood(food.getId());
-            for (FoodAlias foodAlias : aliasesForFood) {
-                csl.dto.FoodAlias currDto = new csl.dto.FoodAlias();
-                currDto.setAliasName(foodAlias.getAliasname());
-                currDto.setAmountNumber(foodAlias.getAmountNumber());
-                currDto.setAmountUnit(foodAlias.getAmountUnit());
+            List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
+            for (csl.database.model.Portion portion : foodPortions) {
+                csl.dto.Portion currDto = new csl.dto.Portion();
+                currDto.setDescription(portion.getDescription());
+                currDto.setGrams(portion.getGrams());
+                currDto.setUnitMultiplier(portion.getUnitMultiplier());
+                currDto.setId(portion.getId());
+//
+//                currDto.setAliasCarbs(food.getCarbs() / 100 * currDto.getAmountNumber());
+//                currDto.setAliasProtein(food.getProtein() / 100 * currDto.getAmountNumber());
+//                currDto.setAliasFat(food.getFat() / 100 * currDto.getAmountNumber());
 
-                currDto.setAliasCarbs(food.getCarbs() / 100 * currDto.getAmountNumber());
-                currDto.setAliasProtein(food.getProtein() / 100 * currDto.getAmountNumber());
-                currDto.setAliasFat(food.getFat() / 100 * currDto.getAmountNumber());
-
-                curr.addFoodAlias(foodAlias.getAliasname(), currDto);
+                foodDto.addPortion(currDto);
             }
 
-            return ResponseEntity.ok(curr);
+            return ResponseEntity.ok(foodDto);
         }
     }
 
@@ -107,18 +113,15 @@ public class FoodService {
             newFood.setProtein(addFoodRequest.getProtein());
 
             int insertedRows = foodRepository.insertFood(newFood);
-            if (insertedRows ==1  && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()){
+            if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
                 Food addedFood = foodRepository.getFood(addFoodRequest.getName());
-                for (Portion portion : addFoodRequest.getPortions()) {
-                    FoodAlias foodAlias = new FoodAlias();
-                    foodAlias.setAliasname(portion.getDescription());
-                    foodAlias.setAmountUnit(newFood.getMeasurementUnit().toString());
-                    if ("UNIT".equals(newFood.getMeasurementUnit().toString())){
-                        foodAlias.setAmountNumber(portion.getUnit());
-                    } else {
-                        foodAlias.setAmountNumber(portion.getGrams());
-                    }
-                    foodAliasRepository.addFoodAlias(addedFood,foodAlias);
+                for (Portion portionDto : addFoodRequest.getPortions()) {
+                    csl.database.model.Portion newPortion = new csl.database.model.Portion();
+                    newPortion.setDescription(portionDto.getDescription());
+                    newPortion.setGrams(portionDto.getGrams());
+                    newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
+
+                    portionRepository.addPortion(addedFood, newPortion);
                 }
             }
 
@@ -126,28 +129,28 @@ public class FoodService {
         }
     }
 
-    @ApiOperation(value = "Adds an alias for a food")
-    @RequestMapping(value = "/{id}/alias",
-            method = POST,
-            headers = {"Content-Type=application/json"})
-    public ResponseEntity addAlias(@PathVariable("id") Long foodId,
-                                   @RequestBody AddUnitAliasRequest addUnitAliasRequest) throws URISyntaxException {
-        Food food = foodRepository.getFoodById(foodId);
-        if (food == null) {
-            return ResponseEntity.badRequest().build();
-        } else {
-
-            FoodAlias foodAlias = new FoodAlias();
-            foodAlias.setAliasname(addUnitAliasRequest.getAliasName());
-            foodAlias.setAmountNumber(addUnitAliasRequest.getAliasAmount());
-            foodAlias.setAmountUnit(addUnitAliasRequest.getAliasUnitName());
-            foodAlias.setFoodId(foodId);
-            foodAliasRepository.addFoodAlias(food, foodAlias);
-
-//            int insertedRows = foodRepository.insertFood(newFood);
-
-
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }
-    }
+//    @ApiOperation(value = "Adds an portion for a food")
+//    @RequestMapping(value = "/{id}/alias",
+//            method = POST,
+//            headers = {"Content-Type=application/json"})
+//    public ResponseEntity addPortion(@PathVariable("id") Long foodId,
+//                                     @RequestBody AddPortionRequest addUnitAliasRequest) throws URISyntaxException {
+//        Food food = foodRepository.getFoodById(foodId);
+//        if (food == null) {
+//            return ResponseEntity.badRequest().build();
+//        } else {
+//
+//            FoodAlias foodAlias = new FoodAlias();
+//            foodAlias.setAliasname(addUnitAliasRequest.getDescription());
+//            foodAlias.setAmountNumber(addUnitAliasRequest.getGrams());
+//            foodAlias.setAmountUnit(addUnitAliasRequest.getUnitMultiplier());
+//            foodAlias.setFoodId(foodId);
+//            portionRepository.addFoodAlias(food, foodAlias);
+//
+////            int insertedRows = foodRepository.insertFood(newFood);
+//
+//
+//            return ResponseEntity.status(HttpStatus.CREATED).build();
+//        }
+//    }
 }

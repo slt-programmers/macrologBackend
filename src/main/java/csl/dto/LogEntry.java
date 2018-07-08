@@ -12,7 +12,8 @@ public class LogEntry {
 
     private String foodName;
     private Long foodId;
-    private FoodAlias foodAlias;
+    @ApiModelProperty(notes = "Portion used.")
+    private Portion portion;
     private Macro macrosCalculated;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
@@ -38,12 +39,12 @@ public class LogEntry {
         this.foodId = foodId;
     }
 
-    public FoodAlias getFoodAlias() {
-        return foodAlias;
+    public Portion getPortion() {
+        return portion;
     }
 
-    public void setFoodAlias(FoodAlias foodAlias) {
-        this.foodAlias = foodAlias;
+    public void setPortion(Portion portion) {
+        this.portion = portion;
     }
 
     public Double getMultiplier() {

@@ -1,5 +1,7 @@
 package csl.database.model;
 
+import csl.enums.MeasurementUnit;
+
 /**
  * Created by Carmen on 18-3-2018.
  */

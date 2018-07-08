@@ -2,9 +2,10 @@ package csl.dto;
 import csl.enums.MeasurementUnit;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AddFoodRequest {
+public class Food {
 
     private String name;
     @ApiModelProperty(notes = "Unit van foodrequest. Of GRAMS of UNIT",required=true, example = "GRAMS")
@@ -80,5 +81,12 @@ public class AddFoodRequest {
 
     public void setPortions(List<Portion> portions) {
         this.portions = portions;
+    }
+
+    public void addPortion(csl.dto.Portion currDto) {
+        if (portions == null){
+            portions = new ArrayList<>();
+        }
+        portions.add(currDto);
     }
 }

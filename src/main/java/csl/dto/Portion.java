@@ -1,4 +1,4 @@
-package csl.database.model;
+package csl.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -47,7 +47,7 @@ public class Portion {
         this.id = id;
     }
 
-    public Portion(Long id, String description,Double grams, Double unitMultiplier) {
+    public Portion(Long id, String description, Double grams, Double unitMultiplier) {
         this.id = id;
         this.description = description;
         this.grams = grams;
