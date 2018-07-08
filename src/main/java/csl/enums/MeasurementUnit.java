@@ -1,4 +1,4 @@
-package csl.database.model;
+package csl.enums;
 
 /**
  * Created by Carmen on 7-7-2018.
