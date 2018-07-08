@@ -50,13 +50,13 @@ public class LogsService {
             FoodMacros curr = new FoodMacros();
             curr.setFoodId(food.getId());
             curr.setName(food.getName());
-            curr.setAmountUnit(food.getAmountUnit());
+            curr.setAmountUnit(food.getMeasurementUnit().toString());
 
             Macro macro = new Macro();
             macro.setCarbs(food.getCarbs());
             macro.setFat(food.getFat());
             macro.setProteins(food.getProtein());
-            curr.addMacroPerUnit(food.getAmountNumber(), macro);
+            curr.addMacroPerUnit(food.getUnitGrams(), macro);
 
             FoodAlias foodAlias = foodAliasRepository.getFoodAlias(logEntry.getAliasIdUsed());
             csl.dto.FoodAlias currDto = new csl.dto.FoodAlias();
@@ -79,9 +79,9 @@ public class LogsService {
 
             Macro macrosCalculated = new Macro();
             if (foodAlias != null){
-                Double defaultProtein = (foodAlias.getAmountNumber()* food.getProtein())/food.getAmountNumber();
-                Double defaultFat = (foodAlias.getAmountNumber() * food.getFat())/food.getAmountNumber();
-                Double defaultCarbs = (foodAlias.getAmountNumber() * food.getCarbs())/food.getAmountNumber();
+                Double defaultProtein = (foodAlias.getAmountNumber()* food.getProtein())/food.getUnitGrams();
+                Double defaultFat = (foodAlias.getAmountNumber() * food.getFat())/food.getUnitGrams();
+                Double defaultCarbs = (foodAlias.getAmountNumber() * food.getCarbs())/food.getUnitGrams();
                 macrosCalculated.setCarbs(multiplier * defaultCarbs);
                 macrosCalculated.setFat(multiplier * defaultFat);
                 macrosCalculated.setProteins(multiplier * defaultProtein);

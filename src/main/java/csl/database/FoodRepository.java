@@ -1,6 +1,7 @@
 package csl.database;
 
 import csl.database.model.Food;
+import csl.database.model.MeasurementUnit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -23,49 +24,50 @@ public class FoodRepository {
     public static final String TABLE_NAME = "food";
 
     public static final String COL_ID = "id";
-    public static final String COL_NAME = "name";
-    public static final String COL_PROTEINS = "proteins";
-    public static final String COL_FATS = "fats";
-    public static final String COL_CARBS = "carbs";
-    public static final String COL_DEFAULT_AMOUNT = "amount";
-    public static final String COL_DEFAULT_AMOUNT_UNIT = "unitname";
+    private static final String COL_NAME = "name";
+    private static final String COL_MEASUREMENT = "measurement";
+    private static final String COL_PROTEIN = "protein";
+    private static final String COL_FAT = "fat";
+    private static final String COL_CARBS = "carbs";
+    private static final String COL_UNIT_NAME = "unit_name";
+    private static final String COL_UNIT_GRAMS = "unit_grams";
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_NAME + " TEXT NOT NULL, " +
-                    COL_PROTEINS + " DEC(5,2)  NOT NULL, " +
-                    COL_FATS + " DEC(5,2) NOT NULL, " +
+                    COL_MEASUREMENT + " TEXT NOT NULL, " +
+                    COL_PROTEIN + " DEC(5,2)  NOT NULL, " +
+                    COL_FAT + " DEC(5,2) NOT NULL, " +
                     COL_CARBS + " DEC(5,2) NOT NULL," +
-                    COL_DEFAULT_AMOUNT + " DEC(5,2) NOT NULL," +
-                    COL_DEFAULT_AMOUNT_UNIT + " TEXT NOT NULL)";
+                    COL_UNIT_NAME + " TEXT," +
+                    COL_UNIT_GRAMS + " DEC(5,2))";
 
-    public static final String TABLE_DELETE =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
+    public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String SELECT_SQL = "select * from food";
-    private static final String INSERT_SQL = "insert into food( name,proteins,fats,carbs,amount,unitname) values(:name,:protein,:fats,:carbs,:amount,:unitname)";
+    private static final String INSERT_SQL = "insert into food(" +
+            "name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
+            "values(:name, :measurement, :protein, :fat, :carbs, :unit_name,:unit_grams)";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-    public FoodRepository() {
-
-
-    }
+    public FoodRepository() {}
 
     public List<Food> getAllFood() {
-        return template.query(SELECT_SQL, new FoodWrapper());
+        return template.query(SELECT_SQL, new FoodWrapper<Food>());
     }
 
     public int insertFood(Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("name", food.getName())
-                .addValue("amount", food.getAmountNumber())
-                .addValue("unitname", food.getAmountUnit())
+                .addValue("measurement", food.getMeasurementUnit().toString())
                 .addValue("protein", food.getProtein())
-                .addValue("fats", food.getFat())
-                .addValue("carbs", food.getCarbs());
+                .addValue("fat", food.getFat())
+                .addValue("carbs", food.getCarbs())
+                .addValue("unit_name", food.getUnitName())
+                .addValue("unit_grams", food.getUnitGrams());
         return template.update(INSERT_SQL, params);
     }
 
@@ -73,31 +75,32 @@ public class FoodRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", name);
         String myFood = SELECT_SQL + " WHERE  " + COL_NAME + "= :name";
-        List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
+        List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
     public Food getFoodById(Long id) {
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", id);
+        SqlParameterSource params = new MapSqlParameterSource().addValue("id", id);
         String myFood = SELECT_SQL + " WHERE  " + COL_ID + "= :id";
-        List<Food> queryResults = template.query(myFood, params, new FoodWrapper());
-        Assert.isTrue(queryResults.size() <= 1);
+        List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
+        Assert.isTrue(queryResults.size() <= 1, "More than one food was found");
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
-}
 
-class FoodWrapper implements RowMapper {
+    class FoodWrapper<T> implements RowMapper<Food> {
 
-    @Override
-    public Object mapRow(ResultSet rs, int i) throws SQLException {
-        return new Food(rs.getLong(COL_ID),
-                rs.getString(COL_NAME),
-                rs.getDouble(COL_DEFAULT_AMOUNT),
-                rs.getString(COL_DEFAULT_AMOUNT_UNIT),
-                rs.getDouble(COL_PROTEINS),
-                rs.getDouble(COL_FATS),
-                rs.getDouble(COL_CARBS)
-        );
+        @Override
+        public Food mapRow(ResultSet rs, int i) throws SQLException {
+            return new Food(rs.getLong(COL_ID),
+                    rs.getString(COL_NAME),
+                    MeasurementUnit.valueOf(rs.getString(COL_MEASUREMENT)),
+                    rs.getDouble(COL_PROTEIN),
+                    rs.getDouble(COL_FAT),
+                    rs.getDouble(COL_CARBS),
+                    rs.getString(COL_UNIT_NAME),
+                    rs.getDouble(COL_UNIT_GRAMS)
+            );
+        }
     }
 }
+

@@ -1,7 +1,5 @@
 package csl.dto;
 
-import csl.dto.FoodAlias;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +32,6 @@ public class FoodMacros {
     }
 
     public void addMacroPerUnit(Double unit, Macro macro) {
-
        getMacroPerUnit().put(unit,macro);
     }
 

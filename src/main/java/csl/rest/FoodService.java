@@ -54,13 +54,13 @@ public class FoodService {
             FoodMacros curr = new FoodMacros();
             curr.setFoodId(food.getId());
             curr.setName(food.getName());
-            curr.setAmountUnit(food.getAmountUnit());
+            curr.setAmountUnit(food.getMeasurementUnit().toString());
 
             Macro macro = new Macro();
             macro.setCarbs(food.getCarbs());
             macro.setFat(food.getFat());
             macro.setProteins(food.getProtein());
-            curr.addMacroPerUnit(food.getAmountNumber(), macro);
+            curr.addMacroPerUnit(food.getUnitGrams(), macro);
 
             List<FoodAlias> aliasesForFood = foodAliasRepository.getAliasesForFood(food.getId());
             for (FoodAlias foodAlias : aliasesForFood) {
@@ -72,7 +72,6 @@ public class FoodService {
                 currDto.setAliasCarbs(food.getCarbs() / 100 * currDto.getAmountNumber());
                 currDto.setAliasProtein(food.getProtein() / 100 * currDto.getAmountNumber());
                 currDto.setAliasFat(food.getFat() / 100 * currDto.getAmountNumber());
-
 
                 curr.addFoodAlias(foodAlias.getAliasname(), currDto);
             }
@@ -94,19 +93,18 @@ public class FoodService {
         } else {
             Food newFood = new Food();
             newFood.setName(addFoodRequest.getName());
-            MeasurementUnit measurementUnit = addFoodRequest.getMeasurementUnit();
-            if (MeasurementUnit.UNIT.equals(measurementUnit)) {
-                newFood.setAmountNumber(addFoodRequest.getUnitGrams());
-                newFood.setAmountUnit(addFoodRequest.getUnitName());
+            newFood.setMeasurementUnit(addFoodRequest.getMeasurementUnit());
+            if (newFood.getMeasurementUnit().equals(MeasurementUnit.UNIT)) {
+                newFood.setUnitGrams(addFoodRequest.getUnitGrams());
+                newFood.setUnitName(addFoodRequest.getUnitName());
             } else {
-                newFood.setAmountNumber(100.0);
-                newFood.setAmountUnit("grams");
+                newFood.setUnitGrams(100.0);
+                newFood.setUnitName("grams");
             }
 
             newFood.setCarbs(addFoodRequest.getCarbs());
             newFood.setFat(addFoodRequest.getFat());
             newFood.setProtein(addFoodRequest.getProtein());
-
 
             int insertedRows = foodRepository.insertFood(newFood);
             if (insertedRows ==1  && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()){
@@ -114,22 +112,15 @@ public class FoodService {
                 for (Portion portion : addFoodRequest.getPortions()) {
                     FoodAlias foodAlias = new FoodAlias();
                     foodAlias.setAliasname(portion.getDescription());
-                    foodAlias.setAmountUnit(measurementUnit.toString());
-                    if ("UNIT".equals(measurementUnit)){
+                    foodAlias.setAmountUnit(newFood.getMeasurementUnit().toString());
+                    if ("UNIT".equals(newFood.getMeasurementUnit().toString())){
                         foodAlias.setAmountNumber(portion.getUnit());
                     } else {
                         foodAlias.setAmountNumber(portion.getGrams());
                     }
                     foodAliasRepository.addFoodAlias(addedFood,foodAlias);
                 }
-
-
             }
-
-
-//            URI location = ServletUriComponentsBuilder
-//                    .fromCurrentRequest()
-//                    .buildAndExpand(newFood.getAliasname()).toUri();
 
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }

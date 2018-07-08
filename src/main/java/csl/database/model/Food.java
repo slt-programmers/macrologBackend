@@ -7,29 +7,32 @@ public class Food {
 
     private Long id;
     private String name;
-    private Double amountNumber;
-    private String amountUnit;
+    private MeasurementUnit measurementUnit;
     private Double protein;
     private Double fat;
     private Double carbs;
+    private String unitName;
+    private Double unitGrams;
 
     public Food() {
     }
 
     public Food(Long id,
                 String name,
-                Double amountNumber,
-                String amountUnit,
+                MeasurementUnit measurementUnit,
                 Double protein,
                 Double fat,
-                Double carbs) {
+                Double carbs,
+                String unitName,
+                Double unitGrams) {
         this.id = id;
         this.name = name;
-        this.amountNumber = amountNumber;
-        this.amountUnit = amountUnit;
+        this.measurementUnit = measurementUnit;
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
+        this.unitName = unitName;
+        this.unitGrams = unitGrams;
     }
 
     public Long getId() {
@@ -48,7 +51,13 @@ public class Food {
         this.name = name;
     }
 
+    public MeasurementUnit getMeasurementUnit() {
+        return measurementUnit;
+    }
 
+    public void setMeasurementUnit(MeasurementUnit measurementUnit) {
+        this.measurementUnit = measurementUnit;
+    }
 
     public Double getProtein() {
         return protein;
@@ -74,20 +83,20 @@ public class Food {
         this.carbs = carbs;
     }
 
-    public String getAmountUnit() {
-        return amountUnit;
+    public String getUnitName() {
+        return unitName;
     }
 
-    public void setAmountUnit(String amountUnit) {
-        this.amountUnit = amountUnit;
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
     }
 
-    public Double getAmountNumber() {
-        return amountNumber;
+    public Double getUnitGrams() {
+        return unitGrams;
     }
 
-    public void setAmountNumber(Double amountNumber) {
-        this.amountNumber = amountNumber;
+    public void setUnitGrams(Double unitGrams) {
+        this.unitGrams = unitGrams;
     }
 
     @Override
@@ -97,16 +106,16 @@ public class Food {
 
         Food food = (Food) o;
 
+        if (!id.equals(food.id)) return false;
         if (!name.equals(food.name)) return false;
-        if (!amountUnit.equals(food.amountUnit)) return false;
-        return amountNumber.equals(food.amountNumber);
+        return measurementUnit == food.measurementUnit;
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + amountUnit.hashCode();
-        result = 31 * result + amountNumber.hashCode();
+        int result = id.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + measurementUnit.hashCode();
         return result;
     }
 
