@@ -13,8 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static csl.database.LogEntryRepository.*;
-
 /**
  * Created by Carmen on 18-3-2018.
  */
@@ -32,8 +30,8 @@ public class LogEntryRepository {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_FOOD_ID + " INT(6)NOT NULL, " +
-                    COL_ALIAS_ID + " INT(6)  NOT NULL, " +
+                    COL_FOOD_ID + " INT(6) NOT NULL, " +
+                    COL_ALIAS_ID + " INT(6) NOT NULL, " +
                     COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
                     COL_DAY + " DATE NOT NULL," +
                     COL_MEAL + " TEXT" +
@@ -63,22 +61,20 @@ public class LogEntryRepository {
         return template.query(SELECT_SQL, new LogEntryWrapper());
     }
 
-}
+    class LogEntryWrapper implements RowMapper {
 
-class LogEntryWrapper implements RowMapper {
-
-
-    @Override
-    public Object mapRow(ResultSet rs, int i) throws SQLException {
+        @Override
+        public Object mapRow(ResultSet rs, int i) throws SQLException {
 
 
-        Date ts = rs.getDate(COL_DAY);
-        return new LogEntry(rs.getLong(COL_ID),
-                rs.getLong(COL_FOOD_ID),
-                rs.getLong(COL_ALIAS_ID),
-                rs.getDouble(COL_MULTIPLIER),
-                ts,
-                rs.getString(COL_MEAL));
+            Date ts = rs.getDate(COL_DAY);
+            return new LogEntry(rs.getLong(COL_ID),
+                    rs.getLong(COL_FOOD_ID),
+                    rs.getLong(COL_ALIAS_ID),
+                    rs.getDouble(COL_MULTIPLIER),
+                    ts,
+                    rs.getString(COL_MEAL));
 
+        }
     }
 }

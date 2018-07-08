@@ -14,8 +14,7 @@ public class Food {
     private String unitName;
     private Double unitGrams;
 
-    public Food() {
-    }
+    public Food() {}
 
     public Food(Long id,
                 String name,

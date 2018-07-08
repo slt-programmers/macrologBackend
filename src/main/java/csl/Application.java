@@ -1,9 +1,6 @@
 package csl;
 
-import csl.database.DatabaseHelper;
-import csl.database.FoodAliasRepository;
-import csl.database.FoodRepository;
-import csl.database.LogEntryRepository;
+import csl.database.*;
 import csl.database.model.MeasurementUnit;
 import csl.database.model.Portion;
 import csl.dto.AddFoodRequest;
@@ -177,10 +174,12 @@ public class Application {
              CallableStatement deleteLogEntry = connection.prepareCall(LogEntryRepository.TABLE_DELETE);
              CallableStatement deleteFoodAlias = connection.prepareCall(FoodAliasRepository.TABLE_DELETE);
              CallableStatement deleteFood = connection.prepareCall(FoodRepository.TABLE_DELETE)) {
+             CallableStatement deleteSettings = connection.prepareCall(SettingsRepository.TABLE_DELETE);
 
             deleteLogEntry.execute();
             deleteFoodAlias.execute();
             deleteFood.execute();
+            deleteSettings.execute();
 
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());
@@ -190,10 +189,12 @@ public class Application {
     private static void createTables() {
         LOGGER.info("Creating tables on startup");
         try (Connection connection = DatabaseHelper.getInstance().getConnection();
+             CallableStatement settingsTableCreate = connection.prepareCall(SettingsRepository.TABLE_CREATE);
              CallableStatement footTableCreate = connection.prepareCall(FoodRepository.TABLE_CREATE);
              CallableStatement foodAliasTableCreate = connection.prepareCall(FoodAliasRepository.TABLE_CREATE);
              CallableStatement logEntryTableCreate = connection.prepareCall(LogEntryRepository.TABLE_CREATE)) {
 
+            settingsTableCreate.execute();
             footTableCreate.execute();
             foodAliasTableCreate.execute();
             logEntryTableCreate.execute();
@@ -208,6 +209,7 @@ public class Application {
     private static boolean isDatabaseSetUp() throws SQLException {
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
         String checkUrl = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where" +
+                " table_name = '" + SettingsRepository.TABLE_NAME + "' or " +
                 " table_name = '" + FoodRepository.TABLE_NAME + "' or " +
                 " table_name = '" + FoodAliasRepository.TABLE_NAME + "' or " +
                 " table_name = '" + LogEntryRepository.TABLE_NAME + "'";

@@ -95,17 +95,17 @@ public class FoodAliasRepository {
         List<FoodAlias> queryResults = template.query(myFoodAlias, params, new FoodAliasWrapper());
         return queryResults;
     }
-}
 
-class FoodAliasWrapper implements RowMapper {
+    class FoodAliasWrapper implements RowMapper {
 
-    @Override
-    public Object mapRow(ResultSet rs, int i) throws SQLException {
-        return new FoodAlias(rs.getString(COL_ALIASNAME),
-                rs.getDouble(COL_DEFAULT_AMOUNT),
-                rs.getString(COL_DEFAULT_AMOUNT_UNIT),
-                rs.getLong(COL_ID)
-        );
+        @Override
+        public Object mapRow(ResultSet rs, int i) throws SQLException {
+            return new FoodAlias(rs.getString(COL_ALIASNAME),
+                    rs.getDouble(COL_DEFAULT_AMOUNT),
+                    rs.getString(COL_DEFAULT_AMOUNT_UNIT),
+                    rs.getLong(COL_ID)
+            );
+        }
     }
 }
 
