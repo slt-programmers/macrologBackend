@@ -4,6 +4,7 @@ import csl.database.FoodRepository;
 import csl.database.PortionRepository;
 import csl.database.model.Food;
 import csl.dto.AddFoodRequest;
+import csl.dto.Macro;
 import csl.dto.Portion;
 import csl.enums.MeasurementUnit;
 import io.swagger.annotations.Api;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -33,7 +35,14 @@ public class FoodService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllFood() {
-        return ResponseEntity.ok(foodRepository.getAllFood());
+
+        List<Food> allFood = foodRepository.getAllFood();
+        List<csl.dto.Food> allFoodDtos = new ArrayList<>();
+        for (Food food : allFood) {
+            allFoodDtos.add(createFoodDto(food));
+        }
+
+        return ResponseEntity.ok(allFoodDtos);
     }
 
     @ApiOperation(value = "Retrieve information about specific food")
@@ -47,43 +56,46 @@ public class FoodService {
         if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
-//            FoodMacros curr = new FoodMacros();
-//            curr.setFoodId(food.getId());
-//            curr.setName(food.getName());
-//            curr.setAmountUnit(food.getMeasurementUnit().toString());
-//
-//            Macro macro = new Macro();
-//            macro.setCarbs(food.getCarbs());
-//            macro.setFat(food.getFat());
-//            macro.setProteins(food.getProtein());
-//            curr.addMacroPerUnit(food.getUnitGrams(), macro);
-
-            csl.dto.Food foodDto = new csl.dto.Food();
-            foodDto.setName(food.getName());
-            foodDto.setMeasurementUnit(food.getMeasurementUnit());
-            foodDto.setUnitGrams(food.getUnitGrams());
-            foodDto.setUnitName(food.getUnitName());
-            foodDto.setProtein(food.getProtein());
-            foodDto.setCarbs(food.getCarbs());
-            foodDto.setFat(food.getFat());
-
-            List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (csl.database.model.Portion portion : foodPortions) {
-                csl.dto.Portion currDto = new csl.dto.Portion();
-                currDto.setDescription(portion.getDescription());
-                currDto.setGrams(portion.getGrams());
-                currDto.setUnitMultiplier(portion.getUnitMultiplier());
-                currDto.setId(portion.getId());
-//
-//                currDto.setAliasCarbs(food.getCarbs() / 100 * currDto.getAmountNumber());
-//                currDto.setAliasProtein(food.getProtein() / 100 * currDto.getAmountNumber());
-//                currDto.setAliasFat(food.getFat() / 100 * currDto.getAmountNumber());
-
-                foodDto.addPortion(currDto);
-            }
+            csl.dto.Food foodDto = createFoodDto(food);
 
             return ResponseEntity.ok(foodDto);
         }
+    }
+
+    private csl.dto.Food createFoodDto(Food food) {
+        csl.dto.Food foodDto = new csl.dto.Food();
+        foodDto.setName(food.getName());
+        foodDto.setMeasurementUnit(food.getMeasurementUnit());
+        foodDto.setUnitGrams(food.getUnitGrams());
+        foodDto.setUnitName(food.getUnitName());
+        foodDto.setProtein(food.getProtein());
+        foodDto.setCarbs(food.getCarbs());
+        foodDto.setFat(food.getFat());
+
+        List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
+        for (csl.database.model.Portion portion : foodPortions) {
+            Portion currDto = new Portion();
+            currDto.setDescription(portion.getDescription());
+            currDto.setGrams(portion.getGrams());
+            currDto.setUnitMultiplier(portion.getUnitMultiplier());
+            currDto.setId(portion.getId());
+
+            Macro calculatedMacros = new Macro();
+            if (food.getMeasurementUnit().equals(MeasurementUnit.GRAMS)) {
+                // Food has been entered for 100g
+                    calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
+                calculatedMacros.setProteins(food.getProtein() / 100 * portion.getGrams());
+                calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+            } else {
+                // Food has been entered per unit
+                calculatedMacros.setCarbs(food.getCarbs()  * portion.getUnitMultiplier());
+                calculatedMacros.setProteins(food.getProtein()  * portion.getUnitMultiplier());
+                calculatedMacros.setFat(food.getFat() * portion.getUnitMultiplier());
+            }
+            currDto.setCalculatedMacros(calculatedMacros);
+            foodDto.addPortion(currDto);
+        }
+        return foodDto;
     }
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")

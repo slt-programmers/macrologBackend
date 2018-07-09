@@ -1,8 +1,5 @@
 package csl.database.model;
 
-import io.swagger.annotations.ApiModelProperty;
-import org.joda.time.DateTime;
-
 import java.sql.Date;
 
 /**
@@ -12,7 +9,7 @@ public class LogEntry {
 
     private Long id;
     private Long foodId;
-    private Long aliasIdUsed;
+    private Long portionId;
     private Double multiplier;
     private Date day;
     private String meal;
@@ -36,10 +33,10 @@ public class LogEntry {
     public LogEntry() {
     }
 
-    public LogEntry(Long id, Long foodId, Long aliasIdUsed, Double multiplier, Date day,String meal) {
+    public LogEntry(Long id, Long foodId, Long portionId, Double multiplier, Date day, String meal) {
         this.id = id;
         this.foodId = foodId;
-        this.aliasIdUsed = aliasIdUsed;
+        this.portionId = portionId;
         this.multiplier = multiplier;
         this.day = day;
         this.meal=meal;
@@ -61,12 +58,12 @@ public class LogEntry {
         this.foodId = foodId;
     }
 
-    public Long getAliasIdUsed() {
-        return aliasIdUsed;
+    public Long getPortionId() {
+        return portionId;
     }
 
-    public void setAliasIdUsed(Long aliasIdUsed) {
-        this.aliasIdUsed = aliasIdUsed;
+    public void setPortionId(Long portionId) {
+        this.portionId = portionId;
     }
 
     public Double getMultiplier() {

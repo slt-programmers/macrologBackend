@@ -102,8 +102,8 @@ public class PortionRepository {
         public Portion mapRow(ResultSet rs, int i) throws SQLException {
             return new Portion(rs.getLong(COL_ID),
                     rs.getString(COL_DESCRIPTION),
-                    rs.getDouble(COL_UNIT_MULTIPLIER),
-                    rs.getDouble(COL_GRAMS)
+                    rs.getDouble(COL_GRAMS),
+                    rs.getDouble(COL_UNIT_MULTIPLIER)
             );
         }
     }

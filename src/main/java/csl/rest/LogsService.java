@@ -4,19 +4,24 @@ import csl.database.FoodRepository;
 import csl.database.LogEntryRepository;
 import csl.database.PortionRepository;
 import csl.database.model.Food;
+import csl.dto.AddLogEntryRequest;
 import csl.dto.LogEntry;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/logs")
@@ -52,7 +57,7 @@ public class LogsService {
 //            macro.setProteins(food.getProtein());
 //            curr.addMacroPerUnit(food.getUnitGrams(), macro);
 
-//            FoodAlias foodAlias = portionRepository.getFoodAlias(logEntry.getAliasIdUsed());
+//            FoodAlias foodAlias = portionRepository.getFoodAlias(logEntry.getPortionId());
 //            csl.dto.FoodAlias currDto = new csl.dto.FoodAlias();
 //            currDto.setDescription(foodAlias.getAliasname());
 //            currDto.setAmountNumber(foodAlias.getAmountNumber());
@@ -99,20 +104,20 @@ public class LogsService {
 
     }
 
-//    @ApiOperation(value = "Store new logentry")
-//    @RequestMapping(value = "",
-//            method = POST,
-//            headers = {"Content-Type=application/json"})
-//    public ResponseEntity storeLogEntry(@RequestBody AddLogEntryRequest logEntry) {
-//
-//        csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
-//        entry.setAliasIdUsed(logEntry.getAliasIdUsed());
-//        entry.setFoodId(logEntry.getFoodId());
-//        entry.setMultiplier(logEntry.getMultiplier());
-//        entry.setDay(new Date(logEntry.getDay().getTime()));
-//        entry.setMeal(logEntry.getMeal());
-//        logEntryRepository.insertLogEntry(entry);
-//
-//        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-//    }
+    @ApiOperation(value = "Store new logentry")
+    @RequestMapping(value = "",
+            method = POST,
+            headers = {"Content-Type=application/json"})
+    public ResponseEntity storeLogEntry(@RequestBody AddLogEntryRequest logEntry) {
+
+        csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
+        entry.setPortionId(logEntry.getPortionId());
+        entry.setFoodId(logEntry.getFoodId());
+        entry.setMultiplier(logEntry.getMultiplier());
+        entry.setDay(new Date(logEntry.getDay().getTime()));
+        entry.setMeal(logEntry.getMeal());
+        logEntryRepository.insertLogEntry(entry);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
 }

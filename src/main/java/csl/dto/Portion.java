@@ -14,6 +14,8 @@ public class Portion {
     private Double unitMultiplier;
     @ApiModelProperty(notes = "bord oid",required=true, example = "bord")
     private String description;
+    private Macro calculatedMacros;
+
 
     public Double getGrams() {
         return grams;
@@ -55,5 +57,13 @@ public class Portion {
     }
 
     public Portion() {
+    }
+
+    public Macro getCalculatedMacros() {
+        return calculatedMacros;
+    }
+
+    public void setCalculatedMacros(Macro calculatedMacros) {
+        this.calculatedMacros = calculatedMacros;
     }
 }

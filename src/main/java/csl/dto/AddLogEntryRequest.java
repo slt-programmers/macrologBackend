@@ -1,7 +1,6 @@
 package csl.dto;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.joda.time.DateTime;
 
 import java.util.Date;
 
@@ -12,8 +11,8 @@ public class AddLogEntryRequest {
 
     @ApiModelProperty(notes = "Defines what food has been eaten",required=true,example = "5")
     private Long foodId;
-    @ApiModelProperty(notes = "MeasurementUnit ID. If left omitted the default measurement of the food will be used",required=false,example = "3")
-    private Long aliasIdUsed;
+    @ApiModelProperty(notes = "Portion used. If null default food entry has been used",required=false,example = "3")
+    private Long portionId;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
     @ApiModelProperty(notes = "Time of log",required=true)
@@ -30,12 +29,12 @@ public class AddLogEntryRequest {
         this.foodId = foodId;
     }
 
-    public Long getAliasIdUsed() {
-        return aliasIdUsed;
+    public Long getPortionId() {
+        return portionId;
     }
 
-    public void setAliasIdUsed(Long aliasIdUsed) {
-        this.aliasIdUsed = aliasIdUsed;
+    public void setPortionId(Long portionId) {
+        this.portionId = portionId;
     }
 
     public Double getMultiplier() {
