@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping("/settings")
@@ -21,12 +21,12 @@ public class SettingsService {
 
     private SettingsRepository settingsRepo = new SettingsRepository();
 
-    @ApiOperation(value = "Store new setting")
+    @ApiOperation(value = "Store new setting or change existing one")
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
-            method = POST,
+            method = PUT,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity addSetting(@RequestBody Setting setting) {
+    public ResponseEntity changeSetting(@RequestBody Setting setting) {
         settingsRepo.insertSetting(setting.getName(), setting.getValue());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
