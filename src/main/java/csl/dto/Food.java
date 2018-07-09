@@ -1,10 +1,12 @@
 package csl.dto;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import csl.enums.MeasurementUnit;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Food {
 
     private String name;

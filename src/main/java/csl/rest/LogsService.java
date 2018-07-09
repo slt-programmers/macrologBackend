@@ -4,8 +4,10 @@ import csl.database.FoodRepository;
 import csl.database.LogEntryRepository;
 import csl.database.PortionRepository;
 import csl.database.model.Food;
+import csl.database.model.Portion;
 import csl.dto.AddLogEntryRequest;
 import csl.dto.LogEntry;
+import csl.dto.Macro;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -45,60 +47,42 @@ public class LogsService {
         List<LogEntry> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
+            LogEntry dto = new LogEntry();
             Food food = foodRepository.getFoodById(logEntry.getFoodId());
-//            FoodMacros curr = new FoodMacros();
-//            curr.setFoodId(food.getId());
-//            curr.setName(food.getName());
-//            curr.setAmountUnit(food.getMeasurementUnit().toString());
-//
-//            Macro macro = new Macro();
-//            macro.setCarbs(food.getCarbs());
-//            macro.setFat(food.getFat());
-//            macro.setProteins(food.getProtein());
-//            curr.addMacroPerUnit(food.getUnitGrams(), macro);
+            csl.dto.Food foodDto = FoodService.mapFoodToFoodDto(food);
+            dto.setFood(foodDto);
 
-//            FoodAlias foodAlias = portionRepository.getFoodAlias(logEntry.getPortionId());
-//            csl.dto.FoodAlias currDto = new csl.dto.FoodAlias();
-//            currDto.setDescription(foodAlias.getAliasname());
-//            currDto.setAmountNumber(foodAlias.getAmountNumber());
-//            currDto.setAmountUnit(foodAlias.getAmountUnit());
-//
-//            currDto.setAliasCarbs(food.getCarbs()/100 * currDto.getAmountNumber());
-//            currDto.setAliasProtein(food.getProtein()/100 * currDto.getAmountNumber());
-//            currDto.setAliasFat(food.getFat()/100 * currDto.getAmountNumber());
+            Portion portion = null;
+            if (logEntry.getPortionId()!= null && logEntry.getPortionId()!= 0){
+               portion = portionRepository.getPortion(logEntry.getPortionId());
+                csl.dto.Portion portionDto = new csl.dto.Portion();
+                portionDto.setId(portion.getId());
+                portionDto.setGrams(portion.getGrams());
+                portionDto.setDescription(portion.getDescription());
+                portionDto.setUnitMultiplier(portion.getUnitMultiplier());
+                Macro calculatedMacros = FoodService.calculateMacro(food, portion);
+                portionDto.setMacros(calculatedMacros);
+                dto.setPortion(portionDto);
+            }
+            Double multiplier = logEntry.getMultiplier();
+            dto.setMultiplier(multiplier);
+            dto.setDay(logEntry.getDay());
+            dto.setMeal(logEntry.getMeal());
 
-//            LogEntry dto = new LogEntry();
-//            dto.setFoodId(curr.getFoodId());
-//            dto.setFoodName(curr.getName());
-//            dto.setFoodAlias(currDto);
-//            Double multiplier = logEntry.getMultiplier();
-//            dto.setMultiplier(multiplier);
-//            dto.setDay(logEntry.getDay());
-//            dto.setMeal(logEntry.getMeal());
-//
-//            Macro macrosCalculated = new Macro();
-//            if (foodAlias != null){
-//                Double defaultProtein = (foodAlias.getAmountNumber()* food.getProtein())/food.getUnitGrams();
-//                Double defaultFat = (foodAlias.getAmountNumber() * food.getFat())/food.getUnitGrams();
-//                Double defaultCarbs = (foodAlias.getAmountNumber() * food.getCarbs())/food.getUnitGrams();
-//                macrosCalculated.setCarbs(multiplier * defaultCarbs);
-//                macrosCalculated.setFat(multiplier * defaultFat);
-//                macrosCalculated.setProteins(multiplier * defaultProtein);
-//
-//            } else {
-//                macrosCalculated.setCarbs(multiplier * food.getCarbs());
-//                macrosCalculated.setFat(multiplier * food.getFat());
-//                macrosCalculated.setProteins(multiplier * food.getProtein());
-//            }
-//            dto.setMacrosCalculated(macrosCalculated);
-//
-//
+            Macro macrosCalculated = new Macro();
+            if (portion!= null){
+                macrosCalculated = dto.getPortion().getMacros().clone();
+                macrosCalculated.multiply(multiplier);
+
+            } else {
+                macrosCalculated.setCarbs(multiplier * food.getCarbs());
+                macrosCalculated.setFat(multiplier * food.getFat());
+                macrosCalculated.setProteins(multiplier * food.getProtein());
+            }
+            dto.setMacrosCalculated(macrosCalculated);
+
+            allDtos.add(dto);
         }
-//            allDtos.add(dto);
-//
-//        }
-
-
         return ResponseEntity.ok(allDtos);
 
 

@@ -46,4 +46,18 @@ public class Macro {
     public void setCarbs(Double carbs) {
         this.carbs = carbs;
     }
+
+    public void multiply(Double multiplier) {
+        this.proteins = this.proteins * multiplier;
+        this.fat = this.fat * multiplier;
+        this.carbs = this.carbs * multiplier;
+    }
+    public Macro clone(){
+        Macro clone = new Macro();
+        clone.setFat(fat);
+        clone.setCarbs(carbs);
+        clone.setProteins(proteins);
+
+        return clone;
+    }
 }

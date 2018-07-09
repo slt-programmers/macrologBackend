@@ -1,10 +1,12 @@
 package csl.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Created by Carmen on 6-7-2018.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Portion {
 
     private Long id;
@@ -14,7 +16,7 @@ public class Portion {
     private Double unitMultiplier;
     @ApiModelProperty(notes = "bord oid",required=true, example = "bord")
     private String description;
-    private Macro calculatedMacros;
+    private Macro macros;
 
 
     public Double getGrams() {
@@ -59,11 +61,11 @@ public class Portion {
     public Portion() {
     }
 
-    public Macro getCalculatedMacros() {
-        return calculatedMacros;
+    public Macro getMacros() {
+        return macros;
     }
 
-    public void setCalculatedMacros(Macro calculatedMacros) {
-        this.calculatedMacros = calculatedMacros;
+    public void setMacros(Macro macros) {
+        this.macros = macros;
     }
 }

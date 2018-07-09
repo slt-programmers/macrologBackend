@@ -100,10 +100,15 @@ public class PortionRepository {
 
         @Override
         public Portion mapRow(ResultSet rs, int i) throws SQLException {
+            double grams = rs.getDouble(COL_GRAMS);
+            boolean gramsWasNull = rs.wasNull();
+
+            double multiplier = rs.getDouble(COL_UNIT_MULTIPLIER);
+            boolean multiplierWasNull = rs.wasNull();
             return new Portion(rs.getLong(COL_ID),
                     rs.getString(COL_DESCRIPTION),
-                    rs.getDouble(COL_GRAMS),
-                    rs.getDouble(COL_UNIT_MULTIPLIER)
+                    gramsWasNull?null:grams,
+                    multiplierWasNull?null:multiplier
             );
         }
     }

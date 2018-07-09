@@ -1,5 +1,6 @@
 package csl.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import org.joda.time.DateTime;
 
@@ -8,10 +9,10 @@ import java.util.Date;
 /**
  * Class voor het bewaren van de macros
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LogEntry {
 
-    private String foodName;
-    private Long foodId;
+    private Food food;
     @ApiModelProperty(notes = "Portion used.")
     private Portion portion;
     private Macro macrosCalculated;
@@ -23,20 +24,12 @@ public class LogEntry {
     private String meal;
 
 
-    public String getFoodName() {
-        return foodName;
+    public Food getFood() {
+        return food;
     }
 
-    public void setFoodName(String foodName) {
-        this.foodName = foodName;
-    }
-
-    public Long getFoodId() {
-        return foodId;
-    }
-
-    public void setFoodId(Long foodId) {
-        this.foodId = foodId;
+    public void setFood(Food food) {
+        this.food = food;
     }
 
     public Portion getPortion() {
