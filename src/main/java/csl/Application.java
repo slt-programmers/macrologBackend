@@ -121,7 +121,6 @@ public class Application {
         AddLogEntryRequest logEntry3 = new AddLogEntryRequest();
         logEntry3.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry3.setFoodId(EI_ID);
-//        logEntry3.setPortionId(portionRepository.getFoodAlias(EI_ID, EI_STUK).getAliasId());
         logEntry3.setMultiplier(4.0);
         logEntry3.setMeal("LUNCH");
         logService.storeLogEntry(logEntry3);
@@ -139,7 +138,7 @@ public class Application {
         logEntry5.setFoodId(CALVE_PINDAKAAS_FOOD_ID);
         logEntry5.setPortionId(portionRepository.getPortion(CALVE_PINDAKAAS_FOOD_ID, CALVE_PINDAKAAS_BELEG_2).getId());
         logEntry5.setMultiplier(2.0);
-        logEntry5.setMeal("LUNCH");
+        logEntry5.setMeal("DINNER");
         logService.storeLogEntry(logEntry5);
     }
 
