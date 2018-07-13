@@ -77,25 +77,25 @@ public class Application {
 
 
         String MUESLI = "Jordans Muesli de luxe";
-        String MUESLI_SCHAAL = "schaal Muesli";
+        String MUESLI_SCHAAL = "schaal";
         AddFoodRequest addFoodRequest1 = createAddFoodRequest(MUESLI, MeasurementUnit.GRAMS, null, null, 9.4, 9.2, 59.3, Arrays.asList(createPortion(MUESLI_SCHAAL, null, 80)));
         foodService.addFood(addFoodRequest1);
         Long MUESLI_FOOD_ID = foodRepository.getFood(MUESLI).getId();
 
         String YOGHURT_VOL_JUMBO = "Yoghurt vol Jumbo";
-        String YOGHURT_VOL_SCHAAL = "schaal Yoghurt Vol";
+        String YOGHURT_VOL_SCHAAL = "schaal";
         AddFoodRequest addFoodRequest2 = createAddFoodRequest(YOGHURT_VOL_JUMBO, MeasurementUnit.GRAMS, null,null,4.1, 3.1, 4.2,Arrays.asList(createPortion(YOGHURT_VOL_SCHAAL, null,200)));
         foodService.addFood(addFoodRequest2);
         Long YOGHURT_FOOD_ID = foodRepository.getFood(YOGHURT_VOL_JUMBO).getId();
 
-        String CALVE_PINDAKAAS = "Calvé pindakaas";
-        String CALVE_PINDAKAAS_BELEG_2 = "2 boterhammen pindakaas beleg";
+        String CALVE_PINDAKAAS = "Calvé pindakaas beleg";
+        String CALVE_PINDAKAAS_BELEG_2 = "2 boterhammen";
         AddFoodRequest addFoodRequest3 = createAddFoodRequest(CALVE_PINDAKAAS, MeasurementUnit.GRAMS, null,null,20, 55, 15,Arrays.asList(createPortion(CALVE_PINDAKAAS_BELEG_2, null,20)));
         foodService.addFood(addFoodRequest3);
         Long CALVE_PINDAKAAS_FOOD_ID = foodRepository.getFood(CALVE_PINDAKAAS).getId();
 
         String EI = "Ei hardgekookt";
-        String EI_STUK = "ei";
+        String EI_STUK = "stuk";
         AddFoodRequest addFoodRequest4 = createAddFoodRequest(EI, MeasurementUnit.UNIT, EI_STUK, 58.0, 12.3, 9.1, 0.2,null);
         foodService.addFood(addFoodRequest4);
 //        aliasRequest = createPortion(EI_STUK, 58.0, "gram");
@@ -109,6 +109,13 @@ public class Application {
         logEntry1.setMultiplier(1.0);
         logEntry1.setMeal("BREAKFAST");
         logService.storeLogEntry(logEntry1);
+
+        AddLogEntryRequest logEntry1b = new AddLogEntryRequest();
+        logEntry1b.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
+        logEntry1b.setFoodId(MUESLI_FOOD_ID);
+        logEntry1b.setMultiplier(0.6);
+        logEntry1b.setMeal("BREAKFAST");
+        logService.storeLogEntry(logEntry1b);
 
         AddLogEntryRequest logEntry2 = new AddLogEntryRequest();
         logEntry2.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());

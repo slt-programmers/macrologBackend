@@ -85,6 +85,7 @@ public class FoodService {
     public static  csl.dto.Food mapFoodToFoodDto(Food food) {
         csl.dto.Food foodDto = new csl.dto.Food();
         foodDto.setName(food.getName());
+        foodDto.setId(food.getId());
         foodDto.setMeasurementUnit(food.getMeasurementUnit());
         foodDto.setUnitGrams(food.getUnitGrams());
         foodDto.setUnitName(food.getUnitName());
@@ -100,12 +101,12 @@ public class FoodService {
         if (food.getMeasurementUnit().equals(MeasurementUnit.GRAMS)) {
             // Food has been entered for 100g
                 calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
-            calculatedMacros.setProteins(food.getProtein() / 100 * portion.getGrams());
+            calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
             calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
         } else {
             // Food has been entered per unit
             calculatedMacros.setCarbs(food.getCarbs()  * portion.getUnitMultiplier());
-            calculatedMacros.setProteins(food.getProtein()  * portion.getUnitMultiplier());
+            calculatedMacros.setProtein(food.getProtein()  * portion.getUnitMultiplier());
             calculatedMacros.setFat(food.getFat() * portion.getUnitMultiplier());
         }
         return calculatedMacros;
@@ -130,7 +131,7 @@ public class FoodService {
                 newFood.setUnitName(addFoodRequest.getUnitName());
             } else {
                 newFood.setUnitGrams(100.0);
-                newFood.setUnitName("grams");
+                newFood.setUnitName("gram");
             }
 
             newFood.setCarbs(addFoodRequest.getCarbs());
