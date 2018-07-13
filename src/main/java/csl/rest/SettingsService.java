@@ -27,7 +27,7 @@ public class SettingsService {
             method = PUT,
             headers = {"Content-Type=application/json"})
     public ResponseEntity changeSetting(@RequestBody Setting setting) {
-        settingsRepo.insertSetting(setting.getName(), setting.getValue());
+        settingsRepo.putSetting(setting.getName(), setting.getValue());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

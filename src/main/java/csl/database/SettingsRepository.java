@@ -31,10 +31,29 @@ public class SettingsRepository {
     private static final String SELECT_SQL = "select * from settings";
     private static final String INSERT_SQL = "insert into settings(" +
             "setting, value) values(:setting, :value)";
+    private static final String UPDATE_SQL = "UPDATE settings SET value = :value where setting = :setting";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
     public SettingsRepository() {
+    }
+
+    public int putSetting(String setting, String value) {
+        if (getSetting(setting) == null) {
+            System.out.println("Insert");
+            return insertSetting(setting, value);
+        } else {
+            System.out.println("Update");
+            return updateSetting(setting, value);
+        }
+    }
+
+    private int updateSetting(String setting, String value) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", null)
+                .addValue("setting", setting)
+                .addValue("value", value);
+        return template.update(UPDATE_SQL, params);
     }
 
     public int insertSetting(String setting, String value) {

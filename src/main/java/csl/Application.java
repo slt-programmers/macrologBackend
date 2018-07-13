@@ -33,8 +33,8 @@ public class Application {
         SpringApplication.run(Application.class, args);
 
         //DEV/TEST purposes
-        boolean fillTablesOnStartup = true;
-        boolean clearTablesOnStartup = true;
+        boolean fillTablesOnStartup = false;
+        boolean clearTablesOnStartup = false;
 
         if (clearTablesOnStartup) {
             deleteTables();
@@ -232,6 +232,6 @@ public class Application {
                 return resultSet.getString("TABLE_NAME");
             }
         });
-        return results.size() == 3;
+        return results.size() == 4;
     }
 }
