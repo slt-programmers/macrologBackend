@@ -77,7 +77,7 @@ public class LogsService {
             } else {
                 macrosCalculated.setCarbs(multiplier * food.getCarbs());
                 macrosCalculated.setFat(multiplier * food.getFat());
-                macrosCalculated.setProteins(multiplier * food.getProtein());
+                macrosCalculated.setProtein(multiplier * food.getProtein());
             }
             dto.setMacrosCalculated(macrosCalculated);
 

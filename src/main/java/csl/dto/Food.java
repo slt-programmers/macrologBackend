@@ -9,6 +9,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Food {
 
+    private Long id;
     private String name;
     @ApiModelProperty(notes = "Unit van foodrequest. Of GRAMS of UNIT",required=true, example = "GRAMS")
     private MeasurementUnit measurementUnit;
@@ -85,10 +86,18 @@ public class Food {
         this.portions = portions;
     }
 
-    public void addPortion(csl.dto.Portion currDto) {
+    public void addPortion(Portion currDto) {
         if (portions == null){
             portions = new ArrayList<>();
         }
         portions.add(currDto);
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
