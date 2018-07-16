@@ -40,6 +40,12 @@ public class LogEntryRepository {
     public static final String TABLE_DELETE =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
+    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,portion_Id,multiplier,day,meal) values(:foodId,:portionId,:multiplier,:day,:meal)";
+    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id";
+    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+
+
     public int insertLogEntry(LogEntry entry) {
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -52,9 +58,19 @@ public class LogEntryRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,portion_Id,multiplier,day,meal) values(:foodId,:portionId,:multiplier,:day,:meal)";
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    public int updateLogEntry(LogEntry entry) {
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", entry.getId())
+                .addValue("foodId", entry.getFoodId())
+                .addValue("portionId", entry.getPortionId())
+                .addValue("multiplier", entry.getMultiplier())
+                .addValue("day", entry.getDay())
+                .addValue("meal", entry.getMeal());
+        return template.update(UPDATE_SQL, params);
+    }
+
+
 
 
     public List<LogEntry> getAllLogEntries() {

@@ -2,7 +2,7 @@ package csl;
 
 import csl.database.*;
 import csl.dto.AddFoodRequest;
-import csl.dto.AddLogEntryRequest;
+import csl.dto.StoreLogEntryRequest;
 import csl.dto.Portion;
 import csl.enums.MeasurementUnit;
 import csl.rest.FoodService;
@@ -33,8 +33,8 @@ public class Application {
         SpringApplication.run(Application.class, args);
 
         //DEV/TEST purposes
-        boolean fillTablesOnStartup = false;
-        boolean clearTablesOnStartup = false;
+        boolean fillTablesOnStartup = true;
+        boolean clearTablesOnStartup = true;
 
         if (clearTablesOnStartup) {
             deleteTables();
@@ -102,7 +102,7 @@ public class Application {
         Long EI_ID = foodRepository.getFood(EI).getId();
 //        foodService.addPortion(EI_ID, aliasRequest);
 //
-        AddLogEntryRequest logEntry1 = new AddLogEntryRequest();
+        StoreLogEntryRequest logEntry1 = new StoreLogEntryRequest();
         logEntry1.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry1.setFoodId(MUESLI_FOOD_ID);
         logEntry1.setPortionId(portionRepository.getPortion(MUESLI_FOOD_ID, MUESLI_SCHAAL).getId());
@@ -110,14 +110,14 @@ public class Application {
         logEntry1.setMeal("BREAKFAST");
         logService.storeLogEntry(logEntry1);
 
-        AddLogEntryRequest logEntry1b = new AddLogEntryRequest();
+        StoreLogEntryRequest logEntry1b = new StoreLogEntryRequest();
         logEntry1b.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry1b.setFoodId(MUESLI_FOOD_ID);
         logEntry1b.setMultiplier(0.6);
         logEntry1b.setMeal("BREAKFAST");
         logService.storeLogEntry(logEntry1b);
 
-        AddLogEntryRequest logEntry2 = new AddLogEntryRequest();
+        StoreLogEntryRequest logEntry2 = new StoreLogEntryRequest();
         logEntry2.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry2.setFoodId(YOGHURT_FOOD_ID);
         logEntry2.setPortionId(portionRepository.getPortion(YOGHURT_FOOD_ID, YOGHURT_VOL_SCHAAL).getId());
@@ -125,14 +125,14 @@ public class Application {
         logEntry2.setMeal("BREAKFAST");
         logService.storeLogEntry(logEntry2);
 
-        AddLogEntryRequest logEntry3 = new AddLogEntryRequest();
+        StoreLogEntryRequest logEntry3 = new StoreLogEntryRequest();
         logEntry3.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry3.setFoodId(EI_ID);
         logEntry3.setMultiplier(4.0);
         logEntry3.setMeal("LUNCH");
         logService.storeLogEntry(logEntry3);
 
-        AddLogEntryRequest logEntry4 = new AddLogEntryRequest();
+        StoreLogEntryRequest logEntry4 = new StoreLogEntryRequest();
         logEntry4.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry4.setFoodId(BROOD_ID);
         logEntry4.setPortionId(portionRepository.getPortion(BROOD_ID, BROOD_SNEE).getId());
@@ -140,7 +140,7 @@ public class Application {
         logEntry4.setMeal("LUNCH");
         logService.storeLogEntry(logEntry4);
 
-        AddLogEntryRequest logEntry5 = new AddLogEntryRequest();
+        StoreLogEntryRequest logEntry5 = new StoreLogEntryRequest();
         logEntry5.setDay(new DateTime(2018, 6, 21, 7, 0).toDate());
         logEntry5.setFoodId(CALVE_PINDAKAAS_FOOD_ID);
         logEntry5.setPortionId(portionRepository.getPortion(CALVE_PINDAKAAS_FOOD_ID, CALVE_PINDAKAAS_BELEG_2).getId());

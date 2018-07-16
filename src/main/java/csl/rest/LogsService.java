@@ -5,7 +5,7 @@ import csl.database.LogEntryRepository;
 import csl.database.PortionRepository;
 import csl.database.model.Food;
 import csl.database.model.Portion;
-import csl.dto.AddLogEntryRequest;
+import csl.dto.StoreLogEntryRequest;
 import csl.dto.LogEntry;
 import csl.dto.Macro;
 import io.swagger.annotations.Api;
@@ -49,6 +49,7 @@ public class LogsService {
 
             LogEntry dto = new LogEntry();
             Food food = foodRepository.getFoodById(logEntry.getFoodId());
+            dto.setId(logEntry.getId());
             csl.dto.Food foodDto = FoodService.mapFoodToFoodDto(food);
             dto.setFood(foodDto);
 
@@ -88,11 +89,12 @@ public class LogsService {
 
     }
 
-    @ApiOperation(value = "Store new logentry")
+    @ApiOperation(value = "Store logentry")
+    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeLogEntry(@RequestBody AddLogEntryRequest logEntry) {
+    public ResponseEntity storeLogEntry(@RequestBody StoreLogEntryRequest logEntry) {
 
         csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
         entry.setPortionId(logEntry.getPortionId());
@@ -100,7 +102,13 @@ public class LogsService {
         entry.setMultiplier(logEntry.getMultiplier());
         entry.setDay(new Date(logEntry.getDay().getTime()));
         entry.setMeal(logEntry.getMeal());
-        logEntryRepository.insertLogEntry(entry);
+        entry.setId(logEntry.getId());
+        if (logEntry.getId() == null) {
+            logEntryRepository.insertLogEntry(entry);
+        } else {
+            logEntryRepository.updateLogEntry(entry);
+        }
+
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }

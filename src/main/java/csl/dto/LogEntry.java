@@ -12,6 +12,7 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LogEntry {
 
+    private Long id;
     private Food food;
     @ApiModelProperty(notes = "Portion used.")
     private Portion portion;
@@ -70,5 +71,13 @@ public class LogEntry {
 
     public void setMacrosCalculated(Macro macrosCalculated) {
         this.macrosCalculated = macrosCalculated;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
