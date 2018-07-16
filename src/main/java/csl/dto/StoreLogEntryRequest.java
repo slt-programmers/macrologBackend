@@ -7,8 +7,9 @@ import java.util.Date;
 /**
  * Class voor het bewaren van de macros
  */
-public class AddLogEntryRequest {
+public class StoreLogEntryRequest {
 
+    private Long id;
     @ApiModelProperty(notes = "Defines what food has been eaten",required=true,example = "5")
     private Long foodId;
     @ApiModelProperty(notes = "Portion used. If null default food entry has been used",required=false,example = "3")
@@ -59,5 +60,13 @@ public class AddLogEntryRequest {
 
     public void setMeal(String meal) {
         this.meal = meal;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
