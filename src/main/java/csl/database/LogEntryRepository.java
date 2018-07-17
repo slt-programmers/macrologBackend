@@ -43,11 +43,11 @@ public class LogEntryRepository {
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
     private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,portion_Id,multiplier,day,meal) values(:foodId,:portionId,:multiplier,:day,:meal)";
     private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id";
+    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id";
+
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-
     public int insertLogEntry(LogEntry entry) {
-
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("foodId", entry.getFoodId())
@@ -59,7 +59,6 @@ public class LogEntryRepository {
     }
 
     public int updateLogEntry(LogEntry entry) {
-
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", entry.getId())
                 .addValue("foodId", entry.getFoodId())
@@ -70,8 +69,11 @@ public class LogEntryRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-
-
+    public int deleteLogEntry(Long entry) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", entry);
+        return template.update(DELETE_SQL, params);
+    }
 
     public List<LogEntry> getAllLogEntries() {
         return template.query(SELECT_SQL, new LogEntryWrapper());
@@ -81,8 +83,6 @@ public class LogEntryRepository {
 
         @Override
         public Object mapRow(ResultSet rs, int i) throws SQLException {
-
-
             Date ts = rs.getDate(COL_DAY);
             return new LogEntry(rs.getLong(COL_ID),
                     rs.getLong(COL_FOOD_ID),

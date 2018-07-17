@@ -13,15 +13,13 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -111,5 +109,17 @@ public class LogsService {
 
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @ApiOperation(value = "Delete logentry")
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/{id}",
+            method = DELETE,
+            headers = {"Content-Type=application/json"})
+    public ResponseEntity storeLogEntry(@PathVariable("id") Long logEntryId) {
+
+        logEntryRepository.deleteLogEntry(logEntryId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

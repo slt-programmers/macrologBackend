@@ -33,8 +33,8 @@ public class Application {
         SpringApplication.run(Application.class, args);
 
         //DEV/TEST purposes
-        boolean fillTablesOnStartup = true;
-        boolean clearTablesOnStartup = true;
+        boolean fillTablesOnStartup = false;
+        boolean clearTablesOnStartup = false;
 
         if (clearTablesOnStartup) {
             deleteTables();
@@ -156,10 +156,6 @@ public class Application {
         portion.setGrams(grams);
         return portion;
     }
-
-//    private static AddFoodRequest createAddFoodRequest(String name, MeasurementUnit typeUnit, double protein, double fat, double carbs) {
-//        return createAddFoodRequest(name, typeUnit, null, 0.0, protein, fat, carbs, null);
-//    }
 
     private static AddFoodRequest createAddFoodRequest(String name,
                                                        MeasurementUnit typeUnit,
