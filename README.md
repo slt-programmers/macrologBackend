@@ -33,4 +33,4 @@ http://localhost:8090/swagger-ui.html
 
 Interfaces:
 Opslaan van voedsel:
-POST /food/<Naam voedsel> <-- HIERNAAR TOE REQUEST MET MACRO PER 100
+POST /foodDto/<Naam voedsel> <-- HIERNAAR TOE REQUEST MET MACRO PER 100

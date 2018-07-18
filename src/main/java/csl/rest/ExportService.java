@@ -5,21 +5,19 @@ import csl.database.LogEntryRepository;
 import csl.database.PortionRepository;
 import csl.database.SettingsRepository;
 import csl.database.model.Food;
+import csl.database.model.Setting;
 import csl.dto.*;
-import csl.enums.MeasurementUnit;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/export")
@@ -30,54 +28,52 @@ public class ExportService {
     private LogEntryRepository logEntryRepository = new LogEntryRepository();
     private SettingsRepository settingsRepo = new SettingsRepository();
 
-
-
     @ApiOperation(value = "Retrieve all stored information")
     @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAll() {
+    public ResponseEntity  getAll() {
 
         Export export = new Export();
         List<Food> allFood = foodRepository.getAllFood();
-        List<csl.dto.Food> allFoodDtos = new ArrayList<>();
+        List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
-            allFoodDtos.add(createFoodDto(food,true));
+            allFoodDtos.add(createFoodDto(food, true));
         }
-        export.setAllFood(allFoodDtos);
+        export.setAllFoodDto(allFoodDtos);
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries();
 
-        List<LogEntry> allDtos = new ArrayList<>();
+        List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
-            LogEntry dto = new LogEntry();
+            LogEntryDto logEntryDto = new LogEntryDto();
             Food food = foodRepository.getFoodById(logEntry.getFoodId());
-            dto.setId(logEntry.getId());
-            csl.dto.Food foodDto = FoodService.mapFoodToFoodDto(food);
-            dto.setFood(foodDto);
+            logEntryDto.setId(logEntry.getId());
+            FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
+            logEntryDto.setFoodDto(foodDto);
 
             csl.database.model.Portion portion = null;
-            if (logEntry.getPortionId()!= null && logEntry.getPortionId()!= 0){
+            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
                 portion = portionRepository.getPortion(logEntry.getPortionId());
-                csl.dto.Portion portionDto = new csl.dto.Portion();
+                PortionDto portionDto = new PortionDto();
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
                 portionDto.setDescription(portion.getDescription());
                 portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
-                dto.setPortion(portionDto);
+                logEntryDto.setPortionDto(portionDto);
             }
             Double multiplier = logEntry.getMultiplier();
-            dto.setMultiplier(multiplier);
-            dto.setDay(logEntry.getDay());
-            dto.setMeal(logEntry.getMeal());
+            logEntryDto.setMultiplier(multiplier);
+            logEntryDto.setDay(logEntry.getDay());
+            logEntryDto.setMeal(logEntry.getMeal());
 
             Macro macrosCalculated = new Macro();
-            if (portion!= null){
-                macrosCalculated = dto.getPortion().getMacros().clone();
+            if (portion != null) {
+                macrosCalculated = logEntryDto.getPortionDto().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
             } else {
@@ -85,9 +81,9 @@ public class ExportService {
                 macrosCalculated.setFat(multiplier * food.getFat());
                 macrosCalculated.setProtein(multiplier * food.getProtein());
             }
-            dto.setMacrosCalculated(macrosCalculated);
+            logEntryDto.setMacrosCalculated(macrosCalculated);
 
-            allDtos.add(dto);
+            allDtos.add(logEntryDto);
         }
 
         export.setAllLogEntries(allDtos);
@@ -96,17 +92,16 @@ public class ExportService {
         export.setAllSettings(settings);
 
 
-
         return ResponseEntity.ok(export);
     }
 
-    public csl.dto.Food createFoodDto(Food food, boolean withPortions) {
-        csl.dto.Food foodDto = mapFoodToFoodDto(food);
+    public FoodDto createFoodDto(Food food, boolean withPortions) {
+        FoodDto foodDto = mapFoodToFoodDto(food);
 
         if (withPortions) {
             List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
             for (csl.database.model.Portion portion : foodPortions) {
-                Portion currDto = new Portion();
+                PortionDto currDto = new PortionDto();
                 currDto.setDescription(portion.getDescription());
                 currDto.setGrams(portion.getGrams());
                 currDto.setUnitMultiplier(portion.getUnitMultiplier());
@@ -119,8 +114,8 @@ public class ExportService {
     }
 
 
-    public static  csl.dto.Food mapFoodToFoodDto(Food food) {
-        csl.dto.Food foodDto = new csl.dto.Food();
+    public static FoodDto mapFoodToFoodDto(Food food) {
+        FoodDto foodDto = new FoodDto();
         foodDto.setName(food.getName());
         foodDto.setId(food.getId());
         foodDto.setMeasurementUnit(food.getMeasurementUnit());

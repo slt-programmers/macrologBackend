@@ -2,9 +2,6 @@ package csl.database.model;
 
 import csl.enums.MeasurementUnit;
 
-/**
- * Created by Carmen on 18-3-2018.
- */
 public class Food {
 
     private Long id;
@@ -16,7 +13,8 @@ public class Food {
     private String unitName;
     private Double unitGrams;
 
-    public Food() {}
+    public Food() {
+    }
 
     public Food(Long id,
                 String name,
@@ -122,7 +120,7 @@ public class Food {
 
     @Override
     public String toString() {
-        return "Food{" +
+        return "FoodDto{" +
                 "name='" + name + '\'' +
                 '}';
     }

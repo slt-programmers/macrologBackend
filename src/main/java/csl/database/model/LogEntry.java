@@ -2,9 +2,6 @@ package csl.database.model;
 
 import java.sql.Date;
 
-/**
- * Created by Carmen on 18-3-2018.
- */
 public class LogEntry {
 
     private Long id;
@@ -13,6 +10,18 @@ public class LogEntry {
     private Double multiplier;
     private Date day;
     private String meal;
+
+    public LogEntry() {
+    }
+
+    public LogEntry(Long id, Long foodId, Long portionId, Double multiplier, Date day, String meal) {
+        this.id = id;
+        this.foodId = foodId;
+        this.portionId = portionId;
+        this.multiplier = multiplier;
+        this.day = day;
+        this.meal = meal;
+    }
 
     public Date getDay() {
         return day;
@@ -28,18 +37,6 @@ public class LogEntry {
 
     public void setMeal(String meal) {
         this.meal = meal;
-    }
-
-    public LogEntry() {
-    }
-
-    public LogEntry(Long id, Long foodId, Long portionId, Double multiplier, Date day, String meal) {
-        this.id = id;
-        this.foodId = foodId;
-        this.portionId = portionId;
-        this.multiplier = multiplier;
-        this.day = day;
-        this.meal=meal;
     }
 
     public Long getId() {

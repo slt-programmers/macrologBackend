@@ -16,7 +16,7 @@ public class AddFoodRequest {
     private Double protein;
     private Double fat;
     private Double carbs;
-    private List<Portion> portions;
+    private List<PortionDto> portionDtos;
 
     public String getName() {
         return name;
@@ -74,11 +74,11 @@ public class AddFoodRequest {
         this.carbs = carbs;
     }
 
-    public List<Portion> getPortions() {
-        return portions;
+    public List<PortionDto> getPortionDtos() {
+        return portionDtos;
     }
 
-    public void setPortions(List<Portion> portions) {
-        this.portions = portions;
+    public void setPortionDtos(List<PortionDto> portionDtos) {
+        this.portionDtos = portionDtos;
     }
 }

@@ -1,28 +1,27 @@
 package csl.dto;
-import csl.enums.MeasurementUnit;
-import io.swagger.annotations.ApiModelProperty;
+import csl.database.model.Setting;
 
 import java.util.List;
 
 public class Export {
 
-    public List<Food> allFood;
-    public List<LogEntry> allLogEntries;
-    public List<Setting> allSettings;
+    private List<FoodDto> allFoodDto;
+    private List<LogEntryDto> allLogEntries;
+    private List<Setting> allSettings;
 
-    public List<Food> getAllFood() {
-        return allFood;
+    public List<FoodDto> getAllFoodDto() {
+        return allFoodDto;
     }
 
-    public void setAllFood(List<Food> allFood) {
-        this.allFood = allFood;
+    public void setAllFoodDto(List<FoodDto> allFoodDto) {
+        this.allFoodDto = allFoodDto;
     }
 
-    public List<LogEntry> getAllLogEntries() {
+    public List<LogEntryDto> getAllLogEntries() {
         return allLogEntries;
     }
 
-    public void setAllLogEntries(List<LogEntry> allLogEntries) {
+    public void setAllLogEntries(List<LogEntryDto> allLogEntries) {
         this.allLogEntries = allLogEntries;
     }
 
@@ -33,4 +32,5 @@ public class Export {
     public void setAllSettings(List<Setting> allSettings) {
         this.allSettings = allSettings;
     }
+
 }

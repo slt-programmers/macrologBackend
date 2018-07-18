@@ -49,7 +49,7 @@ public class PortionRepository {
 
     }
 
-//    public List<Portion> getAllPortions() {
+//    public List<PortionDto> getAllPortions() {
 //        return template.query(SELECT_SQL, new PortionWrapper());
 //    }
 
@@ -62,14 +62,6 @@ public class PortionRepository {
                 .addValue("grams", portion.getGrams());
         return template.update(INSERT_SQL, params);
     }
-
-//    public List<Portion> getPortion(String name) {
-//        SqlParameterSource params = new MapSqlParameterSource()
-//                .addValue("aliasname", name);
-//        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_DESCRIPTION + "= :aliasname";
-//        List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper());
-//        return queryResults;
-//    }
 
     public Portion getPortion(Long portionId) {
         SqlParameterSource params = new MapSqlParameterSource()
@@ -97,7 +89,6 @@ public class PortionRepository {
     }
 
     class PortionWrapper implements RowMapper {
-
         @Override
         public Portion mapRow(ResultSet rs, int i) throws SQLException {
             double grams = rs.getDouble(COL_GRAMS);

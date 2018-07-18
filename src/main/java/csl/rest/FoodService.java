@@ -4,8 +4,9 @@ import csl.database.FoodRepository;
 import csl.database.PortionRepository;
 import csl.database.model.Food;
 import csl.dto.AddFoodRequest;
+import csl.dto.FoodDto;
 import csl.dto.Macro;
-import csl.dto.Portion;
+import csl.dto.PortionDto;
 import csl.enums.MeasurementUnit;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,7 +38,7 @@ public class FoodService {
     public ResponseEntity getAllFood() {
 
         List<Food> allFood = foodRepository.getAllFood();
-        List<csl.dto.Food> allFoodDtos = new ArrayList<>();
+        List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food,true));
         }
@@ -56,19 +57,19 @@ public class FoodService {
         if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
-            csl.dto.Food foodDto = createFoodDto(food,true);
+            FoodDto foodDto = createFoodDto(food,true);
 
             return ResponseEntity.ok(foodDto);
         }
     }
 
-    public csl.dto.Food createFoodDto(Food food, boolean withPortions) {
-        csl.dto.Food foodDto = mapFoodToFoodDto(food);
+    public FoodDto createFoodDto(Food food, boolean withPortions) {
+        FoodDto foodDto = mapFoodToFoodDto(food);
 
         if (withPortions) {
             List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
             for (csl.database.model.Portion portion : foodPortions) {
-                Portion currDto = new Portion();
+                PortionDto currDto = new PortionDto();
                 currDto.setDescription(portion.getDescription());
                 currDto.setGrams(portion.getGrams());
                 currDto.setUnitMultiplier(portion.getUnitMultiplier());
@@ -82,8 +83,8 @@ public class FoodService {
         return foodDto;
     }
 
-    public static  csl.dto.Food mapFoodToFoodDto(Food food) {
-        csl.dto.Food foodDto = new csl.dto.Food();
+    public static FoodDto mapFoodToFoodDto(Food food) {
+        FoodDto foodDto = new FoodDto();
         foodDto.setName(food.getName());
         foodDto.setId(food.getId());
         foodDto.setMeasurementUnit(food.getMeasurementUnit());
@@ -99,12 +100,12 @@ public class FoodService {
     public static Macro calculateMacro(Food food, csl.database.model.Portion portion) {
         Macro calculatedMacros = new Macro();
         if (food.getMeasurementUnit().equals(MeasurementUnit.GRAMS)) {
-            // Food has been entered for 100g
+            // FoodDto has been entered for 100g
                 calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
             calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
             calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
         } else {
-            // Food has been entered per unit
+            // FoodDto has been entered per unit
             calculatedMacros.setCarbs(food.getCarbs()  * portion.getUnitMultiplier());
             calculatedMacros.setProtein(food.getProtein()  * portion.getUnitMultiplier());
             calculatedMacros.setFat(food.getFat() * portion.getUnitMultiplier());
@@ -139,9 +140,9 @@ public class FoodService {
             newFood.setProtein(addFoodRequest.getProtein());
 
             int insertedRows = foodRepository.insertFood(newFood);
-            if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
+            if (insertedRows == 1 && addFoodRequest.getPortionDtos() != null && !addFoodRequest.getPortionDtos().isEmpty()) {
                 Food addedFood = foodRepository.getFood(addFoodRequest.getName());
-                for (Portion portionDto : addFoodRequest.getPortions()) {
+                for (PortionDto portionDto : addFoodRequest.getPortionDtos()) {
                     csl.database.model.Portion newPortion = new csl.database.model.Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
@@ -161,7 +162,7 @@ public class FoodService {
 //            headers = {"Content-Type=application/json"})
 //    public ResponseEntity addPortion(@PathVariable("id") Long foodId,
 //                                     @RequestBody AddPortionRequest addUnitAliasRequest) throws URISyntaxException {
-//        Food food = foodRepository.getFoodById(foodId);
+//        FoodDto food = foodRepository.getFoodById(foodId);
 //        if (food == null) {
 //            return ResponseEntity.badRequest().build();
 //        } else {

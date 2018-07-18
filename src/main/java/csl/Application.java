@@ -3,7 +3,7 @@ package csl;
 import csl.database.*;
 import csl.dto.AddFoodRequest;
 import csl.dto.StoreLogEntryRequest;
-import csl.dto.Portion;
+import csl.dto.PortionDto;
 import csl.enums.MeasurementUnit;
 import csl.rest.FoodService;
 import csl.rest.LogsService;
@@ -149,12 +149,12 @@ public class Application {
         logService.storeLogEntry(logEntry5);
     }
 
-    private static csl.dto.Portion createPortion(String description, Double unitMultiplier, double grams) {
-        csl.dto.Portion portion = new csl.dto.Portion();
-        portion.setDescription(description);
-        portion.setUnitMultiplier(unitMultiplier);
-        portion.setGrams(grams);
-        return portion;
+    private static PortionDto createPortion(String description, Double unitMultiplier, double grams) {
+        PortionDto portionDto = new PortionDto();
+        portionDto.setDescription(description);
+        portionDto.setUnitMultiplier(unitMultiplier);
+        portionDto.setGrams(grams);
+        return portionDto;
     }
 
     private static AddFoodRequest createAddFoodRequest(String name,
@@ -164,7 +164,7 @@ public class Application {
                                                        double protein,
                                                        double fat,
                                                        double carbs,
-                                                       List<Portion> portions) {
+                                                       List<PortionDto> portionDtos) {
         AddFoodRequest foodRequest = new AddFoodRequest();
         foodRequest.setName(name);
         foodRequest.setMeasurementUnit(typeUnit);
@@ -173,7 +173,7 @@ public class Application {
         foodRequest.setProtein(protein);
         foodRequest.setFat(fat);
         foodRequest.setCarbs(carbs);
-        foodRequest.setPortions(portions);
+        foodRequest.setPortionDtos(portionDtos);
         return foodRequest;
     }
 

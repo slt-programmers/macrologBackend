@@ -1,6 +1,6 @@
 package csl.database;
 
-import csl.dto.Setting;
+import csl.database.model.Setting;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,9 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Created by Carmen on 18-3-2018.
- */
 @Repository
 public class SettingsRepository {
     public static final String TABLE_NAME = "settings";

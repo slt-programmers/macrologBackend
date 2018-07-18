@@ -2,7 +2,6 @@ package csl.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
-import org.joda.time.DateTime;
 
 import java.util.Date;
 
@@ -10,12 +9,12 @@ import java.util.Date;
  * Class voor het bewaren van de macros
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LogEntry {
+public class LogEntryDto {
 
     private Long id;
-    private Food food;
-    @ApiModelProperty(notes = "Portion used.")
-    private Portion portion;
+    private FoodDto foodDto;
+    @ApiModelProperty(notes = "PortionDto used.")
+    private PortionDto portionDto;
     private Macro macrosCalculated;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
@@ -25,20 +24,20 @@ public class LogEntry {
     private String meal;
 
 
-    public Food getFood() {
-        return food;
+    public FoodDto getFoodDto() {
+        return foodDto;
     }
 
-    public void setFood(Food food) {
-        this.food = food;
+    public void setFoodDto(FoodDto foodDto) {
+        this.foodDto = foodDto;
     }
 
-    public Portion getPortion() {
-        return portion;
+    public PortionDto getPortionDto() {
+        return portionDto;
     }
 
-    public void setPortion(Portion portion) {
-        this.portion = portion;
+    public void setPortionDto(PortionDto portionDto) {
+        this.portionDto = portionDto;
     }
 
     public Double getMultiplier() {

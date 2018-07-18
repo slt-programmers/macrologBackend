@@ -12,7 +12,7 @@ public class StoreLogEntryRequest {
     private Long id;
     @ApiModelProperty(notes = "Defines what food has been eaten",required=true,example = "5")
     private Long foodId;
-    @ApiModelProperty(notes = "Portion used. If null default food entry has been used",required=false,example = "3")
+    @ApiModelProperty(notes = "PortionDto used. If null default food entry has been used",required=false,example = "3")
     private Long portionId;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;

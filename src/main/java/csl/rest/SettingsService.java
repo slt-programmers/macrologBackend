@@ -1,7 +1,7 @@
 package csl.rest;
 
 import csl.database.SettingsRepository;
-import csl.dto.Setting;
+import csl.database.model.Setting;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Food {
+public class FoodDto {
 
     private Long id;
     private String name;
@@ -20,7 +20,7 @@ public class Food {
     private Double protein;
     private Double fat;
     private Double carbs;
-    private List<Portion> portions;
+    private List<PortionDto> portionDtos;
 
     public String getName() {
         return name;
@@ -78,19 +78,19 @@ public class Food {
         this.carbs = carbs;
     }
 
-    public List<Portion> getPortions() {
-        return portions;
+    public List<PortionDto> getPortionDtos() {
+        return portionDtos;
     }
 
-    public void setPortions(List<Portion> portions) {
-        this.portions = portions;
+    public void setPortionDtos(List<PortionDto> portionDtos) {
+        this.portionDtos = portionDtos;
     }
 
-    public void addPortion(Portion currDto) {
-        if (portions == null){
-            portions = new ArrayList<>();
+    public void addPortion(PortionDto currDto) {
+        if (portionDtos == null){
+            portionDtos = new ArrayList<>();
         }
-        portions.add(currDto);
+        portionDtos.add(currDto);
     }
 
     public void setId(Long id) {

@@ -8,12 +8,22 @@ import io.swagger.annotations.ApiModelProperty;
 public class Portion {
 
     private Long id;
-    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram",required=false, example = "100.0")
+    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram", required = false, example = "100.0")
     private Double grams;
-    @ApiModelProperty(notes = "als je op food niveau unitMultiplier hebt gekozen. dan is dit aantal malen dat food",required=false, example = "1.2")
+    @ApiModelProperty(notes = "als je op food niveau unitMultiplier hebt gekozen. dan is dit aantal malen dat food", required = false, example = "1.2")
     private Double unitMultiplier;
-    @ApiModelProperty(notes = "bord oid",required=true, example = "bord")
+    @ApiModelProperty(notes = "bord oid", required = true, example = "bord")
     private String description;
+
+    public Portion(Long id, String description, Double grams, Double unitMultiplier) {
+        this.id = id;
+        this.description = description;
+        this.grams = grams;
+        this.unitMultiplier = unitMultiplier;
+    }
+
+    public Portion() {
+    }
 
     public Double getGrams() {
         return grams;
@@ -45,15 +55,5 @@ public class Portion {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Portion(Long id, String description,Double grams, Double unitMultiplier) {
-        this.id = id;
-        this.description = description;
-        this.grams = grams;
-        this.unitMultiplier = unitMultiplier;
-    }
-
-    public Portion() {
     }
 }

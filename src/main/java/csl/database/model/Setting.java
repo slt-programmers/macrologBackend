@@ -1,4 +1,4 @@
-package csl.dto;
+package csl.database.model;
 
 public class Setting {
 

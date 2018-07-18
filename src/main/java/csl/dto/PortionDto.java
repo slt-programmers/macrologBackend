@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Carmen on 6-7-2018.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Portion {
+public class PortionDto {
 
     private Long id;
     @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram",required=false, example = "100.0")
@@ -51,14 +51,14 @@ public class Portion {
         this.id = id;
     }
 
-    public Portion(Long id, String description, Double grams, Double unitMultiplier) {
+    public PortionDto(Long id, String description, Double grams, Double unitMultiplier) {
         this.id = id;
         this.description = description;
         this.grams = grams;
         this.unitMultiplier = unitMultiplier;
     }
 
-    public Portion() {
+    public PortionDto() {
     }
 
     public Macro getMacros() {
