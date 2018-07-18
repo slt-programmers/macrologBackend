@@ -173,7 +173,7 @@ public class Application {
         foodRequest.setProtein(protein);
         foodRequest.setFat(fat);
         foodRequest.setCarbs(carbs);
-        foodRequest.setPortionDtos(portionDtos);
+        foodRequest.setPortions(portionDtos);
         return foodRequest;
     }
 

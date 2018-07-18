@@ -140,9 +140,9 @@ public class FoodService {
             newFood.setProtein(addFoodRequest.getProtein());
 
             int insertedRows = foodRepository.insertFood(newFood);
-            if (insertedRows == 1 && addFoodRequest.getPortionDtos() != null && !addFoodRequest.getPortionDtos().isEmpty()) {
+            if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
                 Food addedFood = foodRepository.getFood(addFoodRequest.getName());
-                for (PortionDto portionDto : addFoodRequest.getPortionDtos()) {
+                for (PortionDto portionDto : addFoodRequest.getPortions()) {
                     csl.database.model.Portion newPortion = new csl.database.model.Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());

@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.rmi.runtime.Log;
 
 import java.net.URISyntaxException;
-import java.util.Date;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -44,14 +42,14 @@ public class ImportService {
             settingsRepo.insertSetting(setting.getName(), setting.getValue());
         }
 
-        List<FoodDto> allFoodDto = export.getAllFoodDto();
+        List<FoodDto> allFoodDto = export.getAllFood();
         for (FoodDto foodDto : allFoodDto) {
             Food food = mapFoodDtoToFood(foodDto);
             foodRepository.insertFood(food);
 
             // We hebben de database ID nodig, dus opnieuw ophalen:
             Food foodDB = foodRepository.getFood(food.getName());
-            List<PortionDto> portionDtos = foodDto.getPortionDtos();
+            List<PortionDto> portionDtos = foodDto.getPortions();
 
             for (PortionDto portionDto: portionDtos) {
                 Portion portion = mapPortionDtoToPortion(portionDto);
@@ -63,8 +61,8 @@ public class ImportService {
         for (LogEntryDto logEntryDto: logEntryDtos) {
             LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
             // De database IDs komen waarschijnlijk niet overeen, dus haal de correcte database ids op:
-            Food foodDB = foodRepository.getFood(logEntryDto.getFoodDto().getName());
-            Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortionDto().getDescription());
+            Food foodDB = foodRepository.getFood(logEntryDto.getFood().getName());
+            Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
             logEntry.setFoodId(foodDB.getId());
             logEntry.setPortionId(portionDB.getId());
             logEntryRepository.insertLogEntry(logEntry);
@@ -78,10 +76,10 @@ public class ImportService {
         logEntry.setId(null);
         java.sql.Date newDate = new java.sql.Date(logEntryDto.getDay().getTime());
         logEntry.setDay(newDate);
-        logEntry.setFoodId(logEntryDto.getFoodDto().getId());
+        logEntry.setFoodId(logEntryDto.getFood().getId());
         logEntry.setMeal(logEntryDto.getMeal());
         logEntry.setMultiplier(logEntryDto.getMultiplier());
-        logEntry.setPortionId(logEntryDto.getPortionDto().getId());
+        logEntry.setPortionId(logEntryDto.getPortion().getId());
         return logEntry;
     }
 

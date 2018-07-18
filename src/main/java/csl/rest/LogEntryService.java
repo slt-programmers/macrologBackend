@@ -49,7 +49,7 @@ public class LogEntryService {
             Food food = foodRepository.getFoodById(logEntry.getFoodId());
             dto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            dto.setFoodDto(foodDto);
+            dto.setFood(foodDto);
 
             Portion portion = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
@@ -61,7 +61,7 @@ public class LogEntryService {
                 portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
-                dto.setPortionDto(portionDto);
+                dto.setPortion(portionDto);
             }
             Double multiplier = logEntry.getMultiplier();
             dto.setMultiplier(multiplier);
@@ -70,7 +70,7 @@ public class LogEntryService {
 
             Macro macrosCalculated = new Macro();
             if (portion != null) {
-                macrosCalculated = dto.getPortionDto().getMacros().clone();
+                macrosCalculated = dto.getPortion().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
             } else {
@@ -111,7 +111,7 @@ public class LogEntryService {
             Food food = foodRepository.getFoodById(logEntry.getFoodId());
             dto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            dto.setFoodDto(foodDto);
+            dto.setFood(foodDto);
 
             Portion portion = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
@@ -123,7 +123,7 @@ public class LogEntryService {
                 portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
-                dto.setPortionDto(portionDto);
+                dto.setPortion(portionDto);
             }
             Double multiplier = logEntry.getMultiplier();
             dto.setMultiplier(multiplier);
@@ -132,7 +132,7 @@ public class LogEntryService {
 
             Macro macrosCalculated = new Macro();
             if (portion != null) {
-                macrosCalculated = dto.getPortionDto().getMacros().clone();
+                macrosCalculated = dto.getPortion().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
             } else {

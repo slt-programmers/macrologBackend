@@ -5,16 +5,16 @@ import java.util.List;
 
 public class Export {
 
-    private List<FoodDto> allFoodDto;
+    private List<FoodDto> allFood;
     private List<LogEntryDto> allLogEntries;
     private List<Setting> allSettings;
 
-    public List<FoodDto> getAllFoodDto() {
-        return allFoodDto;
+    public List<FoodDto> getAllFood() {
+        return allFood;
     }
 
-    public void setAllFoodDto(List<FoodDto> allFoodDto) {
-        this.allFoodDto = allFoodDto;
+    public void setAllFood(List<FoodDto> allFoodDto) {
+        this.allFood = allFoodDto;
     }
 
     public List<LogEntryDto> getAllLogEntries() {

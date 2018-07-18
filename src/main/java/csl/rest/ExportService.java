@@ -41,7 +41,7 @@ public class ExportService {
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
         }
-        export.setAllFoodDto(allFoodDtos);
+        export.setAllFood(allFoodDtos);
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries();
 
@@ -52,7 +52,7 @@ public class ExportService {
             Food food = foodRepository.getFoodById(logEntry.getFoodId());
             logEntryDto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            logEntryDto.setFoodDto(foodDto);
+            logEntryDto.setFood(foodDto);
 
             csl.database.model.Portion portion = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
@@ -64,7 +64,7 @@ public class ExportService {
                 portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
-                logEntryDto.setPortionDto(portionDto);
+                logEntryDto.setPortion(portionDto);
             }
             Double multiplier = logEntry.getMultiplier();
             logEntryDto.setMultiplier(multiplier);
@@ -73,7 +73,7 @@ public class ExportService {
 
             Macro macrosCalculated = new Macro();
             if (portion != null) {
-                macrosCalculated = logEntryDto.getPortionDto().getMacros().clone();
+                macrosCalculated = logEntryDto.getPortion().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
             } else {

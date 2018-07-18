@@ -12,9 +12,9 @@ import java.util.Date;
 public class LogEntryDto {
 
     private Long id;
-    private FoodDto foodDto;
+    private FoodDto food;
     @ApiModelProperty(notes = "PortionDto used.")
-    private PortionDto portionDto;
+    private PortionDto portion;
     private Macro macrosCalculated;
     @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
     private Double multiplier;
@@ -24,20 +24,20 @@ public class LogEntryDto {
     private String meal;
 
 
-    public FoodDto getFoodDto() {
-        return foodDto;
+    public FoodDto getFood() {
+        return food;
     }
 
-    public void setFoodDto(FoodDto foodDto) {
-        this.foodDto = foodDto;
+    public void setFood(FoodDto foodDto) {
+        this.food = foodDto;
     }
 
-    public PortionDto getPortionDto() {
-        return portionDto;
+    public PortionDto getPortion() {
+        return portion;
     }
 
-    public void setPortionDto(PortionDto portionDto) {
-        this.portionDto = portionDto;
+    public void setPortion(PortionDto portion) {
+        this.portion = portion;
     }
 
     public Double getMultiplier() {

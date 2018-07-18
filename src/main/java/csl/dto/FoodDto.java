@@ -20,7 +20,7 @@ public class FoodDto {
     private Double protein;
     private Double fat;
     private Double carbs;
-    private List<PortionDto> portionDtos;
+    private List<PortionDto> portions;
 
     public String getName() {
         return name;
@@ -78,19 +78,19 @@ public class FoodDto {
         this.carbs = carbs;
     }
 
-    public List<PortionDto> getPortionDtos() {
-        return portionDtos;
+    public List<PortionDto> getPortions() {
+        return portions;
     }
 
-    public void setPortionDtos(List<PortionDto> portionDtos) {
-        this.portionDtos = portionDtos;
+    public void setPortions(List<PortionDto> portionDtos) {
+        this.portions = portionDtos;
     }
 
     public void addPortion(PortionDto currDto) {
-        if (portionDtos == null){
-            portionDtos = new ArrayList<>();
+        if (portions == null){
+            portions = new ArrayList<>();
         }
-        portionDtos.add(currDto);
+        portions.add(currDto);
     }
 
     public void setId(Long id) {
