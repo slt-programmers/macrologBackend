@@ -1,5 +1,6 @@
 package csl.database;
 
+import csl.database.model.Food;
 import csl.database.model.LogEntry;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -77,6 +79,16 @@ public class LogEntryRepository {
 
     public List<LogEntry> getAllLogEntries() {
         return template.query(SELECT_SQL, new LogEntryWrapper());
+    }
+    public List<LogEntry> getAllLogEntries(java.util.Date d) {
+
+        System.out.println(d);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date",sdf.format(d));
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date";
+        List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
+        return queryResults;
     }
 
     class LogEntryWrapper implements RowMapper {
