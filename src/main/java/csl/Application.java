@@ -6,7 +6,7 @@ import csl.dto.StoreLogEntryRequest;
 import csl.dto.PortionDto;
 import csl.enums.MeasurementUnit;
 import csl.rest.FoodService;
-import csl.rest.LogsService;
+import csl.rest.LogEntryService;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class Application {
         FoodService foodService = new FoodService();
         FoodRepository foodRepository = new FoodRepository();
         PortionRepository portionRepository = new PortionRepository();
-        LogsService logService = new LogsService();
+        LogEntryService logService = new LogEntryService();
 
         String BROOD = "Brood: Goudeerlijk bus fijn volkoren Jumbo";
         String BROOD_SNEE = "snee";

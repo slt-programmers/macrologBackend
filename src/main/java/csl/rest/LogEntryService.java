@@ -19,14 +19,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/logs")
 @Api(value = "logs", description = "Operations pertaining to logentries in the macro logger applications")
-public class LogsService {
+public class LogEntryService {
 
     private FoodRepository foodRepository = new FoodRepository();
     private PortionRepository portionRepository = new PortionRepository();
@@ -52,8 +50,8 @@ public class LogsService {
             dto.setFoodDto(foodDto);
 
             Portion portion = null;
-            if (logEntry.getPortionId()!= null && logEntry.getPortionId()!= 0){
-               portion = portionRepository.getPortion(logEntry.getPortionId());
+            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
+                portion = portionRepository.getPortion(logEntry.getPortionId());
                 PortionDto portionDto = new PortionDto();
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
@@ -69,7 +67,7 @@ public class LogsService {
             dto.setMeal(logEntry.getMeal());
 
             Macro macrosCalculated = new Macro();
-            if (portion!= null){
+            if (portion != null) {
                 macrosCalculated = dto.getPortionDto().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
@@ -97,7 +95,7 @@ public class LogsService {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         java.util.Date parsedDate;
         try {
-             parsedDate = sdf.parse(dateLog);
+            parsedDate = sdf.parse(dateLog);
         } catch (ParseException e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -114,7 +112,7 @@ public class LogsService {
             dto.setFoodDto(foodDto);
 
             Portion portion = null;
-            if (logEntry.getPortionId()!= null && logEntry.getPortionId()!= 0){
+            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
                 portion = portionRepository.getPortion(logEntry.getPortionId());
                 PortionDto portionDto = new PortionDto();
                 portionDto.setId(portion.getId());
@@ -131,7 +129,7 @@ public class LogsService {
             dto.setMeal(logEntry.getMeal());
 
             Macro macrosCalculated = new Macro();
-            if (portion!= null){
+            if (portion != null) {
                 macrosCalculated = dto.getPortionDto().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 

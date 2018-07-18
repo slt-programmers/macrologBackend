@@ -48,17 +48,25 @@ public class ImportService {
         for (FoodDto foodDto : allFoodDto) {
             Food food = mapFoodDtoToFood(foodDto);
             foodRepository.insertFood(food);
+
+            // We hebben de database ID nodig, dus opnieuw ophalen:
+            Food foodDB = foodRepository.getFood(food.getName());
             List<PortionDto> portionDtos = foodDto.getPortionDtos();
 
             for (PortionDto portionDto: portionDtos) {
                 Portion portion = mapPortionDtoToPortion(portionDto);
-                portionRepository.addPortion(food, portion);
+                portionRepository.addPortion(foodDB, portion);
             }
         }
 
         List<LogEntryDto> logEntryDtos = export.getAllLogEntries();
         for (LogEntryDto logEntryDto: logEntryDtos) {
             LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
+            // De database IDs komen waarschijnlijk niet overeen, dus haal de correcte database ids op:
+            Food foodDB = foodRepository.getFood(logEntryDto.getFoodDto().getName());
+            Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortionDto().getDescription());
+            logEntry.setFoodId(foodDB.getId());
+            logEntry.setPortionId(portionDB.getId());
             logEntryRepository.insertLogEntry(logEntry);
         }
 
