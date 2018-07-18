@@ -191,9 +191,7 @@ public class LogEntryService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate){
 
-
-        HashMap<String, Macro> ret = new HashMap<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+        ArrayList<DayMacro> retObject = new ArrayList<>();
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(GregorianCalendar.MONTH,-1);
         for (int i=0;i<=31;i++) {
@@ -201,9 +199,12 @@ public class LogEntryService {
             macro.setFat(31 * Math.random());
             macro.setCarbs(31 * Math.random());
             macro.setProtein(31 * Math.random());
-            ret.put(sdf.format(gc.getTime()),macro);
-            gc.add(GregorianCalendar.DAY_OF_MONTH,1);
+            DayMacro dm = new DayMacro();
+            dm.setDay(gc.getTime());
+            gc.add(GregorianCalendar.DAY_OF_YEAR,1);
+            dm.setMacro(macro);
+            retObject.add(dm);
         }
-        return  ResponseEntity.ok(ret);
+        return  ResponseEntity.ok(retObject);
     }
 }
