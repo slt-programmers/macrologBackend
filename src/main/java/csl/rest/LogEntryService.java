@@ -17,6 +17,8 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -181,5 +183,27 @@ public class LogEntryService {
         logEntryRepository.deleteLogEntry(logEntryId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/macros",
+            method = GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate){
+
+
+        HashMap<String, Macro> ret = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.add(GregorianCalendar.MONTH,-1);
+        for (int i=0;i<=31;i++) {
+            Macro macro = new Macro();
+            macro.setFat(31 * Math.random());
+            macro.setCarbs(31 * Math.random());
+            macro.setProtein(31 * Math.random());
+            ret.put(sdf.format(gc.getTime()),macro);
+            gc.add(GregorianCalendar.DAY_OF_MONTH,1);
+        }
+        return  ResponseEntity.ok(ret);
     }
 }
