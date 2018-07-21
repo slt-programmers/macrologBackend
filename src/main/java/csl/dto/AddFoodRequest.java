@@ -6,6 +6,8 @@ import java.util.List;
 
 public class AddFoodRequest {
 
+    @ApiModelProperty(notes = "ID van food. Indien gevuld is het een update")
+    private Long id;
     private String name;
     @ApiModelProperty(notes = "Unit van foodrequest. Of GRAMS of UNIT",required=true, example = "GRAMS")
     private MeasurementUnit measurementUnit;
@@ -80,5 +82,13 @@ public class AddFoodRequest {
 
     public void setPortions(List<PortionDto> portions) {
         this.portions = portions;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

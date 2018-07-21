@@ -47,6 +47,9 @@ public class FoodRepository {
     private static final String INSERT_SQL = "insert into food(" +
             "name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
             "values(:name, :measurement, :protein, :fat, :carbs, :unit_name,:unit_grams)";
+    private static final String UPDATE_SQL = "update food set " +
+            "name = :name, measurement = :measurement, protein = :protein, fat = :fat, carbs = :carbs, unit_name = :unit_name ,unit_grams = :unit_grams " +
+            "where id = :id";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -68,6 +71,19 @@ public class FoodRepository {
                 .addValue("unit_name", food.getUnitName())
                 .addValue("unit_grams", food.getUnitGrams());
         return template.update(INSERT_SQL, params);
+    }
+
+    public int updateFood(Food food) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", food.getId())
+                .addValue("name", food.getName())
+                .addValue("measurement", food.getMeasurementUnit().toString())
+                .addValue("protein", food.getProtein())
+                .addValue("fat", food.getFat())
+                .addValue("carbs", food.getCarbs())
+                .addValue("unit_name", food.getUnitName())
+                .addValue("unit_grams", food.getUnitGrams());
+        return template.update(UPDATE_SQL, params);
     }
 
     public Food getFood(String name) {

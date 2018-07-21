@@ -41,6 +41,7 @@ public class PortionRepository {
 
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
     private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,description,unitmultiplier,grams) values(:foodId,:description,:unitmultiplier,:grams)";
+    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_Id= :foodId ,description = :description,unitmultiplier = :unitmultiplier,grams =:grams where id = :id";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -53,14 +54,23 @@ public class PortionRepository {
 //        return template.query(SELECT_SQL, new PortionWrapper());
 //    }
 
-    public int addPortion(Food food, Portion portion) {
+    public int addPortion(Long foodId, Portion portion) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
-                .addValue("foodId", food.getId())
+                .addValue("foodId", foodId)
                 .addValue("description", portion.getDescription())
                 .addValue("unitmultiplier", portion.getUnitMultiplier())
                 .addValue("grams", portion.getGrams());
         return template.update(INSERT_SQL, params);
+    }
+    public int updatePortion(Long foodId, Portion portion) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", portion.getId())
+                .addValue("foodId", foodId)
+                .addValue("description", portion.getDescription())
+                .addValue("unitmultiplier", portion.getUnitMultiplier())
+                .addValue("grams", portion.getGrams());
+        return template.update(UPDATE_SQL, params);
     }
 
     public Portion getPortion(Long portionId) {

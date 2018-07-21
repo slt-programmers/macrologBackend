@@ -119,12 +119,10 @@ public class FoodService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
-        Food food = foodRepository.getFood(addFoodRequest.getName());
-        if (food != null) {
-            String errorMessage = "This food is already in your database";
-            return ResponseEntity.badRequest().body(errorMessage);
-        } else {
+        if (addFoodRequest.getId()!= null){
+            // Update request
             Food newFood = new Food();
+            newFood.setId(addFoodRequest.getId());
             newFood.setName(addFoodRequest.getName());
             newFood.setMeasurementUnit(addFoodRequest.getMeasurementUnit());
             if (newFood.getMeasurementUnit().equals(MeasurementUnit.UNIT)) {
@@ -139,20 +137,69 @@ public class FoodService {
             newFood.setFat(addFoodRequest.getFat());
             newFood.setProtein(addFoodRequest.getProtein());
 
-            int insertedRows = foodRepository.insertFood(newFood);
-            if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
-                Food addedFood = foodRepository.getFood(addFoodRequest.getName());
-                for (PortionDto portionDto : addFoodRequest.getPortions()) {
+
+            foodRepository.updateFood(newFood);
+
+            // remove portions not supported yet.
+            for (PortionDto portionDto : addFoodRequest.getPortions()) {
+                Long id = portionDto.getId();
+                if (id != null){
+                     // update portion
+                    csl.database.model.Portion newPortion = new csl.database.model.Portion();
+                    newPortion.setId(portionDto.getId());
+                    newPortion.setDescription(portionDto.getDescription());
+                    newPortion.setGrams(portionDto.getGrams());
+                    newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
+                    portionRepository.updatePortion(newFood.getId(),newPortion);
+
+                } else {
+                    // add portion
                     csl.database.model.Portion newPortion = new csl.database.model.Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
                     newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
-
-                    portionRepository.addPortion(addedFood, newPortion);
+                    portionRepository.addPortion(newFood.getId(),newPortion);
                 }
             }
-
             return ResponseEntity.status(HttpStatus.CREATED).build();
+
+
+        } else {
+            Food food = foodRepository.getFood(addFoodRequest.getName());
+            if (food != null) {
+                String errorMessage = "This food is already in your database";
+                return ResponseEntity.badRequest().body(errorMessage);
+            } else {
+                Food newFood = new Food();
+                newFood.setName(addFoodRequest.getName());
+                newFood.setMeasurementUnit(addFoodRequest.getMeasurementUnit());
+                if (newFood.getMeasurementUnit().equals(MeasurementUnit.UNIT)) {
+                    newFood.setUnitGrams(addFoodRequest.getUnitGrams());
+                    newFood.setUnitName(addFoodRequest.getUnitName());
+                } else {
+                    newFood.setUnitGrams(100.0);
+                    newFood.setUnitName("gram");
+                }
+
+                newFood.setCarbs(addFoodRequest.getCarbs());
+                newFood.setFat(addFoodRequest.getFat());
+                newFood.setProtein(addFoodRequest.getProtein());
+
+                int insertedRows = foodRepository.insertFood(newFood);
+                if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
+                    Food addedFood = foodRepository.getFood(addFoodRequest.getName());
+                    for (PortionDto portionDto : addFoodRequest.getPortions()) {
+                        csl.database.model.Portion newPortion = new csl.database.model.Portion();
+                        newPortion.setDescription(portionDto.getDescription());
+                        newPortion.setGrams(portionDto.getGrams());
+                        newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
+
+                        portionRepository.addPortion(addedFood.getId(), newPortion);
+                    }
+                }
+
+                return ResponseEntity.status(HttpStatus.CREATED).build();
+            }
         }
     }
 

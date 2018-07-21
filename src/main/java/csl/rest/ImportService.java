@@ -53,7 +53,7 @@ public class ImportService {
 
             for (PortionDto portionDto: portionDtos) {
                 Portion portion = mapPortionDtoToPortion(portionDto);
-                portionRepository.addPortion(foodDB, portion);
+                portionRepository.addPortion(foodDB.getId(), portion);
             }
         }
 
