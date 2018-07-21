@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -42,6 +44,8 @@ public class FoodService {
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food,true));
         }
+
+        allFoodDtos.sort(Comparator.comparing(FoodDto::getName));
 
         return ResponseEntity.ok(allFoodDtos);
     }
