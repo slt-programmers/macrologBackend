@@ -1,6 +1,5 @@
 package csl.database;
 
-import csl.database.model.Food;
 import csl.database.model.LogEntry;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -15,19 +14,16 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-/**
- * Created by Carmen on 18-3-2018.
- */
 @Repository
 public class LogEntryRepository {
     public static final String TABLE_NAME = "logentry";
 
-    public static final String COL_ID = "id";
-    public static final String COL_FOOD_ID = "food_id";
-    public static final String COL_PORTION_ID = "portion_id";
-    public static final String COL_MULTIPLIER = "multiplier";
-    public static final String COL_DAY = "day";
-    public static final String COL_MEAL = "meal";
+    private static final String COL_ID = "id";
+    private static final String COL_FOOD_ID = "food_id";
+    private static final String COL_PORTION_ID = "portion_id";
+    private static final String COL_MULTIPLIER = "multiplier";
+    private static final String COL_DAY = "day";
+    private static final String COL_MEAL = "meal";
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
@@ -80,8 +76,8 @@ public class LogEntryRepository {
     public List<LogEntry> getAllLogEntries() {
         return template.query(SELECT_SQL, new LogEntryWrapper());
     }
-    public List<LogEntry> getAllLogEntries(java.util.Date d) {
 
+    public List<LogEntry> getAllLogEntries(java.util.Date d) {
         System.out.println(d);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
@@ -92,7 +88,6 @@ public class LogEntryRepository {
     }
 
     class LogEntryWrapper implements RowMapper {
-
         @Override
         public Object mapRow(ResultSet rs, int i) throws SQLException {
             Date ts = rs.getDate(COL_DAY);
