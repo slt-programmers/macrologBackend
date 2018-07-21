@@ -39,10 +39,9 @@ public class LogEntryService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllLogEntries() {
-
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries();
-
         List<LogEntryDto> allDtos = new ArrayList<>();
+
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto dto = new LogEntryDto();
@@ -83,8 +82,6 @@ public class LogEntryService {
             allDtos.add(dto);
         }
         return ResponseEntity.ok(allDtos);
-
-
     }
 
     @ApiOperation(value = "Retrieve all stored logentries")
@@ -94,7 +91,7 @@ public class LogEntryService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getLogOfDay(@PathVariable("date") String dateLog) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date parsedDate;
         try {
             parsedDate = sdf.parse(dateLog);
