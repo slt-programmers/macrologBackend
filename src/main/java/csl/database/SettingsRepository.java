@@ -1,6 +1,8 @@
 package csl.database;
 
 import csl.database.model.Setting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -31,16 +33,17 @@ public class SettingsRepository {
     private static final String UPDATE_SQL = "UPDATE settings SET value = :value where setting = :setting";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsRepository.class);
 
     public SettingsRepository() {
     }
 
     public int putSetting(String setting, String value) {
         if (getSetting(setting) == null) {
-            System.out.println("Insert");
+            LOGGER.debug("Insert");
             return insertSetting(setting, value);
         } else {
-            System.out.println("Update");
+            LOGGER.debug("Update");
             return updateSetting(setting, value);
         }
     }

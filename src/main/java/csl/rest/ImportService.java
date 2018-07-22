@@ -8,6 +8,8 @@ import csl.database.model.*;
 import csl.dto.*;
 import csl.dto.LogEntryDto;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,6 +30,7 @@ public class ImportService {
     private final static PortionRepository portionRepository = new PortionRepository();
     private LogEntryRepository logEntryRepository = new LogEntryRepository();
     private SettingsRepository settingsRepo = new SettingsRepository();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImportService.class);
 
     @ApiOperation(value = "Import exported json")
     @CrossOrigin(origins = "http://localhost:4200")
@@ -35,7 +38,7 @@ public class ImportService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity setAll(@RequestBody Export export) throws URISyntaxException {
-        System.out.println(export);
+        LOGGER.debug("export = " +export);
 
         List<Setting> settings = export.getAllSettings();
         for (Setting setting : settings) {
