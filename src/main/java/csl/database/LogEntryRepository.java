@@ -1,6 +1,8 @@
 package csl.database;
 
 import csl.database.model.LogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @Repository
 public class LogEntryRepository {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogEntryRepository.class);
+
     public static final String TABLE_NAME = "logentry";
 
     private static final String COL_ID = "id";
@@ -78,7 +82,7 @@ public class LogEntryRepository {
     }
 
     public List<LogEntry> getAllLogEntries(java.util.Date d) {
-        System.out.println(d);
+        LOGGER.debug("Getting entries for " + d);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date",sdf.format(d));
@@ -86,7 +90,16 @@ public class LogEntryRepository {
         List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
         return queryResults;
     }
-
+    public List<LogEntry> getAllLogEntries(java.util.Date begin, java.util.Date end) {
+        LOGGER.debug("Getting entries for period " + begin + " - " + end);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("dateBegin",sdf.format(begin))
+                .addValue("dateEnd",sdf.format(end));
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd";
+        List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
+        return queryResults;
+    }
     class LogEntryWrapper implements RowMapper {
         @Override
         public Object mapRow(ResultSet rs, int i) throws SQLException {
