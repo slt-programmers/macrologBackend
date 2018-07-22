@@ -28,8 +28,8 @@ public class LogEntryRepository {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_FOOD_ID + " INT(6) NOT NULL, " +
-                    COL_PORTION_ID + " INT(6) NULL, " +
+                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
+                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")" +
                     COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
                     COL_DAY + " DATE NOT NULL," +
                     COL_MEAL + " TEXT" +

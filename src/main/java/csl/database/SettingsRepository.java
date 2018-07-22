@@ -16,7 +16,7 @@ import java.util.List;
 public class SettingsRepository {
     public static final String TABLE_NAME = "settings";
 
-    public static final String COL_ID = "id";
+    private static final String COL_ID = "id";
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private static final String COL_SETTING = "setting";
     private static final String COL_VALUE = "value";

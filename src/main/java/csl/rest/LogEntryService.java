@@ -99,8 +99,8 @@ public class LogEntryService {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
-        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(parsedDate);
 
+        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(parsedDate);
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
@@ -141,9 +141,8 @@ public class LogEntryService {
 
             allDtos.add(dto);
         }
+
         return ResponseEntity.ok(allDtos);
-
-
     }
 
     @ApiOperation(value = "Store logentry")
