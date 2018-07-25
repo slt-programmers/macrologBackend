@@ -65,6 +65,12 @@ public class Macro {
 
         return clone;
     }
+    public void combine(Macro other) {
+        this.fat = this.fat+other.fat;
+        this.carbs = this.carbs+other.carbs;
+        this.protein = this.protein+other.protein;
+
+    }
 
 
 }

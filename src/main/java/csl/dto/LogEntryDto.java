@@ -82,4 +82,9 @@ public class LogEntryDto {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public void combine(LogEntryDto other) {
+        getMacrosCalculated().combine(other.getMacrosCalculated());
+    }
+
 }
