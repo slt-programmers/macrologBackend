@@ -45,14 +45,7 @@ public class PortionRepository {
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-    public PortionRepository() {
-
-
-    }
-
-//    public List<PortionDto> getAllPortions() {
-//        return template.query(SELECT_SQL, new PortionWrapper());
-//    }
+    public PortionRepository() { }
 
     public int addPortion(Long foodId, Portion portion) {
         SqlParameterSource params = new MapSqlParameterSource()
