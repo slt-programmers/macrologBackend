@@ -97,6 +97,8 @@ public class LogEntryRepository {
                 .addValue("dateBegin",sdf.format(begin))
                 .addValue("dateEnd",sdf.format(end));
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd";
+        LOGGER.debug(myLogs);
+        LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
         List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
         return queryResults;
     }

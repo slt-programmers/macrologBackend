@@ -23,6 +23,9 @@ public class LogEntryDto {
     @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK",required=true, example="BREAKFAST")
     private String meal;
 
+    public LogEntryDto() {
+        macrosCalculated = new Macro(0.0,0.0,0.0);
+    }
 
     public FoodDto getFood() {
         return food;

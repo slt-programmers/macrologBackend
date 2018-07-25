@@ -9,6 +9,8 @@ import csl.database.model.Portion;
 import csl.dto.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +20,10 @@ import sun.rmi.runtime.Log;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -33,6 +35,7 @@ public class LogEntryService {
     private FoodRepository foodRepository = new FoodRepository();
     private PortionRepository portionRepository = new PortionRepository();
     private LogEntryRepository logEntryRepository = new LogEntryRepository();
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogEntryService.class);
 
 
     @ApiOperation(value = "Retrieve all stored logentries")
@@ -154,17 +157,58 @@ public class LogEntryService {
 
         Calendar now = GregorianCalendar.getInstance();
         java.util.Date endTime = now.getTime();
-        now.add(GregorianCalendar.MONTH,1);
-        java.util.Date beginTime = now.getTime();
+        Calendar begin = GregorianCalendar.getInstance();
+        begin.add(GregorianCalendar.MONTH,-1);
+        java.util.Date beginTime = begin.getTime();
 
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(beginTime, endTime);
         List<LogEntryDto> logEntryDtos = mapToDtos(allLogEntries);
+        LOGGER.debug("Aantal dtos:" + logEntryDtos);
 
+        Map<java.util.Date, List<LogEntryDto>> mappedPerDay = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay));
+        Map<java.util.Date, List<LogEntryDto>> mappedPerDay2 = logEntryDtos.stream().collect(Collectors.groupingBy(logentrydto -> logentrydto.getDay()));
+        LOGGER.debug("Aantal dagen mapped:" + mappedPerDay.size());
+
+
+
+
+        BiConsumer<LogEntryDto,LogEntryDto> reducer = (object1,object2) -> {
+            object1.getMacrosCalculated().setProtein(object1.getMacrosCalculated().getProtein() + object2.getMacrosCalculated().getProtein());
+            object1.getMacrosCalculated().setFat(object1.getMacrosCalculated().getFat() + object2.getMacrosCalculated().getFat());
+            object1.getMacrosCalculated().setCarbs(object1.getMacrosCalculated().getCarbs() + object2.getMacrosCalculated().getCarbs());
+        };
+        BinaryOperator<LogEntryDto> operator = (object1, object2) -> {
+            object1.getMacrosCalculated().setProtein(object1.getMacrosCalculated().getProtein() + object2.getMacrosCalculated().getProtein());
+            object1.getMacrosCalculated().setFat(object1.getMacrosCalculated().getFat() + object2.getMacrosCalculated().getFat());
+            object1.getMacrosCalculated().setCarbs(object1.getMacrosCalculated().getCarbs() + object2.getMacrosCalculated().getCarbs());
+            return object1;
+        };
+
+        Map<java.util.Date, List<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(o -> o.getDay()));
+
+
+
+        //        mappedPerDay.forEach((day, listday) -> listday.stream().collect(() -> new LogEntryDto(),reducer,reducer));
+//        mappedPerDay.forEach((day, listday) -> System.out.println(day + " -" + listday.size()));
+//        mappedPerDay.forEach((day,logentriesperday) --> reducer);
+      // mappedPerDay.forEach((day,lisday) -> lisday.stream().map(sumElements
+//        mappedPerDay.forEach((day,listday)-> listday.stream().reduce(new LogEntryDto(),operator));
+
+
+
+//
+//        for (List<LogEntryDto> entryDtos : mappedPerDay.values()) {
+//            for (LogEntryDto entryDto : entryDtos) {
+//                System.out.println(entryDto.getDay() +"\t"+entryDto.getMacrosCalculated().getProtein() + "\t" + entryDto.getMacrosCalculated().getFat() + "\t" + entryDto.getMacrosCalculated().getCarbs());
+//            }
+//
+//        }
+//
 
         ArrayList<DayMacro> retObject = new ArrayList<>();
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(GregorianCalendar.MONTH, -1);
-        for (int i = 0; i <= 31; i++) {
+        for (int i = 0; i <= 1; i++) {
             Macro macro = new Macro();
             macro.setFat(31 * Math.random());
             macro.setCarbs(31 * Math.random());
@@ -176,6 +220,17 @@ public class LogEntryService {
             retObject.add(dm);
         }
         return ResponseEntity.ok(retObject);
+    }
+
+
+//    public static List<DayMacro> sumElements(java.util.Date d, List<LogEntryDto> elements) {
+//        return new ArrayList<>();
+//    }
+    public static List<Macro> sumElements(List<LogEntryDto> elements) {
+        return new ArrayList<>();
+    }
+    public static List<Macro> sumMacros(List<Macro> elements) {
+        return new ArrayList<>();
     }
 
     private List<LogEntryDto> mapToDtos(List<LogEntry> allLogEntries){
