@@ -34,3 +34,9 @@ http://localhost:8090/swagger-ui.html
 Interfaces:
 Opslaan van voedsel:
 POST /foodDto/<Naam voedsel> <-- HIERNAAR TOE REQUEST MET MACRO PER 100
+
+Database export:
+CMD prompt openen , maar doe dit RUN ALS AMINISTRATOR (rechtermuisknop)
+dan naar 
+C:\Program Files\MySQL\MySQL Server 8.0\bin>
+mysqldump --user=root --password=? test >testdump.sql

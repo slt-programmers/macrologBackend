@@ -7,11 +7,11 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class Macro {
 
-    @ApiModelProperty(notes = "Number of protein",required=true)
+    @ApiModelProperty(notes = "Number of protein", required = true)
     private Double protein;
-    @ApiModelProperty(notes = "Number of fat",required=true)
+    @ApiModelProperty(notes = "Number of fat", required = true)
     private Double fat;
-    @ApiModelProperty(notes = "Number of carbs",required=true)
+    @ApiModelProperty(notes = "Number of carbs", required = true)
     private Double carbs;
     private Double calories;
 
@@ -44,8 +44,8 @@ public class Macro {
         return carbs;
     }
 
-    public Double getCalories(){
-        return fat*9 + carbs*4 + protein*4;
+    public Double getCalories() {
+        return fat * 9 + carbs * 4 + protein * 4;
     }
 
     public void setCarbs(Double carbs) {
@@ -57,7 +57,8 @@ public class Macro {
         this.fat = this.fat * multiplier;
         this.carbs = this.carbs * multiplier;
     }
-    public Macro clone(){
+
+    public Macro clone() {
         Macro clone = new Macro();
         clone.setFat(fat);
         clone.setCarbs(carbs);
@@ -65,10 +66,11 @@ public class Macro {
 
         return clone;
     }
+
     public void combine(Macro other) {
-        this.fat = this.fat+other.fat;
-        this.carbs = this.carbs+other.carbs;
-        this.protein = this.protein+other.protein;
+        this.fat = this.fat + other.fat;
+        this.carbs = this.carbs + other.carbs;
+        this.protein = this.protein + other.protein;
 
     }
 

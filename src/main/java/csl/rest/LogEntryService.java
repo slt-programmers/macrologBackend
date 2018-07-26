@@ -164,11 +164,6 @@ public class LogEntryService {
         List<LogEntryDto> logEntryDtos = mapToDtos(allLogEntries);
         LOGGER.debug("Aantal dtos:" + logEntryDtos);
 
-        Map<java.util.Date, List<LogEntryDto>> mappedPerDay = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay));
-        Map<java.util.Date, List<LogEntryDto>> mappedPerDay2 = logEntryDtos.stream().collect(Collectors.groupingBy(logentrydto -> logentrydto.getDay()));
-        LOGGER.debug("Aantal dagen mapped:" + mappedPerDay.size());
-
-
 
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
@@ -190,25 +185,6 @@ public class LogEntryService {
 
 
         return ResponseEntity.ok(retObject);
-    }
-
-
-//    public static List<DayMacro> sumElements(java.util.Date d, List<LogEntryDto> elements) {
-//        return new ArrayList<>();
-//    }
-    public static List<Macro> sumElements(List<LogEntryDto> elements) {
-        return new ArrayList<>();
-    }
-    public static List<Macro> sumMacros(List<Macro> elements) {
-        return new ArrayList<>();
-    }
-
-
-    public static LogEntryDto addLogEntryDtos(LogEntryDto d1,LogEntryDto d2) {
-        LogEntryDto dummy = new LogEntryDto();
-        dummy.setMacrosCalculated(d1.getMacrosCalculated());
-        dummy.getMacrosCalculated().combine(d2.getMacrosCalculated());
-        return dummy;
     }
 
     private List<LogEntryDto> mapToDtos(List<LogEntry> allLogEntries){
