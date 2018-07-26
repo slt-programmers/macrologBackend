@@ -65,9 +65,11 @@ public class ImportService {
             LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
             // De database IDs komen waarschijnlijk niet overeen, dus haal de correcte database ids op:
             Food foodDB = foodRepository.getFood(logEntryDto.getFood().getName());
-            Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
             logEntry.setFoodId(foodDB.getId());
-            logEntry.setPortionId(portionDB.getId());
+            if (logEntryDto.getPortion() != null) {
+                Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
+                logEntry.setPortionId(portionDB.getId());
+            }
             logEntryRepository.insertLogEntry(logEntry);
         }
 
@@ -82,7 +84,9 @@ public class ImportService {
         logEntry.setFoodId(logEntryDto.getFood().getId());
         logEntry.setMeal(logEntryDto.getMeal());
         logEntry.setMultiplier(logEntryDto.getMultiplier());
-        logEntry.setPortionId(logEntryDto.getPortion().getId());
+        if (logEntryDto.getPortion() != null) {
+            logEntry.setPortionId(logEntryDto.getPortion().getId());
+        }
         return logEntry;
     }
 

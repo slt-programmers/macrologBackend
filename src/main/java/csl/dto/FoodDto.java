@@ -79,6 +79,9 @@ public class FoodDto {
     }
 
     public List<PortionDto> getPortions() {
+        if (portions == null){
+            portions = new ArrayList<>();
+        }
         return portions;
     }
 

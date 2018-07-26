@@ -59,7 +59,7 @@ public class Application {
              CallableStatement deleteLogEntry = connection.prepareCall(LogEntryRepository.TABLE_DELETE);
              CallableStatement deletePortion = connection.prepareCall(PortionRepository.TABLE_DELETE);
              CallableStatement deleteFood = connection.prepareCall(FoodRepository.TABLE_DELETE)) {
-            CallableStatement deleteSettings = connection.prepareCall(SettingsRepository.TABLE_DELETE);
+             CallableStatement deleteSettings = connection.prepareCall(SettingsRepository.TABLE_DELETE);
 
             LOGGER.info("Deleting old food alias");
             deleteOldFoodAlias.execute();
