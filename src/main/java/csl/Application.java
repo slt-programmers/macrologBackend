@@ -1,13 +1,6 @@
 package csl;
 
 import csl.database.*;
-import csl.dto.AddFoodRequest;
-import csl.dto.StoreLogEntryRequest;
-import csl.dto.PortionDto;
-import csl.enums.MeasurementUnit;
-import csl.rest.FoodService;
-import csl.rest.LogEntryService;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -17,9 +10,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.net.URISyntaxException;
-import java.sql.*;
-import java.util.Arrays;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 
