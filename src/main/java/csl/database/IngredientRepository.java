@@ -32,17 +32,20 @@ public class IngredientRepository {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    "FOREIGN KEY (" + COL_MEAL_ID + ") REFERENCES " + MealRepository.TABLE_NAME + "(" + MealRepository.COL_ID + ")" +
-                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
-                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")" +
-                    COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
+                    COL_MEAL_ID + " INT(6) NOT NULL, " +
+                    COL_FOOD_ID + " INT(6) NOT NULL, " +
+                    COL_PORTION_ID + " INT(6), " +
+                    "FOREIGN KEY (" + COL_MEAL_ID + ") REFERENCES " + MealRepository.TABLE_NAME + "(" + MealRepository.COL_ID + "), " +
+                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + "), " +
+                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + "), " +
+                    COL_MULTIPLIER + " DEC(5,2) NOT NULL" +
                     ")";
 
     public static final String TABLE_DELETE =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(meal_id, food_Id, portion_Id, multiplier) values(:meal_id, :foodId, :portionId, :multiplier)";
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(meal_id, food_Id, portion_Id, multiplier) values(:mealId, :foodId, :portionId, :multiplier)";
     private static final String UPDATE_SQL = "update " + TABLE_NAME + " set meal_id = :mealId, food_id = :foodId, portion_id = :portionId, multiplier = :multiplier where Id = :id";
     private static final String DELETE_SQL = "delete from " + TABLE_NAME;
 

@@ -9,11 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import sun.swing.BakedArrayList;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 //import csl.security.SecurityFilter;
@@ -40,109 +42,68 @@ public class Application {
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
 
-        //DEV/TEST purposes
-        boolean clearTablesOnStartup = false;
-
-        if (clearTablesOnStartup) {
-            deleteTables();
-        }
-
-        boolean tableExists = isDatabaseSetUp();
-        if (!tableExists) {
-            createTables();
-        } else {
-            LOGGER.info("Tables already set up");
-        }
-
-
+        setUpDatabase();
         //Application is now running
 
-    }
-
-
-    private static void deleteTables() {
-        LOGGER.info("Deleting tables on startup");
-        try (Connection connection = DatabaseHelper.getInstance().getConnection();
-             CallableStatement deleteOldFoodAlias = connection.prepareCall("DROP TABLE IF EXISTS FOOD_ALIAS");
-             CallableStatement deleteLogEntry = connection.prepareCall(LogEntryRepository.TABLE_DELETE);
-             CallableStatement deletePortion = connection.prepareCall(PortionRepository.TABLE_DELETE);
-             CallableStatement deleteFood = connection.prepareCall(FoodRepository.TABLE_DELETE);
-             CallableStatement deleteSettings = connection.prepareCall(SettingsRepository.TABLE_DELETE);
-             CallableStatement deleteUser = connection.prepareCall(UserAcccountRepository.TABLE_DELETE)) {
-
-            LOGGER.info("Deleting old food alias");
-            deleteOldFoodAlias.execute();
-            LOGGER.info("Deleting deleteLogEntry");
-            deleteLogEntry.execute();
-            LOGGER.info("Deleting deletePortion");
-            deletePortion.execute();
-            LOGGER.info("Deleting deleteFood");
-            deleteFood.execute();
-            LOGGER.info("Deleting deleteLogEntry");
-            deleteSettings.execute();
-            LOGGER.info("Deleting deleteUser");
-            deleteUser.execute();
-
-        } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
-        }
-    }
-
-
-
-    private static void createTables() {
-        LOGGER.info("Creating tables on startup");
-        try (Connection connection = DatabaseHelper.getInstance().getConnection();
-             CallableStatement userTableCreate = connection.prepareCall(UserAcccountRepository.TABLE_CREATE);
-             CallableStatement settingsTableCreate = connection.prepareCall(SettingsRepository.TABLE_CREATE);
-             CallableStatement footTableCreate = connection.prepareCall(FoodRepository.TABLE_CREATE);
-             CallableStatement foodPortionCreate = connection.prepareCall(PortionRepository.TABLE_CREATE);
-             CallableStatement logEntryTableCreate = connection.prepareCall(LogEntryRepository.TABLE_CREATE)) {
-
-            userTableCreate.execute();
-            settingsTableCreate.execute();
-            footTableCreate.execute();
-            foodPortionCreate.execute();
-            logEntryTableCreate.execute();
-
-            LOGGER.info("Tables created succesfully");
-        } catch (SQLException e) {
-            LOGGER.error("Failed to create tables");
-            LOGGER.error(e.getMessage());
-        }
     }
 
     private static void setUpDatabase() {
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
         String checkUrl = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where" +
+                " table_name = '" + UserAcccountRepository.TABLE_NAME + "' or " +
                 " table_name = '" + SettingsRepository.TABLE_NAME + "' or " +
                 " table_name = '" + FoodRepository.TABLE_NAME + "' or " +
                 " table_name = '" + PortionRepository.TABLE_NAME + "' or " +
                 " table_name = '" + LogEntryRepository.TABLE_NAME + "' or " +
                 " table_name = '" + MealRepository.TABLE_NAME + "' or " +
                 " table_name = '" + IngredientRepository.TABLE_NAME + "'";
-        List<String> results = template.query(checkUrl, new RowMapper<String>() {
+        List<String> existingTables = template.query(checkUrl, new RowMapper<String>() {
             @Override
             public String mapRow(ResultSet resultSet, int i) throws SQLException {
                 return resultSet.getString("TABLE_NAME");
             }
         });
+
+        if(!existingTables.contains(UserAcccountRepository.TABLE_NAME)) {
+            LOGGER.info("Create useraccounts table");
+            createTable(UserAcccountRepository.TABLE_CREATE);
+        }
+        if(!existingTables.contains(SettingsRepository.TABLE_NAME)) {
+            LOGGER.info("Create settings table");
+            createTable(SettingsRepository.TABLE_CREATE);
+        }
+        if(!existingTables.contains(FoodRepository.TABLE_NAME)) {
+            LOGGER.info("Create food table");
+            createTable(FoodRepository.TABLE_CREATE);
+        }
+        if(!existingTables.contains(PortionRepository.TABLE_NAME)) {
+            LOGGER.info("Create portion table");
+            createTable(PortionRepository.TABLE_CREATE);
+        }
+        if(!existingTables.contains(LogEntryRepository.TABLE_NAME)) {
+            LOGGER.info("Create logentry table");
+            createTable(LogEntryRepository.TABLE_CREATE);
+        }
+        if(!existingTables.contains(MealRepository.TABLE_NAME)) {
+            LOGGER.info("Create meal table");
+            createTable(MealRepository.TABLE_CREATE);
+        }
+        if(!existingTables.contains(IngredientRepository.TABLE_NAME)) {
+            LOGGER.info("Create ingredient table");
+            createTable(IngredientRepository.TABLE_CREATE);
+        }
     }
 
-    private static boolean isDatabaseSetUp() throws SQLException {
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
-        String checkUrl = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where (" +
-                " table_name = '" + SettingsRepository.TABLE_NAME + "' or " +
-                " table_name = '" + FoodRepository.TABLE_NAME + "' or " +
-                " table_name = '" + PortionRepository.TABLE_NAME + "' or " +
-                " table_name = '" + UserAcccountRepository.TABLE_NAME + "' or " +
-                " table_name = '" + LogEntryRepository.TABLE_NAME + "')";
-        List<String> results = template.query(checkUrl, new RowMapper<String>() {
-            @Override
-            public String mapRow(ResultSet resultSet, int i) throws SQLException {
-                return resultSet.getString("TABLE_NAME");
-            }
-        });
-        return results.size() == 5;
+    private static void createTable(String sql) {
+        System.out.println(sql);
+        try (Connection connection = DatabaseHelper.getInstance().getConnection();
+             CallableStatement tableCreate = connection.prepareCall(sql)) {
+            tableCreate.execute();
+            LOGGER.info("Table created succesfully");
+        } catch (SQLException e) {
+            LOGGER.error("Failed to create table");
+            LOGGER.error(e.getMessage());
+        }
     }
+
 }

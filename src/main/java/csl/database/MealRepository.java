@@ -29,7 +29,7 @@ public class MealRepository {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_NAME + " TEXT NOT NULL, " +
+                    COL_NAME + " TEXT NOT NULL" +
                     ")";
 
     public static final String TABLE_DELETE =
@@ -43,12 +43,17 @@ public class MealRepository {
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
     public int insertMeal(Meal meal) {
+
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("name", meal.getName());
         int result = template.update(INSERT_SQL, params);
 
+        Long mealId = getMealByName(meal.getName()).getId();
+        System.out.println(mealId);
         for (Ingredient ingredient : meal.getIngredients()) {
+            ingredient.setMealId(mealId);
+            System.out.println(ingredient.getMealId());
             ingredientRepository.insertIngredient(ingredient);
         }
         return result;
@@ -67,6 +72,13 @@ public class MealRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", mealId);
         return template.update(DELETE_SQL, params);
+    }
+
+    private Meal getMealByName(String name) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("name", name);
+        List<Meal> result = template.query(SELECT_SQL + " WHERE " + COL_NAME + " = :name", params, new MealWrapper());
+        return result.get(0);
     }
 
     public Meal getMeal(Long mealId) {
