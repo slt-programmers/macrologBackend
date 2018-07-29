@@ -15,16 +15,16 @@ public class MealDto {
     @ApiModelProperty(notes = "Name of meal", required = true)
     private String name;
     @ApiModelProperty(notes = "List of ingredients", required = true)
-    private List<IngredientDto> ingredientDtos;
+    private List<IngredientDto> ingredients;
 
     public MealDto() {
 
     }
 
-    public MealDto(Long id, String name, List<IngredientDto> ingredientDtos) {
+    public MealDto(Long id, String name, List<IngredientDto> ingredients) {
         this.id = id;
         this.name = name;
-        this.ingredientDtos = ingredientDtos;
+        this.ingredients = ingredients;
     }
 
     public Long getId() {
@@ -43,11 +43,11 @@ public class MealDto {
         this.name = name;
     }
 
-    public List<IngredientDto> getIngredientDtos() {
-        return ingredientDtos;
+    public List<IngredientDto> getIngredients() {
+        return ingredients;
     }
 
-    public void setIngredientDtos(List<IngredientDto> ingredientDtos) {
-        this.ingredientDtos = ingredientDtos;
+    public void setIngredients(List<IngredientDto> ingredients) {
+        this.ingredients = ingredients;
     }
 }

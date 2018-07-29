@@ -41,7 +41,7 @@ public class MealService {
     public ResponseEntity getAllMeals() {
         List<Meal> allMeals = mealRepository.getAllMeals();
         List<MealDto> allMealDtos = mapToDto(allMeals);
-        return ResponseEntity.ok(allMeals);
+        return ResponseEntity.ok(allMealDtos);
     }
 
     @ApiOperation(value = "Insert meal")
@@ -94,7 +94,7 @@ public class MealService {
 
                 ingredientDtos.add(ingredientDto);
             }
-            mealDto.setIngredientDtos(ingredientDtos);
+            mealDto.setIngredients(ingredientDtos);
 
             mealDtos.add(mealDto);
         }
