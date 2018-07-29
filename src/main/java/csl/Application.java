@@ -97,6 +97,23 @@ public class Application {
         }
     }
 
+    private static void setUpDatabase() {
+        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+        String checkUrl = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where" +
+                " table_name = '" + SettingsRepository.TABLE_NAME + "' or " +
+                " table_name = '" + FoodRepository.TABLE_NAME + "' or " +
+                " table_name = '" + PortionRepository.TABLE_NAME + "' or " +
+                " table_name = '" + LogEntryRepository.TABLE_NAME + "' or " +
+                " table_name = '" + MealRepository.TABLE_NAME + "' or " +
+                " table_name = '" + IngredientRepository.TABLE_NAME + "'";
+        List<String> results = template.query(checkUrl, new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet resultSet, int i) throws SQLException {
+                return resultSet.getString("TABLE_NAME");
+            }
+        });
+    }
+
     private static boolean isDatabaseSetUp() throws SQLException {
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
         String checkUrl = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES where" +
