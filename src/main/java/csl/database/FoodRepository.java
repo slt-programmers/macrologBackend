@@ -41,7 +41,9 @@ public class FoodRepository {
                     COL_FAT + " DEC(5,2) NOT NULL, " +
                     COL_CARBS + " DEC(5,2) NOT NULL," +
                     COL_UNIT_NAME + " TEXT," +
-                    COL_UNIT_GRAMS + " DEC(5,2))";
+                    COL_UNIT_GRAMS + " DEC(5,2)," +
+                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
+                    ")";
 
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 

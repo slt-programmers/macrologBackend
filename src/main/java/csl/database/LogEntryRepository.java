@@ -36,11 +36,12 @@ public class LogEntryRepository {
                     COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_FOOD_ID + " INT(6) NOT NULL, " +
                     COL_PORTION_ID + " INT(6) NULL, " +
-                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
-                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")" +
                     COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
                     COL_DAY + " DATE NOT NULL," +
-                    COL_MEAL + " TEXT" +
+                    COL_MEAL + " TEXT," +
+                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")," +
+                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")," +
+                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
 
     public static final String TABLE_DELETE =

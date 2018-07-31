@@ -28,7 +28,9 @@ public class SettingsRepository {
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_SETTING + " TEXT NOT NULL, " +
-                    COL_VALUE + " TEXT)";
+                    COL_VALUE + " TEXT," +
+                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
+                    ")";
     private static final String SELECT_SQL = "select * from settings";
     private static final String INSERT_SQL = "insert into settings" +
             "(user_id,setting, value) values(:userId,:setting, :value)";
