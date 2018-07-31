@@ -7,6 +7,8 @@ import csl.database.SettingsRepository;
 import csl.database.model.*;
 import csl.dto.*;
 import csl.dto.LogEntryDto;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +40,21 @@ public class ImportService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity setAll(@RequestBody Export export) throws URISyntaxException {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         LOGGER.debug("export = " +export);
 
         List<Setting> settings = export.getAllSettings();
         for (Setting setting : settings) {
-            settingsRepo.insertSetting(setting.getName(), setting.getValue());
+            settingsRepo.insertSetting(userInfo.getUserId(),setting.getName(), setting.getValue());
         }
 
         List<FoodDto> allFoodDto = export.getAllFood();
         for (FoodDto foodDto : allFoodDto) {
             Food food = mapFoodDtoToFood(foodDto);
-            foodRepository.insertFood(food);
+            foodRepository.insertFood(userInfo.getUserId(),food);
 
             // We hebben de database ID nodig, dus opnieuw ophalen:
-            Food foodDB = foodRepository.getFood(food.getName());
+            Food foodDB = foodRepository.getFood(userInfo.getUserId(),food.getName());
             List<PortionDto> portionDtos = foodDto.getPortions();
 
             for (PortionDto portionDto: portionDtos) {
@@ -64,13 +67,13 @@ public class ImportService {
         for (LogEntryDto logEntryDto: logEntryDtos) {
             LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
             // De database IDs komen waarschijnlijk niet overeen, dus haal de correcte database ids op:
-            Food foodDB = foodRepository.getFood(logEntryDto.getFood().getName());
+            Food foodDB = foodRepository.getFood(userInfo.getUserId(),logEntryDto.getFood().getName());
             logEntry.setFoodId(foodDB.getId());
             if (logEntryDto.getPortion() != null) {
                 Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
                 logEntry.setPortionId(portionDB.getId());
             }
-            logEntryRepository.insertLogEntry(logEntry);
+            logEntryRepository.insertLogEntry(userInfo.getUserId(),logEntry);
         }
 
         return ResponseEntity.status(HttpStatus.OK).build();

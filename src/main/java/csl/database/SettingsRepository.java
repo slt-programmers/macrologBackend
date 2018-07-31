@@ -22,15 +22,17 @@ public class SettingsRepository {
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private static final String COL_SETTING = "setting";
     private static final String COL_VALUE = "value";
+    private static final String COL_USER_ID = "user_id";
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
+                    COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_SETTING + " TEXT NOT NULL, " +
                     COL_VALUE + " TEXT)";
     private static final String SELECT_SQL = "select * from settings";
-    private static final String INSERT_SQL = "insert into settings(" +
-            "setting, value) values(:setting, :value)";
-    private static final String UPDATE_SQL = "UPDATE settings SET value = :value where setting = :setting";
+    private static final String INSERT_SQL = "insert into settings" +
+            "(user_id,setting, value) values(:userId,:setting, :value)";
+    private static final String UPDATE_SQL = "UPDATE settings SET value = :value where user_id = :userId AND setting = :setting";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsRepository.class);
@@ -38,42 +40,50 @@ public class SettingsRepository {
     public SettingsRepository() {
     }
 
-    public int putSetting(String setting, String value) {
-        if (getSetting(setting) == null) {
+    public int putSetting(Integer userId,String setting, String value) {
+        if (getSetting(userId,setting) == null) {
             LOGGER.debug("Insert");
-            return insertSetting(setting, value);
+            return insertSetting(userId,setting, value);
         } else {
             LOGGER.debug("Update");
-            return updateSetting(setting, value);
+            return updateSetting(userId,setting, value);
         }
     }
 
-    private int updateSetting(String setting, String value) {
+    private int updateSetting(Integer userId, String setting, String value) {
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("id", null)
                 .addValue("setting", setting)
                 .addValue("value", value);
         return template.update(UPDATE_SQL, params);
     }
 
-    public int insertSetting(String setting, String value) {
+    public int insertSetting(Integer userId, String setting, String value) {
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("id", null)
                 .addValue("setting", setting)
                 .addValue("value", value);
         return template.update(INSERT_SQL, params);
     }
 
-    public String getSetting(String setting) {
+    public String getSetting(Integer userId, String setting) {
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("setting", setting);
-        String settings = SELECT_SQL + " WHERE  " + COL_SETTING + "= :setting";
+        String settings = SELECT_SQL + " WHERE  " + COL_SETTING + "= :setting AND " + COL_USER_ID + "=:userId";
         List<Setting> queryResults = template.query(settings, params, new SettingsWrapper<Setting>());
         return queryResults.isEmpty() ? null : queryResults.get(0).getValue();
     }
 
-    public List<Setting> getAllSettings() {
+    private List<Setting> getAllSettings() {
         return template.query(SELECT_SQL, new SettingsWrapper<Setting>());
+    }
+    public List<Setting> getAllSettings(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + "=:userId", params,new SettingsWrapper<Setting>());
     }
 
     class SettingsWrapper<T> implements RowMapper<Setting> {

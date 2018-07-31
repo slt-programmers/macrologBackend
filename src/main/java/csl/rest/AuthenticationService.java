@@ -31,10 +31,11 @@ public class AuthenticationService {
     private final static UserAcccountRepository USER_ACCCOUNT_REPOSITORY = new UserAcccountRepository();
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
-    @CrossOrigin(origins = "http://localhost:4200")
+//    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/authenticate",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+            method = POST
+            //, headers = {"Content-Type=application/json"}
+            )
     public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
         LOGGER.error("Login attempt:" + request.getUsername() + " - " + request.getPassword());
 

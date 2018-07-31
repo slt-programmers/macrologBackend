@@ -7,6 +7,8 @@ import csl.database.model.Food;
 import csl.database.model.LogEntry;
 import csl.database.model.Portion;
 import csl.dto.*;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -15,14 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sun.rmi.runtime.Log;
 
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -31,6 +30,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/logs")
 @Api(value = "logs", description = "Operations pertaining to logentries in the macro logger applications")
 public class LogEntryService {
+
 
     private FoodRepository foodRepository = new FoodRepository();
     private PortionRepository portionRepository = new PortionRepository();
@@ -44,9 +44,10 @@ public class LogEntryService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllLogEntries() {
-        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries();
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
 
-        return ResponseEntity.ok(mapToDtos(allLogEntries));
+        return ResponseEntity.ok(mapToDtos(userInfo,allLogEntries));
     }
 
     @ApiOperation(value = "Retrieve all stored logentries")
@@ -56,6 +57,8 @@ public class LogEntryService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getLogOfDay(@PathVariable("date") String dateLog) {
 
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        LOGGER.debug("Request for " + userInfo);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date parsedDate;
         try {
@@ -65,12 +68,12 @@ public class LogEntryService {
             return ResponseEntity.badRequest().build();
         }
 
-        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(parsedDate);
+        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(),parsedDate);
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto dto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(logEntry.getFoodId());
+            Food food = foodRepository.getFoodById(userInfo.getUserId(),logEntry.getFoodId());
             dto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
             dto.setFood(foodDto);
@@ -116,6 +119,7 @@ public class LogEntryService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeLogEntries(@RequestBody List<StoreLogEntryRequest> logEntries) {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
         for (StoreLogEntryRequest logEntry : logEntries) {
             csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
@@ -126,9 +130,9 @@ public class LogEntryService {
             entry.setMeal(logEntry.getMeal());
             entry.setId(logEntry.getId());
             if (logEntry.getId() == null) {
-                logEntryRepository.insertLogEntry(entry);
+                logEntryRepository.insertLogEntry(userInfo.getUserId(),entry);
             } else {
-                logEntryRepository.updateLogEntry(entry);
+                logEntryRepository.updateLogEntry(userInfo.getUserId(),entry);
             }
         }
 
@@ -143,7 +147,8 @@ public class LogEntryService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeLogEntry(@PathVariable("id") Long logEntryId) {
 
-        logEntryRepository.deleteLogEntry(logEntryId);
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        logEntryRepository.deleteLogEntry(userInfo.getUserId(),logEntryId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -153,17 +158,16 @@ public class LogEntryService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
-
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Calendar now = GregorianCalendar.getInstance();
         java.util.Date endTime = now.getTime();
         Calendar begin = GregorianCalendar.getInstance();
-        begin.add(GregorianCalendar.MONTH,-1);
+        begin.add(GregorianCalendar.MONTH, -1);
         java.util.Date beginTime = begin.getTime();
 
-        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(beginTime, endTime);
-        List<LogEntryDto> logEntryDtos = mapToDtos(allLogEntries);
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(),beginTime, endTime);
+        List<LogEntryDto> logEntryDtos = mapToDtos(userInfo,allLogEntries);
         LOGGER.debug("Aantal dtos:" + logEntryDtos);
-
 
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
@@ -187,12 +191,12 @@ public class LogEntryService {
         return ResponseEntity.ok(retObject);
     }
 
-    private List<LogEntryDto> mapToDtos(List<LogEntry> allLogEntries){
+    private List<LogEntryDto> mapToDtos(UserInfo userInfo,List<LogEntry> allLogEntries) {
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto dto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(logEntry.getFoodId());
+            Food food = foodRepository.getFoodById(userInfo.getUserId(),logEntry.getFoodId());
             dto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
             dto.setFood(foodDto);
@@ -228,6 +232,6 @@ public class LogEntryService {
 
             allDtos.add(dto);
         }
-        return  allDtos;
+        return allDtos;
     }
 }

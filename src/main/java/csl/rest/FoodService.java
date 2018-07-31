@@ -8,6 +8,8 @@ import csl.dto.FoodDto;
 import csl.dto.Macro;
 import csl.dto.PortionDto;
 import csl.enums.MeasurementUnit;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -39,7 +41,8 @@ public class FoodService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllFood() {
 
-        List<Food> allFood = foodRepository.getAllFood();
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food,true));
@@ -56,8 +59,8 @@ public class FoodService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getFoodInformation(@PathVariable("id") Long id) {
-
-        Food food = foodRepository.getFoodById(id);
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        Food food = foodRepository.getFoodById(userInfo.getUserId(),id);
         if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
@@ -123,6 +126,7 @@ public class FoodService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (addFoodRequest.getId()!= null){
             // Update request
             Food newFood = new Food();
@@ -142,7 +146,7 @@ public class FoodService {
             newFood.setProtein(addFoodRequest.getProtein());
 
 
-            foodRepository.updateFood(newFood);
+            foodRepository.updateFood(userInfo.getUserId(),newFood);
 
             // remove portions not supported yet.
             for (PortionDto portionDto : addFoodRequest.getPortions()) {
@@ -169,7 +173,7 @@ public class FoodService {
 
 
         } else {
-            Food food = foodRepository.getFood(addFoodRequest.getName());
+            Food food = foodRepository.getFood(userInfo.getUserId(),addFoodRequest.getName());
             if (food != null) {
                 String errorMessage = "This food is already in your database";
                 return ResponseEntity.badRequest().body(errorMessage);
@@ -189,9 +193,9 @@ public class FoodService {
                 newFood.setFat(addFoodRequest.getFat());
                 newFood.setProtein(addFoodRequest.getProtein());
 
-                int insertedRows = foodRepository.insertFood(newFood);
+                int insertedRows = foodRepository.insertFood(userInfo.getUserId(),newFood);
                 if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
-                    Food addedFood = foodRepository.getFood(addFoodRequest.getName());
+                    Food addedFood = foodRepository.getFood(userInfo.getUserId(),addFoodRequest.getName());
                     for (PortionDto portionDto : addFoodRequest.getPortions()) {
                         csl.database.model.Portion newPortion = new csl.database.model.Portion();
                         newPortion.setDescription(portionDto.getDescription());

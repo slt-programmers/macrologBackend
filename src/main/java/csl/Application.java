@@ -23,18 +23,6 @@ import java.util.List;
 @EnableAutoConfiguration
 public class Application {
 
-
-//    @Bean
-//    public FilterRegistrationBean<SecurityFilter> loggingFilter() {
-//        FilterRegistrationBean<SecurityFilter> registrationBean
-//                = new FilterRegistrationBean<>();
-//
-//        registrationBean.setFilter(new SecurityFilter());
-//        registrationBean.addUrlPatterns("/logs/*");
-//
-//        return registrationBean;
-//    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws Exception {
@@ -42,6 +30,8 @@ public class Application {
 
         //DEV/TEST purposes
         boolean clearTablesOnStartup = false;
+
+        updateAT();
 
         if (clearTablesOnStartup) {
             deleteTables();
@@ -54,8 +44,38 @@ public class Application {
             LOGGER.info("Tables already set up");
         }
 
+    }
 
-        //Application is now running
+    private static void updateAT() {
+        String[] statements = new String[]{"insert into useraccounts(id,username,password) values (null,'test','test')",
+                // settings tabel:
+                "ALTER TABLE " + SettingsRepository.TABLE_NAME + " ADD COLUMN USER_ID INT (6)",
+                "UPDATE " + SettingsRepository.TABLE_NAME + " SET USER_ID = (select id from useraccounts where username='test')",
+                "ALTER TABLE " + SettingsRepository.TABLE_NAME + " MODIFY COLUMN USER_ID INT (6) NOT NULL",
+                "ALTER TABLE " + SettingsRepository.TABLE_NAME + " ADD FOREIGN KEY (USER_ID) REFERENCES " + UserAcccountRepository.TABLE_NAME + "(id)",
+                // Food tabel:
+                "ALTER TABLE " + FoodRepository.TABLE_NAME + " ADD COLUMN USER_ID INT (6)",
+                "UPDATE " + FoodRepository.TABLE_NAME + " SET USER_ID = (select id from useraccounts where username='test')",
+                "ALTER TABLE " + FoodRepository.TABLE_NAME + " MODIFY COLUMN USER_ID INT (6) NOT NULL",
+                "ALTER TABLE " + FoodRepository.TABLE_NAME + " ADD FOREIGN KEY (USER_ID) REFERENCES " + UserAcccountRepository.TABLE_NAME + "(id)",
+                // logentry tabel:
+                "ALTER TABLE " + LogEntryRepository.TABLE_NAME + " ADD COLUMN USER_ID INT (6)",
+                "UPDATE " + LogEntryRepository.TABLE_NAME + " SET USER_ID = (select id from useraccounts where username='test')",
+                "ALTER TABLE " + LogEntryRepository.TABLE_NAME + " MODIFY COLUMN USER_ID INT (6) NOT NULL",
+                "ALTER TABLE " + LogEntryRepository.TABLE_NAME + " ADD FOREIGN KEY (USER_ID) REFERENCES " + UserAcccountRepository.TABLE_NAME + "(id)"
+        };
+
+        for (String statement : statements) {
+            try (Connection connection = DatabaseHelper.getInstance().getConnection();
+                 CallableStatement currStatement = connection.prepareCall(statement)) {
+                LOGGER.info("Executing");
+                LOGGER.info(statement);
+                currStatement.execute();
+
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
 
     }
 
@@ -87,7 +107,6 @@ public class Application {
             LOGGER.error(e.getMessage());
         }
     }
-
 
 
     private static void createTables() {

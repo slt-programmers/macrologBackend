@@ -2,6 +2,8 @@ package csl.rest;
 
 import csl.database.SettingsRepository;
 import csl.database.model.Setting;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -27,7 +29,8 @@ public class SettingsService {
             method = PUT,
             headers = {"Content-Type=application/json"})
     public ResponseEntity changeSetting(@RequestBody Setting setting) {
-        settingsRepo.putSetting(setting.getName(), setting.getValue());
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        settingsRepo.putSetting(userInfo.getUserId(),setting.getName(), setting.getValue());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -37,7 +40,8 @@ public class SettingsService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllSetting() {
-        List<Setting> settings = settingsRepo.getAllSettings();
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         return ResponseEntity.ok(settings);
     }
 
@@ -47,7 +51,8 @@ public class SettingsService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getSetting(@PathVariable("name") String name) {
-        String setting = settingsRepo.getSetting(name);
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        String setting = settingsRepo.getSetting(userInfo.getUserId(),name);
         return ResponseEntity.ok(setting);
     }
 

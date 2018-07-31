@@ -23,6 +23,7 @@ public class LogEntryRepository {
     public static final String TABLE_NAME = "logentry";
 
     private static final String COL_ID = "id";
+    private static final String COL_USER_ID = "user_id";
     private static final String COL_FOOD_ID = "food_id";
     private static final String COL_PORTION_ID = "portion_id";
     private static final String COL_MULTIPLIER = "multiplier";
@@ -32,6 +33,7 @@ public class LogEntryRepository {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
+                    COL_USER_ID + " INT(6) NOT NULL, " +
                     "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
                     "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")" +
                     COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
@@ -43,15 +45,16 @@ public class LogEntryRepository {
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,portion_Id,multiplier,day,meal) values(:foodId,:portionId,:multiplier,:day,:meal)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id";
-    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id";
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id,food_Id,portion_Id,multiplier,day,meal) values(:userId,:foodId,:portionId,:multiplier,:day,:meal)";
+    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id where user_id=:userId";
+    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id=:userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-    public int insertLogEntry(LogEntry entry) {
+    public int insertLogEntry(Integer userId,LogEntry entry) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
+                .addValue("userId", userId)
                 .addValue("foodId", entry.getFoodId())
                 .addValue("portionId", entry.getPortionId())
                 .addValue("multiplier", entry.getMultiplier())
@@ -60,9 +63,10 @@ public class LogEntryRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public int updateLogEntry(LogEntry entry) {
+    public int updateLogEntry(Integer userId,LogEntry entry) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", entry.getId())
+                .addValue("userId", userId)
                 .addValue("foodId", entry.getFoodId())
                 .addValue("portionId", entry.getPortionId())
                 .addValue("multiplier", entry.getMultiplier())
@@ -71,32 +75,41 @@ public class LogEntryRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public int deleteLogEntry(Long entry) {
+    public int deleteLogEntry(Integer userId,Long entry) {
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("id", entry);
         return template.update(DELETE_SQL, params);
     }
 
-    public List<LogEntry> getAllLogEntries() {
+    private List<LogEntry> getAllLogEntries() {
         return template.query(SELECT_SQL, new LogEntryWrapper());
     }
+    public List<LogEntry> getAllLogEntries(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
 
-    public List<LogEntry> getAllLogEntries(java.util.Date d) {
+        return template.query(SELECT_SQL +" WHERE user_id=:userId", params,new LogEntryWrapper());
+    }
+
+    public List<LogEntry> getAllLogEntries(Integer userId,java.util.Date d) {
         LOGGER.debug("Getting entries for " + d);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("date",sdf.format(d));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND user_id=:userId";
         List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
         return queryResults;
     }
-    public List<LogEntry> getAllLogEntries(java.util.Date begin, java.util.Date end) {
+    public List<LogEntry> getAllLogEntries(Integer userId,java.util.Date begin, java.util.Date end) {
         LOGGER.debug("Getting entries for period " + begin + " - " + end);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("dateBegin",sdf.format(begin))
                 .addValue("dateEnd",sdf.format(end));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND user_id=:userId";
         LOGGER.debug(myLogs);
         LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
         List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());

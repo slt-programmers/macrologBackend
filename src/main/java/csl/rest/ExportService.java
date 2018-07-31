@@ -7,6 +7,8 @@ import csl.database.SettingsRepository;
 import csl.database.model.Food;
 import csl.database.model.Setting;
 import csl.dto.*;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,23 +35,23 @@ public class ExportService {
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity  getAll() {
-
+    public ResponseEntity getAll() {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
-        List<Food> allFood = foodRepository.getAllFood();
+        List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
         }
         export.setAllFood(allFoodDtos);
 
-        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries();
+        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
 
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto logEntryDto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(logEntry.getFoodId());
+            Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
             logEntryDto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
             logEntryDto.setFood(foodDto);
@@ -88,7 +90,7 @@ public class ExportService {
 
         export.setAllLogEntries(allDtos);
 
-        List<Setting> settings = settingsRepo.getAllSettings();
+        List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         export.setAllSettings(settings);
 
 

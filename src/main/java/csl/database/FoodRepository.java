@@ -22,6 +22,7 @@ public class FoodRepository {
     public static final String TABLE_NAME = "food";
 
     public static final String COL_ID = "id";
+    private static final String COL_USER_ID = "user_id";
     private static final String COL_NAME = "name";
     private static final String COL_MEASUREMENT = "measurement";
     private static final String COL_PROTEIN = "protein";
@@ -33,6 +34,7 @@ public class FoodRepository {
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
+                    COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_NAME + " TEXT NOT NULL, " +
                     COL_MEASUREMENT + " TEXT NOT NULL, " +
                     COL_PROTEIN + " DEC(5,2)  NOT NULL, " +
@@ -45,24 +47,30 @@ public class FoodRepository {
 
     private static final String SELECT_SQL = "select * from food";
     private static final String INSERT_SQL = "insert into food(" +
-            "name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
-            "values(:name, :measurement, :protein, :fat, :carbs, :unit_name,:unit_grams)";
+            "user_id,name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
+            "values(:userId, :name, :measurement, :protein, :fat, :carbs, :unit_name,:unit_grams)";
     private static final String UPDATE_SQL = "update food set " +
             "name = :name, measurement = :measurement, protein = :protein, fat = :fat, carbs = :carbs, unit_name = :unit_name ,unit_grams = :unit_grams " +
-            "where id = :id";
+            "where id = :id AND user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
     public FoodRepository() {
     }
 
-    public List<Food> getAllFood() {
+    private List<Food> getAllFood() {
         return template.query(SELECT_SQL, new FoodWrapper<Food>());
     }
+    public List<Food> getAllFood(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.query(SELECT_SQL + " AND user_id=:userId",params, new FoodWrapper<Food>());
+    }
 
-    public int insertFood(Food food) {
+    public int insertFood(Integer userId,Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
+                .addValue("userId", userId)
                 .addValue("name", food.getName())
                 .addValue("measurement", food.getMeasurementUnit().toString())
                 .addValue("protein", food.getProtein())
@@ -73,9 +81,10 @@ public class FoodRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public int updateFood(Food food) {
+    public int updateFood(Integer userId,Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", food.getId())
+                .addValue("userId", userId)
                 .addValue("name", food.getName())
                 .addValue("measurement", food.getMeasurementUnit().toString())
                 .addValue("protein", food.getProtein())
@@ -86,17 +95,20 @@ public class FoodRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public Food getFood(String name) {
+    public Food getFood(Integer userId,String name) {
         SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
                 .addValue("name", name);
-        String myFood = SELECT_SQL + " WHERE  " + COL_NAME + "= :name";
+        String myFood = SELECT_SQL + " WHERE  " + COL_NAME + "= :name AND user_id=:userId";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
-    public Food getFoodById(Long id) {
-        SqlParameterSource params = new MapSqlParameterSource().addValue("id", id);
-        String myFood = SELECT_SQL + " WHERE  " + COL_ID + "= :id";
+    public Food getFoodById(Integer userId, Long id) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("id", id);
+        String myFood = SELECT_SQL + " WHERE  " + COL_ID + "= :id AND user_id=:userId";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
         Assert.isTrue(queryResults.size() <= 1, "More than one food was found");
         return queryResults.isEmpty() ? null : queryResults.get(0);
