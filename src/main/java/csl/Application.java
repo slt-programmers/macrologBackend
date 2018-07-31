@@ -81,7 +81,7 @@ public class Application {
             createTable(IngredientRepository.TABLE_CREATE);
         }
 
-        updateAT();
+//        updateAT();
     }
 
     private static void createTable(String sql) {
