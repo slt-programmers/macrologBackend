@@ -3,6 +3,7 @@ package csl.rest;
 import csl.database.FoodRepository;
 import csl.database.PortionRepository;
 import csl.database.model.Food;
+import csl.database.model.Portion;
 import csl.dto.AddFoodRequest;
 import csl.dto.FoodDto;
 import csl.dto.Macro;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -49,7 +49,6 @@ public class FoodService {
         }
 
         allFoodDtos.sort(Comparator.comparing(FoodDto::getName));
-
         return ResponseEntity.ok(allFoodDtos);
     }
 
@@ -74,20 +73,24 @@ public class FoodService {
         FoodDto foodDto = mapFoodToFoodDto(food);
 
         if (withPortions) {
-            List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (csl.database.model.Portion portion : foodPortions) {
-                PortionDto currDto = new PortionDto();
-                currDto.setDescription(portion.getDescription());
-                currDto.setGrams(portion.getGrams());
-                currDto.setUnitMultiplier(portion.getUnitMultiplier());
-                currDto.setId(portion.getId());
-
-                Macro calculatedMacros = calculateMacro(food, portion);
-                currDto.setMacros(calculatedMacros);
-                foodDto.addPortion(currDto);
+            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
+            for (Portion portion : foodPortions) {
+                PortionDto portionDto = mapPortionToPortionDto(portion, food);
+                foodDto.addPortion(portionDto);
             }
         }
         return foodDto;
+    }
+
+    public static PortionDto mapPortionToPortionDto(Portion portion, Food food) {
+        PortionDto currDto = new PortionDto();
+        currDto.setDescription(portion.getDescription());
+        currDto.setGrams(portion.getGrams());
+        currDto.setUnitMultiplier(portion.getUnitMultiplier());
+        currDto.setId(portion.getId());
+        Macro calculatedMacros = calculateMacro(food, portion);
+        currDto.setMacros(calculatedMacros);
+        return currDto;
     }
 
     public static FoodDto mapFoodToFoodDto(Food food) {

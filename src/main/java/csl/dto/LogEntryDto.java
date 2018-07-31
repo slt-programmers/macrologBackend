@@ -5,9 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Date;
 
-/**
- * Class voor het bewaren van de macros
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LogEntryDto {
 
