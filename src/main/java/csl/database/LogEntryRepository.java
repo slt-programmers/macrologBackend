@@ -49,7 +49,7 @@ public class LogEntryRepository {
 
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
     private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id,food_Id,portion_Id,multiplier,day,meal) values(:userId,:foodId,:portionId,:multiplier,:day,:meal)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id where user_id=:userId";
+    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id and user_id=:userId";
     private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id=:userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
