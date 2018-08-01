@@ -66,7 +66,7 @@ public class FoodRepository {
     public List<Food> getAllFood(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL + " AND user_id=:userId",params, new FoodWrapper<Food>());
+        return template.query(SELECT_SQL + " WHERE user_id=:userId",params, new FoodWrapper<Food>());
     }
 
     public int insertFood(Integer userId,Food food) {

@@ -1,5 +1,6 @@
 package csl.rest;
 
+import csl.database.SettingsRepository;
 import csl.database.UserAcccountRepository;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
@@ -29,26 +30,25 @@ public class AuthenticationService {
 
 
     private final static UserAcccountRepository USER_ACCCOUNT_REPOSITORY = new UserAcccountRepository();
+    private final static SettingsRepository SETTINGS_REPOSITORY = new SettingsRepository();
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
-//    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/authenticate",
-            method = POST
-            //, headers = {"Content-Type=application/json"}
-            )
+            method = POST)
     public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
-        LOGGER.error("Login attempt:" + request.getUsername() + " - " + request.getPassword());
+        LOGGER.error("Login attempt:" + request.getUsername());
 
         UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUser(request.getUsername());
         if (userAccount == null || !userAccount.getPassword().equals(request.getPassword())) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-
+            String name = SETTINGS_REPOSITORY.getSetting((int) userAccount.getId(), "name");
+            if (name==null) name = request.getUsername();
             try {
                 String jwt = Jwts.builder()
                         .setSubject("users/TzMUocMF4p")
                         .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-//                        .claim("name", "Macro Log")
+                        .claim("name", name)
                         .claim("userId", userAccount.getId())
 //                        .claim("scope", "self groups/admins")
                         .signWith(
@@ -58,7 +58,7 @@ public class AuthenticationService {
                         .compact();
                 MultiValueMap<String, String> responseHeaders = new HttpHeaders();
                 responseHeaders.add("token", jwt);
-                return new ResponseEntity("{\"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
+                return new ResponseEntity("{\"name\":\""+name+"\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

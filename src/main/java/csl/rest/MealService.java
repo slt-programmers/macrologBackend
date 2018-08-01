@@ -93,7 +93,7 @@ public class MealService {
                 Long portionId = ingredient.getPortionId();
                 if(portionId != null && portionId != 0) {
                     ingredientDto.setPortionId(portionId);
-                    ingredientDto.setPortion(FoodService.mapPortionToPortionDto(portionRepository.getPortion(portionId), food));
+                    ingredientDto.setPortion(FoodService.mapPortionToPortionDto(portionRepository.getPortion(foodId,portionId), food));
                 }
                 ingredientDto.setMultiplier(ingredient.getMultiplier());
 

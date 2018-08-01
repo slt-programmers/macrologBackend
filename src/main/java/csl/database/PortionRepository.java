@@ -66,10 +66,11 @@ public class PortionRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public Portion getPortion(Long portionId) {
+    public Portion getPortion(Long foodId, Long portionId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("portionId", portionId);
-        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ID + "= :portionId";
+                .addValue("portionId", portionId)
+                .addValue("foodId", foodId);
+        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ID + "= :portionId AND " + COL_FOOD_ID + "= :foodId";
         List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }

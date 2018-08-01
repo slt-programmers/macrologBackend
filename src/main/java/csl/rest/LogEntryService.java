@@ -80,7 +80,7 @@ public class LogEntryService {
 
             Portion portion = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                portion = portionRepository.getPortion(logEntry.getPortionId());
+                portion = portionRepository.getPortion(food.getId(),logEntry.getPortionId());
                 PortionDto portionDto = new PortionDto();
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
@@ -203,7 +203,7 @@ public class LogEntryService {
 
             Portion portion = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                portion = portionRepository.getPortion(logEntry.getPortionId());
+                portion = portionRepository.getPortion(food.getId(),logEntry.getPortionId());
                 PortionDto portionDto = new PortionDto();
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
