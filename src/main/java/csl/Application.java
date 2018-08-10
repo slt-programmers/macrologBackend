@@ -82,6 +82,7 @@ public class Application {
         }
 
 //        updateAT();
+//        updateWeightSettings();
     }
 
     private static void createTable(String sql) {
@@ -96,6 +97,18 @@ public class Application {
         }
     }
 
+    private static void updateWeightSettings() {
+        String sql = "ALTER TABLE " + SettingsRepository.TABLE_NAME +
+                " ADD COLUMN date DATE";
+        try (Connection connection = DatabaseHelper.getInstance().getConnection();
+             CallableStatement currStatement = connection.prepareCall(sql)) {
+            LOGGER.info(sql);
+            currStatement.execute();
+
+        } catch (SQLException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
 
     private static void updateAT() {
         String[] statements = new String[]{"insert into useraccounts(id,username,password) values (null,'test','test')",
@@ -133,7 +146,5 @@ public class Application {
             }
         }
         LOGGER.debug("Finished running update scripts.");
-
     }
-
 }

@@ -28,16 +28,15 @@ public class UserAcccountRepository {
                     COL_USERNAME + " VARCHAR(30) UNIQUE NOT NULL, " +
                     COL_PASSWORD + " TEXT NOT NULL)";
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into "+TABLE_NAME+"(" +
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(" +
             "username, password) values(:username, :password)";
-    private static final String UPDATE_SQL = "UPDATE "+TABLE_NAME+" SET password = :password where username = :username";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password where username = :username";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
     private static final Logger LOGGER = LoggerFactory.getLogger(UserAcccountRepository.class);
 
     public UserAcccountRepository() {
     }
-
 
     private int updatePassword(String username, String password) {
         SqlParameterSource params = new MapSqlParameterSource()
@@ -63,12 +62,7 @@ public class UserAcccountRepository {
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
-//    public List<Setting> getAllSettings() {
-//        return template.query(SELECT_SQL, new UserWrapper<Setting>());
-//    }
-
     class UserWrapper<T> implements RowMapper<UserAccount> {
-
         @Override
         public UserAccount mapRow(ResultSet rs, int i) throws SQLException {
             return new UserAccount(rs.getLong(COL_ID),

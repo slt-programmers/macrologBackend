@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,13 +24,15 @@ public class SettingsRepository {
     private static final String COL_SETTING = "setting";
     private static final String COL_VALUE = "value";
     private static final String COL_USER_ID = "user_id";
+    private static final String COL_DATE = "date";
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_SETTING + " TEXT NOT NULL, " +
                     COL_VALUE + " TEXT," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
+                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")," +
+                    COL_DATE + " DATE" +
                     ")";
     private static final String SELECT_SQL = "select * from settings";
     private static final String INSERT_SQL = "insert into settings" +
@@ -67,6 +70,16 @@ public class SettingsRepository {
                 .addValue("id", null)
                 .addValue("setting", setting)
                 .addValue("value", value);
+        return template.update(INSERT_SQL, params);
+    }
+
+    public int insertSetting(Integer userId, String setting, String value, Date date) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("id", null)
+                .addValue("setting", setting)
+                .addValue("value", value)
+                .addValue("date", date);
         return template.update(INSERT_SQL, params);
     }
 

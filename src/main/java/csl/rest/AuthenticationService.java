@@ -28,7 +28,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/api")
 public class AuthenticationService {
 
-
     private final static UserAcccountRepository USER_ACCCOUNT_REPOSITORY = new UserAcccountRepository();
     private final static SettingsRepository SETTINGS_REPOSITORY = new SettingsRepository();
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
@@ -36,14 +35,22 @@ public class AuthenticationService {
     @RequestMapping(value = "/authenticate",
             method = POST)
     public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
-        LOGGER.error("Login attempt:" + request.getUsername());
+        String username = request.getUsername();
+        String password = request.getPassword();
+        LOGGER.info("Login attempt: " + username);
 
-        UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUser(request.getUsername());
-        if (userAccount == null || !userAccount.getPassword().equals(request.getPassword())) {
+        UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        if (userAccount == null) {
+            LOGGER.error("Not found");
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } else if (!userAccount.getPassword().equals(password)) {
+            LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
             String name = SETTINGS_REPOSITORY.getSetting((int) userAccount.getId(), "name");
-            if (name==null) name = request.getUsername();
+            if (name == null) {
+                name = username;
+            }
             try {
                 String jwt = Jwts.builder()
                         .setSubject("users/TzMUocMF4p")
@@ -58,14 +65,12 @@ public class AuthenticationService {
                         .compact();
                 MultiValueMap<String, String> responseHeaders = new HttpHeaders();
                 responseHeaders.add("token", jwt);
-                return new ResponseEntity("{\"name\":\""+name+"\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
-
+                LOGGER.info("Login successful");
+                return new ResponseEntity<>("{\"name\":\"" + name + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
+                return ResponseEntity.status(500).body(e.getMessage());
             }
-
-
-            return ResponseEntity.ok("ok");
         }
     }
 
@@ -74,12 +79,38 @@ public class AuthenticationService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity signUp(@RequestBody AuthenticationRequest request) {
-        LOGGER.error("Add user attempt:" + request.getUsername() + " - " + request.getPassword());
+        String username = request.getUsername();
+        String password = request.getPassword();
+        LOGGER.info("Add user attempt:" + username + " - " + password);
 
-        String encodedPassword = request.getPassword(); // todo = encode
-        USER_ACCCOUNT_REPOSITORY.insertUser(request.getUsername(), encodedPassword);
+        String encodedPassword = password; // todo = encode
 
-        return ResponseEntity.ok("ok");
+        UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        if (account == null) {
+            USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword);
+            account = USER_ACCCOUNT_REPOSITORY.getUser(username);
 
+            try {
+                String jwt = Jwts.builder()
+                        .setSubject("users/TzMUocMF4p")
+                        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                        .claim("name", username)
+                        .claim("userId", account.getId())
+                        .signWith(
+                                SignatureAlgorithm.HS256,
+                                SECRET.getBytes("UTF-8")
+                        )
+                        .compact();
+                MultiValueMap<String, String> responseHeaders = new HttpHeaders();
+                responseHeaders.add("token", jwt);
+                LOGGER.info("Signup successful");
+                return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error(e.getMessage());
+                return ResponseEntity.status(500).body(e.getMessage());
+            }
+        } else {
+            return ResponseEntity.status(401).body("Username allready in use");
+        }
     }
 }

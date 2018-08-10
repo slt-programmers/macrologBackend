@@ -11,10 +11,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/settings")
@@ -54,6 +57,21 @@ public class SettingsService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         String setting = settingsRepo.getSetting(userInfo.getUserId(),name);
         return ResponseEntity.ok(setting);
+    }
+
+    @ApiOperation(value = "Post new weight")
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/weight",
+            method = POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity insertWeight(@RequestParam("weight") String weight,
+                                       @RequestParam("date") String date) {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        LocalDate localDate = LocalDate.parse(date);
+        System.out.println(localDate);
+        Date sqlDate = new Date(localDate.toEpochDay());
+        settingsRepo.insertSetting(userInfo.getUserId(), "weight", weight, sqlDate);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }
