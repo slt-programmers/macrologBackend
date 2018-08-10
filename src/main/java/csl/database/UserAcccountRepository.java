@@ -22,14 +22,16 @@ public class UserAcccountRepository {
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private static final String COL_USERNAME = "username";
     private static final String COL_PASSWORD = "password";
+    private static final String COL_EMAIL = "email";
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USERNAME + " VARCHAR(30) UNIQUE NOT NULL, " +
-                    COL_PASSWORD + " TEXT NOT NULL)";
+                    COL_PASSWORD + " TEXT NOT NULL, " +
+                    COL_EMAIL + " TEXT NOT NULL)";
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
     private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(" +
-            "username, password) values(:username, :password)";
+            "username, password, email) values(:username, :password, :email)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password where username = :username";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
@@ -46,11 +48,12 @@ public class UserAcccountRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public int insertUser(String username, String password) {
+    public int insertUser(String username, String password, String email) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("username", username)
-                .addValue("password", password);
+                .addValue("password", password)
+                .addValue("email", email);
         return template.update(INSERT_SQL, params);
     }
 
@@ -67,7 +70,8 @@ public class UserAcccountRepository {
         public UserAccount mapRow(ResultSet rs, int i) throws SQLException {
             return new UserAccount(rs.getLong(COL_ID),
                     rs.getString(COL_USERNAME),
-                    rs.getString(COL_PASSWORD)
+                    rs.getString(COL_PASSWORD),
+                    rs.getString(COL_EMAIL)
             );
         }
     }

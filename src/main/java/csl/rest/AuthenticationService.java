@@ -79,15 +79,17 @@ public class AuthenticationService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity signUp(@RequestBody AuthenticationRequest request) {
+        LOGGER.info(request.getEmail());
         String username = request.getUsername();
         String password = request.getPassword();
+        String email = request.getEmail();
         LOGGER.info("Add user attempt:" + username + " - " + password);
 
         String encodedPassword = password; // todo = encode
 
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
         if (account == null) {
-            USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword);
+            USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword, email);
             account = USER_ACCCOUNT_REPOSITORY.getUser(username);
 
             try {
@@ -113,4 +115,28 @@ public class AuthenticationService {
             return ResponseEntity.status(401).body("Username allready in use");
         }
     }
+
+    @CrossOrigin(origins = "http://localhost:4200")
+    @RequestMapping(value = "/validate",
+            method = POST,
+            headers = {"Content-Type=application/json"})
+    public ResponseEntity validate(@RequestBody AuthenticationRequest request) {
+        LOGGER.info("Validate email");
+
+        String username = request.getUsername();
+        String email = request.getEmail();
+        UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        if (account != null) {
+            if (account.getEmail().equals(email)) {
+                return ResponseEntity.ok("Email matches");
+            } else {
+                LOGGER.error("No match");
+                return ResponseEntity.status(401).body("Email does not match");
+            }
+        } else {
+            LOGGER.error("Account is null");
+            return ResponseEntity.status(404).body("Username not found");
+        }
+    }
+
 }

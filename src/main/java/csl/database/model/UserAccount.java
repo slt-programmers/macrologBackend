@@ -5,11 +5,13 @@ public class UserAccount {
     private long id;
     private String username;
     private String password;
+    private String email;
 
-    public UserAccount(long id, String username, String password) {
+    public UserAccount(long id, String username, String password, String email) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.email = email;
     }
 
     public long getId() {
@@ -30,5 +32,13 @@ public class UserAccount {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

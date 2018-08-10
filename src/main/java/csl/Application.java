@@ -83,6 +83,7 @@ public class Application {
 
 //        updateAT();
 //        updateWeightSettings();
+//        updateUserAccountsWithEmail();
     }
 
     private static void createTable(String sql) {
@@ -146,5 +147,17 @@ public class Application {
             }
         }
         LOGGER.debug("Finished running update scripts.");
+    }
+
+    private static void updateUserAccountsWithEmail() {
+        String sql = "ALTER TABLE " + UserAcccountRepository.TABLE_NAME +
+                " ADD COLUMN email TEXT NOT NULL";
+        try (Connection connection = DatabaseHelper.getInstance().getConnection();
+             CallableStatement currStatement = connection.prepareCall(sql)) {
+            LOGGER.info(sql);
+            currStatement.execute();
+        } catch (SQLException e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 }
