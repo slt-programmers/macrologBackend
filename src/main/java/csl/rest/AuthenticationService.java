@@ -89,31 +89,39 @@ public class AuthenticationService {
         String encodedPassword = password; // todo = encode
 
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
-        if (account == null) {
+        if (account != null) {
+            return ResponseEntity.status(401).body("Username allready in use");
+        } else {
             USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword, email);
             account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        }
 
-            try {
-                String jwt = Jwts.builder()
-                        .setSubject("users/TzMUocMF4p")
-                        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                        .claim("name", username)
-                        .claim("userId", account.getId())
-                        .signWith(
-                                SignatureAlgorithm.HS256,
-                                SECRET.getBytes("UTF-8")
-                        )
-                        .compact();
-                MultiValueMap<String, String> responseHeaders = new HttpHeaders();
-                responseHeaders.add("token", jwt);
-                LOGGER.info("Signup successful");
-                return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
-            } catch (UnsupportedEncodingException e) {
-                LOGGER.error(e.getMessage());
-                return ResponseEntity.status(500).body(e.getMessage());
-            }
-        } else {
-            return ResponseEntity.status(401).body("Username allready in use");
+        UserAccount newAccount = account;
+        try {
+            String jwt = Jwts.builder()
+                    .setSubject("users/TzMUocMF4p")
+                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                    .claim("name", username)
+                    .claim("userId", newAccount.getId())
+                    .signWith(
+                            SignatureAlgorithm.HS256,
+                            SECRET.getBytes("UTF-8")
+                    )
+                    .compact();
+            MultiValueMap<String, String> responseHeaders = new HttpHeaders();
+            responseHeaders.add("token", jwt);
+            LOGGER.info("Signup successful");
+
+            new Thread() {
+                public void run () {
+                    MailService.sendConfirmationMail(email, newAccount);
+                }
+            }.start();
+
+            return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error(e.getMessage());
+            return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 
@@ -129,7 +137,7 @@ public class AuthenticationService {
             if (account.getEmail().equals(email)) {
                 new Thread() {
                     public void run () {
-                        MailService.sendMail(email, account);
+                        MailService.sendPasswordRetrievalMail(email, account);
                     }
                 }.start();
                 return ResponseEntity.ok("Email matches");
