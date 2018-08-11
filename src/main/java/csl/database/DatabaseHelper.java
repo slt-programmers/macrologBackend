@@ -9,13 +9,16 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 
 /**
  * Created by Carmen on 17-3-2018.
  */
-public class DatabaseHelper implements DataSource{
+public class DatabaseHelper implements DataSource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHelper.class);
 
@@ -37,17 +40,18 @@ public class DatabaseHelper implements DataSource{
                 e.printStackTrace();
             }
             Properties p = getProperties(hostname);
-            CONNECTION_URL = getFromEnvOrPropertyFile("spring.datasource.url",p);
-            DB_USER = getFromEnvOrPropertyFile("spring.datasource.username",p);
-            DB_PASSWORD = getFromEnvOrPropertyFile("spring.datasource.password",p);
+            CONNECTION_URL = getFromEnvOrPropertyFile("spring.datasource.url", p);
+            DB_USER = getFromEnvOrPropertyFile("spring.datasource.username", p);
+            DB_PASSWORD = getFromEnvOrPropertyFile("spring.datasource.password", p);
             instance = new DatabaseHelper();
         }
         return instance;
     }
+
     private static String getFromEnvOrPropertyFile(String property, Properties p) {
         String fromEnvironment = System.getenv(property);
         LOGGER.debug("fromEnvironment = " + property + " : " + fromEnvironment);
-        return (fromEnvironment == null || fromEnvironment.equals(""))?p.getProperty(property):fromEnvironment;
+        return (fromEnvironment == null || fromEnvironment.equals("")) ? p.getProperty(property) : fromEnvironment;
     }
 
     private static Properties getProperties(String hostname) {
@@ -55,8 +59,8 @@ public class DatabaseHelper implements DataSource{
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         String namePropertiesFile = "application.properties";
         if ("LAPTOP-HPA3TJNH".equals(hostname)) {
-//            namePropertiesFile = "application-arjan.properties";
-                namePropertiesFile = "application-heroku.properties";
+            namePropertiesFile = "application-arjan.propert0ies";
+//                namePropertiesFile = "application-heroku.properties";
         }
 
         InputStream stream = loader.getResourceAsStream(namePropertiesFile);
@@ -70,7 +74,7 @@ public class DatabaseHelper implements DataSource{
 
     @Override
     public Connection getConnection() throws SQLException {
-        return getConnection(DB_USER ,DB_PASSWORD);
+        return getConnection(DB_USER, DB_PASSWORD);
     }
 
     @Override
