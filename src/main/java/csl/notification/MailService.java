@@ -45,14 +45,14 @@ public class MailService {
             message.setFrom(new InternetAddress("macrologwebapp@gmail.com"));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             message.setSubject("Welcome to Macrolog Webapp!");
-            message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
+            message.setContent("<p>Hello " + account.getUsername() + ", </p>" +
                             "<p>Thank you for using Macrolog Webapp!</p>" +
                             "<p>This app started out as a hobby project. " +
-                            "It was developed by two software engineers who wanted to get in shape " +
+                            "It was developed by two software engineers who wanted to get in shape, " +
                             "who also happen to hate adds, and who (probably incorrectly) " +
                             "think they could do a better job on this " +
-                            "than the multitude of other food-tracking-app developers. " + "" +
-                            "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
+                            "than the multitude of other food-tracking-app developers. </p>" + "" +
+                            "<p>Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
                             "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
                             "<p>All the best,</p>" +
                             "<p>Carmen and Arjan from Macrolog Webapp</p>"
