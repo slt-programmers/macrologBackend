@@ -65,6 +65,14 @@ public class UserAcccountRepository {
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
+    public UserAccount getUserByEmail(String email) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("email", email);
+        String users = SELECT_SQL + " WHERE  " + COL_EMAIL + "= :email";
+        List<UserAccount> queryResults = template.query(users, params, new UserWrapper<UserAccount>());
+        return queryResults.isEmpty() ? null : queryResults.get(0);
+    }
+
     class UserWrapper<T> implements RowMapper<UserAccount> {
         @Override
         public UserAccount mapRow(ResultSet rs, int i) throws SQLException {

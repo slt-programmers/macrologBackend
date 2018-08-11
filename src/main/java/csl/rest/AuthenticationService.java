@@ -4,6 +4,7 @@ import csl.database.SettingsRepository;
 import csl.database.UserAcccountRepository;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
+import csl.notification.MailService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
@@ -122,12 +123,11 @@ public class AuthenticationService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity validate(@RequestBody AuthenticationRequest request) {
         LOGGER.info("Validate email");
-
-        String username = request.getUsername();
         String email = request.getEmail();
-        UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        UserAccount account = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
         if (account != null) {
             if (account.getEmail().equals(email)) {
+                MailService.sendMail(email, account);
                 return ResponseEntity.ok("Email matches");
             } else {
                 LOGGER.error("No match");
