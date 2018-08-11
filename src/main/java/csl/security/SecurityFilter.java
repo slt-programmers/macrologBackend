@@ -29,7 +29,6 @@ public class SecurityFilter implements Filter {
     }
 
     @Override
-//    @CrossOrigin(origins = "http://localhost:4200")
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
     {
         if ("OPTIONS".equalsIgnoreCase(((HttpServletRequest) request).getMethod())) {
@@ -41,8 +40,12 @@ public class SecurityFilter implements Filter {
             chain.doFilter(request, response);
         } else {
             LOGGER.debug("actual");
+            String getenv = System.getenv("allow.crossorigin");
+            if (getenv ==null || getenv.equals("")){
+                getenv="http://localhost:4200";
+            }
 
-            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getenv);
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE,PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Max-Age", "3600");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");

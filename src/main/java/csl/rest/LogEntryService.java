@@ -39,7 +39,6 @@ public class LogEntryService {
 
 
     @ApiOperation(value = "Retrieve all stored logentries")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -51,7 +50,6 @@ public class LogEntryService {
     }
 
     @ApiOperation(value = "Retrieve all stored logentries")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/day/{date}",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -114,7 +112,6 @@ public class LogEntryService {
     }
 
     @ApiOperation(value = "Store logentries")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
@@ -141,7 +138,6 @@ public class LogEntryService {
     }
 
     @ApiOperation(value = "Delete logentry")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/{id}",
             method = DELETE,
             headers = {"Content-Type=application/json"})
@@ -153,7 +149,6 @@ public class LogEntryService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/macros",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)

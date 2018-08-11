@@ -59,7 +59,7 @@ public class DatabaseHelper implements DataSource {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         String namePropertiesFile = "application.properties";
         if ("LAPTOP-HPA3TJNH".equals(hostname)) {
-            namePropertiesFile = "application-arjan.propert0ies";
+            namePropertiesFile = "application-arjan.properties";
 //                namePropertiesFile = "application-heroku.properties";
         }
 

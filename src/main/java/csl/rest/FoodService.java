@@ -35,7 +35,6 @@ public class FoodService {
     private final static PortionRepository portionRepository = new PortionRepository();
 
     @ApiOperation(value = "Retrieve all stored foods")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,7 +52,6 @@ public class FoodService {
     }
 
     @ApiOperation(value = "Retrieve information about specific food")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/{id}",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -124,7 +122,6 @@ public class FoodService {
     }
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})

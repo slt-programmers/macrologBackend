@@ -75,7 +75,6 @@ public class AuthenticationService {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/signup",
             method = POST,
             headers = {"Content-Type=application/json"})
@@ -125,7 +124,6 @@ public class AuthenticationService {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/validate",
             method = POST,
             headers = {"Content-Type=application/json"})

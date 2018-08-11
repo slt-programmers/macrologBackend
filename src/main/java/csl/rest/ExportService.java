@@ -31,7 +31,6 @@ public class ExportService {
     private SettingsRepository settingsRepo = new SettingsRepository();
 
     @ApiOperation(value = "Retrieve all stored information")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)

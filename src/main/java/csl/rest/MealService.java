@@ -36,7 +36,6 @@ public class MealService {
 
 
     @ApiOperation(value = "Retrieve all meals")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,7 +47,6 @@ public class MealService {
     }
 
     @ApiOperation(value = "Insert meal")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
@@ -64,7 +62,6 @@ public class MealService {
     }
 
     @ApiOperation(value = "Delete meal")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/{id}",
             method = DELETE,
             headers = {"Content-Type=application/json"})

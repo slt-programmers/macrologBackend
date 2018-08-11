@@ -27,7 +27,6 @@ public class SettingsService {
     private SettingsRepository settingsRepo = new SettingsRepository();
 
     @ApiOperation(value = "Store new setting or change existing one")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = PUT,
             headers = {"Content-Type=application/json"})
@@ -38,7 +37,6 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Get all settings")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,7 +47,6 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Get setting")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/{name}",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,7 +57,6 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Post new weight")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "/weight",
             method = POST,
             produces = MediaType.APPLICATION_JSON_VALUE)

@@ -35,7 +35,6 @@ public class ImportService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportService.class);
 
     @ApiOperation(value = "Import exported json")
-    @CrossOrigin(origins = "http://localhost:4200")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
