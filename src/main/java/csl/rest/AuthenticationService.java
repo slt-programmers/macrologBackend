@@ -127,7 +127,11 @@ public class AuthenticationService {
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
         if (account != null) {
             if (account.getEmail().equals(email)) {
-                MailService.sendMail(email, account);
+                new Thread() {
+                    public void run () {
+                        MailService.sendMail(email, account);
+                    }
+                }.start();
                 return ResponseEntity.ok("Email matches");
             } else {
                 LOGGER.error("No match");

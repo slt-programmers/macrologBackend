@@ -41,7 +41,7 @@ public class MailService {
             message.setSubject("Macrolog Webapp Credentials");
             message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
                     "<p>Your password is "+ account.getPassword() +"</p>" +
-                    "<p>See you back soon!</p>" +
+                    "<p>See you soon!</p>" +
                     "<p>Carmen and Arjan from Macrolog Webapp</p>"
                     , "text/html");
 
@@ -50,7 +50,5 @@ public class MailService {
         } catch (MessagingException ex) {
             LOGGER.error(ex.getMessage());
         }
-
     }
-
 }
