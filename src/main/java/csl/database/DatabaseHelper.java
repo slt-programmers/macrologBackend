@@ -37,12 +37,17 @@ public class DatabaseHelper implements DataSource{
                 e.printStackTrace();
             }
             Properties p = getProperties(hostname);
-            CONNECTION_URL = p.getProperty("spring.datasource.url");
-            DB_USER = p.getProperty("spring.datasource.username");
-            DB_PASSWORD = p.getProperty("spring.datasource.password");
+            CONNECTION_URL = getFromEnvOrPropertyFile("spring.datasource.url",p);
+            DB_USER = getFromEnvOrPropertyFile("spring.datasource.username",p);
+            DB_PASSWORD = getFromEnvOrPropertyFile("spring.datasource.password",p);
             instance = new DatabaseHelper();
         }
         return instance;
+    }
+    private static String getFromEnvOrPropertyFile(String property, Properties p) {
+        String fromEnvironment = System.getenv(property);
+        LOGGER.debug("fromEnvironment = " + property + " : " + fromEnvironment);
+        return (fromEnvironment == null || fromEnvironment.equals(""))?p.getProperty(property):fromEnvironment;
     }
 
     private static Properties getProperties(String hostname) {
@@ -50,7 +55,8 @@ public class DatabaseHelper implements DataSource{
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         String namePropertiesFile = "application.properties";
         if ("LAPTOP-HPA3TJNH".equals(hostname)) {
-                namePropertiesFile = "application-arjan.properties";
+//            namePropertiesFile = "application-arjan.properties";
+                namePropertiesFile = "application-heroku.properties";
         }
 
         InputStream stream = loader.getResourceAsStream(namePropertiesFile);
