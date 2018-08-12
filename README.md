@@ -48,3 +48,13 @@ https://dashboard.heroku.com/apps
 Zie https://dashboard.heroku.com/apps/macrolog-backend/deploy/heroku-git voor een manual om te git repo te connecten.
 
 De app is nu ingesteld om automatisch te deployen als je naar de heroku git master pushed
+
+Swagger UI met authorization
+
+Swagger is te gebruiken dmv Authorize, de knop rechtsboven.
+
+Log hier in door in de teksts balk de key te zetten, voorafgaand aan de tekst Bearer.
+Voorbeeld:
+Bearer 2r8y489574fksdbjfkh
+De key kun je krijgen door in te loggen via de authenication service.
+Deze geeft te token terug die je hierboven kunt gebruiken.
