@@ -9,13 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import sun.swing.BakedArrayList;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
@@ -27,8 +25,8 @@ public class Application {
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
 
-       setUpDatabase();
-       LOGGER.debug("Application is now running.");
+        setUpDatabase();
+        LOGGER.debug("Application is now running.");
     }
 
 
@@ -49,31 +47,31 @@ public class Application {
             }
         });
 
-        if(!existingTables.contains(UserAcccountRepository.TABLE_NAME)) {
+        if (!existingTables.contains(UserAcccountRepository.TABLE_NAME)) {
             LOGGER.info("Create useraccounts table");
             createTable(UserAcccountRepository.TABLE_CREATE);
         }
-        if(!existingTables.contains(SettingsRepository.TABLE_NAME)) {
+        if (!existingTables.contains(SettingsRepository.TABLE_NAME)) {
             LOGGER.info("Create settings table");
             createTable(SettingsRepository.TABLE_CREATE);
         }
-        if(!existingTables.contains(FoodRepository.TABLE_NAME)) {
+        if (!existingTables.contains(FoodRepository.TABLE_NAME)) {
             LOGGER.info("Create food table");
             createTable(FoodRepository.TABLE_CREATE);
         }
-        if(!existingTables.contains(PortionRepository.TABLE_NAME)) {
+        if (!existingTables.contains(PortionRepository.TABLE_NAME)) {
             LOGGER.info("Create portion table");
             createTable(PortionRepository.TABLE_CREATE);
         }
-        if(!existingTables.contains(LogEntryRepository.TABLE_NAME)) {
+        if (!existingTables.contains(LogEntryRepository.TABLE_NAME)) {
             LOGGER.info("Create logentry table");
             createTable(LogEntryRepository.TABLE_CREATE);
         }
-        if(!existingTables.contains(MealRepository.TABLE_NAME)) {
+        if (!existingTables.contains(MealRepository.TABLE_NAME)) {
             LOGGER.info("Create meal table");
             createTable(MealRepository.TABLE_CREATE);
         }
-        if(!existingTables.contains(IngredientRepository.TABLE_NAME)) {
+        if (!existingTables.contains(IngredientRepository.TABLE_NAME)) {
             LOGGER.info("Create ingredient table");
             createTable(IngredientRepository.TABLE_CREATE);
         }

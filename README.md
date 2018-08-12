@@ -40,3 +40,11 @@ CMD prompt openen , maar doe dit RUN ALS AMINISTRATOR (rechtermuisknop)
 dan naar 
 C:\Program Files\MySQL\MySQL Server 8.0\bin>
 mysqldump --user=root --password=? test >testdump.sql
+
+
+Heroku:
+https://dashboard.heroku.com/apps
+
+Zie https://dashboard.heroku.com/apps/macrolog-backend/deploy/heroku-git voor een manual om te git repo te connecten.
+
+De app is nu ingesteld om automatisch te deployen als je naar de heroku git master pushed
