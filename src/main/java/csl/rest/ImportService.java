@@ -44,7 +44,7 @@ public class ImportService {
 
         List<Setting> settings = export.getAllSettings();
         for (Setting setting : settings) {
-            settingsRepo.insertSetting(userInfo.getUserId(),setting.getName(), setting.getValue());
+            settingsRepo.putSetting(userInfo.getUserId(),setting.getName(), setting.getValue());
         }
 
         List<FoodDto> allFoodDto = export.getAllFood();
