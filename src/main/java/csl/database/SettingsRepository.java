@@ -17,7 +17,7 @@ import java.util.List;
 
 @Repository
 public class SettingsRepository {
-    public static final String TABLE_NAME = "settings";
+    public static final String TABLE_NAME = "settings2";
 
     private static final String COL_ID = "id";
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -29,10 +29,11 @@ public class SettingsRepository {
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_SETTING + " TEXT NOT NULL, " +
+                    COL_SETTING + " TEXT(50) NOT NULL, " +
                     COL_VALUE + " TEXT," +
+                    COL_DATE + " DATE," +
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")," +
-                    COL_DATE + " DATE" +
+                    "UNIQUE KEY user_set (" +COL_USER_ID +"," +COL_SETTING + "(50))" +
                     ")";
     private static final String SELECT_SQL = "select * from settings";
     private static final String INSERT_SQL = "insert into settings" +

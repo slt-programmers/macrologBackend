@@ -79,6 +79,7 @@ public class Application {
 //        updateAT();
 //        updateWeightSettings();
 //        updateUserAccountsWithEmail();
+//          updateSettings();
     }
 
     private static void createTable(String sql) {
@@ -130,18 +131,7 @@ public class Application {
                 "ALTER TABLE " + MealRepository.TABLE_NAME + " ADD FOREIGN KEY (USER_ID) REFERENCES " + UserAcccountRepository.TABLE_NAME + "(id)"
         };
 
-        LOGGER.debug("Running update scripts:");
-        for (String statement : statements) {
-            try (Connection connection = DatabaseHelper.getInstance().getConnection();
-                 CallableStatement currStatement = connection.prepareCall(statement)) {
-                LOGGER.info(statement);
-                currStatement.execute();
-
-            } catch (SQLException e) {
-                LOGGER.error(e.getMessage());
-            }
-        }
-        LOGGER.debug("Finished running update scripts.");
+        runStatements(statements);
     }
 
     private static void updateUserAccountsWithEmail() {
@@ -154,5 +144,26 @@ public class Application {
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());
         }
+    }
+
+    private static void updateSettings(){
+        String[] statements = new String[]{"alter table settings modify column setting text(50)",
+        "ALTER TABLE settings ADD UNIQUE user_set(user_id, setting(50))"};
+        runStatements(statements);
+    }
+
+    private static void runStatements(String[] statements) {
+        LOGGER.debug("Running update scripts:");
+        for (String statement : statements) {
+            try (Connection connection = DatabaseHelper.getInstance().getConnection();
+                 CallableStatement currStatement = connection.prepareCall(statement)) {
+                LOGGER.info(statement);
+                currStatement.execute();
+
+            } catch (SQLException e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
+        LOGGER.debug("Finished running update scripts.");
     }
 }
