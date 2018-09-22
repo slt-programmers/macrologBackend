@@ -42,6 +42,10 @@ public class AuthenticationService {
 
         UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUser(username);
         if (userAccount == null) {
+            // Maybe the user signed in with his/her email:
+            userAccount = USER_ACCCOUNT_REPOSITORY.getUserByEmail(username);
+        }
+        if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         } else if (!userAccount.getPassword().equals(password)) {

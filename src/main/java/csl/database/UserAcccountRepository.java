@@ -66,11 +66,16 @@ public class UserAcccountRepository {
     }
 
     public UserAccount getUserByEmail(String email) {
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("email", email);
-        String users = SELECT_SQL + " WHERE  " + COL_EMAIL + "= :email";
-        List<UserAccount> queryResults = template.query(users, params, new UserWrapper<UserAccount>());
-        return queryResults.isEmpty() ? null : queryResults.get(0);
+        if (email != null) {
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("email", email.toUpperCase());
+            String users = SELECT_SQL + " WHERE  UPPER(" + COL_EMAIL + ") = :email";
+            List<UserAccount> queryResults = template.query(users, params, new UserWrapper<UserAccount>());
+            return queryResults.isEmpty() ? null : queryResults.get(0);
+        } else {
+            return null;
+        }
     }
 
     class UserWrapper<T> implements RowMapper<UserAccount> {
