@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
@@ -62,11 +63,14 @@ public class ImportService {
             }
         }
 
+        // To get the food_id's
+        List<Food> allFoodDB = foodRepository.getAllFood(userInfo.getUserId());
+
         List<LogEntryDto> logEntryDtos = export.getAllLogEntries();
         for (LogEntryDto logEntryDto: logEntryDtos) {
             LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
-            // De database IDs komen waarschijnlijk niet overeen, dus haal de correcte database ids op:
-            Food foodDB = foodRepository.getFood(userInfo.getUserId(),logEntryDto.getFood().getName());
+
+            Food foodDB = getFoodFromListByName(logEntryDto.getFood().getName(), allFoodDB);
             logEntry.setFoodId(foodDB.getId());
             if (logEntryDto.getPortion() != null) {
                 Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
@@ -76,6 +80,21 @@ public class ImportService {
         }
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    private Food getFoodFromListByName(String foodName, List<Food> foodList) {
+        Food foundFood;
+        List<Food> matches = foodList.stream()
+                .filter(food -> food.getName().equals(foodName))
+                .collect(toList());
+        if (matches.size() == 1) {
+            foundFood = matches.get(0);
+        } else {
+            LOGGER.error("Multiple Food with name " + foodName + " found");
+            LOGGER.error("Selecting first from list");
+            foundFood = matches.get(0);
+        }
+        return foundFood;
     }
 
     public static LogEntry mapLogEntryDtoToLogEntry(LogEntryDto logEntryDto) {
