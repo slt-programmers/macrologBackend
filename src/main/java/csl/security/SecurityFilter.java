@@ -1,6 +1,7 @@
 package csl.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
@@ -57,15 +58,20 @@ public class SecurityFilter implements Filter {
             if (token != null && token.startsWith("Bearer")) {
                 String jwtToken = token.substring("Bearer".length() + 1);
                 LOGGER.debug(jwtToken);
-                Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes("UTF-8")).parseClaimsJws(jwtToken);
-                Object userId = claimsJws.getBody().get("userId");
-                LOGGER.debug("Userid from token = " + userId);
+                Object userId = null;
+                try {
+                    Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes("UTF-8")).parseClaimsJws(jwtToken);
+                    userId = claimsJws.getBody().get("userId");
+                    LOGGER.debug("Userid from token = " + userId);
+                    UserInfo userInfo = new UserInfo();
+                    userInfo.setUserId(Integer.valueOf(userId.toString()));
+                    ThreadLocalHolder.getThreadLocal().set(userInfo);
+                    chain.doFilter(request, response);
+                } catch (ExpiredJwtException expiredEx) {
+                    LOGGER.debug("ExpiredJWT token.");
+                    ((HttpServletResponse) response).sendError(403,"Expired session");
+                }
 
-
-                UserInfo userInfo = new UserInfo();
-                userInfo.setUserId(Integer.valueOf(userId.toString()));
-                ThreadLocalHolder.getThreadLocal().set(userInfo);
-                chain.doFilter(request, response);
 
             } else if (((HttpServletRequest) request).getRequestURI().startsWith("/swagger-resources") ||
                     ((HttpServletRequest) request).getRequestURI().startsWith("/webjars/") ||
