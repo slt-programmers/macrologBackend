@@ -28,7 +28,7 @@ public class UserAcccountRepository {
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USERNAME + " VARCHAR(30) UNIQUE NOT NULL, " +
                     COL_PASSWORD + " TEXT NOT NULL, " +
-                    COL_EMAIL + " TEXT NOT NULL)";
+                    COL_EMAIL + " TEXT(100) NOT NULL)";
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
     private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(" +
             "username, password, email) values(:username, :password, :email)";
