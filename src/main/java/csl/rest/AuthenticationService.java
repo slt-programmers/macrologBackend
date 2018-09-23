@@ -95,8 +95,13 @@ public class AuthenticationService {
         if (account != null) {
             return ResponseEntity.status(401).body("Username allready in use");
         } else {
-            USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword, email);
-            account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+            UserAccount userByEmail = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
+            if (userByEmail != null){
+                return ResponseEntity.status(401).body("Email allready in use");
+            } else {
+                USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword, email);
+                account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+            }
         }
 
         UserAccount newAccount = account;
