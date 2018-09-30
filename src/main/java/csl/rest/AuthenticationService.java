@@ -4,7 +4,10 @@ import csl.database.SettingsRepository;
 import csl.database.UserAcccountRepository;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
+import csl.dto.ChangePasswordRequest;
 import csl.notification.MailService;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
@@ -13,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -155,6 +157,36 @@ public class AuthenticationService {
         } else {
             LOGGER.error("Account is null");
             return ResponseEntity.status(404).body("Username not found");
+        }
+    }
+
+    @RequestMapping(value = "/changePassword",
+            method = POST)
+    public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request) {
+        String oldPassword = request.getOldPassword();
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+
+        LOGGER.info("Update password attempt for userid " + userInfo.getUserId());
+
+        UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUserById(userInfo.getUserId());
+        if (userAccount == null) {
+            LOGGER.error("Not found");
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } else if (!userAccount.getPassword().equals(oldPassword)) {
+            LOGGER.error("Old password incorrect");
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        } else {
+            if (!newPassword.equals(confirmPassword)){
+                LOGGER.error("passwords do not match");
+                return new ResponseEntity("passwords do not match",HttpStatus.BAD_REQUEST);
+            } else {
+                LOGGER.error("passwords match");
+                USER_ACCCOUNT_REPOSITORY.updatePassword(userAccount.getUsername(),newPassword);
+                return new ResponseEntity("ok",HttpStatus.OK);
+
+            }
         }
     }
 

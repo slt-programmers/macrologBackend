@@ -40,9 +40,8 @@ public class UserAcccountRepository {
     public UserAcccountRepository() {
     }
 
-    private int updatePassword(String username, String password) {
+    public int updatePassword(String username, String password) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", null)
                 .addValue("username", username)
                 .addValue("password", password);
         return template.update(UPDATE_SQL, params);
@@ -76,6 +75,15 @@ public class UserAcccountRepository {
         } else {
             return null;
         }
+    }
+
+    public UserAccount getUserById(Integer id) {
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id);
+        String users = SELECT_SQL + " WHERE " + COL_ID + " = :id";
+        List<UserAccount> queryResults = template.query(users, params, new UserWrapper<UserAccount>());
+        return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
     class UserWrapper<T> implements RowMapper<UserAccount> {
