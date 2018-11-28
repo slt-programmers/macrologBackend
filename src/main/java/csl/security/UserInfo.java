@@ -2,7 +2,6 @@ package csl.security;
 
 public class UserInfo {
 
-
     private Integer userId;
 
     public void setUserId(Integer userId) {

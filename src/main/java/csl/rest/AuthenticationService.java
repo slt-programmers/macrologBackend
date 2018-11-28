@@ -5,7 +5,7 @@ import csl.database.UserAcccountRepository;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
 import csl.dto.ChangePasswordRequest;
-import csl.notification.MailService;
+import csl.websocket.notification.MailService;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;

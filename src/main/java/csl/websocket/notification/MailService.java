@@ -1,4 +1,4 @@
-package csl.notification;
+package csl.websocket.notification;
 
 
 import csl.database.model.UserAccount;
@@ -12,7 +12,6 @@ import javax.mail.internet.*;
 public class MailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
-
 
     public static void sendPasswordRetrievalMail(String email, UserAccount account) {
         Session secureSession = getSession();
@@ -67,8 +66,8 @@ public class MailService {
 
 
     private static Session getSession() {
-        String username = "marcologwebapp@gmail.com";
-        String password = "macrolog";
+        String username = "macrologwebapp@gmail.com";
+        String password = "Macrolog01";
 
         Properties properties = System.getProperties();
         properties.put("mail.smtp.auth", "true");
