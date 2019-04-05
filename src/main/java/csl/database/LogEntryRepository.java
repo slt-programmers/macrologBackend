@@ -54,7 +54,7 @@ public class LogEntryRepository {
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-    public int insertLogEntry(Integer userId,LogEntry entry) {
+    public int insertLogEntry(Integer userId, LogEntry entry) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("userId", userId)
@@ -66,7 +66,7 @@ public class LogEntryRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public int updateLogEntry(Integer userId,LogEntry entry) {
+    public int updateLogEntry(Integer userId, LogEntry entry) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", entry.getId())
                 .addValue("userId", userId)
@@ -78,16 +78,21 @@ public class LogEntryRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public int deleteLogEntry(Integer userId,Long entry) {
+    public int deleteLogEntry(Integer userId, Long entry) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("id", entry);
         return template.update(DELETE_SQL, params);
     }
 
+    public List<LogEntry> getSomeLogEntries(String selectStatement) {
+        return template.query(selectStatement, new LogEntryWrapper());
+    }
+
     private List<LogEntry> getAllLogEntries() {
         return template.query(SELECT_SQL, new LogEntryWrapper());
     }
+
     public List<LogEntry> getAllLogEntries(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
@@ -105,7 +110,8 @@ public class LogEntryRepository {
         List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
         return queryResults;
     }
-    public List<LogEntry> getAllLogEntries(Integer userId,java.util.Date begin, java.util.Date end) {
+
+    public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date begin, java.util.Date end) {
         LOGGER.debug("Getting entries for period " + begin + " - " + end);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()

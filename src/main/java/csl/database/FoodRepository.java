@@ -63,13 +63,18 @@ public class FoodRepository {
     private List<Food> getAllFood() {
         return template.query(SELECT_SQL, new FoodWrapper<Food>());
     }
+
+    public List<Food> getSomeFood(String selectStatement) {
+        return template.query(selectStatement, new FoodWrapper<Food>());
+    }
+
     public List<Food> getAllFood(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
         return template.query(SELECT_SQL + " WHERE user_id=:userId",params, new FoodWrapper<Food>());
     }
 
-    public int insertFood(Integer userId,Food food) {
+    public int insertFood(Integer userId, Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("userId", userId)
@@ -83,7 +88,7 @@ public class FoodRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public int updateFood(Integer userId,Food food) {
+    public int updateFood(Integer userId, Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", food.getId())
                 .addValue("userId", userId)
