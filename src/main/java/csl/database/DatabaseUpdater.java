@@ -23,10 +23,8 @@ public class DatabaseUpdater {
     public DatabaseUpdater() {}
 
     public static void updateRefactoreMeasurement() throws SQLException {
-//        String foodsql = "SELECT * FROM food WHERE id = 4";
-        String foodsql = "SELECT * FROM food WHERE measurement = 'UNIT' and user_id = 1";
-//        String logentrySql = "SELECT * FROM logentry WHERE food_id = 4";
-        String logentrySql = "SELECT * FROM logentry WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 1)" ;
+        String foodsql = "SELECT * FROM food WHERE measurement = 'UNIT' and user_id = 2";
+        String logentrySql = "SELECT * FROM logentry WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 2)" ;
 
         FoodRepository foodrepo = new FoodRepository();
         PortionRepository portionrepo = new PortionRepository();
@@ -46,7 +44,7 @@ public class DatabaseUpdater {
             portion.setGrams(food.getUnitGrams());
             food.setUnitGrams(100.00);
 
-            foodrepo.updateFood(1, food);
+            foodrepo.updateFood(2, food);
             portionrepo.addPortion(food.getId(), portion);
         }
 
@@ -55,7 +53,7 @@ public class DatabaseUpdater {
             List<Portion> portions = portionrepo.getPortions(entry.getFoodId());
             Portion portion = portions.get(0);
             entry.setPortionId(portion.getId());
-            entryrepo.updateLogEntry(1, entry);
+            entryrepo.updateLogEntry(2, entry);
         }
 
     }
