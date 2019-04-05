@@ -23,43 +23,39 @@ public class DatabaseUpdater {
     public DatabaseUpdater() {}
 
     public static void updateRefactoreMeasurement() throws SQLException {
-        String foodsql = "SELECT * FROM food WHERE id = 1";
-//        String foodsql = "SELECT * FROM food WHERE measurement = 'UNIT' and user_id = 2";
-        String logentrySql = "SELECT * FROM logentry WHERE food_id = 1";
-//        String logentrySql = "SELECT * FROM logentry WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 2)" ;
-        String ingredientSql = "SELECT * FROM ingredient WHERE food_id = 1";
-//        String ingredientSql = "SELECT * FROM ingredient WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 2)";
+//        String foodsql = "SELECT * FROM food WHERE id = 4";
+        String foodsql = "SELECT * FROM food WHERE measurement = 'UNIT' and user_id = 1";
+//        String logentrySql = "SELECT * FROM logentry WHERE food_id = 4";
+        String logentrySql = "SELECT * FROM logentry WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 1)" ;
 
-        LOGGER.info("!!!!!!UPDATE REFACTOR MEASUREMENT!!!!!!");
         FoodRepository foodrepo = new FoodRepository();
         PortionRepository portionrepo = new PortionRepository();
         LogEntryRepository entryrepo = new LogEntryRepository();
 
-//        List<Food> foodlist = foodrepo.getSomeFood(foodsql);
-//        for (Food food : foodlist){
-//            food.setMeasurementUnit(MeasurementUnit.GRAMS);
-//            food.setProtein(food.getProtein() * food.getUnitGrams() / 100);
-//            food.setFat(food.getFat() * food.getUnitGrams() / 100);
-//            food.setCarbs(food.getCarbs() * food.getUnitGrams() / 100);
-//
-//            Portion portion = new Portion();
-//            portion.setDescription(food.getUnitName());
-//            food.setUnitName("gram");
-//
-//            portion.setGrams(food.getUnitGrams());
-//            food.setUnitGrams(100.00);
-//
-//            foodrepo.updateFood(2, food);
-//            int response = portionrepo.addPortion(food.getId(), portion);
-//        }
+        List<Food> foodlist = foodrepo.getSomeFood(foodsql);
+        for (Food food : foodlist){
+            food.setMeasurementUnit(MeasurementUnit.GRAMS);
+            food.setProtein(food.getProtein() / food.getUnitGrams() * 100);
+            food.setFat(food.getFat() / food.getUnitGrams() * 100);
+            food.setCarbs(food.getCarbs() / food.getUnitGrams() * 100);
+
+            Portion portion = new Portion();
+            portion.setDescription(food.getUnitName());
+            food.setUnitName("gram");
+
+            portion.setGrams(food.getUnitGrams());
+            food.setUnitGrams(100.00);
+
+            foodrepo.updateFood(1, food);
+            portionrepo.addPortion(food.getId(), portion);
+        }
 
         List<LogEntry> entries = entryrepo.getSomeLogEntries(logentrySql);
-        LOGGER.info("Entries lenght: " + entries.size());
         for (LogEntry entry : entries) {
             List<Portion> portions = portionrepo.getPortions(entry.getFoodId());
             Portion portion = portions.get(0);
             entry.setPortionId(portion.getId());
-            entryrepo.updateLogEntry(2, entry);
+            entryrepo.updateLogEntry(1, entry);
         }
 
     }
