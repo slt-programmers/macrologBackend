@@ -173,7 +173,7 @@ public class FoodService {
 
 
         } else {
-            Food food = foodRepository.getFood(userInfo.getUserId(),addFoodRequest.getName());
+            Food food = foodRepository.getFood(userInfo.getUserId(), addFoodRequest.getName());
             if (food != null) {
                 String errorMessage = "This food is already in your database";
                 return ResponseEntity.badRequest().body(errorMessage);
@@ -195,7 +195,7 @@ public class FoodService {
 
                 int insertedRows = foodRepository.insertFood(userInfo.getUserId(),newFood);
                 if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
-                    Food addedFood = foodRepository.getFood(userInfo.getUserId(),addFoodRequest.getName());
+                    Food addedFood = foodRepository.getFood(userInfo.getUserId(), addFoodRequest.getName());
                     for (PortionDto portionDto : addFoodRequest.getPortions()) {
                         csl.database.model.Portion newPortion = new csl.database.model.Portion();
                         newPortion.setDescription(portionDto.getDescription());

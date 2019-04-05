@@ -96,7 +96,6 @@ public class LogEntryRepository {
     public List<LogEntry> getAllLogEntries(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-
         return template.query(SELECT_SQL +" WHERE user_id=:userId", params,new LogEntryWrapper());
     }
 

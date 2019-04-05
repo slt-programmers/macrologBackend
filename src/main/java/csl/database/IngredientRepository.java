@@ -87,7 +87,7 @@ public class IngredientRepository {
         }
     }
 
-    private int updateIngredient(Ingredient ingredient) {
+    public int updateIngredient(Ingredient ingredient) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", ingredient.getId())
                 .addValue("mealId", ingredient.getMealId())

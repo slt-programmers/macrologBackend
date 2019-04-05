@@ -30,10 +30,10 @@ public class DatabaseUpdater {
         String ingredientSql = "SELECT * FROM ingredient WHERE food_id = 1";
 //        String ingredientSql = "SELECT * FROM ingredient WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 2)";
 
+        LOGGER.info("!!!!!!UPDATE REFACTOR MEASUREMENT!!!!!!");
         FoodRepository foodrepo = new FoodRepository();
         PortionRepository portionrepo = new PortionRepository();
         LogEntryRepository entryrepo = new LogEntryRepository();
-        IngredientRepository ingredientrepo = new IngredientRepository();
 
 //        List<Food> foodlist = foodrepo.getSomeFood(foodsql);
 //        for (Food food : foodlist){
@@ -45,25 +45,21 @@ public class DatabaseUpdater {
 //            Portion portion = new Portion();
 //            portion.setDescription(food.getUnitName());
 //            food.setUnitName("gram");
-//            food.setUnitGrams(100.00);
+//
 //            portion.setGrams(food.getUnitGrams());
+//            food.setUnitGrams(100.00);
 //
 //            foodrepo.updateFood(2, food);
 //            int response = portionrepo.addPortion(food.getId(), portion);
 //        }
 
         List<LogEntry> entries = entryrepo.getSomeLogEntries(logentrySql);
+        LOGGER.info("Entries lenght: " + entries.size());
         for (LogEntry entry : entries) {
             List<Portion> portions = portionrepo.getPortions(entry.getFoodId());
             Portion portion = portions.get(0);
             entry.setPortionId(portion.getId());
-        }
-
-        List<Ingredient> ingredients = ingredientrepo.getSomeIngredients(ingredientSql);
-        for (Ingredient ingredient : ingredients) {
-            List<Portion> portions = portionrepo.getPortions(ingredient.getFoodId());
-            Portion portion = portions.get(0);
-            ingredient.setPortionId(portion.getId());
+            entryrepo.updateLogEntry(2, entry);
         }
 
     }

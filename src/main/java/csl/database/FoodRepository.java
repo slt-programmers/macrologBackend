@@ -102,7 +102,7 @@ public class FoodRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public Food getFood(Integer userId,String name) {
+    public Food getFood(Integer userId, String name) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("name", name);
