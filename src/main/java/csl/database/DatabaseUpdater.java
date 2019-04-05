@@ -3,18 +3,14 @@ package csl.database;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import csl.database.model.Food;
-import csl.database.model.Ingredient;
 import csl.database.model.LogEntry;
 import csl.database.model.Portion;
 import csl.enums.MeasurementUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sound.sampled.Port;
 
 public class DatabaseUpdater {
 

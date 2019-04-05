@@ -24,8 +24,6 @@ public class Application {
         SpringApplication.run(Application.class, args);
         setUpDatabase();
         LOGGER.debug("Application is now running.");
-
-        DatabaseUpdater.updateRefactoreMeasurement();
     }
 
     private static void setUpDatabase() {
