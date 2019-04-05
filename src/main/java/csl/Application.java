@@ -25,7 +25,7 @@ public class Application {
         setUpDatabase();
         LOGGER.debug("Application is now running.");
 
-//        DatabaseUpdater.updateRefactoreMeasurement();
+        DatabaseUpdater.updateRefactoreMeasurement();
     }
 
     private static void setUpDatabase() {

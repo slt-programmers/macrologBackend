@@ -35,22 +35,22 @@ public class DatabaseUpdater {
         LogEntryRepository entryrepo = new LogEntryRepository();
         IngredientRepository ingredientrepo = new IngredientRepository();
 
-        List<Food> foodlist = foodrepo.getSomeFood(foodsql);
-        for (Food food : foodlist){
-            food.setMeasurementUnit(MeasurementUnit.GRAMS);
-            food.setProtein(food.getProtein() * food.getUnitGrams() / 100);
-            food.setFat(food.getFat() * food.getUnitGrams() / 100);
-            food.setCarbs(food.getCarbs() * food.getUnitGrams() / 100);
-
-            Portion portion = new Portion();
-            portion.setDescription(food.getUnitName());
-            food.setUnitName("gram");
-            food.setUnitGrams(100.00);
-            portion.setGrams(food.getUnitGrams());
-
-            foodrepo.updateFood(2, food);
-            portionrepo.addPortion(food.getId(), portion);
-        }
+//        List<Food> foodlist = foodrepo.getSomeFood(foodsql);
+//        for (Food food : foodlist){
+//            food.setMeasurementUnit(MeasurementUnit.GRAMS);
+//            food.setProtein(food.getProtein() * food.getUnitGrams() / 100);
+//            food.setFat(food.getFat() * food.getUnitGrams() / 100);
+//            food.setCarbs(food.getCarbs() * food.getUnitGrams() / 100);
+//
+//            Portion portion = new Portion();
+//            portion.setDescription(food.getUnitName());
+//            food.setUnitName("gram");
+//            food.setUnitGrams(100.00);
+//            portion.setGrams(food.getUnitGrams());
+//
+//            foodrepo.updateFood(2, food);
+//            int response = portionrepo.addPortion(food.getId(), portion);
+//        }
 
         List<LogEntry> entries = entryrepo.getSomeLogEntries(logentrySql);
         for (LogEntry entry : entries) {
