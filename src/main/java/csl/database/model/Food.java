@@ -1,12 +1,9 @@
 package csl.database.model;
 
-import csl.enums.MeasurementUnit;
-
 public class Food {
 
     private Long id;
     private String name;
-    private MeasurementUnit measurementUnit;
     private Double protein;
     private Double fat;
     private Double carbs;
@@ -18,7 +15,6 @@ public class Food {
 
     public Food(Long id,
                 String name,
-                MeasurementUnit measurementUnit,
                 Double protein,
                 Double fat,
                 Double carbs,
@@ -26,7 +22,6 @@ public class Food {
                 Double unitGrams) {
         this.id = id;
         this.name = name;
-        this.measurementUnit = measurementUnit;
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
@@ -48,14 +43,6 @@ public class Food {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public MeasurementUnit getMeasurementUnit() {
-        return measurementUnit;
-    }
-
-    public void setMeasurementUnit(MeasurementUnit measurementUnit) {
-        this.measurementUnit = measurementUnit;
     }
 
     public Double getProtein() {
@@ -106,15 +93,13 @@ public class Food {
         Food food = (Food) o;
 
         if (!id.equals(food.id)) return false;
-        if (!name.equals(food.name)) return false;
-        return measurementUnit == food.measurementUnit;
+        return !name.equals(food.name);
     }
 
     @Override
     public int hashCode() {
         int result = id.hashCode();
         result = 31 * result + name.hashCode();
-        result = 31 * result + measurementUnit.hashCode();
         return result;
     }
 

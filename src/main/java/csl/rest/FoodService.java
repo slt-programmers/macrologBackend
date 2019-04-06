@@ -8,7 +8,6 @@ import csl.dto.AddFoodRequest;
 import csl.dto.FoodDto;
 import csl.dto.Macro;
 import csl.dto.PortionDto;
-import csl.enums.MeasurementUnit;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.Api;
@@ -95,7 +94,6 @@ public class FoodService {
         FoodDto foodDto = new FoodDto();
         foodDto.setName(food.getName());
         foodDto.setId(food.getId());
-        foodDto.setMeasurementUnit(food.getMeasurementUnit());
         foodDto.setUnitGrams(food.getUnitGrams());
         foodDto.setUnitName(food.getUnitName());
         foodDto.setProtein(food.getProtein());
@@ -107,17 +105,11 @@ public class FoodService {
     // Naar een util brengen:
     public static Macro calculateMacro(Food food, csl.database.model.Portion portion) {
         Macro calculatedMacros = new Macro();
-        if (food.getMeasurementUnit().equals(MeasurementUnit.GRAMS)) {
             // FoodDto has been entered for 100g
                 calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
             calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
             calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
-        } else {
-            // FoodDto has been entered per unit
-            calculatedMacros.setCarbs(food.getCarbs()  * portion.getUnitMultiplier());
-            calculatedMacros.setProtein(food.getProtein()  * portion.getUnitMultiplier());
-            calculatedMacros.setFat(food.getFat() * portion.getUnitMultiplier());
-        }
+
         return calculatedMacros;
     }
 
@@ -132,19 +124,11 @@ public class FoodService {
             Food newFood = new Food();
             newFood.setId(addFoodRequest.getId());
             newFood.setName(addFoodRequest.getName());
-            newFood.setMeasurementUnit(addFoodRequest.getMeasurementUnit());
-            if (newFood.getMeasurementUnit().equals(MeasurementUnit.UNIT)) {
-                newFood.setUnitGrams(addFoodRequest.getUnitGrams());
-                newFood.setUnitName(addFoodRequest.getUnitName());
-            } else {
-                newFood.setUnitGrams(100.0);
-                newFood.setUnitName("gram");
-            }
-
+            newFood.setUnitGrams(100.0);
+            newFood.setUnitName("gram");
             newFood.setCarbs(addFoodRequest.getCarbs());
             newFood.setFat(addFoodRequest.getFat());
             newFood.setProtein(addFoodRequest.getProtein());
-
 
             foodRepository.updateFood(userInfo.getUserId(),newFood);
 
@@ -180,15 +164,8 @@ public class FoodService {
             } else {
                 Food newFood = new Food();
                 newFood.setName(addFoodRequest.getName());
-                newFood.setMeasurementUnit(addFoodRequest.getMeasurementUnit());
-                if (newFood.getMeasurementUnit().equals(MeasurementUnit.UNIT)) {
-                    newFood.setUnitGrams(addFoodRequest.getUnitGrams());
-                    newFood.setUnitName(addFoodRequest.getUnitName());
-                } else {
-                    newFood.setUnitGrams(100.0);
-                    newFood.setUnitName("gram");
-                }
-
+                newFood.setUnitGrams(100.0);
+                newFood.setUnitName("gram");
                 newFood.setCarbs(addFoodRequest.getCarbs());
                 newFood.setFat(addFoodRequest.getFat());
                 newFood.setProtein(addFoodRequest.getProtein());
@@ -210,29 +187,4 @@ public class FoodService {
             }
         }
     }
-
-//    @ApiOperation(value = "Adds an portion for a food")
-//    @RequestMapping(value = "/{id}/alias",
-//            method = POST,
-//            headers = {"Content-Type=application/json"})
-//    public ResponseEntity addPortion(@PathVariable("id") Long foodId,
-//                                     @RequestBody AddPortionRequest addUnitAliasRequest) throws URISyntaxException {
-//        FoodDto food = foodRepository.getFoodById(foodId);
-//        if (food == null) {
-//            return ResponseEntity.badRequest().build();
-//        } else {
-//
-//            FoodAlias foodAlias = new FoodAlias();
-//            foodAlias.setAliasname(addUnitAliasRequest.getDescription());
-//            foodAlias.setAmountNumber(addUnitAliasRequest.getGrams());
-//            foodAlias.setAmountUnit(addUnitAliasRequest.getUnitMultiplier());
-//            foodAlias.setFoodId(foodId);
-//            portionRepository.addFoodAlias(food, foodAlias);
-//
-////            int insertedRows = foodRepository.insertFood(newFood);
-//
-//
-//            return ResponseEntity.status(HttpStatus.CREATED).build();
-//        }
-//    }
 }

@@ -8,7 +8,6 @@ import java.util.List;
 import csl.database.model.Food;
 import csl.database.model.LogEntry;
 import csl.database.model.Portion;
-import csl.enums.MeasurementUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,6 @@ public class DatabaseUpdater {
 
         List<Food> foodlist = foodrepo.getSomeFood(foodsql);
         for (Food food : foodlist){
-            food.setMeasurementUnit(MeasurementUnit.GRAMS);
             food.setProtein(food.getProtein() / food.getUnitGrams() * 100);
             food.setFat(food.getFat() / food.getUnitGrams() * 100);
             food.setCarbs(food.getCarbs() / food.getUnitGrams() * 100);

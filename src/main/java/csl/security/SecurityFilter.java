@@ -6,13 +6,9 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
-import javax.naming.Context;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,7 +38,7 @@ public class SecurityFilter implements Filter {
         } else {
             LOGGER.debug("actual");
             String getenv = System.getenv("allow.crossorigin");
-            if (getenv ==null || getenv.equals("")){
+            if (getenv == null || getenv.equals("")){
                 getenv="http://localhost:4200";
             }
 

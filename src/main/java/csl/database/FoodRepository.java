@@ -1,7 +1,6 @@
 package csl.database;
 
 import csl.database.model.Food;
-import csl.enums.MeasurementUnit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -47,6 +46,7 @@ public class FoodRepository {
 
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
+    //TODO remove measurement unit
     private static final String SELECT_SQL = "select * from food";
     private static final String INSERT_SQL = "insert into food(" +
             "user_id,name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
@@ -74,12 +74,13 @@ public class FoodRepository {
         return template.query(SELECT_SQL + " WHERE user_id=:userId",params, new FoodWrapper<Food>());
     }
 
+    //TODO remove measurement unit from db insert
     public int insertFood(Integer userId, Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("userId", userId)
                 .addValue("name", food.getName())
-                .addValue("measurement", food.getMeasurementUnit().toString())
+                .addValue("measurement", "GRAMS")
                 .addValue("protein", food.getProtein())
                 .addValue("fat", food.getFat())
                 .addValue("carbs", food.getCarbs())
@@ -88,12 +89,13 @@ public class FoodRepository {
         return template.update(INSERT_SQL, params);
     }
 
+    //TODO remove measurement unit from db update
     public int updateFood(Integer userId, Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", food.getId())
                 .addValue("userId", userId)
                 .addValue("name", food.getName())
-                .addValue("measurement", food.getMeasurementUnit().toString())
+                .addValue("measurement", "GRAMS")
                 .addValue("protein", food.getProtein())
                 .addValue("fat", food.getFat())
                 .addValue("carbs", food.getCarbs())
@@ -127,7 +129,6 @@ public class FoodRepository {
         public Food mapRow(ResultSet rs, int i) throws SQLException {
             return new Food(rs.getLong(COL_ID),
                     rs.getString(COL_NAME),
-                    MeasurementUnit.valueOf(rs.getString(COL_MEASUREMENT)),
                     rs.getDouble(COL_PROTEIN),
                     rs.getDouble(COL_FAT),
                     rs.getDouble(COL_CARBS),

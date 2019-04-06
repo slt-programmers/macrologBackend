@@ -124,7 +124,6 @@ public class ImportService {
         Food food = new Food();
         food.setName(foodDto.getName());
         food.setId(null);
-        food.setMeasurementUnit(foodDto.getMeasurementUnit());
         food.setUnitGrams(foodDto.getUnitGrams());
         food.setUnitName(foodDto.getUnitName());
         food.setProtein(foodDto.getProtein());

@@ -1,6 +1,5 @@
 package csl.database;
 
-import csl.database.model.Food;
 import csl.database.model.Portion;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -88,8 +87,7 @@ public class PortionRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("foodId", foodId);
         String myPortions = SELECT_SQL + " WHERE  " + COL_FOOD_ID + "= :foodId";
-        List<Portion> queryResults = template.query(myPortions, params, new PortionWrapper());
-        return queryResults;
+        return template.query(myPortions, params, new PortionWrapper());
     }
 
     class PortionWrapper implements RowMapper {

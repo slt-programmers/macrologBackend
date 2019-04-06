@@ -1,6 +1,5 @@
 package csl.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import csl.enums.MeasurementUnit;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
@@ -11,8 +10,6 @@ public class FoodDto {
 
     private Long id;
     private String name;
-    @ApiModelProperty(notes = "Unit van foodrequest. Of GRAMS of UNIT",required=true, example = "GRAMS")
-    private MeasurementUnit measurementUnit;
     @ApiModelProperty(notes = "Indien Unit geselecteerd kan hier bijvoorbeeld stuks of bord.",required=false, example = "bord")
     private String unitName;
     @ApiModelProperty(notes = "Optioneel als unit ook nog gewogen wordt. Indien Gram is dit altijd 100",required=true, example = "100")
@@ -28,14 +25,6 @@ public class FoodDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public MeasurementUnit getMeasurementUnit() {
-        return measurementUnit;
-    }
-
-    public void setMeasurementUnit(MeasurementUnit unit) {
-        this.measurementUnit = unit;
     }
 
     public String getUnitName() {
