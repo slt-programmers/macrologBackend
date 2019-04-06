@@ -51,7 +51,7 @@ public class PortionRepository {
                 .addValue("id", null)
                 .addValue("foodId", foodId)
                 .addValue("description", portion.getDescription())
-                .addValue("unitmultiplier", portion.getUnitMultiplier())
+                .addValue("unitmultiplier", null)
                 .addValue("grams", portion.getGrams());
         return template.update(INSERT_SQL, params);
     }
@@ -60,7 +60,7 @@ public class PortionRepository {
                 .addValue("id", portion.getId())
                 .addValue("foodId", foodId)
                 .addValue("description", portion.getDescription())
-                .addValue("unitmultiplier", portion.getUnitMultiplier())
+                .addValue("unitmultiplier", null)
                 .addValue("grams", portion.getGrams());
         return template.update(UPDATE_SQL, params);
     }
@@ -70,7 +70,7 @@ public class PortionRepository {
                 .addValue("portionId", portionId)
                 .addValue("foodId", foodId);
         String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ID + "= :portionId AND " + COL_FOOD_ID + "= :foodId";
-        List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper());
+        List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper<Portion>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
@@ -79,7 +79,7 @@ public class PortionRepository {
                 .addValue("description", description)
                 .addValue("foodId", foodId);
         String myFoodAlias = SELECT_SQL + " WHERE  " + COL_DESCRIPTION + "= :description AND " + COL_FOOD_ID + "=:foodId";
-        List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper());
+        List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper<Portion>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
@@ -87,21 +87,17 @@ public class PortionRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("foodId", foodId);
         String myPortions = SELECT_SQL + " WHERE  " + COL_FOOD_ID + "= :foodId";
-        return template.query(myPortions, params, new PortionWrapper());
+        return template.query(myPortions, params, new PortionWrapper<Portion>());
     }
 
-    class PortionWrapper implements RowMapper {
+    class PortionWrapper<T> implements RowMapper<Portion> {
         @Override
         public Portion mapRow(ResultSet rs, int i) throws SQLException {
             double grams = rs.getDouble(COL_GRAMS);
             boolean gramsWasNull = rs.wasNull();
-
-            double multiplier = rs.getDouble(COL_UNIT_MULTIPLIER);
-            boolean multiplierWasNull = rs.wasNull();
             return new Portion(rs.getLong(COL_ID),
                     rs.getString(COL_DESCRIPTION),
-                    gramsWasNull?null:grams,
-                    multiplierWasNull?null:multiplier
+                    gramsWasNull ? null : grams
             );
         }
     }

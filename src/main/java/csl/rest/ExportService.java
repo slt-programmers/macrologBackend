@@ -62,7 +62,6 @@ public class ExportService {
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
                 portionDto.setDescription(portion.getDescription());
-                portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
                 logEntryDto.setPortion(portionDto);
@@ -105,7 +104,6 @@ public class ExportService {
                 PortionDto currDto = new PortionDto();
                 currDto.setDescription(portion.getDescription());
                 currDto.setGrams(portion.getGrams());
-                currDto.setUnitMultiplier(portion.getUnitMultiplier());
                 currDto.setId(portion.getId());
 
                 foodDto.addPortion(currDto);

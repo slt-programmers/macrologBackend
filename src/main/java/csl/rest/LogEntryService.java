@@ -83,7 +83,6 @@ public class LogEntryService {
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
                 portionDto.setDescription(portion.getDescription());
-                portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
                 dto.setPortion(portionDto);
@@ -203,7 +202,6 @@ public class LogEntryService {
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());
                 portionDto.setDescription(portion.getDescription());
-                portionDto.setUnitMultiplier(portion.getUnitMultiplier());
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
                 dto.setPortion(portionDto);

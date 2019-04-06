@@ -83,7 +83,6 @@ public class FoodService {
         PortionDto currDto = new PortionDto();
         currDto.setDescription(portion.getDescription());
         currDto.setGrams(portion.getGrams());
-        currDto.setUnitMultiplier(portion.getUnitMultiplier());
         currDto.setId(portion.getId());
         Macro calculatedMacros = calculateMacro(food, portion);
         currDto.setMacros(calculatedMacros);
@@ -141,7 +140,6 @@ public class FoodService {
                     newPortion.setId(portionDto.getId());
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
-                    newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
                     portionRepository.updatePortion(newFood.getId(),newPortion);
 
                 } else {
@@ -149,7 +147,6 @@ public class FoodService {
                     csl.database.model.Portion newPortion = new csl.database.model.Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
-                    newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
                     portionRepository.addPortion(newFood.getId(),newPortion);
                 }
             }
@@ -177,7 +174,6 @@ public class FoodService {
                         csl.database.model.Portion newPortion = new csl.database.model.Portion();
                         newPortion.setDescription(portionDto.getDescription());
                         newPortion.setGrams(portionDto.getGrams());
-                        newPortion.setUnitMultiplier(portionDto.getUnitMultiplier());
 
                         portionRepository.addPortion(addedFood.getId(), newPortion);
                     }

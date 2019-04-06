@@ -2,9 +2,8 @@ package csl.dto;
 
 public class AddPortionRequest {
 
-   String description;
-   Double grams;
-   String unitMultiplier;
+    private String description;
+    private Double grams;
 
     public String getDescription() {
         return description;
@@ -20,13 +19,5 @@ public class AddPortionRequest {
 
     public void setGrams(Double grams) {
         this.grams = grams;
-    }
-
-    public String getUnitMultiplier() {
-        return unitMultiplier;
-    }
-
-    public void setUnitMultiplier(String unitMultiplier) {
-        this.unitMultiplier = unitMultiplier;
     }
 }

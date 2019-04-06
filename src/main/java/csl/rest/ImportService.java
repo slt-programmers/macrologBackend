@@ -116,7 +116,6 @@ public class ImportService {
         portion.setId(null);
         portion.setGrams(portionDto.getGrams());
         portion.setDescription(portionDto.getDescription());
-        portion.setUnitMultiplier(portionDto.getUnitMultiplier());
         return portion;
     }
 

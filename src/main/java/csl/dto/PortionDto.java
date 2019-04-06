@@ -10,10 +10,8 @@ import io.swagger.annotations.ApiModelProperty;
 public class PortionDto {
 
     private Long id;
-    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram",required=false, example = "100.0")
+    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram", example = "100.0")
     private Double grams;
-    @ApiModelProperty(notes = "als je op food niveau unitMultiplier hebt gekozen. dan is dit aantal malen dat food",required=false, example = "1.2")
-    private Double unitMultiplier;
     @ApiModelProperty(notes = "bord oid",required=true, example = "bord")
     private String description;
     private Macro macros;
@@ -25,14 +23,6 @@ public class PortionDto {
 
     public void setGrams(Double grams) {
         this.grams = grams;
-    }
-
-    public Double getUnitMultiplier() {
-        return unitMultiplier;
-    }
-
-    public void setUnitMultiplier(Double unitMultiplier) {
-        this.unitMultiplier = unitMultiplier;
     }
 
     public String getDescription() {
@@ -51,11 +41,10 @@ public class PortionDto {
         this.id = id;
     }
 
-    public PortionDto(Long id, String description, Double grams, Double unitMultiplier) {
+    public PortionDto(Long id, String description, Double grams) {
         this.id = id;
         this.description = description;
         this.grams = grams;
-        this.unitMultiplier = unitMultiplier;
     }
 
     public PortionDto() {
