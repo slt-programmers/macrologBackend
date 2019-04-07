@@ -17,6 +17,12 @@ public class DatabaseUpdater {
 
     public DatabaseUpdater() {}
 
+    public static void updateDatabaseDropColumns() throws SQLException {
+        String sql = "ALTER TABLE " + PortionRepository.TABLE_NAME + " DROP COLUMN " + PortionRepository.COL_UNIT_MULTIPLIER;
+        String[] sqlArray = new String[]{sql};
+        runStatements(sqlArray);
+    }
+
     public static void updateRefactoreMeasurement() throws SQLException {
         String foodsql = "SELECT * FROM food WHERE measurement = 'UNIT' and user_id = 2";
         String logentrySql = "SELECT * FROM logentry WHERE food_id IN(SELECT id FROM food WHERE measurement = 'UNIT' AND user_id = 2)" ;
@@ -49,9 +55,7 @@ public class DatabaseUpdater {
             entry.setPortionId(portion.getId());
             entryrepo.updateLogEntry(2, entry);
         }
-
     }
-
 
     public static void updateWeightSettings() {
         String sql = "ALTER TABLE " + SettingsRepository.TABLE_NAME +

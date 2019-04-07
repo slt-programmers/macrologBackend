@@ -20,10 +20,12 @@ public class Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         SpringApplication.run(Application.class, args);
         setUpDatabase();
         LOGGER.debug("Application is now running.");
+
+        DatabaseUpdater.updateDatabaseDropColumns();
     }
 
     private static void setUpDatabase() {
