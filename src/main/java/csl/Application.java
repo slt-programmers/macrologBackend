@@ -24,6 +24,8 @@ public class Application {
         SpringApplication.run(Application.class, args);
         setUpDatabase();
         LOGGER.debug("Application is now running.");
+
+        DatabaseUpdater.updateDatabaseDropFoodColumns();
     }
 
     private static void setUpDatabase() {
