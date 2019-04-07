@@ -8,10 +8,6 @@ public class AddFoodRequest {
     @ApiModelProperty(notes = "ID van food. Indien gevuld is het een update")
     private Long id;
     private String name;
-    @ApiModelProperty(notes = "Indien Unit geselecteerd kan hier bijvoorbeeld stuks of bord.",required=false, example = "bord")
-    private String unitName;
-    @ApiModelProperty(notes = "Optioneel als unit ook nog gewogen wordt. Indien Gram is dit altijd 100",required=true, example = "100")
-    private Double unitGrams;
     private Double protein;
     private Double fat;
     private Double carbs;
@@ -23,22 +19,6 @@ public class AddFoodRequest {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getUnitName() {
-        return unitName;
-    }
-
-    public void setUnitName(String unitName) {
-        this.unitName = unitName;
-    }
-
-    public Double getUnitGrams() {
-        return unitGrams;
-    }
-
-    public void setUnitGrams(Double unitGrams) {
-        this.unitGrams = unitGrams;
     }
 
     public Double getProtein() {

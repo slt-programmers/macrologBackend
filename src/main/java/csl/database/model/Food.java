@@ -7,8 +7,6 @@ public class Food {
     private Double protein;
     private Double fat;
     private Double carbs;
-    private String unitName;
-    private Double unitGrams;
 
     public Food() {
     }
@@ -17,16 +15,12 @@ public class Food {
                 String name,
                 Double protein,
                 Double fat,
-                Double carbs,
-                String unitName,
-                Double unitGrams) {
+                Double carbs) {
         this.id = id;
         this.name = name;
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
-        this.unitName = unitName;
-        this.unitGrams = unitGrams;
     }
 
     public Long getId() {
@@ -67,22 +61,6 @@ public class Food {
 
     public void setCarbs(Double carbs) {
         this.carbs = carbs;
-    }
-
-    public String getUnitName() {
-        return unitName;
-    }
-
-    public void setUnitName(String unitName) {
-        this.unitName = unitName;
-    }
-
-    public Double getUnitGrams() {
-        return unitGrams;
-    }
-
-    public void setUnitGrams(Double unitGrams) {
-        this.unitGrams = unitGrams;
     }
 
     @Override

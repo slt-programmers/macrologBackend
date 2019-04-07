@@ -20,33 +20,26 @@ import java.util.List;
 public class FoodRepository {
     public static final String TABLE_NAME = "food";
 
-    public static final String COL_ID = "id";
+    static final String COL_ID = "id";
     private static final String COL_USER_ID = "user_id";
     private static final String COL_NAME = "name";
-    private static final String COL_MEASUREMENT = "measurement";
     private static final String COL_PROTEIN = "protein";
     private static final String COL_FAT = "fat";
     private static final String COL_CARBS = "carbs";
-    private static final String COL_UNIT_NAME = "unit_name";
-    private static final String COL_UNIT_GRAMS = "unit_grams";
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_NAME + " TEXT NOT NULL, " +
-                    COL_MEASUREMENT + " TEXT NOT NULL, " +
                     COL_PROTEIN + " DEC(5,2)  NOT NULL, " +
                     COL_FAT + " DEC(5,2) NOT NULL, " +
                     COL_CARBS + " DEC(5,2) NOT NULL," +
-                    COL_UNIT_NAME + " TEXT," +
-                    COL_UNIT_GRAMS + " DEC(5,2)," +
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
 
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
-    //TODO remove measurement unit
     private static final String SELECT_SQL = "select * from food";
     private static final String INSERT_SQL = "insert into food(" +
             "user_id,name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
@@ -74,7 +67,6 @@ public class FoodRepository {
         return template.query(SELECT_SQL + " WHERE user_id=:userId",params, new FoodWrapper<Food>());
     }
 
-    //TODO remove measurement unit from db insert
     public int insertFood(Integer userId, Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
@@ -84,12 +76,11 @@ public class FoodRepository {
                 .addValue("protein", food.getProtein())
                 .addValue("fat", food.getFat())
                 .addValue("carbs", food.getCarbs())
-                .addValue("unit_name", food.getUnitName())
-                .addValue("unit_grams", food.getUnitGrams());
+                .addValue("unit_name", "gram")
+                .addValue("unit_grams", 100.00);
         return template.update(INSERT_SQL, params);
     }
 
-    //TODO remove measurement unit from db update
     public int updateFood(Integer userId, Food food) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", food.getId())
@@ -99,8 +90,8 @@ public class FoodRepository {
                 .addValue("protein", food.getProtein())
                 .addValue("fat", food.getFat())
                 .addValue("carbs", food.getCarbs())
-                .addValue("unit_name", food.getUnitName())
-                .addValue("unit_grams", food.getUnitGrams());
+                .addValue("unit_name", "gram")
+                .addValue("unit_grams", 100.00);
         return template.update(UPDATE_SQL, params);
     }
 
@@ -131,9 +122,7 @@ public class FoodRepository {
                     rs.getString(COL_NAME),
                     rs.getDouble(COL_PROTEIN),
                     rs.getDouble(COL_FAT),
-                    rs.getDouble(COL_CARBS),
-                    rs.getString(COL_UNIT_NAME),
-                    rs.getDouble(COL_UNIT_GRAMS)
+                    rs.getDouble(COL_CARBS)
             );
         }
     }

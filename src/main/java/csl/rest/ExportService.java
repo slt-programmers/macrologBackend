@@ -117,8 +117,6 @@ public class ExportService {
         FoodDto foodDto = new FoodDto();
         foodDto.setName(food.getName());
         foodDto.setId(food.getId());
-        foodDto.setUnitGrams(food.getUnitGrams());
-        foodDto.setUnitName(food.getUnitName());
         foodDto.setProtein(food.getProtein());
         foodDto.setCarbs(food.getCarbs());
         foodDto.setFat(food.getFat());

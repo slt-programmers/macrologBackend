@@ -93,8 +93,6 @@ public class FoodService {
         FoodDto foodDto = new FoodDto();
         foodDto.setName(food.getName());
         foodDto.setId(food.getId());
-        foodDto.setUnitGrams(food.getUnitGrams());
-        foodDto.setUnitName(food.getUnitName());
         foodDto.setProtein(food.getProtein());
         foodDto.setCarbs(food.getCarbs());
         foodDto.setFat(food.getFat());
@@ -123,8 +121,6 @@ public class FoodService {
             Food newFood = new Food();
             newFood.setId(addFoodRequest.getId());
             newFood.setName(addFoodRequest.getName());
-            newFood.setUnitGrams(100.0);
-            newFood.setUnitName("gram");
             newFood.setCarbs(addFoodRequest.getCarbs());
             newFood.setFat(addFoodRequest.getFat());
             newFood.setProtein(addFoodRequest.getProtein());
@@ -161,8 +157,6 @@ public class FoodService {
             } else {
                 Food newFood = new Food();
                 newFood.setName(addFoodRequest.getName());
-                newFood.setUnitGrams(100.0);
-                newFood.setUnitName("gram");
                 newFood.setCarbs(addFoodRequest.getCarbs());
                 newFood.setFat(addFoodRequest.getFat());
                 newFood.setProtein(addFoodRequest.getProtein());
