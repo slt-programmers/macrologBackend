@@ -17,11 +17,11 @@ public class DatabaseUpdater {
 
     public DatabaseUpdater() {}
 
-    public static void updateDatabaseDropColumns() throws SQLException {
-        String sql = "ALTER TABLE " + PortionRepository.TABLE_NAME + " DROP COLUMN " + PortionRepository.COL_UNIT_MULTIPLIER;
-        String[] sqlArray = new String[]{sql};
-        runStatements(sqlArray);
-    }
+//    public static void updateDatabaseDropColumns() throws SQLException {
+//        String sql = "ALTER TABLE " + PortionRepository.TABLE_NAME + " DROP COLUMN " + PortionRepository.COL_UNIT_MULTIPLIER;
+//        String[] sqlArray = new String[]{sql};
+//        runStatements(sqlArray);
+//    }
 
     public static void updateRefactoreMeasurement() throws SQLException {
         String foodsql = "SELECT * FROM food WHERE measurement = 'UNIT' and user_id = 2";

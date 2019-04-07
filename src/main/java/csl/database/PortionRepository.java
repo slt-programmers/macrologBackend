@@ -20,9 +20,6 @@ public class PortionRepository {
     public static final String COL_ID = "id";
     public static final String COL_FOOD_ID = "food_id";
     public static final String COL_DESCRIPTION = "description";
-    /* Times the unit. */
-    public static final String COL_UNIT_MULTIPLIER = "unitmultiplier";
-    /* If food has been defined by unit this may be empty */
     public static final String COL_GRAMS = "grams";
 
     public static final String TABLE_CREATE =
@@ -30,7 +27,6 @@ public class PortionRepository {
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_FOOD_ID + " INT(6) NOT NULL, " +
                     COL_DESCRIPTION + " TEXT NOT NULL, " +
-                    COL_UNIT_MULTIPLIER + " DEC(5,2)," +
                     COL_GRAMS + " DEC(5,2)," +
                     "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
                     ")";
@@ -39,8 +35,8 @@ public class PortionRepository {
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,description,unitmultiplier,grams) values(:foodId,:description,:unitmultiplier,:grams)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_Id= :foodId ,description = :description,unitmultiplier = :unitmultiplier,grams =:grams where id = :id";
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,description,grams) values(:foodId, :description, :grams)";
+    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_Id= :foodId, description = :description, grams =:grams where id = :id";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -51,7 +47,6 @@ public class PortionRepository {
                 .addValue("id", null)
                 .addValue("foodId", foodId)
                 .addValue("description", portion.getDescription())
-                .addValue("unitmultiplier", null)
                 .addValue("grams", portion.getGrams());
         return template.update(INSERT_SQL, params);
     }
@@ -60,7 +55,6 @@ public class PortionRepository {
                 .addValue("id", portion.getId())
                 .addValue("foodId", foodId)
                 .addValue("description", portion.getDescription())
-                .addValue("unitmultiplier", null)
                 .addValue("grams", portion.getGrams());
         return template.update(UPDATE_SQL, params);
     }
