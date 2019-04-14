@@ -45,7 +45,7 @@ public class FoodRepository {
             "user_id,name, protein, fat, carbs) " +
             "values(:userId, :name, :protein, :fat, :carbs)";
     private static final String UPDATE_SQL = "update food set " +
-            "name = :name, protein = :protein, fat = :fat, carbs = :carbs, " +
+            "name = :name, protein = :protein, fat = :fat, carbs = :carbs " +
             "where id = :id AND user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
