@@ -42,10 +42,10 @@ public class FoodRepository {
 
     private static final String SELECT_SQL = "select * from food";
     private static final String INSERT_SQL = "insert into food(" +
-            "user_id,name, measurement, protein, fat, carbs, unit_name,unit_grams) " +
-            "values(:userId, :name, :measurement, :protein, :fat, :carbs, :unit_name,:unit_grams)";
+            "user_id,name, protein, fat, carbs) " +
+            "values(:userId, :name, :protein, :fat, :carbs)";
     private static final String UPDATE_SQL = "update food set " +
-            "name = :name, measurement = :measurement, protein = :protein, fat = :fat, carbs = :carbs, unit_name = :unit_name ,unit_grams = :unit_grams " +
+            "name = :name, protein = :protein, fat = :fat, carbs = :carbs, " +
             "where id = :id AND user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
@@ -72,12 +72,9 @@ public class FoodRepository {
                 .addValue("id", null)
                 .addValue("userId", userId)
                 .addValue("name", food.getName())
-                .addValue("measurement", "GRAMS")
                 .addValue("protein", food.getProtein())
                 .addValue("fat", food.getFat())
-                .addValue("carbs", food.getCarbs())
-                .addValue("unit_name", "gram")
-                .addValue("unit_grams", 100.00);
+                .addValue("carbs", food.getCarbs());
         return template.update(INSERT_SQL, params);
     }
 
@@ -86,12 +83,9 @@ public class FoodRepository {
                 .addValue("id", food.getId())
                 .addValue("userId", userId)
                 .addValue("name", food.getName())
-                .addValue("measurement", "GRAMS")
                 .addValue("protein", food.getProtein())
                 .addValue("fat", food.getFat())
-                .addValue("carbs", food.getCarbs())
-                .addValue("unit_name", "gram")
-                .addValue("unit_grams", 100.00);
+                .addValue("carbs", food.getCarbs());
         return template.update(UPDATE_SQL, params);
     }
 
