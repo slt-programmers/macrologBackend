@@ -99,15 +99,14 @@ public class LogEntryRepository {
         return template.query(SELECT_SQL +" WHERE user_id=:userId", params,new LogEntryWrapper());
     }
 
-    public List<LogEntry> getAllLogEntries(Integer userId,java.util.Date d) {
-        LOGGER.debug("Getting entries for " + d);
+    public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date date) {
+        LOGGER.debug("Getting entries for " + date);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("date",sdf.format(d));
+                .addValue("date",sdf.format(date));
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND user_id=:userId";
-        List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
-        return queryResults;
+        return template.query(myLogs, params, new LogEntryWrapper());
     }
 
     public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date begin, java.util.Date end) {
@@ -120,8 +119,7 @@ public class LogEntryRepository {
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND user_id=:userId";
         LOGGER.debug(myLogs);
         LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
-        List<LogEntry> queryResults = template.query(myLogs, params, new LogEntryWrapper());
-        return queryResults;
+        return template.query(myLogs, params, new LogEntryWrapper());
     }
     class LogEntryWrapper implements RowMapper {
         @Override

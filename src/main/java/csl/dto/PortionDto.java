@@ -16,6 +16,14 @@ public class PortionDto {
     private String description;
     private Macro macros;
 
+    public PortionDto(Long id, String description, Double grams) {
+        this.id = id;
+        this.description = description;
+        this.grams = grams;
+    }
+
+    public PortionDto() {
+    }
 
     public Double getGrams() {
         return grams;
@@ -39,15 +47,6 @@ public class PortionDto {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public PortionDto(Long id, String description, Double grams) {
-        this.id = id;
-        this.description = description;
-        this.grams = grams;
-    }
-
-    public PortionDto() {
     }
 
     public Macro getMacros() {

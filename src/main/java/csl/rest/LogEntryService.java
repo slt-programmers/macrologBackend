@@ -31,12 +31,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @Api(value = "logs", description = "Operations pertaining to logentries in the macro logger applications")
 public class LogEntryService {
 
-
     private FoodRepository foodRepository = new FoodRepository();
     private PortionRepository portionRepository = new PortionRepository();
     private LogEntryRepository logEntryRepository = new LogEntryRepository();
     private static final Logger LOGGER = LoggerFactory.getLogger(LogEntryService.class);
-
 
     @ApiOperation(value = "Retrieve all stored logentries")
     @RequestMapping(value = "",
@@ -49,52 +47,57 @@ public class LogEntryService {
         return ResponseEntity.ok(mapToDtos(userInfo,allLogEntries));
     }
 
-    @ApiOperation(value = "Retrieve all stored logentries")
+    @ApiOperation(value = "Retrieve all stored logentries for date")
     @RequestMapping(value = "/day/{date}",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getLogOfDay(@PathVariable("date") String dateLog) {
+    public ResponseEntity getLogEntriesForDay(@PathVariable("date") String date) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         LOGGER.debug("Request for " + userInfo);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date parsedDate;
         try {
-            parsedDate = sdf.parse(dateLog);
+            parsedDate = sdf.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(),parsedDate);
-        List<LogEntryDto> allDtos = new ArrayList<>();
+        List<LogEntryDto> logEntryDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
-            LogEntryDto dto = new LogEntryDto();
+            LogEntryDto logEntryDto = new LogEntryDto();
             Food food = foodRepository.getFoodById(userInfo.getUserId(),logEntry.getFoodId());
-            dto.setId(logEntry.getId());
+            logEntryDto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            dto.setFood(foodDto);
+            List<Portion> portions = portionRepository.getPortions(food.getId());
+            List<PortionDto> portionDtos = new ArrayList<>();
 
             Portion portion = null;
-            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                portion = portionRepository.getPortion(food.getId(),logEntry.getPortionId());
-                PortionDto portionDto = new PortionDto();
-                portionDto.setId(portion.getId());
-                portionDto.setGrams(portion.getGrams());
-                portionDto.setDescription(portion.getDescription());
-                Macro calculatedMacros = FoodService.calculateMacro(food, portion);
-                portionDto.setMacros(calculatedMacros);
-                dto.setPortion(portionDto);
+            if (portions != null) {
+                portionDtos = portions.stream().map(p -> new PortionDto(p.getId(), p.getDescription(), p.getGrams())).collect(Collectors.toList());
+
+                if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
+                    portion = portions.stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst().get();
+                    PortionDto portionDto =  new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
+                    Macro calculatedMacros = FoodService.calculateMacro(food, portion);
+                    portionDto.setMacros(calculatedMacros);
+                    logEntryDto.setPortion(portionDto);
+                }
             }
+            foodDto.setPortions(portionDtos);
+            logEntryDto.setFood(foodDto);
+
             Double multiplier = logEntry.getMultiplier();
-            dto.setMultiplier(multiplier);
-            dto.setDay(logEntry.getDay());
-            dto.setMeal(logEntry.getMeal());
+            logEntryDto.setMultiplier(multiplier);
+            logEntryDto.setDay(logEntry.getDay());
+            logEntryDto.setMeal(logEntry.getMeal());
 
             Macro macrosCalculated = new Macro();
             if (portion != null) {
-                macrosCalculated = dto.getPortion().getMacros().clone();
+                macrosCalculated = logEntryDto.getPortion().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
             } else {
@@ -102,12 +105,12 @@ public class LogEntryService {
                 macrosCalculated.setFat(multiplier * food.getFat());
                 macrosCalculated.setProtein(multiplier * food.getProtein());
             }
-            dto.setMacrosCalculated(macrosCalculated);
+            logEntryDto.setMacrosCalculated(macrosCalculated);
 
-            allDtos.add(dto);
+            logEntryDtos.add(logEntryDto);
         }
 
-        return ResponseEntity.ok(allDtos);
+        return ResponseEntity.ok(logEntryDtos);
     }
 
     @ApiOperation(value = "Store logentries")
