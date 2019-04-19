@@ -119,7 +119,7 @@ public class LogEntryService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeLogEntries(@RequestBody List<StoreLogEntryRequest> logEntries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<Long> newEntryIds = new ArrayList<>();
+        List<LogEntryDto> newEntries = new ArrayList<>();
         for (StoreLogEntryRequest logEntry : logEntries) {
             csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
             entry.setPortionId(logEntry.getPortionId());
@@ -132,13 +132,13 @@ public class LogEntryService {
                 logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
                 List<LogEntry> newEntry = logEntryRepository.getLogEntry(userInfo.getUserId(),
                         entry.getFoodId(), entry.getDay(), entry.getMeal());
-                newEntryIds.add(newEntry.get(0).getId());
+                newEntries = (mapToDtos(userInfo, newEntry));
             } else {
                 logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
             }
         }
 
-        return ResponseEntity.ok(newEntryIds);
+        return ResponseEntity.ok(newEntries);
     }
 
     @ApiOperation(value = "Delete logentry")
