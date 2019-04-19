@@ -44,7 +44,7 @@ public class LogEntryService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
 
-        return ResponseEntity.ok(mapToDtos(userInfo,allLogEntries));
+        return ResponseEntity.ok(mapToDtos(userInfo, allLogEntries));
     }
 
     @ApiOperation(value = "Retrieve all stored logentries for date")
@@ -64,12 +64,12 @@ public class LogEntryService {
             return ResponseEntity.badRequest().build();
         }
 
-        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(),parsedDate);
+        List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedDate);
         List<LogEntryDto> logEntryDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto logEntryDto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(userInfo.getUserId(),logEntry.getFoodId());
+            Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
             logEntryDto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
             List<Portion> portions = portionRepository.getPortions(food.getId());
@@ -81,7 +81,7 @@ public class LogEntryService {
 
                 if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
                     portion = portions.stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst().get();
-                    PortionDto portionDto =  new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
+                    PortionDto portionDto = new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
                     Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                     portionDto.setMacros(calculatedMacros);
                     logEntryDto.setPortion(portionDto);
@@ -119,7 +119,7 @@ public class LogEntryService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeLogEntries(@RequestBody List<StoreLogEntryRequest> logEntries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-
+        List<Long> newEntryIds = new ArrayList<>();
         for (StoreLogEntryRequest logEntry : logEntries) {
             csl.database.model.LogEntry entry = new csl.database.model.LogEntry();
             entry.setPortionId(logEntry.getPortionId());
@@ -129,14 +129,16 @@ public class LogEntryService {
             entry.setMeal(logEntry.getMeal());
             entry.setId(logEntry.getId());
             if (logEntry.getId() == null) {
-                logEntryRepository.insertLogEntry(userInfo.getUserId(),entry);
+                logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
+                List<LogEntry> newEntry = logEntryRepository.getLogEntry(userInfo.getUserId(),
+                        entry.getFoodId(), entry.getDay(), entry.getMeal());
+                newEntryIds.add(newEntry.get(0).getId());
             } else {
-                logEntryRepository.updateLogEntry(userInfo.getUserId(),entry);
+                logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
             }
         }
 
-
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return ResponseEntity.ok(newEntryIds);
     }
 
     @ApiOperation(value = "Delete logentry")
@@ -146,7 +148,7 @@ public class LogEntryService {
     public ResponseEntity storeLogEntry(@PathVariable("id") Long logEntryId) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        logEntryRepository.deleteLogEntry(userInfo.getUserId(),logEntryId);
+        logEntryRepository.deleteLogEntry(userInfo.getUserId(), logEntryId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -162,8 +164,8 @@ public class LogEntryService {
         begin.add(GregorianCalendar.MONTH, -1);
         java.util.Date beginTime = begin.getTime();
 
-        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(),beginTime, endTime);
-        List<LogEntryDto> logEntryDtos = mapToDtos(userInfo,allLogEntries);
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), beginTime, endTime);
+        List<LogEntryDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
         LOGGER.debug("Aantal dtos:" + logEntryDtos);
 
 
@@ -188,19 +190,19 @@ public class LogEntryService {
         return ResponseEntity.ok(retObject);
     }
 
-    private List<LogEntryDto> mapToDtos(UserInfo userInfo,List<LogEntry> allLogEntries) {
+    private List<LogEntryDto> mapToDtos(UserInfo userInfo, List<LogEntry> allLogEntries) {
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto dto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(userInfo.getUserId(),logEntry.getFoodId());
+            Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
             dto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
             dto.setFood(foodDto);
 
             Portion portion = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                portion = portionRepository.getPortion(food.getId(),logEntry.getPortionId());
+                portion = portionRepository.getPortion(food.getId(), logEntry.getPortionId());
                 PortionDto portionDto = new PortionDto();
                 portionDto.setId(portion.getId());
                 portionDto.setGrams(portion.getGrams());

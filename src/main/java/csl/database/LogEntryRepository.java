@@ -48,9 +48,10 @@ public class LogEntryRepository {
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id,food_Id,portion_Id,multiplier,day,meal) values(:userId,:foodId,:portionId,:multiplier,:day,:meal)";
+    private static final String SELECT_ONE_SQL = "select * from " + TABLE_NAME + " where user_id = :userId and food_id = :foodId and day = :day and meal = :meal";
+    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id, food_Id, portion_Id, multiplier, day, meal) values(:userId,:foodId,:portionId,:multiplier,:day,:meal)";
     private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id and user_id=:userId";
-    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id=:userId";
+    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id= :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -85,6 +86,15 @@ public class LogEntryRepository {
         return template.update(DELETE_SQL, params);
     }
 
+    public List<LogEntry> getLogEntry(Integer userId, Long foodId, Date day, String meal) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("foodId", foodId)
+                .addValue("day", day)
+                .addValue("meal", meal);
+        return template.query(SELECT_ONE_SQL, params, new LogEntryWrapper());
+    }
+
     public List<LogEntry> getSomeLogEntries(String selectStatement) {
         return template.query(selectStatement, new LogEntryWrapper());
     }
@@ -96,7 +106,7 @@ public class LogEntryRepository {
     public List<LogEntry> getAllLogEntries(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL +" WHERE user_id=:userId", params,new LogEntryWrapper());
+        return template.query(SELECT_SQL + " WHERE user_id=:userId", params, new LogEntryWrapper());
     }
 
     public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date date) {
@@ -104,7 +114,7 @@ public class LogEntryRepository {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("date",sdf.format(date));
+                .addValue("date", sdf.format(date));
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND user_id=:userId";
         return template.query(myLogs, params, new LogEntryWrapper());
     }
@@ -114,13 +124,14 @@ public class LogEntryRepository {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("dateBegin",sdf.format(begin))
-                .addValue("dateEnd",sdf.format(end));
+                .addValue("dateBegin", sdf.format(begin))
+                .addValue("dateEnd", sdf.format(end));
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND user_id=:userId";
         LOGGER.debug(myLogs);
         LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
         return template.query(myLogs, params, new LogEntryWrapper());
     }
+
     class LogEntryWrapper implements RowMapper {
         @Override
         public Object mapRow(ResultSet rs, int i) throws SQLException {
