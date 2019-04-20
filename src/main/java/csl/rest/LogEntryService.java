@@ -65,50 +65,7 @@ public class LogEntryService {
         }
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedDate);
-        List<LogEntryDto> logEntryDtos = new ArrayList<>();
-        for (csl.database.model.LogEntry logEntry : allLogEntries) {
-
-            LogEntryDto logEntryDto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
-            logEntryDto.setId(logEntry.getId());
-            FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            List<Portion> portions = portionRepository.getPortions(food.getId());
-            List<PortionDto> portionDtos = new ArrayList<>();
-
-            Portion portion = null;
-            if (portions != null) {
-                portionDtos = portions.stream().map(p -> new PortionDto(p.getId(), p.getDescription(), p.getGrams())).collect(Collectors.toList());
-
-                if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                    portion = portions.stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst().get();
-                    PortionDto portionDto = new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
-                    Macro calculatedMacros = FoodService.calculateMacro(food, portion);
-                    portionDto.setMacros(calculatedMacros);
-                    logEntryDto.setPortion(portionDto);
-                }
-            }
-            foodDto.setPortions(portionDtos);
-            logEntryDto.setFood(foodDto);
-
-            Double multiplier = logEntry.getMultiplier();
-            logEntryDto.setMultiplier(multiplier);
-            logEntryDto.setDay(logEntry.getDay());
-            logEntryDto.setMeal(logEntry.getMeal());
-
-            Macro macrosCalculated = new Macro();
-            if (portion != null) {
-                macrosCalculated = logEntryDto.getPortion().getMacros().clone();
-                macrosCalculated.multiply(multiplier);
-
-            } else {
-                macrosCalculated.setCarbs(multiplier * food.getCarbs());
-                macrosCalculated.setFat(multiplier * food.getFat());
-                macrosCalculated.setProtein(multiplier * food.getProtein());
-            }
-            logEntryDto.setMacrosCalculated(macrosCalculated);
-
-            logEntryDtos.add(logEntryDto);
-        }
+        List<LogEntryDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
 
         return ResponseEntity.ok(logEntryDtos);
     }
@@ -130,9 +87,8 @@ public class LogEntryService {
             entry.setId(logEntry.getId());
             if (logEntry.getId() == null) {
                 logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
-                List<LogEntry> newEntry = logEntryRepository.getLogEntry(userInfo.getUserId(),
-                        entry.getFoodId(), entry.getDay(), entry.getMeal());
-                newEntries = (mapToDtos(userInfo, newEntry));
+                List<LogEntry> newEntry = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
+                newEntries = mapToDtos(userInfo, newEntry);
             } else {
                 logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
             }
@@ -146,10 +102,8 @@ public class LogEntryService {
             method = DELETE,
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeLogEntry(@PathVariable("id") Long logEntryId) {
-
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logEntryRepository.deleteLogEntry(userInfo.getUserId(), logEntryId);
-
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -168,14 +122,12 @@ public class LogEntryService {
         List<LogEntryDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
         LOGGER.debug("Aantal dtos:" + logEntryDtos);
 
-
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
             LogEntryDto d3 = new LogEntryDto();
             d3.setMacrosCalculated(d1.getMacrosCalculated());
             d3.getMacrosCalculated().combine(d2.getMacrosCalculated());
             return d3;
         })));
-
 
         ArrayList<DayMacro> retObject = new ArrayList<>();
         for (java.util.Date date : collect.keySet()) {
@@ -185,7 +137,6 @@ public class LogEntryService {
             retObject.add(dm);
         }
         Collections.sort(retObject, Comparator.comparing(DayMacro::getDay));
-
 
         return ResponseEntity.ok(retObject);
     }
@@ -198,19 +149,24 @@ public class LogEntryService {
             Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
             dto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            dto.setFood(foodDto);
+            List<Portion> portions = portionRepository.getPortions(food.getId());
+            List<PortionDto> portionDtos = new ArrayList<>();
 
             Portion portion = null;
-            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                portion = portionRepository.getPortion(food.getId(), logEntry.getPortionId());
-                PortionDto portionDto = new PortionDto();
-                portionDto.setId(portion.getId());
-                portionDto.setGrams(portion.getGrams());
-                portionDto.setDescription(portion.getDescription());
-                Macro calculatedMacros = FoodService.calculateMacro(food, portion);
-                portionDto.setMacros(calculatedMacros);
-                dto.setPortion(portionDto);
+            if (portions != null) {
+                portionDtos = portions.stream().map(p -> new PortionDto(p.getId(), p.getDescription(), p.getGrams())).collect(Collectors.toList());
+
+                if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
+                    portion = portionRepository.getPortion(food.getId(), logEntry.getPortionId());
+                    PortionDto portionDto = new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
+                    Macro calculatedMacros = FoodService.calculateMacro(food, portion);
+                    portionDto.setMacros(calculatedMacros);
+                    dto.setPortion(portionDto);
+                }
             }
+            foodDto.setPortions(portionDtos);
+            dto.setFood(foodDto);
+
             Double multiplier = logEntry.getMultiplier();
             dto.setMultiplier(multiplier);
             dto.setDay(logEntry.getDay());
@@ -230,6 +186,7 @@ public class LogEntryService {
 
             allDtos.add(dto);
         }
+
         return allDtos;
     }
 }
