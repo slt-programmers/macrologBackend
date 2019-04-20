@@ -88,6 +88,11 @@ public class LogEntryService {
             if (logEntry.getId() == null) {
                 logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
                 List<LogEntry> newEntry = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
+                if (newEntry.size() > 1) {
+                    LogEntry newestEntry = newEntry.stream().max(Comparator.comparing(LogEntry::getId)).orElse(newEntry.get(newEntry.size() -1));
+                    newEntry = new ArrayList<>();
+                    newEntry.add(newestEntry);
+                }
                 newEntries = mapToDtos(userInfo, newEntry);
             } else {
                 logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
