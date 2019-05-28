@@ -5,7 +5,7 @@ import csl.database.UserAcccountRepository;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
 import csl.dto.ChangePasswordRequest;
-import csl.websocket.notification.MailService;
+import csl.notification.MailService;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;
@@ -15,12 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static csl.security.SecurityConstants.EXPIRATION_TIME;
@@ -39,18 +40,17 @@ public class AuthenticationService {
             method = POST)
     public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
         String username = request.getUsername();
-        String password = request.getPassword();
+        String hashedPassword = DigestUtils.sha256Hex(request.getPassword());
         LOGGER.info("Login attempt: " + username);
 
         UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUser(username);
         if (userAccount == null) {
-            // Maybe the user signed in with his/her email:
             userAccount = USER_ACCCOUNT_REPOSITORY.getUserByEmail(username);
         }
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (!userAccount.getPassword().equals(password)) {
+        } else if (!DigestUtils.sha256Hex(userAccount.getPassword()).equals(hashedPassword)) {
             LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
@@ -58,26 +58,20 @@ public class AuthenticationService {
             if (name == null) {
                 name = username;
             }
-            try {
-                String jwt = Jwts.builder()
-                        .setSubject("users/TzMUocMF4p")
-                        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                        .claim("name", name)
-                        .claim("userId", userAccount.getId())
-//                        .claim("scope", "self groups/admins")
-                        .signWith(
-                                SignatureAlgorithm.HS256,
-                                SECRET.getBytes("UTF-8")
-                        )
-                        .compact();
-                MultiValueMap<String, String> responseHeaders = new HttpHeaders();
-                responseHeaders.add("token", jwt);
-                LOGGER.info("Login successful");
-                return new ResponseEntity<>("{\"name\":\"" + name + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
-            } catch (UnsupportedEncodingException e) {
-                LOGGER.error(e.getMessage());
-                return ResponseEntity.status(500).body(e.getMessage());
-            }
+            String jwt = Jwts.builder()
+                    .setSubject("users/TzMUocMF4p")
+                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                    .claim("name", name)
+                    .claim("userId", userAccount.getId())
+                    .signWith(
+                            SignatureAlgorithm.HS256,
+                            SECRET.getBytes(StandardCharsets.UTF_8)
+                    )
+                    .compact();
+            MultiValueMap<String, String> responseHeaders = new HttpHeaders();
+            responseHeaders.add("token", jwt);
+            LOGGER.info("Login successful");
+            return new ResponseEntity<>("{\"name\":\"" + name + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
         }
     }
 
@@ -87,52 +81,42 @@ public class AuthenticationService {
     public ResponseEntity signUp(@RequestBody AuthenticationRequest request) {
         LOGGER.info(request.getEmail());
         String username = request.getUsername();
-        String password = request.getPassword();
+        String hashedPassword = DigestUtils.sha256Hex(request.getPassword());
         String email = request.getEmail();
-        LOGGER.info("Add user attempt:" + username + " - " + password);
-
-        String encodedPassword = password; // todo = encode
+        LOGGER.info("Add user attempt: " + username);
 
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
         if (account != null) {
             return ResponseEntity.status(401).body("Username already in use");
         } else {
             UserAccount userByEmail = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
-            if (userByEmail != null){
+            if (userByEmail != null) {
                 return ResponseEntity.status(401).body("Email already in use");
             } else {
-                USER_ACCCOUNT_REPOSITORY.insertUser(username, encodedPassword, email);
+                USER_ACCCOUNT_REPOSITORY.insertUser(username, hashedPassword, email);
                 account = USER_ACCCOUNT_REPOSITORY.getUser(username);
             }
         }
 
         UserAccount newAccount = account;
-        try {
-            String jwt = Jwts.builder()
-                    .setSubject("users/TzMUocMF4p")
-                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                    .claim("name", username)
-                    .claim("userId", newAccount.getId())
-                    .signWith(
-                            SignatureAlgorithm.HS256,
-                            SECRET.getBytes("UTF-8")
-                    )
-                    .compact();
-            MultiValueMap<String, String> responseHeaders = new HttpHeaders();
-            responseHeaders.add("token", jwt);
-            LOGGER.info("Signup successful");
 
-            new Thread() {
-                public void run () {
-                    MailService.sendConfirmationMail(email, newAccount);
-                }
-            }.start();
+        String jwt = Jwts.builder()
+                .setSubject("users/TzMUocMF4p")
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .claim("name", username)
+                .claim("userId", newAccount.getId())
+                .signWith(
+                        SignatureAlgorithm.HS256,
+                        SECRET.getBytes(StandardCharsets.UTF_8)
+                )
+                .compact();
+        MultiValueMap<String, String> responseHeaders = new HttpHeaders();
+        responseHeaders.add("token", jwt);
+        LOGGER.info("Signup successful");
 
-            return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error(e.getMessage());
-            return ResponseEntity.status(500).body(e.getMessage());
-        }
+        new Thread(() -> MailService.sendConfirmationMail(email, newAccount)).start();
+
+        return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
     }
 
     @RequestMapping(value = "/validate",
@@ -145,7 +129,7 @@ public class AuthenticationService {
         if (account != null) {
             if (account.getEmail().equals(email)) {
                 new Thread() {
-                    public void run () {
+                    public void run() {
                         MailService.sendPasswordRetrievalMail(email, account);
                     }
                 }.start();
@@ -163,29 +147,28 @@ public class AuthenticationService {
     @RequestMapping(value = "/changePassword",
             method = POST)
     public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request) {
-        String oldPassword = request.getOldPassword();
-        String newPassword = request.getNewPassword();
-        String confirmPassword = request.getConfirmPassword();
+        String oldPasswordHashed = DigestUtils.sha256Hex(request.getOldPassword());
+        String newPasswordHashed = DigestUtils.sha256Hex(request.getNewPassword());
+        String confirmPasswordHashed = DigestUtils.sha256Hex(request.getConfirmPassword());
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
-        LOGGER.info("Update password attempt for userid " + userInfo.getUserId());
+        LOGGER.info("Update password attempt for userId: " + userInfo.getUserId());
 
         UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUserById(userInfo.getUserId());
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (!userAccount.getPassword().equals(oldPassword)) {
+        } else if (!DigestUtils.sha256Hex(userAccount.getPassword()).equals(oldPasswordHashed)) {
             LOGGER.error("Old password incorrect");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            if (!newPassword.equals(confirmPassword)){
-                LOGGER.error("passwords do not match");
-                return new ResponseEntity("passwords do not match",HttpStatus.BAD_REQUEST);
+            if (!newPasswordHashed.equals(confirmPasswordHashed)) {
+                LOGGER.error("Passwords do not match");
+                return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
             } else {
-                LOGGER.error("passwords match");
-                USER_ACCCOUNT_REPOSITORY.updatePassword(userAccount.getUsername(),newPassword);
-                return new ResponseEntity("ok",HttpStatus.OK);
-
+                LOGGER.info("Passwords match");
+                USER_ACCCOUNT_REPOSITORY.updatePassword(userAccount.getUsername(), newPasswordHashed);
+                return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
     }

@@ -66,7 +66,6 @@ public class UserAcccountRepository {
 
     public UserAccount getUserByEmail(String email) {
         if (email != null) {
-
             SqlParameterSource params = new MapSqlParameterSource()
                     .addValue("email", email.toUpperCase());
             String users = SELECT_SQL + " WHERE  UPPER(" + COL_EMAIL + ") = :email";
@@ -78,7 +77,6 @@ public class UserAcccountRepository {
     }
 
     public UserAccount getUserById(Integer id) {
-
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
         String users = SELECT_SQL + " WHERE " + COL_ID + " = :id";

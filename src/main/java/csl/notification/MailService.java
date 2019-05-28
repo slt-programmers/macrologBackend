@@ -1,4 +1,4 @@
-package csl.websocket.notification;
+package csl.notification;
 
 
 import csl.database.model.UserAccount;
@@ -43,9 +43,9 @@ public class MailService {
             MimeMessage message = new MimeMessage(secureSession);
             message.setFrom(new InternetAddress("macrologwebapp@gmail.com"));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            message.setSubject("Welcome to Macrolog Webapp!");
+            message.setSubject("Welcome to Macrolog!");
             message.setContent("<p>Hello " + account.getUsername() + ", </p>" +
-                            "<p>Thank you for using Macrolog Webapp!</p>" +
+                            "<p>Thank you for using Macrolog!</p>" +
                             "<p>This app started out as a hobby project. " +
                             "It was developed by two software engineers who wanted to get in shape, " +
                             "who also happen to hate adds, and who (probably incorrectly) " +
@@ -54,7 +54,7 @@ public class MailService {
                             "<p>Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
                             "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
                             "<p>All the best,</p>" +
-                            "<p>Carmen and Arjan from Macrolog Webapp</p>"
+                            "<p>Carmen and Arjan from Macrolog</p>"
                     , "text/html");
 
             Transport.send(message);

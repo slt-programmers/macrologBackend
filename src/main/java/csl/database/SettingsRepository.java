@@ -33,11 +33,11 @@ public class SettingsRepository {
                     COL_VALUE + " TEXT," +
                     COL_DATE + " DATE," +
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")," +
-                    "UNIQUE KEY user_set (" +COL_USER_ID +"," +COL_SETTING + "(50))" +
+                    "UNIQUE KEY user_set (" + COL_USER_ID + "," + COL_SETTING + "(50))" +
                     ")";
     private static final String SELECT_SQL = "select * from settings";
     private static final String INSERT_SQL = "insert into settings" +
-            "(user_id,setting, value) values(:userId,:setting, :value)";
+            "(user_id, setting, value) values(:userId, :setting, :value)";
     private static final String UPDATE_SQL = "UPDATE settings SET value = :value where user_id = :userId AND setting = :setting";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
@@ -46,13 +46,13 @@ public class SettingsRepository {
     public SettingsRepository() {
     }
 
-    public int putSetting(Integer userId,String setting, String value) {
-        if (getSetting(userId,setting) == null) {
+    public int putSetting(Integer userId, String setting, String value) {
+        if (getSetting(userId, setting) == null) {
             LOGGER.debug("Insert");
-            return insertSetting(userId,setting, value);
+            return insertSetting(userId, setting, value);
         } else {
             LOGGER.debug("Update");
-            return updateSetting(userId,setting, value);
+            return updateSetting(userId, setting, value);
         }
     }
 
@@ -96,10 +96,11 @@ public class SettingsRepository {
     private List<Setting> getAllSettings() {
         return template.query(SELECT_SQL, new SettingsWrapper<Setting>());
     }
+
     public List<Setting> getAllSettings(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + "=:userId", params,new SettingsWrapper<Setting>());
+        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + "=:userId", params, new SettingsWrapper<Setting>());
     }
 
     class SettingsWrapper<T> implements RowMapper<Setting> {
