@@ -87,15 +87,19 @@ public class LogEntryService {
             entry.setId(logEntry.getId());
             if (logEntry.getId() == null) {
                 logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
-                List<LogEntry> newEntry = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
-                if (newEntry.size() > 1) {
-                    LogEntry newestEntry = newEntry.stream().max(Comparator.comparing(LogEntry::getId)).orElse(newEntry.get(newEntry.size() -1));
-                    newEntry = new ArrayList<>();
-                    newEntry.add(newestEntry);
+                List<LogEntry> addedEntryMatches = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
+                if (addedEntryMatches.size() > 1) {
+                    LogEntry newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogEntry::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() -1));
+                    addedEntryMatches = new ArrayList<>();
+                    addedEntryMatches.add(newestEntry);
                 }
-                newEntries = mapToDtos(userInfo, newEntry);
+                if (addedEntryMatches.size() != 1) {
+                    LOGGER.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getFoodId() + " - " + entry.getDay());
+                }
+                newEntries.add(mapToDto(userInfo, addedEntryMatches.get(0)));
             } else {
                 logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
+                newEntries.add(mapToDto(userInfo,entry));
             }
         }
 
@@ -150,48 +154,53 @@ public class LogEntryService {
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
-            LogEntryDto dto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
-            dto.setId(logEntry.getId());
-            FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
-            List<Portion> portions = portionRepository.getPortions(food.getId());
-            List<PortionDto> portionDtos = new ArrayList<>();
-
-            Portion portion = null;
-            if (portions != null) {
-                portionDtos = portions.stream().map(p -> new PortionDto(p.getId(), p.getDescription(), p.getGrams())).collect(Collectors.toList());
-
-                if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                    portion = portionRepository.getPortion(food.getId(), logEntry.getPortionId());
-                    PortionDto portionDto = new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
-                    Macro calculatedMacros = FoodService.calculateMacro(food, portion);
-                    portionDto.setMacros(calculatedMacros);
-                    dto.setPortion(portionDto);
-                }
-            }
-            foodDto.setPortions(portionDtos);
-            dto.setFood(foodDto);
-
-            Double multiplier = logEntry.getMultiplier();
-            dto.setMultiplier(multiplier);
-            dto.setDay(logEntry.getDay());
-            dto.setMeal(logEntry.getMeal());
-
-            Macro macrosCalculated = new Macro();
-            if (portion != null) {
-                macrosCalculated = dto.getPortion().getMacros().clone();
-                macrosCalculated.multiply(multiplier);
-
-            } else {
-                macrosCalculated.setCarbs(multiplier * food.getCarbs());
-                macrosCalculated.setFat(multiplier * food.getFat());
-                macrosCalculated.setProtein(multiplier * food.getProtein());
-            }
-            dto.setMacrosCalculated(macrosCalculated);
+            LogEntryDto dto = mapToDto(userInfo, logEntry);
 
             allDtos.add(dto);
         }
 
         return allDtos;
+    }
+
+    private LogEntryDto mapToDto(UserInfo userInfo, LogEntry logEntry) {
+        LogEntryDto dto = new LogEntryDto();
+        Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
+        dto.setId(logEntry.getId());
+        FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
+        List<Portion> portions = portionRepository.getPortions(food.getId());
+        List<PortionDto> portionDtos = new ArrayList<>();
+
+        Portion portion = null;
+        if (portions != null) {
+            portionDtos = portions.stream().map(p -> new PortionDto(p.getId(), p.getDescription(), p.getGrams())).collect(Collectors.toList());
+
+            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
+                portion = portionRepository.getPortion(food.getId(), logEntry.getPortionId());
+                PortionDto portionDto = new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
+                Macro calculatedMacros = FoodService.calculateMacro(food, portion);
+                portionDto.setMacros(calculatedMacros);
+                dto.setPortion(portionDto);
+            }
+        }
+        foodDto.setPortions(portionDtos);
+        dto.setFood(foodDto);
+
+        Double multiplier = logEntry.getMultiplier();
+        dto.setMultiplier(multiplier);
+        dto.setDay(logEntry.getDay());
+        dto.setMeal(logEntry.getMeal());
+
+        Macro macrosCalculated = new Macro();
+        if (portion != null) {
+            macrosCalculated = dto.getPortion().getMacros().clone();
+            macrosCalculated.multiply(multiplier);
+
+        } else {
+            macrosCalculated.setCarbs(multiplier * food.getCarbs());
+            macrosCalculated.setFat(multiplier * food.getFat());
+            macrosCalculated.setProtein(multiplier * food.getProtein());
+        }
+        dto.setMacrosCalculated(macrosCalculated);
+        return dto;
     }
 }

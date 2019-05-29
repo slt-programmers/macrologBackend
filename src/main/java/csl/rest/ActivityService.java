@@ -53,7 +53,7 @@ public class ActivityService {
         }
 
         List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), parsedDate);
-        List<LogActivityDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
+        List<LogActivityDto> logEntryDtos = mapToDtos(allLogEntries);
 
         return ResponseEntity.ok(logEntryDtos);
     }
@@ -73,16 +73,20 @@ public class ActivityService {
             entry.setId(logEntry.getId());
             if (logEntry.getId() == null) {
                 logActitivyRepository.insertActivity(userInfo.getUserId(), entry);
-                List<LogActivity> newEntry = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay());
-                if (newEntry.size() > 1) {
-                    LogActivity newestEntry = newEntry.stream().max(Comparator.comparing(LogActivity::getId)).orElse(newEntry.get(newEntry.size() - 1));
-                    newEntry = new ArrayList<>();
-                    newEntry.add(newestEntry);
+                List<LogActivity> addedEntryMatches = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay());
+                if (addedEntryMatches.size() > 1) {
+                    LogActivity newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogActivity::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
+                    addedEntryMatches = new ArrayList<>();
+                    addedEntryMatches.add(newestEntry);
                 }
-                newEntries = mapToDtos(userInfo, newEntry);
+                if (addedEntryMatches.size() != 1) {
+                    LOGGER.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getName() + " - " + entry.getDay());
+                }
+                newEntries.add(mapToDto(addedEntryMatches.get(0)));
             } else {
                 // TODO BUG? Add to list of new entries? Why only new?
                 logActitivyRepository.updateLogActivity(userInfo.getUserId(), entry);
+                newEntries.add(mapToDto(entry));
             }
         }
 
@@ -98,18 +102,23 @@ public class ActivityService {
         logActitivyRepository.deleteLogActivity(userInfo.getUserId(), logEntryId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-    private List<LogActivityDto> mapToDtos(UserInfo userInfo, List<LogActivity> allLogActivities) {
+    private List<LogActivityDto> mapToDtos(List<LogActivity> allLogActivities) {
         List<LogActivityDto> allDtos = new ArrayList<>();
         for (LogActivity logEntry : allLogActivities) {
 
-            LogActivityDto dto = new LogActivityDto();
-            dto.setCalories(logEntry.getCalories());
-            dto.setName(logEntry.getName());
-            dto.setId(logEntry.getId());
-            dto.setDay(logEntry.getDay());
+            LogActivityDto dto = mapToDto(logEntry);
             allDtos.add(dto);
         }
 
         return allDtos;
+    }
+
+    private LogActivityDto mapToDto(LogActivity logEntry) {
+        LogActivityDto dto = new LogActivityDto();
+        dto.setCalories(logEntry.getCalories());
+        dto.setName(logEntry.getName());
+        dto.setId(logEntry.getId());
+        dto.setDay(logEntry.getDay());
+        return dto;
     }
 }
