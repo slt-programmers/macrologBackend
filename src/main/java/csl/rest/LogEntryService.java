@@ -28,7 +28,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/logs")
-@Api(value = "logs", description = "Operations pertaining to logentries in the macro logger applications")
+@Api(value = "logs", description = "Operations pertaining to logentries in the macro logger application")
 public class LogEntryService {
 
     private FoodRepository foodRepository = new FoodRepository();
