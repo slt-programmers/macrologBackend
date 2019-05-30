@@ -50,21 +50,19 @@ public class ExportService {
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto logEntryDto = new LogEntryDto();
-            Food food = allFood.stream().filter(f -> f.getId().equals(logEntry.getFoodId())).findFirst()
-                    .orElse(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId()));
             logEntryDto.setId(logEntry.getId());
-            FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
+            FoodDto foodDto = allFoodDtos.stream().filter(f -> f.getId().equals(logEntry.getFoodId())).findFirst()
+                    .orElse(FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
             logEntryDto.setFood(foodDto);
 
-            csl.database.model.Portion portion = null;
+            PortionDto portionDto = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
-                portion = portionRepository.getPortion(food.getId(),logEntry.getPortionId());
-                PortionDto portionDto = new PortionDto();
-                portionDto.setId(portion.getId());
-                portionDto.setGrams(portion.getGrams());
-                portionDto.setDescription(portion.getDescription());
-                Macro calculatedMacros = FoodService.calculateMacro(food, portion);
-                portionDto.setMacros(calculatedMacros);
+                portionDto = foodDto.getPortions().stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst()
+                        .orElse(null);
+                if (portionDto != null) {
+                    Macro calculatedMacros = FoodService.calculateMacro(foodDto, portionDto);
+                    portionDto.setMacros(calculatedMacros);
+                }
                 logEntryDto.setPortion(portionDto);
             }
             Double multiplier = logEntry.getMultiplier();
@@ -73,14 +71,14 @@ public class ExportService {
             logEntryDto.setMeal(logEntry.getMeal());
 
             Macro macrosCalculated = new Macro();
-            if (portion != null) {
+            if (portionDto != null) {
                 macrosCalculated = logEntryDto.getPortion().getMacros().clone();
                 macrosCalculated.multiply(multiplier);
 
             } else {
-                macrosCalculated.setCarbs(multiplier * food.getCarbs());
-                macrosCalculated.setFat(multiplier * food.getFat());
-                macrosCalculated.setProtein(multiplier * food.getProtein());
+                macrosCalculated.setCarbs(multiplier * foodDto.getCarbs());
+                macrosCalculated.setFat(multiplier * foodDto.getFat());
+                macrosCalculated.setProtein(multiplier * foodDto.getProtein());
             }
             logEntryDto.setMacrosCalculated(macrosCalculated);
 
@@ -91,7 +89,6 @@ public class ExportService {
 
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         export.setAllSettings(settings);
-
 
         return ResponseEntity.ok(export);
     }

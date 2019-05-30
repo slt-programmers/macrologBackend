@@ -110,6 +110,16 @@ public class FoodService {
         return calculatedMacros;
     }
 
+    public static Macro calculateMacro(FoodDto food, PortionDto portion) {
+        Macro calculatedMacros = new Macro();
+        // FoodDto has been entered for 100g
+        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
+        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
+        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+
+        return calculatedMacros;
+    }
+
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
     @RequestMapping(value = "",
             method = POST,
