@@ -36,6 +36,7 @@ public class Application {
                 " table_name = '" + LogEntryRepository.TABLE_NAME + "' or " +
                 " table_name = '" + MealRepository.TABLE_NAME + "' or " +
                 " table_name = '" + ActivityRepository.TABLE_NAME + "' or " +
+                " table_name = '" + WeightRepository.TABLE_NAME + "' or " +
                 " table_name = '" + IngredientRepository.TABLE_NAME + "'";
         List<String> existingTables = template.query(checkUrl, (resultSet, i) -> resultSet.getString("TABLE_NAME"));
 
@@ -71,6 +72,12 @@ public class Application {
             LOGGER.info("Create activity table");
             createTable(ActivityRepository.TABLE_CREATE);
         }
+
+        if (!existingTables.contains(WeightRepository.TABLE_NAME)) {
+            LOGGER.info("Create weight tracker table");
+            createTable(WeightRepository.TABLE_CREATE);
+        }
+
     }
 
     private static void createTable(String sql) {
