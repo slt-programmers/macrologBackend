@@ -1,5 +1,6 @@
 package csl.rest;
 
+import com.oracle.tools.packager.Log;
 import csl.database.FoodRepository;
 import csl.database.LogEntryRepository;
 import csl.database.PortionRepository;
@@ -38,10 +39,12 @@ public class ExportService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
+        Log.info("Export: allFood size = " + allFood.size());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
         }
+        Log.info("Export: allFoodDtos size = " + allFoodDtos.size());
         export.setAllFood(allFoodDtos);
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
@@ -51,8 +54,12 @@ public class ExportService {
 
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
-            FoodDto foodDto = allFoodDtos.stream().filter(f -> f.getId().equals(logEntry.getFoodId())).findFirst()
-                    .orElse(FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
+            Log.info("Export: logEntryDto ID " + logEntry.getId());
+
+            FoodDto foodDto = allFoodDtos.stream().filter(f -> {
+                Log.info("Export: foodDto ID " + f.getId());
+                return f.getId().equals(logEntry.getFoodId());
+            }).findFirst().orElse(FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
             logEntryDto.setFood(foodDto);
 
             PortionDto portionDto = null;
