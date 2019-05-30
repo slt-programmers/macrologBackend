@@ -21,11 +21,11 @@ public class MailService {
             MimeMessage message = new MimeMessage(secureSession);
             message.setFrom(new InternetAddress("macrologwebapp@gmail.com"));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            message.setSubject("Macrolog Webapp Credentials");
+            message.setSubject("Macrolog Credentials");
             message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
                     "<p>Your password is "+ account.getPassword() +"</p>" +
                     "<p>See you soon!</p>" +
-                    "<p>Carmen and Arjan from Macrolog Webapp</p>"
+                    "<p>Carmen and Arjan from Macrolog</p>"
                     , "text/html");
 
             Transport.send(message);
