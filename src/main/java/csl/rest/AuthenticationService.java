@@ -50,7 +50,7 @@ public class AuthenticationService {
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (!DigestUtils.sha256Hex(userAccount.getPassword()).equals(hashedPassword)) {
+        } else if (!userAccount.getPassword().equals(hashedPassword)) {
             LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
@@ -158,7 +158,7 @@ public class AuthenticationService {
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (!DigestUtils.sha256Hex(userAccount.getPassword()).equals(oldPasswordHashed)) {
+        } else if (userAccount.getPassword().equals(oldPasswordHashed)) {
             LOGGER.error("Old password incorrect");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
