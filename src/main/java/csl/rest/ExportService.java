@@ -50,7 +50,8 @@ public class ExportService {
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
 
             LogEntryDto logEntryDto = new LogEntryDto();
-            Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
+            Food food = allFood.stream().filter(f -> f.getId().equals(logEntry.getFoodId())).findFirst()
+                    .orElse(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId()));
             logEntryDto.setId(logEntry.getId());
             FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
             logEntryDto.setFood(foodDto);
