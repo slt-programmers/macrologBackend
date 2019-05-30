@@ -58,6 +58,9 @@ public class DatabaseHelper implements DataSource {
         Properties p = new Properties();
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         String namePropertiesFile = "application.properties";
+
+        //TODO load dynamically with argument on startup
+//        namePropertiesFile = "application-carmen.properties";
         if ("LAPTOP-HPA3TJNH".equals(hostname)) {
             namePropertiesFile = "application-arjan.properties";
 //                namePropertiesFile = "application-heroku.properties";
