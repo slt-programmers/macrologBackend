@@ -1,19 +1,16 @@
 package csl.rest;
 
-import com.oracle.tools.packager.Log;
-import csl.database.FoodRepository;
-import csl.database.LogEntryRepository;
-import csl.database.PortionRepository;
-import csl.database.SettingsRepository;
+import csl.database.*;
 import csl.database.model.Food;
 import csl.database.model.Setting;
 import csl.dto.*;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +22,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RestController
 @RequestMapping("/export")
 public class ExportService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExportService.class);
 
     private final static FoodRepository foodRepository = new FoodRepository();
     private final static PortionRepository portionRepository = new PortionRepository();
@@ -39,12 +38,12 @@ public class ExportService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
-        Log.info("Export: allFood size = " + allFood.size());
+        LOGGER.info("Export: allFood size = " + allFood.size());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
         }
-        Log.info("Export: allFoodDtos size = " + allFoodDtos.size());
+        LOGGER.info("Export: allFoodDtos size = " + allFoodDtos.size());
         export.setAllFood(allFoodDtos);
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
@@ -54,10 +53,10 @@ public class ExportService {
 
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
-            Log.info("Export: logEntryDto ID " + logEntry.getId());
+            LOGGER.info("Export: logEntryDto ID " + logEntry.getId());
 
             FoodDto foodDto = allFoodDtos.stream().filter(f -> {
-                Log.info("Export: foodDto ID " + f.getId());
+                LOGGER.info("Export: foodDto ID " + f.getId());
                 return f.getId().equals(logEntry.getFoodId());
             }).findFirst().orElse(FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
             logEntryDto.setFood(foodDto);
