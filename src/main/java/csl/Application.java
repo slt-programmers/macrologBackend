@@ -20,7 +20,7 @@ public class Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
         setUpDatabase();
         LOGGER.debug("Application is now running.");
@@ -35,6 +35,7 @@ public class Application {
                 " table_name = '" + PortionRepository.TABLE_NAME + "' or " +
                 " table_name = '" + LogEntryRepository.TABLE_NAME + "' or " +
                 " table_name = '" + MealRepository.TABLE_NAME + "' or " +
+                " table_name = '" + ActivityRepository.TABLE_NAME + "' or " +
                 " table_name = '" + IngredientRepository.TABLE_NAME + "'";
         List<String> existingTables = template.query(checkUrl, (resultSet, i) -> resultSet.getString("TABLE_NAME"));
 
@@ -65,6 +66,10 @@ public class Application {
         if (!existingTables.contains(IngredientRepository.TABLE_NAME)) {
             LOGGER.info("Create ingredient table");
             createTable(IngredientRepository.TABLE_CREATE);
+        }
+        if (!existingTables.contains(ActivityRepository.TABLE_NAME)) {
+            LOGGER.info("Create activity table");
+            createTable(ActivityRepository.TABLE_CREATE);
         }
     }
 

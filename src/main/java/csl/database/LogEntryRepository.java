@@ -95,14 +95,6 @@ public class LogEntryRepository {
         return template.query(SELECT_ONE_SQL, params, new LogEntryWrapper());
     }
 
-    public List<LogEntry> getSomeLogEntries(String selectStatement) {
-        return template.query(selectStatement, new LogEntryWrapper());
-    }
-
-    private List<LogEntry> getAllLogEntries() {
-        return template.query(SELECT_SQL, new LogEntryWrapper());
-    }
-
     public List<LogEntry> getAllLogEntries(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
