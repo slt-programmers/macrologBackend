@@ -58,3 +58,4 @@ Voorbeeld:
 Bearer 2r8y489574fksdbjfkh
 De key kun je krijgen door in te loggen via de authenication service.
 Deze geeft te token terug die je hierboven kunt gebruiken.
+

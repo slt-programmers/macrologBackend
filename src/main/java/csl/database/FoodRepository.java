@@ -38,15 +38,9 @@ public class FoodRepository {
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
 
-    public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
-
-    private static final String SELECT_SQL = "select * from food";
-    private static final String INSERT_SQL = "insert into food(" +
-            "user_id,name, protein, fat, carbs) " +
-            "values(:userId, :name, :protein, :fat, :carbs)";
-    private static final String UPDATE_SQL = "update food set " +
-            "name = :name, protein = :protein, fat = :fat, carbs = :carbs " +
-            "where id = :id AND user_id = :userId";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, protein, fat, carbs) VALUES(:userId, :name, :protein, :fat, :carbs)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, protein = :protein, fat = :fat, carbs = :carbs WHERE id = :id AND user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -64,7 +58,7 @@ public class FoodRepository {
     public List<Food> getAllFood(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL + " WHERE user_id=:userId",params, new FoodWrapper<Food>());
+        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + " = :userId", params, new FoodWrapper<Food>());
     }
 
     public int insertFood(Integer userId, Food food) {
@@ -93,7 +87,7 @@ public class FoodRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("name", name);
-        String myFood = SELECT_SQL + " WHERE  " + COL_NAME + "= :name AND user_id=:userId";
+        String myFood = SELECT_SQL + " WHERE  " + COL_NAME + " = :name AND " + COL_USER_ID + " = :userId";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
@@ -102,7 +96,7 @@ public class FoodRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("id", id);
-        String myFood = SELECT_SQL + " WHERE  " + COL_ID + "= :id AND user_id=:userId";
+        String myFood = SELECT_SQL + " WHERE  " + COL_ID + " = :id AND " + COL_USER_ID + " = :userId";
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
         Assert.isTrue(queryResults.size() <= 1, "More than one food was found");
         return queryResults.isEmpty() ? null : queryResults.get(0);

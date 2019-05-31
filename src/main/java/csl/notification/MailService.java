@@ -1,4 +1,4 @@
-package csl.websocket.notification;
+package csl.notification;
 
 
 import csl.database.model.UserAccount;
@@ -13,7 +13,7 @@ public class MailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
-    public static void sendPasswordRetrievalMail(String email, UserAccount account) {
+    public static void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
         Session secureSession = getSession();
 
         try {
@@ -21,15 +21,17 @@ public class MailService {
             MimeMessage message = new MimeMessage(secureSession);
             message.setFrom(new InternetAddress("macrologwebapp@gmail.com"));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            message.setSubject("Macrolog Webapp Credentials");
+            message.setSubject("Macrolog Credentials");
             message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
-                    "<p>Your password is "+ account.getPassword() +"</p>" +
-                    "<p>See you soon!</p>" +
-                    "<p>Carmen and Arjan from Macrolog Webapp</p>"
+                            "<p>A request has been made to reset your password. </p>" +
+                            "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
+                            "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
+                            "<p>If you did not request this password change, you can ignore this messsage. </p>" +
+                            "<p>See you soon! </p>" +
+                            "<p>Carmen and Arjan from Macrolog </p>"
                     , "text/html");
 
             Transport.send(message);
-            LOGGER.info("Mail send to: " + email);
         } catch (MessagingException ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -43,9 +45,9 @@ public class MailService {
             MimeMessage message = new MimeMessage(secureSession);
             message.setFrom(new InternetAddress("macrologwebapp@gmail.com"));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            message.setSubject("Welcome to Macrolog Webapp!");
+            message.setSubject("Welcome to Macrolog!");
             message.setContent("<p>Hello " + account.getUsername() + ", </p>" +
-                            "<p>Thank you for using Macrolog Webapp!</p>" +
+                            "<p>Thank you for using Macrolog!</p>" +
                             "<p>This app started out as a hobby project. " +
                             "It was developed by two software engineers who wanted to get in shape, " +
                             "who also happen to hate adds, and who (probably incorrectly) " +
@@ -54,11 +56,10 @@ public class MailService {
                             "<p>Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
                             "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
                             "<p>All the best,</p>" +
-                            "<p>Carmen and Arjan from Macrolog Webapp</p>"
+                            "<p>Carmen and Arjan from Macrolog</p>"
                     , "text/html");
 
             Transport.send(message);
-            LOGGER.info("Mail send to: " + email);
         } catch (MessagingException ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -76,7 +77,7 @@ public class MailService {
         properties.put("mail.smtp.port", "587");
 
         // Get the default Session object.
-        Session secureSession = Session.getInstance(properties,
+        return Session.getInstance(properties,
                 new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
@@ -84,7 +85,6 @@ public class MailService {
                     }
                 }
         );
-        return secureSession;
     }
 
 }

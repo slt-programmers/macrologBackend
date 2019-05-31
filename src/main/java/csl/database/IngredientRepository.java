@@ -1,9 +1,6 @@
 package csl.database;
 
 import csl.database.model.Ingredient;
-import io.swagger.models.auth.In;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,13 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Repository
 public class IngredientRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IngredientRepository.class);
 
     public static final String TABLE_NAME = "ingredient";
 
@@ -41,13 +35,10 @@ public class IngredientRepository {
                     COL_MULTIPLIER + " DEC(5,2) NOT NULL" +
                     ")";
 
-    public static final String TABLE_DELETE =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
-
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(meal_id, food_Id, portion_Id, multiplier) values(:mealId, :foodId, :portionId, :multiplier)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set meal_id = :mealId, food_id = :foodId, portion_id = :portionId, multiplier = :multiplier where Id = :id";
-    private static final String DELETE_SQL = "delete from " + TABLE_NAME;
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(meal_id, food_Id, portion_Id, multiplier) VALUES(:mealId, :foodId, :portionId, :multiplier)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET meal_id = :mealId, food_id = :foodId, portion_id = :portionId, multiplier = :multiplier WHERE id = :id";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME;
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -72,10 +63,10 @@ public class IngredientRepository {
             }
         }
 
-        for (Ingredient ingredient: currentList) {
+        for (Ingredient ingredient : currentList) {
             Long id = ingredient.getId();
             boolean found = false;
-            for (Ingredient newIngredient: newIngredients) {
+            for (Ingredient newIngredient : newIngredients) {
                 if (newIngredient.getId().equals(id)) {
                     found = true;
                     break;
@@ -100,13 +91,13 @@ public class IngredientRepository {
     public int deleteIngredientsForMeal(Long mealId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("mealId", mealId);
-        return template.update(DELETE_SQL + " where meal_id = :mealId", params);
+        return template.update(DELETE_SQL + " WHERE " + COL_MEAL_ID + " = :mealId", params);
     }
 
     private int deleteIngredient(Long ingredientId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", ingredientId);
-        return template.update(DELETE_SQL + " where id = :id", params);
+        return template.update(DELETE_SQL + " WHERE " + COL_ID + " = :id", params);
     }
 
     public List<Ingredient> getSomeIngredients(String selectStatement) {

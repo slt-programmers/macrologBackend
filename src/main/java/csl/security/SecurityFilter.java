@@ -13,6 +13,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @Order(1)
@@ -21,7 +22,7 @@ public class SecurityFilter implements Filter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityFilter.class);
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         LOGGER.debug("Security filter init");
     }
 
@@ -54,9 +55,9 @@ public class SecurityFilter implements Filter {
             if (token != null && token.startsWith("Bearer")) {
                 String jwtToken = token.substring("Bearer".length() + 1);
                 LOGGER.debug(jwtToken);
-                Object userId = null;
+                Object userId;
                 try {
-                    Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes("UTF-8")).parseClaimsJws(jwtToken);
+                    Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
                     userId = claimsJws.getBody().get("userId");
                     LOGGER.debug("Userid from token = " + userId);
                     UserInfo userInfo = new UserInfo();
@@ -67,11 +68,8 @@ public class SecurityFilter implements Filter {
                     LOGGER.debug("ExpiredJWT token.");
                     ((HttpServletResponse) response).sendError(403,"Expired session");
                 }
-
-
             } else if (((HttpServletRequest) request).getRequestURI().startsWith("/swagger-resources") ||
                     ((HttpServletRequest) request).getRequestURI().startsWith("/webjars/") ||
-                 //   ((HttpServletRequest) request).getRequestURI().startsWith("/export") ||
                     ((HttpServletRequest) request).getRequestURI().startsWith("/v2/api-docs") ||
                     ((HttpServletRequest) request).getRequestURI().startsWith("/swagger-ui.html")) {
                 LOGGER.debug("Swagger");

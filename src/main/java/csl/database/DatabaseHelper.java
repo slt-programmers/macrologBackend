@@ -60,10 +60,11 @@ public class DatabaseHelper implements DataSource {
         String namePropertiesFile = "application.properties";
 
         //TODO load dynamically with argument on startup
-//        namePropertiesFile = "application-carmen.properties";
+
         if ("LAPTOP-HPA3TJNH".equals(hostname)) {
             namePropertiesFile = "application-arjan.properties";
-//                namePropertiesFile = "application-heroku.properties";
+        } else if ("Carmens-MacBook-Pro.local".equals(hostname)) {
+            namePropertiesFile = "application-carmen.properties";
         }
 
         InputStream stream = loader.getResourceAsStream(namePropertiesFile);
