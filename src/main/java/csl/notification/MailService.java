@@ -13,7 +13,7 @@ public class MailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
-    public static void sendPasswordRetrievalMail(String email, UserAccount account) {
+    public static void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
         Session secureSession = getSession();
 
         try {
@@ -23,7 +23,9 @@ public class MailService {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             message.setSubject("Macrolog Credentials");
             message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
-                    "<p>Your password is "+ account.getPassword() +"</p>" +
+                    "<p>A request has been made to reset your password. " +
+                            "Your temporary new password is <i>"+ unhashedTemporaryPassword +"</i>. Please login within 30 minutes to verify this request." +
+                            "If you did not request this password change, you can ignore this messsage.</p>" +
                     "<p>See you soon!</p>" +
                     "<p>Carmen and Arjan from Macrolog</p>"
                     , "text/html");

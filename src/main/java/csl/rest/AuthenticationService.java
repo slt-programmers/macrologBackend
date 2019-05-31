@@ -10,6 +10,7 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static csl.security.SecurityConstants.EXPIRATION_TIME;
@@ -50,7 +54,7 @@ public class AuthenticationService {
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (!userAccount.getPassword().equals(hashedPassword)) {
+        } else if (!checkValidPassword(hashedPassword,userAccount)) {
             LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
@@ -73,6 +77,26 @@ public class AuthenticationService {
             LOGGER.info("Login successful");
             return new ResponseEntity<>("{\"name\":\"" + name + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
         }
+    }
+
+    private boolean checkValidPassword(String hashedRequestPassword, UserAccount accountRequested) {
+        boolean activePasswordOK =  accountRequested.getPassword().equals(hashedRequestPassword);
+        if (!activePasswordOK) {
+            boolean resettedPasswordOK = accountRequested.getResetpassword() != null &&
+                                         accountRequested.getResetpassword().equals(hashedRequestPassword);
+
+            boolean withinTimeFrame = accountRequested.getResetdate() != null &&
+                    accountRequested.getResetdate().isAfter(LocalDateTime.now().minusMinutes(30));
+
+            if (resettedPasswordOK && withinTimeFrame) {
+                LOGGER.info("Password has been reset to verified new password");
+                USER_ACCCOUNT_REPOSITORY.updatePassword(accountRequested.getUsername(),hashedRequestPassword,null,null);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return activePasswordOK;
     }
 
     @RequestMapping(value = "/signup",
@@ -119,18 +143,23 @@ public class AuthenticationService {
         return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
     }
 
-    @RequestMapping(value = "/validate",
+    @RequestMapping(value = "/resetPassword",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity validate(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity resetPassword(@RequestBody AuthenticationRequest request) {
         LOGGER.info("Validate email");
         String email = request.getEmail();
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
         if (account != null) {
             if (account.getEmail().equals(email)) {
+                String randomPassword = RandomStringUtils.randomAlphabetic(10);
+                String hashedRandomPassword = DigestUtils.sha256Hex(randomPassword);
+
+                USER_ACCCOUNT_REPOSITORY.updatePassword(account.getUsername(),account.getPassword(),hashedRandomPassword, LocalDateTime.now());
                 new Thread() {
                     public void run() {
-                        MailService.sendPasswordRetrievalMail(email, account);
+
+                        MailService.sendPasswordRetrievalMail(email, randomPassword, account);
                     }
                 }.start();
                 return ResponseEntity.ok("Email matches");
@@ -158,7 +187,7 @@ public class AuthenticationService {
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (userAccount.getPassword().equals(oldPasswordHashed)) {
+        } else if (!userAccount.getPassword().equals(oldPasswordHashed)) {
             LOGGER.error("Old password incorrect");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
@@ -167,7 +196,7 @@ public class AuthenticationService {
                 return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
             } else {
                 LOGGER.info("Passwords match");
-                USER_ACCCOUNT_REPOSITORY.updatePassword(userAccount.getUsername(), newPasswordHashed);
+                USER_ACCCOUNT_REPOSITORY.updatePassword(userAccount.getUsername(), newPasswordHashed, null, null);
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
