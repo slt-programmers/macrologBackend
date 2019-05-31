@@ -23,15 +23,15 @@ public class MailService {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             message.setSubject("Macrolog Credentials");
             message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
-                    "<p>A request has been made to reset your password. " +
-                            "Your temporary new password is <i>"+ unhashedTemporaryPassword +"</i>. Please login within 30 minutes to verify this request." +
+                            "<p>A request has been made to reset your password. " +
+                            "We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. " +
+                            "You can use this within 30 minutes to log in and choose a new password of your own." +
                             "If you did not request this password change, you can ignore this messsage.</p>" +
-                    "<p>See you soon!</p>" +
-                    "<p>Carmen and Arjan from Macrolog</p>"
+                            "<p>See you soon!</p>" +
+                            "<p>Carmen and Arjan from Macrolog</p>"
                     , "text/html");
 
             Transport.send(message);
-            LOGGER.info("Mail send to: " + email);
         } catch (MessagingException ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -60,7 +60,6 @@ public class MailService {
                     , "text/html");
 
             Transport.send(message);
-            LOGGER.info("Mail send to: " + email);
         } catch (MessagingException ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -78,7 +77,7 @@ public class MailService {
         properties.put("mail.smtp.port", "587");
 
         // Get the default Session object.
-        Session secureSession = Session.getInstance(properties,
+        return Session.getInstance(properties,
                 new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
@@ -86,7 +85,6 @@ public class MailService {
                     }
                 }
         );
-        return secureSession;
     }
 
 }

@@ -54,7 +54,7 @@ public class AuthenticationService {
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
-        } else if (!checkValidPassword(hashedPassword,userAccount)) {
+        } else if (!checkValidPassword(hashedPassword, userAccount)) {
             LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
@@ -79,24 +79,24 @@ public class AuthenticationService {
         }
     }
 
-    private boolean checkValidPassword(String hashedRequestPassword, UserAccount accountRequested) {
-        boolean activePasswordOK =  accountRequested.getPassword().equals(hashedRequestPassword);
+    private boolean checkValidPassword(String hashedPassword, UserAccount account) {
+        boolean activePasswordOK = account.getPassword().equals(hashedPassword);
         if (!activePasswordOK) {
-            boolean resettedPasswordOK = accountRequested.getResetpassword() != null &&
-                                         accountRequested.getResetpassword().equals(hashedRequestPassword);
+            boolean resettedPasswordOK = account.getResetpassword() != null &&
+                    account.getResetpassword().equals(hashedPassword);
 
-            boolean withinTimeFrame = accountRequested.getResetdate() != null &&
-                    accountRequested.getResetdate().isAfter(LocalDateTime.now().minusMinutes(30));
+            boolean withinTimeFrame = account.getResetdate() != null &&
+                    account.getResetdate().isAfter(LocalDateTime.now().minusMinutes(30));
 
             if (resettedPasswordOK && withinTimeFrame) {
                 LOGGER.info("Password has been reset to verified new password");
-                USER_ACCCOUNT_REPOSITORY.updatePassword(accountRequested.getUsername(),hashedRequestPassword,null,null);
+                USER_ACCCOUNT_REPOSITORY.updatePassword(account.getUsername(), hashedPassword, null, null);
                 return true;
             } else {
                 return false;
             }
         }
-        return activePasswordOK;
+        return true;
     }
 
     @RequestMapping(value = "/signup",
@@ -147,29 +147,19 @@ public class AuthenticationService {
             method = POST,
             headers = {"Content-Type=application/json"})
     public ResponseEntity resetPassword(@RequestBody AuthenticationRequest request) {
-        LOGGER.info("Validate email");
+        LOGGER.info("Reset email");
         String email = request.getEmail();
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
         if (account != null) {
-            if (account.getEmail().equals(email)) {
-                String randomPassword = RandomStringUtils.randomAlphabetic(10);
-                String hashedRandomPassword = DigestUtils.sha256Hex(randomPassword);
+            String randomPassword = RandomStringUtils.randomAlphabetic(10);
+            String hashedRandomPassword = DigestUtils.sha256Hex(randomPassword);
 
-                USER_ACCCOUNT_REPOSITORY.updatePassword(account.getUsername(),account.getPassword(),hashedRandomPassword, LocalDateTime.now());
-                new Thread() {
-                    public void run() {
-
-                        MailService.sendPasswordRetrievalMail(email, randomPassword, account);
-                    }
-                }.start();
-                return ResponseEntity.ok("Email matches");
-            } else {
-                LOGGER.error("No match");
-                return ResponseEntity.status(401).body("Email does not match");
-            }
+            USER_ACCCOUNT_REPOSITORY.updatePassword(account.getUsername(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
+            new Thread(() -> MailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
+            return ResponseEntity.ok("Email matches");
         } else {
             LOGGER.error("Account is null");
-            return ResponseEntity.status(404).body("Username not found");
+            return ResponseEntity.status(404).body("Email not found");
         }
     }
 
