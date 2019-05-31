@@ -32,7 +32,7 @@ public class WeightRepository {
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_WEIGHT + " INT(6) NOT NULL, " +
+                    COL_WEIGHT + " DEC(5,2) NOT NULL, " +
                     COL_DAY + " DATE NOT NULL," +
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
