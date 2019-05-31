@@ -1,8 +1,6 @@
 package csl.database;
 
 import csl.database.model.UserAccount;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,7 +8,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -21,12 +18,12 @@ import java.util.List;
 public class UserAcccountRepository {
     public static final String TABLE_NAME = "useraccounts";
 
-    public static final String COL_ID = "id";
+    static final String COL_ID = "id";
     public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private static final String COL_USERNAME = "username";
     private static final String COL_PASSWORD = "password";
-    private static final String COL_RESET_PASSWORD = "resetpassword";
-    private static final String COL_RESET_DATE = "resetdate";
+    private static final String COL_RESET_PASSWORD = "reset_password";
+    private static final String COL_RESET_DATE = "reset_date";
     private static final String COL_EMAIL = "email";
 
     public static final String TABLE_CREATE =
@@ -37,23 +34,21 @@ public class UserAcccountRepository {
                     COL_RESET_PASSWORD + " TEXT, " +
                     COL_RESET_DATE + " DATETIME, " +
                     COL_EMAIL + " TEXT(100) NOT NULL)";
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "(" +
-            "username, password, email) values(:username, :password, :email)";
-    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, resetpassword =:resetpassword, resetdate =:resetdate  where username = :username";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(username, password, email) VALUES(:username, :password, :email)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, reset_password = :reset_password, reset_date = :reset_date  where username = :username";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserAcccountRepository.class);
 
     public UserAcccountRepository() {
     }
 
-    public int updatePassword(String username, String password,String resetpassword, LocalDateTime resetdate) {
+    public int updatePassword(String username, String password, String resetPassword, LocalDateTime resetDate) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("username", username)
                 .addValue("password", password)
-                .addValue("resetpassword", resetpassword)
-                .addValue("resetdate", resetdate==null?null:Timestamp.valueOf(resetdate));
+                .addValue("reset_password", resetPassword)
+                .addValue("reset_date", resetDate == null ? null : Timestamp.valueOf(resetDate));
         return template.update(UPDATE_SQL, params);
     }
 
@@ -103,8 +98,7 @@ public class UserAcccountRepository {
                     rs.getString(COL_PASSWORD),
                     rs.getString(COL_EMAIL),
                     rs.getString(COL_RESET_PASSWORD),
-                    ts==null?null:ts.toLocalDateTime()
-
+                    ts == null ? null : ts.toLocalDateTime()
             );
         }
     }
