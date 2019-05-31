@@ -17,10 +17,10 @@ import java.util.List;
 public class PortionRepository {
     public static final String TABLE_NAME = "portion";
 
-    public static final String COL_ID = "id";
-    public static final String COL_FOOD_ID = "food_id";
-    public static final String COL_DESCRIPTION = "description";
-    public static final String COL_GRAMS = "grams";
+    static final String COL_ID = "id";
+    private static final String COL_FOOD_ID = "food_id";
+    private static final String COL_DESCRIPTION = "description";
+    private static final String COL_GRAMS = "grams";
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
@@ -31,12 +31,9 @@ public class PortionRepository {
                     "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
                     ")";
 
-    public static final String TABLE_DELETE =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
-
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( food_Id,description,grams) values(:foodId, :description, :grams)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_Id= :foodId, description = :description, grams =:grams where id = :id";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(food_Id, description, grams) VALUES(:foodId, :description, :grams)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET food_Id = :foodId, description = :description, grams =:grams WHERE id = :id";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -63,7 +60,7 @@ public class PortionRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("portionId", portionId)
                 .addValue("foodId", foodId);
-        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ID + "= :portionId AND " + COL_FOOD_ID + "= :foodId";
+        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_ID + " = :portionId AND " + COL_FOOD_ID + " = :foodId";
         List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper<Portion>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
@@ -72,7 +69,7 @@ public class PortionRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("description", description)
                 .addValue("foodId", foodId);
-        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_DESCRIPTION + "= :description AND " + COL_FOOD_ID + "=:foodId";
+        String myFoodAlias = SELECT_SQL + " WHERE  " + COL_DESCRIPTION + " = :description AND " + COL_FOOD_ID + " = :foodId";
         List<Portion> queryResults = template.query(myFoodAlias, params, new PortionWrapper<Portion>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
@@ -80,7 +77,7 @@ public class PortionRepository {
     public List<Portion> getPortions(Long foodId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("foodId", foodId);
-        String myPortions = SELECT_SQL + " WHERE  " + COL_FOOD_ID + "= :foodId";
+        String myPortions = SELECT_SQL + " WHERE  " + COL_FOOD_ID + " = :foodId";
         return template.query(myPortions, params, new PortionWrapper<Portion>());
     }
 

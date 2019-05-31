@@ -38,14 +38,11 @@ public class ActivityRepository {
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
 
-    public static final String TABLE_DELETE =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
-
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String SELECT_ONE_DAY_SQL = "select * from " + TABLE_NAME + " where user_id = :userId and day = :day";
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id, name, calories, day) values(:userId,:name,:calories,:day)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set name = :name, calories = :calories, day = :day where Id = :id and user_id=:userId";
-    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id= :userId";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String SELECT_ONE_DAY_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND day = :day";
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, calories, day) VALUES(:userId, :name, :calories, :day)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, calories = :calories, day = :day WHERE Id = :id AND user_id = :userId";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -83,7 +80,7 @@ public class ActivityRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("date", sdf.format(date));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND user_id=:userId";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND " + COL_USER_ID + " = :userId";
         return template.query(myLogs, params, new LogActivityWrapper());
     }
 
@@ -94,9 +91,9 @@ public class ActivityRepository {
                 .addValue("userId", userId)
                 .addValue("dateBegin", sdf.format(begin))
                 .addValue("dateEnd", sdf.format(end));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND user_id=:userId";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND " + COL_USER_ID + " = :userId";
         LOGGER.debug(myLogs);
-        LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
+        LOGGER.debug("BETWEEN " + sdf.format(begin) + " AND " + sdf.format(end));
         return template.query(myLogs, params, new LogActivityWrapper());
     }
 

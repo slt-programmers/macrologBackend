@@ -19,7 +19,6 @@ public class UserAcccountRepository {
     public static final String TABLE_NAME = "useraccounts";
 
     static final String COL_ID = "id";
-    public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private static final String COL_USERNAME = "username";
     private static final String COL_PASSWORD = "password";
     private static final String COL_RESET_PASSWORD = "reset_password";
@@ -36,7 +35,7 @@ public class UserAcccountRepository {
                     COL_EMAIL + " TEXT(100) NOT NULL)";
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(username, password, email) VALUES(:username, :password, :email)";
-    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, reset_password = :reset_password, reset_date = :reset_date  where username = :username";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, reset_password = :reset_password, reset_date = :reset_date WHERE username = :username";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -73,7 +72,7 @@ public class UserAcccountRepository {
         if (email != null) {
             SqlParameterSource params = new MapSqlParameterSource()
                     .addValue("email", email.toUpperCase());
-            String users = SELECT_SQL + " WHERE  UPPER(" + COL_EMAIL + ") = :email";
+            String users = SELECT_SQL + " WHERE UPPER(" + COL_EMAIL + ") = :email";
             List<UserAccount> queryResults = template.query(users, params, new UserWrapper<UserAccount>());
             return queryResults.isEmpty() ? null : queryResults.get(0);
         } else {

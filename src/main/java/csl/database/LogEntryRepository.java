@@ -44,14 +44,11 @@ public class LogEntryRepository {
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
 
-    public static final String TABLE_DELETE =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
-
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String SELECT_ONE_SQL = "select * from " + TABLE_NAME + " where user_id = :userId and food_id = :foodId and day = :day and meal = :meal";
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id, food_Id, portion_Id, multiplier, day, meal) values(:userId,:foodId,:portionId,:multiplier,:day,:meal)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier ,day = :day ,meal = :meal where Id = :id and user_id=:userId";
-    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id= :userId";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String SELECT_ONE_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND food_id = :foodId AND day = :day AND meal = :meal";
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, food_Id, portion_Id, multiplier, day, meal) VALUES(:userId, :foodId, :portionId, :multiplier, :day, :meal)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier, day = :day, meal = :meal WHERE Id = :id AND user_id = :userId";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -98,7 +95,7 @@ public class LogEntryRepository {
     public List<LogEntry> getAllLogEntries(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL + " WHERE user_id=:userId", params, new LogEntryWrapper());
+        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + " = :userId", params, new LogEntryWrapper());
     }
 
     public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date date) {
@@ -107,7 +104,7 @@ public class LogEntryRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("date", sdf.format(date));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND user_id=:userId";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND " + COL_USER_ID + " = :userId";
         return template.query(myLogs, params, new LogEntryWrapper());
     }
 
@@ -118,9 +115,9 @@ public class LogEntryRepository {
                 .addValue("userId", userId)
                 .addValue("dateBegin", sdf.format(begin))
                 .addValue("dateEnd", sdf.format(end));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND user_id=:userId";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND " + COL_USER_ID + " = :userId";
         LOGGER.debug(myLogs);
-        LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
+        LOGGER.debug("BETWEEN " + sdf.format(begin) + " AND " + sdf.format(end));
         return template.query(myLogs, params, new LogEntryWrapper());
     }
 

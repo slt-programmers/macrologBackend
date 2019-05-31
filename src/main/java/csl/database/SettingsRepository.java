@@ -20,7 +20,6 @@ public class SettingsRepository {
     public static final String TABLE_NAME = "settings";
 
     private static final String COL_ID = "id";
-    public static final String TABLE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     private static final String COL_SETTING = "setting";
     private static final String COL_VALUE = "value";
     private static final String COL_USER_ID = "user_id";
@@ -35,10 +34,9 @@ public class SettingsRepository {
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")," +
                     "UNIQUE KEY user_set (" + COL_USER_ID + "," + COL_SETTING + "(50))" +
                     ")";
-    private static final String SELECT_SQL = "select * from settings";
-    private static final String INSERT_SQL = "insert into settings" +
-            "(user_id, setting, value) values(:userId, :setting, :value)";
-    private static final String UPDATE_SQL = "UPDATE settings SET value = :value where user_id = :userId AND setting = :setting";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, setting, value) VALUES(:userId, :setting, :value)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET value = :value WHERE user_id = :userId AND setting = :setting";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsRepository.class);
@@ -88,7 +86,7 @@ public class SettingsRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("setting", setting);
-        String settings = SELECT_SQL + " WHERE  " + COL_SETTING + "= :setting AND " + COL_USER_ID + "=:userId";
+        String settings = SELECT_SQL + " WHERE  " + COL_SETTING + "= :setting AND " + COL_USER_ID + " = :userId";
         List<Setting> queryResults = template.query(settings, params, new SettingsWrapper<Setting>());
         return queryResults.isEmpty() ? null : queryResults.get(0).getValue();
     }
@@ -100,7 +98,7 @@ public class SettingsRepository {
     public List<Setting> getAllSettings(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + "=:userId", params, new SettingsWrapper<Setting>());
+        return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + " = :userId", params, new SettingsWrapper<Setting>());
     }
 
     class SettingsWrapper<T> implements RowMapper<Setting> {
