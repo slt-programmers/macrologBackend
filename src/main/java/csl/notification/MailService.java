@@ -23,12 +23,12 @@ public class MailService {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             message.setSubject("Macrolog Credentials");
             message.setContent("<h3>Hello " + account.getUsername() + ", </h3>" +
-                            "<p>A request has been made to reset your password. " +
-                            "We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. " +
-                            "You can use this within 30 minutes to log in and choose a new password of your own." +
-                            "If you did not request this password change, you can ignore this messsage.</p>" +
-                            "<p>See you soon!</p>" +
-                            "<p>Carmen and Arjan from Macrolog</p>"
+                            "<p>A request has been made to reset your password. </p>" +
+                            "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
+                            "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
+                            "<p>If you did not request this password change, you can ignore this messsage. </p>" +
+                            "<p>See you soon! </p>" +
+                            "<p>Carmen and Arjan from Macrolog </p>"
                     , "text/html");
 
             Transport.send(message);
