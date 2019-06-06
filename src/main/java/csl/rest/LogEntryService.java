@@ -121,15 +121,23 @@ public class LogEntryService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Calendar now = GregorianCalendar.getInstance();
-        java.util.Date endTime = now.getTime();
-        Calendar begin = GregorianCalendar.getInstance();
-        begin.add(GregorianCalendar.MONTH, -1);
-        java.util.Date beginTime = begin.getTime();
 
-        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), beginTime, endTime);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date parsedFromDate;
+        java.util.Date parsedToDate;
+        try {
+            parsedFromDate = sdf.parse(fromDate);
+            parsedToDate = sdf.parse(toDate);
+        } catch (ParseException e) {
+            LOGGER.error(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+
+
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedFromDate, parsedToDate);
         List<LogEntryDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
-        LOGGER.debug("Aantal dtos:" + logEntryDtos);
+        LOGGER.debug("Aantal dtos:" + logEntryDtos.size());
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
             LogEntryDto d3 = new LogEntryDto();
