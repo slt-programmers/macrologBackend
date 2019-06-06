@@ -29,7 +29,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RestController
 @RequestMapping("/logs")
 @Api(value = "logs", description = "Operations pertaining to logentries in the macro logger application")
-public class LogEntryService {
+public class LogEntryService  {
 
     private FoodRepository foodRepository = new FoodRepository();
     private PortionRepository portionRepository = new PortionRepository();
@@ -136,8 +136,10 @@ public class LogEntryService {
 
 
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedFromDate, parsedToDate);
-        List<LogEntryDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
+
+        List<LogEntryDto> logEntryDtos =transformToDtos(allLogEntries,userInfo);
         LOGGER.debug("Aantal dtos:" + logEntryDtos.size());
+
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
             LogEntryDto d3 = new LogEntryDto();
@@ -161,12 +163,9 @@ public class LogEntryService {
     private List<LogEntryDto> mapToDtos(UserInfo userInfo, List<LogEntry> allLogEntries) {
         List<LogEntryDto> allDtos = new ArrayList<>();
         for (csl.database.model.LogEntry logEntry : allLogEntries) {
-
             LogEntryDto dto = mapToDto(userInfo, logEntry);
-
             allDtos.add(dto);
         }
-
         return allDtos;
     }
 
@@ -210,5 +209,95 @@ public class LogEntryService {
         }
         dto.setMacrosCalculated(macrosCalculated);
         return dto;
+    }
+
+    /**
+     * REFACTOR ONDERSTAANDE NAAR COMMON USAGE BIJ EXPORT
+     * @return
+     */
+
+
+    private List<LogEntryDto> transformToDtos(List<csl.database.model.LogEntry> allLogEntries, UserInfo userInfo){
+        List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
+        LOGGER.info("Export: allFood size = " + allFood.size());
+        List<FoodDto> allFoodDtos = new ArrayList<>();
+        for (Food food : allFood) {
+            allFoodDtos.add(createFoodDto(food, true));
+        }
+        LOGGER.info("Export: allFoodDtos size = " + allFoodDtos.size());
+
+
+        List<LogEntryDto> allDtos = new ArrayList<>();
+        for (csl.database.model.LogEntry logEntry : allLogEntries) {
+
+            LogEntryDto logEntryDto = new LogEntryDto();
+            logEntryDto.setId(logEntry.getId());
+            LOGGER.info("Export: logEntryDto ID " + logEntry.getFoodId());
+
+            FoodDto foodDto = allFoodDtos.stream().filter(f -> {
+                LOGGER.info("Export: foodDto ID " + f.getId());
+                return f.getId().equals(logEntry.getFoodId());
+            }).findFirst().orElseGet(() ->
+                    FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
+            logEntryDto.setFood(foodDto);
+
+            PortionDto portionDto = null;
+            if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
+                portionDto = foodDto.getPortions().stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst()
+                        .orElse(null);
+                if (portionDto != null) {
+                    Macro calculatedMacros = FoodService.calculateMacro(foodDto, portionDto);
+                    portionDto.setMacros(calculatedMacros);
+                }
+                logEntryDto.setPortion(portionDto);
+            }
+            Double multiplier = logEntry.getMultiplier();
+            logEntryDto.setMultiplier(multiplier);
+            logEntryDto.setDay(logEntry.getDay());
+            logEntryDto.setMeal(logEntry.getMeal());
+
+            Macro macrosCalculated = new Macro();
+            if (portionDto != null) {
+                macrosCalculated = logEntryDto.getPortion().getMacros().clone();
+                macrosCalculated.multiply(multiplier);
+
+            } else {
+                macrosCalculated.setCarbs(multiplier * foodDto.getCarbs());
+                macrosCalculated.setFat(multiplier * foodDto.getFat());
+                macrosCalculated.setProtein(multiplier * foodDto.getProtein());
+            }
+            logEntryDto.setMacrosCalculated(macrosCalculated);
+
+            allDtos.add(logEntryDto);
+        }
+        return allDtos;
+    }
+
+    public FoodDto createFoodDto(Food food, boolean withPortions) {
+        FoodDto foodDto = mapFoodToFoodDto(food);
+
+        if (withPortions) {
+            List<csl.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
+            for (csl.database.model.Portion portion : foodPortions) {
+                PortionDto currDto = new PortionDto();
+                currDto.setDescription(portion.getDescription());
+                currDto.setGrams(portion.getGrams());
+                currDto.setId(portion.getId());
+
+                foodDto.addPortion(currDto);
+            }
+        }
+        return foodDto;
+    }
+
+
+    public static FoodDto mapFoodToFoodDto(Food food) {
+        FoodDto foodDto = new FoodDto();
+        foodDto.setName(food.getName());
+        foodDto.setId(food.getId());
+        foodDto.setProtein(food.getProtein());
+        foodDto.setCarbs(food.getCarbs());
+        foodDto.setFat(food.getFat());
+        return foodDto;
     }
 }
