@@ -67,18 +67,6 @@ public class DatabaseUpdater {
 //        }
     }
 
-    public static void updateWeightSettings() {
-        String sql = "ALTER TABLE " + SettingsRepository.TABLE_NAME +
-                " ADD COLUMN date DATE";
-        try (Connection connection = DatabaseHelper.getInstance().getConnection();
-             CallableStatement currStatement = connection.prepareCall(sql)) {
-            LOGGER.info(sql);
-            currStatement.execute();
-        } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
-        }
-    }
-
     public static void updateAT() {
         String[] statements = new String[]{"insert into useraccounts(id,username,password) values (null,'test','test')",
                 // settings tabel:

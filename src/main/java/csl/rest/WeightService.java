@@ -27,10 +27,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RestController
 @RequestMapping("/weight")
 @Api(value = "weight", description = "Operations pertaining to weightRepository tracking in the macro logger application")
-public class WeightTrackerService {
+public class WeightService {
 
     private WeightRepository weightRepository = new WeightRepository();
-    private static final Logger LOGGER = LoggerFactory.getLogger(WeightTrackerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WeightService.class);
 
     @ApiOperation(value = "Retrieve all tracked weights")
     @RequestMapping(value = "",
@@ -40,22 +40,21 @@ public class WeightTrackerService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Weight> allLogEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
 
-        return ResponseEntity.ok(mapToDtos(userInfo, allLogEntries));
+        return ResponseEntity.ok(mapToDtos(allLogEntries));
     }
 
     @ApiOperation(value = "Store weight entry")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeWeightEntries(@RequestBody WeightDto logEntry) {
+    public ResponseEntity storeWeightEntries(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<WeightDto> newEntries = new ArrayList<>();
-//        for (WeightDto logEntry : logEntries) {
             Weight entry = new Weight();
-            entry.setDay(new Date(logEntry.getDay().getTime()));
-            entry.setId(logEntry.getId());
-            entry.setWeight(logEntry.getWeight());
-            if (logEntry.getId() == null) {
+            entry.setDay(new Date(weightEntry.getDay().getTime()));
+            entry.setId(weightEntry.getId());
+            entry.setWeight(weightEntry.getWeight());
+            if (weightEntry.getId() == null) {
                 weightRepository.insertWeight(userInfo.getUserId(), entry);
                 List<Weight> addedEntryMatches = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
                 if (addedEntryMatches.size() > 1) {
@@ -64,14 +63,13 @@ public class WeightTrackerService {
                     addedEntryMatches.add(newestEntry);
                 }
                 if (addedEntryMatches.size() != 1) {
-                    LOGGER.error("SAVE OF WEIGHT NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getWeight() + " - " + entry.getDay());
+                    LOGGER.error("SAVING OF WEIGHT NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getWeight() + " - " + entry.getDay());
                 }
-                newEntries.add(mapToDto(userInfo, addedEntryMatches.get(0)));
+                newEntries.add(mapToDto(addedEntryMatches.get(0)));
             } else {
                 weightRepository.updateWeight(userInfo.getUserId(), entry);
-                newEntries.add(mapToDto(userInfo,entry));
+                newEntries.add(mapToDto(entry));
             }
-//        }
 
         return ResponseEntity.ok(newEntries);
     }
@@ -87,18 +85,18 @@ public class WeightTrackerService {
     }
 
 
-    private List<WeightDto> mapToDtos(UserInfo userInfo, List<Weight> allWeightEntries) {
+    private List<WeightDto> mapToDtos(List<Weight> allWeightEntries) {
         List<WeightDto> allDtos = new ArrayList<>();
         for (Weight weightEntry : allWeightEntries) {
 
-            WeightDto dto = mapToDto(userInfo, weightEntry);
+            WeightDto dto = mapToDto(weightEntry);
             allDtos.add(dto);
         }
 
         return allDtos;
     }
 
-    private WeightDto mapToDto(UserInfo userInfo, Weight logEntry) {
+    private WeightDto mapToDto(Weight logEntry) {
         WeightDto dto = new WeightDto();
         dto.setDay(logEntry.getDay());
         dto.setId(logEntry.getId());

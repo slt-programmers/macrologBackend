@@ -74,7 +74,7 @@ public class Application {
         }
 
         if (!existingTables.contains(WeightRepository.TABLE_NAME)) {
-            LOGGER.info("Create weight tracker table");
+            LOGGER.info("Create weight table");
             createTable(WeightRepository.TABLE_CREATE);
         }
 
