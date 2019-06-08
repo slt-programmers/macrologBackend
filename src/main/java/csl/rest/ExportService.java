@@ -2,7 +2,9 @@ package csl.rest;
 
 import csl.database.*;
 import csl.database.model.Food;
+import csl.database.model.LogActivity;
 import csl.database.model.Setting;
+import csl.database.model.Weight;
 import csl.dto.*;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -25,10 +28,12 @@ public class ExportService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportService.class);
 
-    private final static FoodRepository foodRepository = new FoodRepository();
-    private final static PortionRepository portionRepository = new PortionRepository();
+    private FoodRepository foodRepository = new FoodRepository();
+    private PortionRepository portionRepository = new PortionRepository();
     private LogEntryRepository logEntryRepository = new LogEntryRepository();
     private SettingsRepository settingsRepo = new SettingsRepository();
+    private ActivityRepository activityRepository = new ActivityRepository();
+    private WeightRepository weightRepository = new WeightRepository();
 
     @ApiOperation(value = "Retrieve all stored information")
     @RequestMapping(value = "",
@@ -97,6 +102,14 @@ public class ExportService {
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         export.setAllSettings(settings);
 
+        List<LogActivity> activities = activityRepository.getAllLogActivities(userInfo.getUserId());
+        List<LogActivityDto> collectedActivityDtos = activities.stream().map(domeinObject -> mapActivityToDto(domeinObject)).collect(Collectors.toList());
+        export.setAllActivities(collectedActivityDtos);
+
+        List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
+        List<WeightDto> collectedWeightDtos = allWeightEntries.stream().map(domeinObject -> mapWeightToDto(domeinObject)).collect(Collectors.toList());
+        export.setAllWeights(collectedWeightDtos);
+
         return ResponseEntity.ok(export);
     }
 
@@ -127,6 +140,22 @@ public class ExportService {
         foodDto.setFat(food.getFat());
         return foodDto;
     }
+    private LogActivityDto mapActivityToDto(LogActivity logEntry) {
+        LogActivityDto dto = new LogActivityDto();
+        dto.setCalories(logEntry.getCalories());
+        dto.setName(logEntry.getName());
+        dto.setId(logEntry.getId());
+        dto.setDay(logEntry.getDay());
+        return dto;
+    }
 
+    private WeightDto mapWeightToDto(Weight weightEntry) {
+        WeightDto dto = new WeightDto();
+        dto.setDay(weightEntry.getDay());
+        dto.setId(weightEntry.getId());
+        dto.setWeight(weightEntry.getWeight());
+
+        return dto;
+    }
 
 }

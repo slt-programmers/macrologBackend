@@ -66,11 +66,7 @@ public class ActivityService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogActivityDto> newEntries = new ArrayList<>();
         for (LogActivityDto logEntry : logActivities) {
-            LogActivity entry = new LogActivity();
-            entry.setName(logEntry.getName());
-            entry.setCalories(logEntry.getCalories());
-            entry.setDay(new Date(logEntry.getDay().getTime()));
-            entry.setId(logEntry.getId());
+            LogActivity entry = mapActivityDtoToDomain(logEntry);
             if (logEntry.getId() == null) {
                 logActitivyRepository.insertActivity(userInfo.getUserId(), entry);
                 List<LogActivity> addedEntryMatches = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay());
@@ -91,6 +87,15 @@ public class ActivityService {
         }
 
         return ResponseEntity.ok(newEntries);
+    }
+
+    private LogActivity mapActivityDtoToDomain(LogActivityDto logEntry) {
+        LogActivity entry = new LogActivity();
+        entry.setName(logEntry.getName());
+        entry.setCalories(logEntry.getCalories());
+        entry.setDay(new Date(logEntry.getDay().getTime()));
+        entry.setId(logEntry.getId());
+        return entry;
     }
 
     @ApiOperation(value = "Delete activity")

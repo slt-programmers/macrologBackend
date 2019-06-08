@@ -232,12 +232,8 @@ public class LogEntryService  {
 
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
-            LOGGER.info("Export: logEntryDto ID " + logEntry.getFoodId());
 
-            FoodDto foodDto = allFoodDtos.stream().filter(f -> {
-                LOGGER.info("Export: foodDto ID " + f.getId());
-                return f.getId().equals(logEntry.getFoodId());
-            }).findFirst().orElseGet(() ->
+            FoodDto foodDto = allFoodDtos.stream().filter(f -> f.getId().equals(logEntry.getFoodId())).findFirst().orElseGet(() ->
                     FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
             logEntryDto.setFood(foodDto);
 
