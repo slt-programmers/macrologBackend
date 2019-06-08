@@ -10,7 +10,7 @@ public class WeightDto {
 
     private Long id;
     private Double weight;
-    @ApiModelProperty(notes = "Day of log",required=true)
+    @ApiModelProperty(notes = "Day of log", required = true)
     private Date day;
 
     public Long getId() {

@@ -26,7 +26,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/weight")
-@Api(value = "weight", description = "Operations pertaining to weightRepository tracking in the macro logger application")
+@Api(value = "weight")
 public class WeightService {
 
     private WeightRepository weightRepository = new WeightRepository();
@@ -38,9 +38,9 @@ public class WeightService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllWeightEntries() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<Weight> allLogEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
+        List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
 
-        return ResponseEntity.ok(mapToDtos(allLogEntries));
+        return ResponseEntity.ok(mapToDtos(allWeightEntries));
     }
 
     @ApiOperation(value = "Store weight entry")
@@ -50,26 +50,26 @@ public class WeightService {
     public ResponseEntity storeWeightEntries(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<WeightDto> newEntries = new ArrayList<>();
-            Weight entry = new Weight();
-            entry.setDay(new Date(weightEntry.getDay().getTime()));
-            entry.setId(weightEntry.getId());
-            entry.setWeight(weightEntry.getWeight());
-            if (weightEntry.getId() == null) {
-                weightRepository.insertWeight(userInfo.getUserId(), entry);
-                List<Weight> addedEntryMatches = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
-                if (addedEntryMatches.size() > 1) {
-                    Weight newestEntry = addedEntryMatches.stream().max(Comparator.comparing(Weight::getId)).orElseThrow(() -> new IllegalArgumentException("Weight not found"));
-                    addedEntryMatches = new ArrayList<>();
-                    addedEntryMatches.add(newestEntry);
-                }
-                if (addedEntryMatches.size() != 1) {
-                    LOGGER.error("SAVING OF WEIGHT NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getWeight() + " - " + entry.getDay());
-                }
-                newEntries.add(mapToDto(addedEntryMatches.get(0)));
-            } else {
-                weightRepository.updateWeight(userInfo.getUserId(), entry);
-                newEntries.add(mapToDto(entry));
+        Weight entry = new Weight();
+        entry.setDay(new Date(weightEntry.getDay().getTime()));
+        entry.setId(weightEntry.getId());
+        entry.setWeight(weightEntry.getWeight());
+        if (weightEntry.getId() == null) {
+            weightRepository.insertWeight(userInfo.getUserId(), entry);
+            List<Weight> addedEntryMatches = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
+            if (addedEntryMatches.size() > 1) {
+                Weight newestEntry = addedEntryMatches.stream().max(Comparator.comparing(Weight::getId)).orElseThrow(() -> new IllegalArgumentException("Weight not found"));
+                addedEntryMatches = new ArrayList<>();
+                addedEntryMatches.add(newestEntry);
             }
+            if (addedEntryMatches.size() != 1) {
+                LOGGER.error("SAVING OF WEIGHT NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getWeight() + " - " + entry.getDay());
+            }
+            newEntries.add(mapToDto(addedEntryMatches.get(0)));
+        } else {
+            weightRepository.updateWeight(userInfo.getUserId(), entry);
+            newEntries.add(mapToDto(entry));
+        }
 
         return ResponseEntity.ok(newEntries);
     }
@@ -88,7 +88,6 @@ public class WeightService {
     private List<WeightDto> mapToDtos(List<Weight> allWeightEntries) {
         List<WeightDto> allDtos = new ArrayList<>();
         for (Weight weightEntry : allWeightEntries) {
-
             WeightDto dto = mapToDto(weightEntry);
             allDtos.add(dto);
         }
