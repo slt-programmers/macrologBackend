@@ -140,6 +140,7 @@ public class ImportService {
         entry.setDay(Date.valueOf(weightEntry.getDay()));
         entry.setId(null);
         entry.setWeight(weightEntry.getWeight());
+        entry.setRemark(weightEntry.getRemark());
         return entry;
     }
 

@@ -16,5 +16,6 @@ public class Weight {
     private Long id;
     private Double weight;
     private Date day;
+    private String remark;
 
 }
