@@ -1,9 +1,6 @@
 package csl.rest;
 
-import csl.database.FoodRepository;
-import csl.database.LogEntryRepository;
-import csl.database.PortionRepository;
-import csl.database.SettingsRepository;
+import csl.database.*;
 import csl.database.model.*;
 import csl.dto.*;
 import csl.dto.LogEntryDto;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URISyntaxException;
+import java.sql.Date;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -29,17 +27,20 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/import")
 public class ImportService {
 
-    private final static FoodRepository foodRepository = new FoodRepository();
-    private final static PortionRepository portionRepository = new PortionRepository();
+    private FoodRepository foodRepository = new FoodRepository();
+    private PortionRepository portionRepository = new PortionRepository();
     private LogEntryRepository logEntryRepository = new LogEntryRepository();
     private SettingsRepository settingsRepo = new SettingsRepository();
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportService.class);
+    private ActivityRepository activityRepository = new ActivityRepository();
+    private WeightRepository weightRepository = new WeightRepository();
+
+    private Logger LOGGER = LoggerFactory.getLogger(ImportService.class);
 
     @ApiOperation(value = "Import exported json")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity setAll(@RequestBody Export export) throws URISyntaxException {
+    public ResponseEntity setAll(@RequestBody Export export)  {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         LOGGER.debug("export = " +export);
 
@@ -78,6 +79,14 @@ public class ImportService {
             }
             logEntryRepository.insertLogEntry(userInfo.getUserId(),logEntry);
         }
+
+        List<WeightDto> allWeights = export.getAllWeights();
+        allWeights.stream().map(weightDto -> mapWeightToDomain(weightDto))
+                .forEach(weightDomain ->weightRepository.insertWeight(userInfo.getUserId(),weightDomain));
+
+        List<LogActivityDto> allActivities = export.getAllActivities();
+        allActivities.stream().map(activityDto -> mapActivityDtoToDomain(activityDto))
+                .forEach(activityDomain -> activityRepository.insertActivity(userInfo.getUserId(),activityDomain));
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -128,5 +137,20 @@ public class ImportService {
         food.setFat(foodDto.getFat());
         return food;
     }
+    private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
+        Weight entry = new Weight();
+        entry.setDay(new Date(weightEntry.getDay().getTime()));
+        entry.setId(null);
+        entry.setWeight(weightEntry.getWeight());
+        return entry;
+    }
 
+    private LogActivity mapActivityDtoToDomain(LogActivityDto logEntry) {
+        LogActivity entry = new LogActivity();
+        entry.setName(logEntry.getName());
+        entry.setCalories(logEntry.getCalories());
+        entry.setDay(new Date(logEntry.getDay().getTime()));
+        entry.setId(logEntry.getId());
+        return entry;
+    }
 }

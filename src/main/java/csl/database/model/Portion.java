@@ -1,23 +1,23 @@
 package csl.database.model;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Created by Carmen on 6-7-2018.
  */
+@Getter
+@Setter
+@AllArgsConstructor
 public class Portion {
 
     private Long id;
-    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram", example = "100.0")
-    private Double grams;
     @ApiModelProperty(notes = "bord oid", required = true, example = "bord")
     private String description;
-
-    public Portion(Long id, String description, Double grams) {
-        this.id = id;
-        this.description = description;
-        this.grams = grams;
-    }
+    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram", example = "100.0")
+    private Double grams;
 
     public Portion() {
     }

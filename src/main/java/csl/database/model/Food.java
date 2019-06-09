@@ -1,5 +1,14 @@
 package csl.database.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Food {
 
     private Long id;
@@ -7,61 +16,6 @@ public class Food {
     private Double protein;
     private Double fat;
     private Double carbs;
-
-    public Food() {
-    }
-
-    public Food(Long id,
-                String name,
-                Double protein,
-                Double fat,
-                Double carbs) {
-        this.id = id;
-        this.name = name;
-        this.protein = protein;
-        this.fat = fat;
-        this.carbs = carbs;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Double getProtein() {
-        return protein;
-    }
-
-    public void setProtein(Double protein) {
-        this.protein = protein;
-    }
-
-    public Double getFat() {
-        return fat;
-    }
-
-    public void setFat(Double fat) {
-        this.fat = fat;
-    }
-
-    public Double getCarbs() {
-        return carbs;
-    }
-
-    public void setCarbs(Double carbs) {
-        this.carbs = carbs;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -79,12 +33,5 @@ public class Food {
         int result = id.hashCode();
         result = 31 * result + name.hashCode();
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "FoodDto{" +
-                "name='" + name + '\'' +
-                '}';
     }
 }

@@ -100,10 +100,6 @@ public class IngredientRepository {
         return template.update(DELETE_SQL + " WHERE " + COL_ID + " = :id", params);
     }
 
-    public List<Ingredient> getSomeIngredients(String selectStatement) {
-        return template.query(selectStatement, new IngredientWrapper());
-    }
-
     public List<Ingredient> getAllIngredientsForMeal(Long mealId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("mealId", mealId);

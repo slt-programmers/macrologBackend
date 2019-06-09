@@ -39,7 +39,6 @@ public class ActivityRepository {
                     ")";
 
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
-    private static final String SELECT_ONE_DAY_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND day = :day";
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, calories, day) VALUES(:userId, :name, :calories, :day)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, calories = :calories, day = :day WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
@@ -73,6 +72,13 @@ public class ActivityRepository {
         return template.update(DELETE_SQL, params);
     }
 
+    public List<LogActivity> getAllLogActivities(Integer userId) {
+        LOGGER.debug("Getting entries for " + userId);
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        String myLogs = SELECT_SQL + " WHERE  "  + COL_USER_ID + " = :userId";
+        return template.query(myLogs, params, new LogActivityWrapper());
+    }
 
     public List<LogActivity> getAllLogActivities(Integer userId, java.util.Date date) {
         LOGGER.debug("Getting entries for " + date);
@@ -81,19 +87,6 @@ public class ActivityRepository {
                 .addValue("userId", userId)
                 .addValue("date", sdf.format(date));
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND " + COL_USER_ID + " = :userId";
-        return template.query(myLogs, params, new LogActivityWrapper());
-    }
-
-    public List<LogActivity> getAllLogActivities(Integer userId, java.util.Date begin, java.util.Date end) {
-        LOGGER.debug("Getting entries for period " + begin + " - " + end);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("userId", userId)
-                .addValue("dateBegin", sdf.format(begin))
-                .addValue("dateEnd", sdf.format(end));
-        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND " + COL_USER_ID + " = :userId";
-        LOGGER.debug(myLogs);
-        LOGGER.debug("BETWEEN " + sdf.format(begin) + " AND " + sdf.format(end));
         return template.query(myLogs, params, new LogActivityWrapper());
     }
 

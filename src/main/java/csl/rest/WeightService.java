@@ -50,10 +50,7 @@ public class WeightService {
     public ResponseEntity storeWeightEntries(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<WeightDto> newEntries = new ArrayList<>();
-        Weight entry = new Weight();
-        entry.setDay(Date.valueOf(weightEntry.getDay()));
-        entry.setId(weightEntry.getId());
-        entry.setWeight(weightEntry.getWeight());
+        Weight entry = mapWeightToDomain(weightEntry);
         if (weightEntry.getId() == null) {
             weightRepository.insertWeight(userInfo.getUserId(), entry);
             List<Weight> addedEntryMatches = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
@@ -72,6 +69,14 @@ public class WeightService {
         }
 
         return ResponseEntity.ok(newEntries);
+    }
+
+    private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
+        Weight entry = new Weight();
+        entry.setDay(Date.valueOf(weightEntry.getDay()));
+        entry.setId(weightEntry.getId());
+        entry.setWeight(weightEntry.getWeight());
+        return entry;
     }
 
     @ApiOperation(value = "Delete weight entry")
