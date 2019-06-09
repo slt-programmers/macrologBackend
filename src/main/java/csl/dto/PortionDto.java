@@ -12,7 +12,7 @@ public class PortionDto {
     private Long id;
     @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram", example = "100.0")
     private Double grams;
-    @ApiModelProperty(notes = "bord oid",required=true, example = "bord")
+    @ApiModelProperty(notes = "bord oid", required = true, example = "bord")
     private String description;
     private Macro macros;
 

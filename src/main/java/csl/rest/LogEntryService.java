@@ -28,7 +28,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/logs")
-@Api(value = "logs", description = "Operations pertaining to logentries in the macro logger application")
+@Api(value = "logs")
 public class LogEntryService  {
 
     private FoodRepository foodRepository = new FoodRepository();
@@ -122,7 +122,6 @@ public class LogEntryService  {
     public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date parsedFromDate;
         java.util.Date parsedToDate;
@@ -134,28 +133,26 @@ public class LogEntryService  {
             return ResponseEntity.badRequest().build();
         }
 
-
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedFromDate, parsedToDate);
 
         List<LogEntryDto> logEntryDtos =transformToDtos(allLogEntries,userInfo);
-        LOGGER.debug("Aantal dtos:" + logEntryDtos.size());
-
+        LOGGER.debug("Aantal dtos: " + logEntryDtos.size());
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
-            LogEntryDto d3 = new LogEntryDto();
-            d3.setMacrosCalculated(d1.getMacrosCalculated());
-            d3.getMacrosCalculated().combine(d2.getMacrosCalculated());
-            return d3;
+            LogEntryDto logEntryDto = new LogEntryDto();
+            logEntryDto.setMacrosCalculated(d1.getMacrosCalculated());
+            logEntryDto.getMacrosCalculated().combine(d2.getMacrosCalculated());
+            return logEntryDto;
         })));
 
-        ArrayList<DayMacro> retObject = new ArrayList<>();
+        List<DayMacro> retObject = new ArrayList<>();
         for (java.util.Date date : collect.keySet()) {
             DayMacro dm = new DayMacro();
             dm.setDay(date);
             dm.setMacro(collect.get(date).get().getMacrosCalculated());
             retObject.add(dm);
         }
-        Collections.sort(retObject, Comparator.comparing(DayMacro::getDay));
+        retObject.sort(Comparator.comparing(DayMacro::getDay));
 
         return ResponseEntity.ok(retObject);
     }
@@ -213,9 +210,7 @@ public class LogEntryService  {
 
     /**
      * REFACTOR ONDERSTAANDE NAAR COMMON USAGE BIJ EXPORT
-     * @return
      */
-
 
     private List<LogEntryDto> transformToDtos(List<csl.database.model.LogEntry> allLogEntries, UserInfo userInfo){
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());

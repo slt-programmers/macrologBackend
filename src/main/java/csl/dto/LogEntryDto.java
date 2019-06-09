@@ -13,15 +13,15 @@ public class LogEntryDto {
     @ApiModelProperty(notes = "PortionDto used.")
     private PortionDto portion;
     private Macro macrosCalculated;
-    @ApiModelProperty(notes = "Multiplier of the measurement",required=true, example = "1.7")
+    @ApiModelProperty(notes = "Multiplier of the measurement", required = true, example = "1.7")
     private Double multiplier;
-    @ApiModelProperty(notes = "Day of log",required=true)
+    @ApiModelProperty(notes = "Day of log", required = true)
     private Date day;
-    @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK",required=true, example="BREAKFAST")
+    @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK", required = true, example = "BREAKFAST")
     private String meal;
 
     public LogEntryDto() {
-        macrosCalculated = new Macro(0.0,0.0,0.0);
+        macrosCalculated = new Macro(0.0, 0.0, 0.0);
     }
 
     public FoodDto getFood() {

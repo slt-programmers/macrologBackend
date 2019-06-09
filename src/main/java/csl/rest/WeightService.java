@@ -51,14 +51,14 @@ public class WeightService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<WeightDto> newEntries = new ArrayList<>();
         Weight entry = new Weight();
-        entry.setDay(new Date(weightEntry.getDay().getTime()));
+        entry.setDay(Date.valueOf(weightEntry.getDay()));
         entry.setId(weightEntry.getId());
         entry.setWeight(weightEntry.getWeight());
         if (weightEntry.getId() == null) {
             weightRepository.insertWeight(userInfo.getUserId(), entry);
             List<Weight> addedEntryMatches = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
             if (addedEntryMatches.size() > 1) {
-                Weight newestEntry = addedEntryMatches.stream().max(Comparator.comparing(Weight::getId)).orElseThrow(() -> new IllegalArgumentException("Weight not found"));
+                Weight newestEntry = addedEntryMatches.stream().max(Comparator.comparing(Weight::getId)).orElse(null);
                 addedEntryMatches = new ArrayList<>();
                 addedEntryMatches.add(newestEntry);
             }
@@ -91,15 +91,14 @@ public class WeightService {
             WeightDto dto = mapToDto(weightEntry);
             allDtos.add(dto);
         }
-
         return allDtos;
     }
 
-    private WeightDto mapToDto(Weight logEntry) {
+    private WeightDto mapToDto(Weight weightEntry) {
         WeightDto dto = new WeightDto();
-        dto.setDay(logEntry.getDay());
-        dto.setId(logEntry.getId());
-        dto.setWeight(logEntry.getWeight());
+        dto.setDay(weightEntry.getDay().toLocalDate());
+        dto.setId(weightEntry.getId());
+        dto.setWeight(weightEntry.getWeight());
 
         return dto;
     }

@@ -11,7 +11,7 @@ public class Weight {
     public Weight() {
     }
 
-    public Weight(Long id, Double weight,Date day) {
+    public Weight(Long id, Double weight, Date day) {
         this.id = id;
         this.day = day;
         this.weight = weight;
