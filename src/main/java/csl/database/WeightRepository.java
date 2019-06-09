@@ -1,6 +1,5 @@
 package csl.database;
 
-import csl.database.model.LogEntry;
 import csl.database.model.Weight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Repository
@@ -80,44 +78,20 @@ public class WeightRepository {
         return template.query(SELECT_ONE_SQL, params, new WeightWrapper());
     }
 
-        public List<Weight> getAllWeightEntries (Integer userId){
-            SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue("userId", userId);
-            return template.query(SELECT_SQL + " WHERE user_id=:userId", params, new WeightWrapper());
+    public List<Weight> getAllWeightEntries(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.query(SELECT_SQL + " WHERE user_id=:userId", params, new WeightWrapper());
+    }
+
+    class WeightWrapper implements RowMapper {
+        @Override
+        public Object mapRow(ResultSet rs, int i) throws SQLException {
+            Date ts = rs.getDate(COL_DAY);
+            return new Weight(rs.getLong(COL_ID),
+                    rs.getDouble(COL_WEIGHT),
+                    ts);
+
         }
-
-//    public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date date) {
-//        LOGGER.debug("Getting entries for " + date);
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        SqlParameterSource params = new MapSqlParameterSource()
-//                .addValue("userId", userId)
-//                .addValue("date", sdf.format(date));
-//        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND user_id=:userId";
-//        return template.query(myLogs, params, new LogEntryWrapper());
-//    }
-//
-//    public List<LogEntry> getAllLogEntries(Integer userId, java.util.Date begin, java.util.Date end) {
-//        LOGGER.debug("Getting entries for period " + begin + " - " + end);
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        SqlParameterSource params = new MapSqlParameterSource()
-//                .addValue("userId", userId)
-//                .addValue("dateBegin", sdf.format(begin))
-//                .addValue("dateEnd", sdf.format(end));
-//        String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + ">= :dateBegin AND " + COL_DAY + "<= :dateEnd AND user_id=:userId";
-//        LOGGER.debug(myLogs);
-//        LOGGER.debug("between " + sdf.format(begin) + " and " + sdf.format(end));
-//        return template.query(myLogs, params, new LogEntryWrapper());
-//    }
-
-        class WeightWrapper implements RowMapper {
-            @Override
-            public Object mapRow(ResultSet rs, int i) throws SQLException {
-                Date ts = rs.getDate(COL_DAY);
-                return new Weight(rs.getLong(COL_ID),
-                        rs.getDouble(COL_WEIGHT),
-                        ts);
-
-            }
-        }
-
+    }
 }

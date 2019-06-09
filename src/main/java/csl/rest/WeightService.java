@@ -49,26 +49,15 @@ public class WeightService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeWeightEntries(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<WeightDto> newEntries = new ArrayList<>();
         Weight entry = mapWeightToDomain(weightEntry);
-        if (weightEntry.getId() == null) {
+        List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
+        if (weightEntry.getId() == null && (storedWeight == null || storedWeight.size() == 0)) {
             weightRepository.insertWeight(userInfo.getUserId(), entry);
-            List<Weight> addedEntryMatches = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
-            if (addedEntryMatches.size() > 1) {
-                Weight newestEntry = addedEntryMatches.stream().max(Comparator.comparing(Weight::getId)).orElse(null);
-                addedEntryMatches = new ArrayList<>();
-                addedEntryMatches.add(newestEntry);
-            }
-            if (addedEntryMatches.size() != 1) {
-                LOGGER.error("SAVING OF WEIGHT NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getWeight() + " - " + entry.getDay());
-            }
-            newEntries.add(mapToDto(addedEntryMatches.get(0)));
         } else {
             weightRepository.updateWeight(userInfo.getUserId(), entry);
-            newEntries.add(mapToDto(entry));
         }
 
-        return ResponseEntity.ok(newEntries);
+        return ResponseEntity.ok().build();
     }
 
     private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
