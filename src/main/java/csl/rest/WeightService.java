@@ -21,6 +21,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -40,7 +41,8 @@ public class WeightService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
 
-        return ResponseEntity.ok(mapToDtos(allWeightEntries));
+        List<WeightDto> collectedDtos = allWeightEntries.stream().map(this::mapToDto).collect(Collectors.toList());
+        return ResponseEntity.ok(collectedDtos);
     }
 
     @ApiOperation(value = "Store weight entry")
@@ -51,21 +53,18 @@ public class WeightService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Weight entry = mapWeightToDomain(weightEntry);
         List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
-        if (weightEntry.getId() == null && (storedWeight == null || storedWeight.size() == 0)) {
+        boolean weightDayAlreadyRegistered = (storedWeight != null || storedWeight.size() > 0);
+
+        if (weightEntry.getId() == null && !weightDayAlreadyRegistered) {
             weightRepository.insertWeight(userInfo.getUserId(), entry);
         } else {
+            if (weightDayAlreadyRegistered){
+                entry.setId(storedWeight.get(0).getId());
+            }
             weightRepository.updateWeight(userInfo.getUserId(), entry);
         }
 
         return ResponseEntity.ok().build();
-    }
-
-    private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
-        Weight entry = new Weight();
-        entry.setDay(Date.valueOf(weightEntry.getDay()));
-        entry.setId(weightEntry.getId());
-        entry.setWeight(weightEntry.getWeight());
-        return entry;
     }
 
     @ApiOperation(value = "Delete weight entry")
@@ -78,14 +77,13 @@ public class WeightService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-
-    private List<WeightDto> mapToDtos(List<Weight> allWeightEntries) {
-        List<WeightDto> allDtos = new ArrayList<>();
-        for (Weight weightEntry : allWeightEntries) {
-            WeightDto dto = mapToDto(weightEntry);
-            allDtos.add(dto);
-        }
-        return allDtos;
+    private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
+        Weight entry = new Weight();
+        entry.setDay(Date.valueOf(weightEntry.getDay()));
+        entry.setId(weightEntry.getId());
+        entry.setWeight(weightEntry.getWeight());
+        entry.setRemark(weightEntry.getRemark());
+        return entry;
     }
 
     private WeightDto mapToDto(Weight weightEntry) {
@@ -93,7 +91,7 @@ public class WeightService {
         dto.setDay(weightEntry.getDay().toLocalDate());
         dto.setId(weightEntry.getId());
         dto.setWeight(weightEntry.getWeight());
-
+        dto.setRemark(weightEntry.getRemark());
         return dto;
     }
 }

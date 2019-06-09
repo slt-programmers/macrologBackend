@@ -155,6 +155,7 @@ public class ExportService {
         dto.setDay(weightEntry.getDay().toLocalDate());
         dto.setId(weightEntry.getId());
         dto.setWeight(weightEntry.getWeight());
+        dto.setRemark(weightEntry.getRemark());
 
         return dto;
     }
