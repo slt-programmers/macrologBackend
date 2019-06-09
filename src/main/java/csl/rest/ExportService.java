@@ -44,6 +44,7 @@ public class ExportService {
         Export export = new Export();
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         LOGGER.info("Export: allFood size = " + allFood.size());
+
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
@@ -103,17 +104,17 @@ public class ExportService {
         export.setAllSettings(settings);
 
         List<LogActivity> activities = activityRepository.getAllLogActivities(userInfo.getUserId());
-        List<LogActivityDto> collectedActivityDtos = activities.stream().map(domeinObject -> mapActivityToDto(domeinObject)).collect(Collectors.toList());
+        List<LogActivityDto> collectedActivityDtos = activities.stream().map(this::mapActivityToDto).collect(Collectors.toList());
         export.setAllActivities(collectedActivityDtos);
 
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
-        List<WeightDto> collectedWeightDtos = allWeightEntries.stream().map(domeinObject -> mapWeightToDto(domeinObject)).collect(Collectors.toList());
+        List<WeightDto> collectedWeightDtos = allWeightEntries.stream().map(this::mapWeightToDto).collect(Collectors.toList());
         export.setAllWeights(collectedWeightDtos);
 
         return ResponseEntity.ok(export);
     }
 
-    public FoodDto createFoodDto(Food food, boolean withPortions) {
+    private FoodDto createFoodDto(Food food, boolean withPortions) {
         FoodDto foodDto = mapFoodToFoodDto(food);
 
         if (withPortions) {
@@ -130,8 +131,7 @@ public class ExportService {
         return foodDto;
     }
 
-
-    public static FoodDto mapFoodToFoodDto(Food food) {
+    private static FoodDto mapFoodToFoodDto(Food food) {
         FoodDto foodDto = new FoodDto();
         foodDto.setName(food.getName());
         foodDto.setId(food.getId());
@@ -140,6 +140,7 @@ public class ExportService {
         foodDto.setFat(food.getFat());
         return foodDto;
     }
+
     private LogActivityDto mapActivityToDto(LogActivity logEntry) {
         LogActivityDto dto = new LogActivityDto();
         dto.setCalories(logEntry.getCalories());
@@ -151,7 +152,7 @@ public class ExportService {
 
     private WeightDto mapWeightToDto(Weight weightEntry) {
         WeightDto dto = new WeightDto();
-        dto.setDay(weightEntry.getDay());
+        dto.setDay(weightEntry.getDay().toLocalDate());
         dto.setId(weightEntry.getId());
         dto.setWeight(weightEntry.getWeight());
 

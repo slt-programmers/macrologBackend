@@ -11,12 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URISyntaxException;
 import java.sql.Date;
 import java.util.List;
 
@@ -81,11 +79,11 @@ public class ImportService {
         }
 
         List<WeightDto> allWeights = export.getAllWeights();
-        allWeights.stream().map(weightDto -> mapWeightToDomain(weightDto))
+        allWeights.stream().map(this::mapWeightToDomain)
                 .forEach(weightDomain ->weightRepository.insertWeight(userInfo.getUserId(),weightDomain));
 
         List<LogActivityDto> allActivities = export.getAllActivities();
-        allActivities.stream().map(activityDto -> mapActivityDtoToDomain(activityDto))
+        allActivities.stream().map(this::mapActivityDtoToDomain)
                 .forEach(activityDomain -> activityRepository.insertActivity(userInfo.getUserId(),activityDomain));
 
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -106,7 +104,7 @@ public class ImportService {
         return foundFood;
     }
 
-    public static LogEntry mapLogEntryDtoToLogEntry(LogEntryDto logEntryDto) {
+    private static LogEntry mapLogEntryDtoToLogEntry(LogEntryDto logEntryDto) {
         LogEntry logEntry = new LogEntry();
         logEntry.setId(null);
         java.sql.Date newDate = new java.sql.Date(logEntryDto.getDay().getTime());
@@ -120,7 +118,7 @@ public class ImportService {
         return logEntry;
     }
 
-    public static Portion mapPortionDtoToPortion(PortionDto portionDto) {
+    private static Portion mapPortionDtoToPortion(PortionDto portionDto) {
         Portion portion = new Portion();
         portion.setId(null);
         portion.setGrams(portionDto.getGrams());
@@ -128,7 +126,7 @@ public class ImportService {
         return portion;
     }
 
-    public static Food mapFoodDtoToFood(FoodDto foodDto) {
+    private static Food mapFoodDtoToFood(FoodDto foodDto) {
         Food food = new Food();
         food.setName(foodDto.getName());
         food.setId(null);
@@ -139,7 +137,7 @@ public class ImportService {
     }
     private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
         Weight entry = new Weight();
-        entry.setDay(new Date(weightEntry.getDay().getTime()));
+        entry.setDay(Date.valueOf(weightEntry.getDay()));
         entry.setId(null);
         entry.setWeight(weightEntry.getWeight());
         return entry;
