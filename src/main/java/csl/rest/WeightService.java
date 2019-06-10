@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -49,7 +49,7 @@ public class WeightService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity storeWeightEntries(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Weight entry = mapWeightToDomain(weightEntry);
+        Weight entry = mapWeightDtoToDomain(weightEntry);
         List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
         if (weightEntry.getId() == null && (storedWeight == null || storedWeight.size() == 0)) {
             weightRepository.insertWeight(userInfo.getUserId(), entry);
@@ -60,7 +60,7 @@ public class WeightService {
         return ResponseEntity.ok().build();
     }
 
-    private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
+    private Weight mapWeightDtoToDomain(@RequestBody WeightDto weightEntry) {
         Weight entry = new Weight();
         entry.setDay(Date.valueOf(weightEntry.getDay()));
         entry.setId(weightEntry.getId());

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -14,7 +15,7 @@ import java.sql.Date;
 public class Weight {
 
     private Long id;
-    private Double weight;
-    private Date day;
+    private Double weight = 0.0;
+    private Date day = Date.valueOf(LocalDate.now());
 
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Repository
@@ -38,20 +39,21 @@ public class WeightRepository {
     public static final String TABLE_DELETE =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
-    private static final String SELECT_SQL = "select * from " + TABLE_NAME;
-    private static final String SELECT_ONE_SQL = "select * from " + TABLE_NAME + " where user_id = :userId and day = :day";
-    private static final String INSERT_SQL = "insert into " + TABLE_NAME + "( user_id, weight, day) values(:userId,:weight,:day)";
-    private static final String UPDATE_SQL = "update " + TABLE_NAME + " set weight = :weight,day = :day where Id = :id and user_id=:userId";
-    private static final String DELETE_SQL = "delete from " + TABLE_NAME + " where id = :id AND user_id= :userId";
+    private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
+    private static final String SELECT_ONE_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND day = :day";
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, weight, day) VALUES(:userId, :weight, :day)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET weight = :weight, day = :day WHERE Id = :id AND user_id = :userId";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id= :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
     public int insertWeight(Integer userId, Weight entry) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("userId", userId)
                 .addValue("weight", entry.getWeight())
-                .addValue("day", entry.getDay());
+                .addValue("day", sdf.format(entry.getDay()));
         return template.update(INSERT_SQL, params);
     }
 
@@ -72,25 +74,25 @@ public class WeightRepository {
     }
 
     public List<Weight> getWeightEntryForDay(Integer userId, Date day) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("day", day);
+                .addValue("day", sdf.format(day));
         return template.query(SELECT_ONE_SQL, params, new WeightWrapper());
     }
 
     public List<Weight> getAllWeightEntries(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        return template.query(SELECT_SQL + " WHERE user_id=:userId", params, new WeightWrapper());
+        return template.query(SELECT_SQL + " WHERE user_id = :userId", params, new WeightWrapper());
     }
 
     class WeightWrapper implements RowMapper {
         @Override
         public Object mapRow(ResultSet rs, int i) throws SQLException {
-            Date ts = rs.getDate(COL_DAY);
             return new Weight(rs.getLong(COL_ID),
                     rs.getDouble(COL_WEIGHT),
-                    ts);
+                    rs.getDate(COL_DAY));
 
         }
     }

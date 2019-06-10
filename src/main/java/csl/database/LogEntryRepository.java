@@ -30,6 +30,8 @@ public class LogEntryRepository {
     private static final String COL_DAY = "day";
     private static final String COL_MEAL = "meal";
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
