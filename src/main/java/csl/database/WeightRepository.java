@@ -26,12 +26,14 @@ public class WeightRepository {
     private static final String COL_USER_ID = "user_id";
     private static final String COL_WEIGHT = "weight";
     private static final String COL_DAY = "day";
+    private static final String COL_REMARK = "remark";
 
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
                     COL_WEIGHT + " DEC(5,2) NOT NULL, " +
+                    COL_REMARK + " TEXT, " +
                     COL_DAY + " DATE NOT NULL," +
                     "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
                     ")";
@@ -41,8 +43,8 @@ public class WeightRepository {
 
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String SELECT_ONE_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND day = :day";
-    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, weight, day) VALUES(:userId, :weight, :day)";
-    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET weight = :weight, day = :day WHERE Id = :id AND user_id = :userId";
+    private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, weight, day, remark) VALUES(:userId, :weight, :day, :remark)";
+    private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET weight = :weight, day = :day, remark = :remark WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id= :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
@@ -53,7 +55,8 @@ public class WeightRepository {
                 .addValue("id", null)
                 .addValue("userId", userId)
                 .addValue("weight", entry.getWeight())
-                .addValue("day", sdf.format(entry.getDay()));
+                .addValue("day", sdf.format(entry.getDay()))
+                .addValue("remark", entry.getRemark());
         return template.update(INSERT_SQL, params);
     }
 
@@ -62,7 +65,8 @@ public class WeightRepository {
                 .addValue("id", entry.getId())
                 .addValue("userId", userId)
                 .addValue("weight", entry.getWeight())
-                .addValue("day", entry.getDay());
+                .addValue("day", entry.getDay())
+                .addValue("remark", entry.getRemark());
         return template.update(UPDATE_SQL, params);
     }
 
@@ -92,7 +96,8 @@ public class WeightRepository {
         public Object mapRow(ResultSet rs, int i) throws SQLException {
             return new Weight(rs.getLong(COL_ID),
                     rs.getDouble(COL_WEIGHT),
-                    rs.getDate(COL_DAY));
+                    rs.getDate(COL_DAY),
+                    rs.getString(COL_REMARK));
 
         }
     }

@@ -17,5 +17,6 @@ public class Weight {
     private Long id;
     private Double weight = 0.0;
     private Date day = Date.valueOf(LocalDate.now());
+    private String remark;
 
 }

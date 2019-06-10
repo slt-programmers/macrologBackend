@@ -2,9 +2,17 @@ package csl.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeightDto {
 
@@ -12,28 +20,7 @@ public class WeightDto {
     private Double weight;
     @ApiModelProperty(notes = "Day of log", required = true)
     private LocalDate day;
+    private String remark;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Double weight) {
-        this.weight = weight;
-    }
-
-    public LocalDate getDay() {
-        return day;
-    }
-
-    public void setDay(LocalDate day) {
-        this.day = day;
-    }
 }
