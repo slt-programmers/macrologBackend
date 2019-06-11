@@ -61,11 +61,12 @@ public class WeightRepository {
     }
 
     public int updateWeight(Integer userId, Weight entry) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", entry.getId())
                 .addValue("userId", userId)
                 .addValue("weight", entry.getWeight())
-                .addValue("day", entry.getDay())
+                .addValue("day", sdf.format(entry.getDay()))
                 .addValue("remark", entry.getRemark());
         return template.update(UPDATE_SQL, params);
     }

@@ -66,14 +66,6 @@ public class WeightService {
         return ResponseEntity.ok().build();
     }
 
-    private Weight mapWeightDtoToDomain(@RequestBody WeightDto weightEntry) {
-        Weight entry = new Weight();
-        entry.setDay(Date.valueOf(weightEntry.getDay()));
-        entry.setId(weightEntry.getId());
-        entry.setWeight(weightEntry.getWeight());
-        return entry;
-    }
-
     @ApiOperation(value = "Delete weight entry")
     @RequestMapping(value = "/{id}",
             method = DELETE,
@@ -91,5 +83,14 @@ public class WeightService {
         dto.setWeight(weightEntry.getWeight());
         dto.setRemark(weightEntry.getRemark());
         return dto;
+    }
+
+    private Weight mapWeightDtoToDomain(@RequestBody WeightDto weightEntry) {
+        Weight entry = new Weight();
+        entry.setDay(Date.valueOf(weightEntry.getDay()));
+        entry.setId(weightEntry.getId());
+        entry.setWeight(weightEntry.getWeight());
+        entry.setRemark(weightEntry.getRemark());
+        return entry;
     }
 }
