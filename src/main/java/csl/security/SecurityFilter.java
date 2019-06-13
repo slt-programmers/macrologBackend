@@ -33,7 +33,7 @@ public class SecurityFilter implements Filter {
             LOGGER.debug("precheck");
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "*");
-            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE,PUT");
+            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers","Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Content-Type,Authorization");
             chain.doFilter(request, response);
         } else {
@@ -44,7 +44,7 @@ public class SecurityFilter implements Filter {
             }
 
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getenv);
-            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE,PUT");
+            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Max-Age", "3600");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 

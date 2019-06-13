@@ -7,6 +7,7 @@ import csl.database.model.Weight;
 import csl.dto.UserSettingsDto;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
+import csl.util.LocalDateParser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.joda.time.DateTime;
@@ -73,7 +74,7 @@ public class SettingsService {
         dto.setName(mapSetting(settings, "name"));
         dto.setGender(mapSetting(settings, "gender"));
         dto.setAge(Integer.valueOf(mapSetting(settings, "age")));
-        dto.setBirthday(LocalDate.parse(mapSetting(settings, "birthday"), DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        dto.setBirthday(LocalDateParser.parse(mapSetting(settings, "birthday")));
         dto.setHeight(Integer.valueOf(mapSetting(settings, "height")));
         dto.setActivity(Double.valueOf(mapSetting(settings, "activity")));
         dto.setGoalProtein(Integer.valueOf(mapSetting(settings, "goalProtein")));
