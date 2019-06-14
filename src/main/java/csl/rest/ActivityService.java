@@ -29,7 +29,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/activities")
-@Api(value = "logs", description = "Operations pertaining to activities in the macro logger application")
+@Api(value = "logs")
 public class ActivityService {
 
     private ActivityRepository logActitivyRepository = new ActivityRepository();

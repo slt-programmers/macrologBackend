@@ -38,7 +38,6 @@ public class WeightService {
     public ResponseEntity getAllWeightEntries() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
-
         List<WeightDto> collectedDtos = allWeightEntries.stream().map(this::mapToDto).collect(Collectors.toList());
         return ResponseEntity.ok(collectedDtos);
     }
@@ -47,7 +46,7 @@ public class WeightService {
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeWeightEntries(@RequestBody WeightDto weightEntry) {
+    public ResponseEntity storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Weight entry = mapWeightDtoToDomain(weightEntry);
         List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());

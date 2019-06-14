@@ -111,11 +111,11 @@ public class AuthenticationService {
 
         UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
         if (account != null) {
-            return ResponseEntity.status(401).body("Username already in use");
+            return ResponseEntity.status(401).body("Username or email already in use");
         } else {
             UserAccount userByEmail = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
             if (userByEmail != null) {
-                return ResponseEntity.status(401).body("Email already in use");
+                return ResponseEntity.status(401).body("Username or email already in use");
             } else {
                 USER_ACCCOUNT_REPOSITORY.insertUser(username, hashedPassword, email);
                 account = USER_ACCCOUNT_REPOSITORY.getUser(username);
