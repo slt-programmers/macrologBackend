@@ -5,9 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-/**
- * Class voor het bewaren van de macros
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MealDto {
 

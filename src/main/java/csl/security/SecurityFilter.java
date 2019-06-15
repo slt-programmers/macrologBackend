@@ -27,20 +27,19 @@ public class SecurityFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
-    {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if ("OPTIONS".equalsIgnoreCase(((HttpServletRequest) request).getMethod())) {
             LOGGER.debug("precheck");
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "*");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
-            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers","Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Content-Type,Authorization");
+            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Content-Type,Authorization");
             chain.doFilter(request, response);
         } else {
             LOGGER.debug("actual");
             String getenv = System.getenv("allow.crossorigin");
-            if (getenv == null || getenv.equals("")){
-                getenv="http://localhost:4200";
+            if (getenv == null || getenv.equals("")) {
+                getenv = "http://localhost:4200";
             }
 
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getenv);
@@ -66,7 +65,7 @@ public class SecurityFilter implements Filter {
                     chain.doFilter(request, response);
                 } catch (ExpiredJwtException expiredEx) {
                     LOGGER.debug("ExpiredJWT token.");
-                    ((HttpServletResponse) response).sendError(403,"Expired session");
+                    ((HttpServletResponse) response).sendError(403, "Expired session");
                 }
             } else if (((HttpServletRequest) request).getRequestURI().startsWith("/swagger-resources") ||
                     ((HttpServletRequest) request).getRequestURI().startsWith("/webjars/") ||

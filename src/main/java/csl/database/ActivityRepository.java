@@ -76,7 +76,7 @@ public class ActivityRepository {
         LOGGER.debug("Getting entries for " + userId);
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
-        String myLogs = SELECT_SQL + " WHERE  "  + COL_USER_ID + " = :userId";
+        String myLogs = SELECT_SQL + " WHERE  " + COL_USER_ID + " = :userId";
         return template.query(myLogs, params, new LogActivityWrapper());
     }
 

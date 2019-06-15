@@ -42,7 +42,7 @@ public class IngredientRepository {
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
-    public int insertIngredient(Ingredient ingredient) {
+    int insertIngredient(Ingredient ingredient) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", null)
                 .addValue("mealId", ingredient.getMealId())
@@ -52,7 +52,7 @@ public class IngredientRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public void updateIngredientsForMeal(Long mealId, List<Ingredient> newIngredients) {
+    void updateIngredientsForMeal(Long mealId, List<Ingredient> newIngredients) {
         List<Ingredient> currentList = getAllIngredientsForMeal(mealId);
 
         for (Ingredient ingredient : newIngredients) {
@@ -78,7 +78,7 @@ public class IngredientRepository {
         }
     }
 
-    public int updateIngredient(Ingredient ingredient) {
+    int updateIngredient(Ingredient ingredient) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", ingredient.getId())
                 .addValue("mealId", ingredient.getMealId())
@@ -88,19 +88,19 @@ public class IngredientRepository {
         return template.update(UPDATE_SQL, params);
     }
 
-    public int deleteIngredientsForMeal(Long mealId) {
+    int deleteIngredientsForMeal(Long mealId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("mealId", mealId);
         return template.update(DELETE_SQL + " WHERE " + COL_MEAL_ID + " = :mealId", params);
     }
 
-    private int deleteIngredient(Long ingredientId) {
+    int deleteIngredient(Long ingredientId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", ingredientId);
         return template.update(DELETE_SQL + " WHERE " + COL_ID + " = :id", params);
     }
 
-    public List<Ingredient> getAllIngredientsForMeal(Long mealId) {
+    List<Ingredient> getAllIngredientsForMeal(Long mealId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("mealId", mealId);
         return template.query(SELECT_SQL + " WHERE " + COL_MEAL_ID + " = :mealId", params, new IngredientWrapper());

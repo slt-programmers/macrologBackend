@@ -1,4 +1,5 @@
 package csl.dto;
+
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;

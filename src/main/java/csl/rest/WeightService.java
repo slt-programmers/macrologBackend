@@ -56,7 +56,7 @@ public class WeightService {
         if (weightEntry.getId() == null && !weightDayAlreadyRegistered) {
             weightRepository.insertWeight(userInfo.getUserId(), entry);
         } else {
-            if (weightDayAlreadyRegistered){
+            if (weightDayAlreadyRegistered) {
                 entry.setId(storedWeight.get(0).getId());
             }
             weightRepository.updateWeight(userInfo.getUserId(), entry);

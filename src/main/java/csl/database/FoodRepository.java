@@ -13,9 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Created by Carmen on 18-3-2018.
- */
 @Repository
 public class FoodRepository {
     public static final String TABLE_NAME = "food";

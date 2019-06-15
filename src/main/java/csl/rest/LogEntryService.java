@@ -29,7 +29,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RestController
 @RequestMapping("/logs")
 @Api(value = "logs")
-public class LogEntryService  {
+public class LogEntryService {
 
     private FoodRepository foodRepository = new FoodRepository();
     private PortionRepository portionRepository = new PortionRepository();
@@ -89,7 +89,7 @@ public class LogEntryService  {
                 logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
                 List<LogEntry> addedEntryMatches = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
                 if (addedEntryMatches.size() > 1) {
-                    LogEntry newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogEntry::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() -1));
+                    LogEntry newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogEntry::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
                     addedEntryMatches = new ArrayList<>();
                     addedEntryMatches.add(newestEntry);
                 }
@@ -99,7 +99,7 @@ public class LogEntryService  {
                 newEntries.add(mapToDto(userInfo, addedEntryMatches.get(0)));
             } else {
                 logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
-                newEntries.add(mapToDto(userInfo,entry));
+                newEntries.add(mapToDto(userInfo, entry));
             }
         }
 
@@ -135,7 +135,7 @@ public class LogEntryService  {
 
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedFromDate, parsedToDate);
 
-        List<LogEntryDto> logEntryDtos =transformToDtos(allLogEntries,userInfo);
+        List<LogEntryDto> logEntryDtos = transformToDtos(allLogEntries, userInfo);
         LOGGER.debug("Aantal dtos: " + logEntryDtos.size());
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
@@ -212,7 +212,7 @@ public class LogEntryService  {
      * REFACTOR ONDERSTAANDE NAAR COMMON USAGE BIJ EXPORT
      */
 
-    private List<LogEntryDto> transformToDtos(List<csl.database.model.LogEntry> allLogEntries, UserInfo userInfo){
+    private List<LogEntryDto> transformToDtos(List<csl.database.model.LogEntry> allLogEntries, UserInfo userInfo) {
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         LOGGER.info("Export: allFood size = " + allFood.size());
         List<FoodDto> allFoodDtos = new ArrayList<>();

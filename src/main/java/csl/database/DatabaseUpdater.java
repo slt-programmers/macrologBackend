@@ -1,16 +1,18 @@
 package csl.database;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DatabaseUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUpdater.class);
 
-    public DatabaseUpdater() {}
+    public DatabaseUpdater() {
+    }
 
     public static void updateDatabaseDropFoodColumns() throws SQLException {
 
@@ -18,7 +20,7 @@ public class DatabaseUpdater {
         final String COL_UNIT_GRAMS = "unit_grams";
         final String COL_MEASUREMENT = "measurement";
 
-        String[] sql = new String[] {
+        String[] sql = new String[]{
                 "ALTER TABLE " + FoodRepository.TABLE_NAME + " DROP COLUMN " + COL_MEASUREMENT,
                 "ALTER TABLE " + FoodRepository.TABLE_NAME + " DROP COLUMN " + COL_UNIT_GRAMS,
                 "ALTER TABLE " + FoodRepository.TABLE_NAME + " DROP COLUMN " + COL_UNIT_NAME
@@ -106,7 +108,7 @@ public class DatabaseUpdater {
         }
     }
 
-    public static void updateSettings(){
+    public static void updateSettings() {
         String[] statements = new String[]{"alter table settings modify column setting text(50)",
                 "ALTER TABLE settings ADD UNIQUE user_set(user_id, setting(50))"};
         runStatements(statements);

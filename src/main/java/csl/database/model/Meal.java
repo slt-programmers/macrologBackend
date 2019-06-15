@@ -16,4 +16,5 @@ public class Meal {
     private Long id;
     private String name;
     private List<Ingredient> ingredients;
+
 }

@@ -17,7 +17,7 @@ public class UserAccount {
     private String username;
     private String password;
     private String email;
-    private String resetpassword;
-    private LocalDateTime resetdate;
+    private String resetPassword;
+    private LocalDateTime resetDate;
 
 }

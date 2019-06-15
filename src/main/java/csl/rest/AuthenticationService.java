@@ -10,21 +10,19 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -82,11 +80,11 @@ public class AuthenticationService {
     private boolean checkValidPassword(String hashedPassword, UserAccount account) {
         boolean activePasswordOK = account.getPassword().equals(hashedPassword);
         if (!activePasswordOK) {
-            boolean resettedPasswordOK = account.getResetpassword() != null &&
-                    account.getResetpassword().equals(hashedPassword);
+            boolean resettedPasswordOK = account.getResetPassword() != null &&
+                    account.getResetPassword().equals(hashedPassword);
 
-            boolean withinTimeFrame = account.getResetdate() != null &&
-                    account.getResetdate().isAfter(LocalDateTime.now().minusMinutes(30));
+            boolean withinTimeFrame = account.getResetDate() != null &&
+                    account.getResetDate().isAfter(LocalDateTime.now().minusMinutes(30));
 
             if (resettedPasswordOK && withinTimeFrame) {
                 LOGGER.info("Password has been reset to verified new password");

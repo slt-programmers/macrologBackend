@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Created by Carmen on 6-7-2018.
- */
 @Getter
 @Setter
 @AllArgsConstructor

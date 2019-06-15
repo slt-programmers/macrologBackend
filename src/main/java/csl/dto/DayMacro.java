@@ -2,9 +2,6 @@ package csl.dto;
 
 import java.util.Date;
 
-/**
- * Class voor het bewaren van de macros
- */
 public class DayMacro {
 
     private Date day;

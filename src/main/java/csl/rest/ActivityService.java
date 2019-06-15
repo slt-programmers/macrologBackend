@@ -3,7 +3,6 @@ package csl.rest;
 import csl.database.ActivityRepository;
 import csl.database.model.LogActivity;
 import csl.dto.LogActivityDto;
-import csl.dto.LogEntryDto;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.Api;
@@ -32,8 +31,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @Api(value = "logs")
 public class ActivityService {
 
-    private ActivityRepository logActitivyRepository = new ActivityRepository();
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivityService.class);
+    private ActivityRepository logActitivyRepository = new ActivityRepository();
 
     @ApiOperation(value = "Retrieve all stored activities for date")
     @RequestMapping(value = "/day/{date}",
@@ -107,6 +106,7 @@ public class ActivityService {
         logActitivyRepository.deleteLogActivity(userInfo.getUserId(), logEntryId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     private List<LogActivityDto> mapToDtos(List<LogActivity> allLogActivities) {
         List<LogActivityDto> allDtos = new ArrayList<>();
         for (LogActivity logEntry : allLogActivities) {

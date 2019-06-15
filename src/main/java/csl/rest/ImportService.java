@@ -3,7 +3,6 @@ package csl.rest;
 import csl.database.*;
 import csl.database.model.*;
 import csl.dto.*;
-import csl.dto.LogEntryDto;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.ApiOperation;
@@ -38,25 +37,25 @@ public class ImportService {
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity setAll(@RequestBody Export export)  {
+    public ResponseEntity setAll(@RequestBody Export export) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        LOGGER.debug("export = " +export);
+        LOGGER.debug("export = " + export);
 
         List<Setting> settings = export.getAllSettings();
         for (Setting setting : settings) {
-            settingsRepo.putSetting(userInfo.getUserId(),setting.getName(), setting.getValue());
+            settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue());
         }
 
         List<FoodDto> allFoodDto = export.getAllFood();
         for (FoodDto foodDto : allFoodDto) {
             Food food = mapFoodDtoToFood(foodDto);
-            foodRepository.insertFood(userInfo.getUserId(),food);
+            foodRepository.insertFood(userInfo.getUserId(), food);
 
             // We hebben de database ID nodig, dus opnieuw ophalen:
-            Food foodDB = foodRepository.getFood(userInfo.getUserId(),food.getName());
+            Food foodDB = foodRepository.getFood(userInfo.getUserId(), food.getName());
             List<PortionDto> portionDtos = foodDto.getPortions();
 
-            for (PortionDto portionDto: portionDtos) {
+            for (PortionDto portionDto : portionDtos) {
                 Portion portion = mapPortionDtoToPortion(portionDto);
                 portionRepository.addPortion(foodDB.getId(), portion);
             }
@@ -66,7 +65,7 @@ public class ImportService {
         List<Food> allFoodDB = foodRepository.getAllFood(userInfo.getUserId());
 
         List<LogEntryDto> logEntryDtos = export.getAllLogEntries();
-        for (LogEntryDto logEntryDto: logEntryDtos) {
+        for (LogEntryDto logEntryDto : logEntryDtos) {
             LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
 
             Food foodDB = getFoodFromListByName(logEntryDto.getFood().getName(), allFoodDB);
@@ -75,16 +74,16 @@ public class ImportService {
                 Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
                 logEntry.setPortionId(portionDB.getId());
             }
-            logEntryRepository.insertLogEntry(userInfo.getUserId(),logEntry);
+            logEntryRepository.insertLogEntry(userInfo.getUserId(), logEntry);
         }
 
         List<WeightDto> allWeights = export.getAllWeights();
         allWeights.stream().map(this::mapWeightToDomain)
-                .forEach(weightDomain ->weightRepository.insertWeight(userInfo.getUserId(),weightDomain));
+                .forEach(weightDomain -> weightRepository.insertWeight(userInfo.getUserId(), weightDomain));
 
         List<LogActivityDto> allActivities = export.getAllActivities();
         allActivities.stream().map(this::mapActivityDtoToDomain)
-                .forEach(activityDomain -> activityRepository.insertActivity(userInfo.getUserId(),activityDomain));
+                .forEach(activityDomain -> activityRepository.insertActivity(userInfo.getUserId(), activityDomain));
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -135,6 +134,7 @@ public class ImportService {
         food.setFat(foodDto.getFat());
         return food;
     }
+
     private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
         Weight entry = new Weight();
         entry.setDay(Date.valueOf(weightEntry.getDay()));

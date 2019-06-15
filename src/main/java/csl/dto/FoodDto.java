@@ -1,6 +1,6 @@
 package csl.dto;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class FoodDto {
     }
 
     public List<PortionDto> getPortions() {
-        if (portions == null){
+        if (portions == null) {
             portions = new ArrayList<>();
         }
         return portions;
@@ -59,7 +59,7 @@ public class FoodDto {
     }
 
     public void addPortion(PortionDto currDto) {
-        if (portions == null){
+        if (portions == null) {
             portions = new ArrayList<>();
         }
         portions.add(currDto);

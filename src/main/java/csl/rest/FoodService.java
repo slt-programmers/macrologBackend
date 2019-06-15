@@ -15,7 +15,10 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -43,7 +46,7 @@ public class FoodService {
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
-            allFoodDtos.add(createFoodDto(food,true));
+            allFoodDtos.add(createFoodDto(food, true));
         }
 
         allFoodDtos.sort(Comparator.comparing(FoodDto::getName));
@@ -56,11 +59,11 @@ public class FoodService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getFoodInformation(@PathVariable("id") Long id) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Food food = foodRepository.getFoodById(userInfo.getUserId(),id);
+        Food food = foodRepository.getFoodById(userInfo.getUserId(), id);
         if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
-            FoodDto foodDto = createFoodDto(food,true);
+            FoodDto foodDto = createFoodDto(food, true);
 
             return ResponseEntity.ok(foodDto);
         }
@@ -102,10 +105,10 @@ public class FoodService {
     // Naar een util brengen:
     public static Macro calculateMacro(Food food, csl.database.model.Portion portion) {
         Macro calculatedMacros = new Macro();
-            // FoodDto has been entered for 100g
-                calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
-            calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
-            calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+        // FoodDto has been entered for 100g
+        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
+        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
+        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
 
         return calculatedMacros;
     }
@@ -126,7 +129,7 @@ public class FoodService {
             headers = {"Content-Type=application/json"})
     public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (addFoodRequest.getId()!= null){
+        if (addFoodRequest.getId() != null) {
             // Update request
             Food newFood = new Food();
             newFood.setId(addFoodRequest.getId());
@@ -135,25 +138,25 @@ public class FoodService {
             newFood.setFat(addFoodRequest.getFat());
             newFood.setProtein(addFoodRequest.getProtein());
 
-            foodRepository.updateFood(userInfo.getUserId(),newFood);
+            foodRepository.updateFood(userInfo.getUserId(), newFood);
 
             // remove portions not supported yet.
             for (PortionDto portionDto : addFoodRequest.getPortions()) {
                 Long id = portionDto.getId();
-                if (id != null){
-                     // update portion
+                if (id != null) {
+                    // update portion
                     csl.database.model.Portion newPortion = new csl.database.model.Portion();
                     newPortion.setId(portionDto.getId());
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
-                    portionRepository.updatePortion(newFood.getId(),newPortion);
+                    portionRepository.updatePortion(newFood.getId(), newPortion);
 
                 } else {
                     // add portion
                     csl.database.model.Portion newPortion = new csl.database.model.Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
-                    portionRepository.addPortion(newFood.getId(),newPortion);
+                    portionRepository.addPortion(newFood.getId(), newPortion);
                 }
             }
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -171,7 +174,7 @@ public class FoodService {
                 newFood.setFat(addFoodRequest.getFat());
                 newFood.setProtein(addFoodRequest.getProtein());
 
-                int insertedRows = foodRepository.insertFood(userInfo.getUserId(),newFood);
+                int insertedRows = foodRepository.insertFood(userInfo.getUserId(), newFood);
                 if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
                     Food addedFood = foodRepository.getFood(userInfo.getUserId(), addFoodRequest.getName());
                     for (PortionDto portionDto : addFoodRequest.getPortions()) {

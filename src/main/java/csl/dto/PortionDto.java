@@ -3,9 +3,6 @@ package csl.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
-/**
- * Created by Carmen on 6-7-2018.
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PortionDto {
 

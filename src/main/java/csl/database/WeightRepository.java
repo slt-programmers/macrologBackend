@@ -18,8 +18,6 @@ import java.util.List;
 
 @Repository
 public class WeightRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WeightRepository.class);
-
     public static final String TABLE_NAME = "weight";
 
     private static final String COL_ID = "id";

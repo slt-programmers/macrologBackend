@@ -22,5 +22,4 @@ public class WeightDto {
     private LocalDate day;
     private String remark;
 
-
 }

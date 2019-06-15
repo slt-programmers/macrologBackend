@@ -2,9 +2,6 @@ package csl.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 
-/**
- * Class voor het bewaren van de macros
- */
 public class Macro {
 
     @ApiModelProperty(notes = "Number of protein", required = true)

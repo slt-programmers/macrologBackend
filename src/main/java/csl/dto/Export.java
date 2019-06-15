@@ -1,4 +1,5 @@
 package csl.dto;
+
 import csl.database.model.Setting;
 import lombok.Getter;
 import lombok.Setter;

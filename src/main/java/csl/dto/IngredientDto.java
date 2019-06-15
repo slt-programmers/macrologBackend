@@ -1,11 +1,7 @@
 package csl.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
 
-/**
- * Class voor het bewaren van de macros
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IngredientDto {
 
