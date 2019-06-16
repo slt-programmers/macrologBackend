@@ -34,6 +34,7 @@ public class PortionRepository {
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(food_Id, description, grams) VALUES(:foodId, :description, :grams)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET food_Id = :foodId, description = :description, grams =:grams WHERE id = :id";
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE food_id IN(:foodIds)";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -81,6 +82,21 @@ public class PortionRepository {
                 .addValue("foodId", foodId);
         String myPortions = SELECT_SQL + " WHERE  " + COL_FOOD_ID + " = :foodId";
         return template.query(myPortions, params, new PortionWrapper<Portion>());
+    }
+
+    public int deleteAllForUser(List<Long> foodIds) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Long id : foodIds) {
+            stringBuilder.append(id);
+            stringBuilder.append(", ");
+        }
+        String foodIdsString = stringBuilder.toString();
+        if (foodIdsString.length() != 0) {
+            foodIdsString = foodIdsString.substring(0, foodIdsString.length() - 2);
+        }
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("foodIds", foodIdsString);
+        return template.update(DELETE_ALL_SQL, params);
     }
 
     class PortionWrapper<T> implements RowMapper<Portion> {

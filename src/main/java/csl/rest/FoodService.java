@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -69,65 +68,11 @@ public class FoodService {
         }
     }
 
-    public FoodDto createFoodDto(Food food, boolean withPortions) {
-        FoodDto foodDto = mapFoodToFoodDto(food);
-
-        if (withPortions) {
-            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (Portion portion : foodPortions) {
-                PortionDto portionDto = mapPortionToPortionDto(portion, food);
-                foodDto.addPortion(portionDto);
-            }
-        }
-        return foodDto;
-    }
-
-    public static PortionDto mapPortionToPortionDto(Portion portion, Food food) {
-        PortionDto currDto = new PortionDto();
-        currDto.setDescription(portion.getDescription());
-        currDto.setGrams(portion.getGrams());
-        currDto.setId(portion.getId());
-        Macro calculatedMacros = calculateMacro(food, portion);
-        currDto.setMacros(calculatedMacros);
-        return currDto;
-    }
-
-    public static FoodDto mapFoodToFoodDto(Food food) {
-        FoodDto foodDto = new FoodDto();
-        foodDto.setName(food.getName());
-        foodDto.setId(food.getId());
-        foodDto.setProtein(food.getProtein());
-        foodDto.setCarbs(food.getCarbs());
-        foodDto.setFat(food.getFat());
-        return foodDto;
-    }
-
-    // Naar een util brengen:
-    public static Macro calculateMacro(Food food, csl.database.model.Portion portion) {
-        Macro calculatedMacros = new Macro();
-        // FoodDto has been entered for 100g
-        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
-        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
-        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
-
-        return calculatedMacros;
-    }
-
-    public static Macro calculateMacro(FoodDto food, PortionDto portion) {
-        Macro calculatedMacros = new Macro();
-        // FoodDto has been entered for 100g
-        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
-        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
-        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
-
-        return calculatedMacros;
-    }
-
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
     @RequestMapping(value = "",
             method = POST,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) throws URISyntaxException {
+    public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (addFoodRequest.getId() != null) {
             // Update request
@@ -189,5 +134,59 @@ public class FoodService {
                 return ResponseEntity.status(HttpStatus.CREATED).build();
             }
         }
+    }
+
+    private FoodDto createFoodDto(Food food, boolean withPortions) {
+        FoodDto foodDto = mapFoodToFoodDto(food);
+
+        if (withPortions) {
+            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
+            for (Portion portion : foodPortions) {
+                PortionDto portionDto = mapPortionToPortionDto(portion, food);
+                foodDto.addPortion(portionDto);
+            }
+        }
+        return foodDto;
+    }
+
+    static PortionDto mapPortionToPortionDto(Portion portion, Food food) {
+        PortionDto currDto = new PortionDto();
+        currDto.setDescription(portion.getDescription());
+        currDto.setGrams(portion.getGrams());
+        currDto.setId(portion.getId());
+        Macro calculatedMacros = calculateMacro(food, portion);
+        currDto.setMacros(calculatedMacros);
+        return currDto;
+    }
+
+    static FoodDto mapFoodToFoodDto(Food food) {
+        FoodDto foodDto = new FoodDto();
+        foodDto.setName(food.getName());
+        foodDto.setId(food.getId());
+        foodDto.setProtein(food.getProtein());
+        foodDto.setCarbs(food.getCarbs());
+        foodDto.setFat(food.getFat());
+        return foodDto;
+    }
+
+    // Naar een util brengen:
+    static Macro calculateMacro(Food food, csl.database.model.Portion portion) {
+        Macro calculatedMacros = new Macro();
+        // FoodDto has been entered for 100g
+        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
+        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
+        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+
+        return calculatedMacros;
+    }
+
+    static Macro calculateMacro(FoodDto food, PortionDto portion) {
+        Macro calculatedMacros = new Macro();
+        // FoodDto has been entered for 100g
+        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
+        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
+        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+
+        return calculatedMacros;
     }
 }

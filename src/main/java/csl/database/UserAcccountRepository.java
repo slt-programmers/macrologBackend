@@ -36,6 +36,8 @@ public class UserAcccountRepository {
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(username, password, email) VALUES(:username, :password, :email)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, reset_password = :reset_password, reset_date = :reset_date WHERE username = :username";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id";
+
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -86,6 +88,12 @@ public class UserAcccountRepository {
         String users = SELECT_SQL + " WHERE " + COL_ID + " = :id";
         List<UserAccount> queryResults = template.query(users, params, new UserWrapper<UserAccount>());
         return queryResults.isEmpty() ? null : queryResults.get(0);
+    }
+
+    public int deleteUser(Integer id) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id);
+        return template.update(DELETE_SQL, params);
     }
 
     class UserWrapper<T> implements RowMapper<UserAccount> {

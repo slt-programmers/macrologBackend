@@ -11,7 +11,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequestMapping("/healthcheck")
-@Api(value = "healthcheck", description = "Checks if the backend is still up")
+@Api(value = "healthcheck")
 public class HealthcheckService {
 
     @ApiOperation(value = "Is healthy?")

@@ -30,8 +30,6 @@ public class LogEntryRepository {
     private static final String COL_DAY = "day";
     private static final String COL_MEAL = "meal";
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
     public static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
@@ -51,6 +49,7 @@ public class LogEntryRepository {
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, food_Id, portion_Id, multiplier, day, meal) VALUES(:userId, :foodId, :portionId, :multiplier, :day, :meal)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET food_id = :foodId, portion_Id = :portionId, multiplier = :multiplier, day = :day, meal = :meal WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
+    private static final String DELETE_SQL_ALL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -83,6 +82,12 @@ public class LogEntryRepository {
                 .addValue("userId", userId)
                 .addValue("id", entry);
         return template.update(DELETE_SQL, params);
+    }
+
+    public int deleteAllForUser(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.update(DELETE_SQL_ALL, params);
     }
 
     public List<LogEntry> getLogEntry(Integer userId, Long foodId, Date day, String meal) {

@@ -37,6 +37,7 @@ public class SettingsRepository {
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, setting, value) VALUES(:userId, :setting, :value)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET value = :value WHERE user_id = :userId AND setting = :setting";
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsRepository.class);
@@ -72,14 +73,10 @@ public class SettingsRepository {
         return template.update(INSERT_SQL, params);
     }
 
-    public int insertSetting(Integer userId, String setting, String value, Date date) {
+    public int deleteAllForUser(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("userId", userId)
-                .addValue("id", null)
-                .addValue("setting", setting)
-                .addValue("value", value)
-                .addValue("date", date);
-        return template.update(INSERT_SQL, params);
+                .addValue("userId", userId);
+        return template.update(DELETE_ALL_SQL, params);
     }
 
     public String getSetting(Integer userId, String setting) {

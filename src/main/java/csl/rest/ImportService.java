@@ -135,7 +135,7 @@ public class ImportService {
         return food;
     }
 
-    private Weight mapWeightToDomain(@RequestBody WeightDto weightEntry) {
+    private Weight mapWeightToDomain(WeightDto weightEntry) {
         Weight entry = new Weight();
         entry.setDay(Date.valueOf(weightEntry.getDay()));
         entry.setId(null);

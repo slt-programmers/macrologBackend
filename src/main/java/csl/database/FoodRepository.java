@@ -38,6 +38,7 @@ public class FoodRepository {
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, protein, fat, carbs) VALUES(:userId, :name, :protein, :fat, :carbs)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, protein = :protein, fat = :fat, carbs = :carbs WHERE id = :id AND user_id = :userId";
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -97,6 +98,12 @@ public class FoodRepository {
         List<Food> queryResults = template.query(myFood, params, new FoodWrapper<Food>());
         Assert.isTrue(queryResults.size() <= 1, "More than one food was found");
         return queryResults.isEmpty() ? null : queryResults.get(0);
+    }
+
+    public int deleteAllForUser(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.update(DELETE_ALL_SQL, params);
     }
 
     class FoodWrapper<T> implements RowMapper<Food> {

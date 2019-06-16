@@ -1,7 +1,7 @@
 package csl.rest;
 
-import csl.database.SettingsRepository;
-import csl.database.UserAcccountRepository;
+import csl.database.*;
+import csl.database.model.Portion;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
 import csl.dto.ChangePasswordRequest;
@@ -10,6 +10,7 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.swagger.models.auth.In;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
@@ -20,10 +21,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Date;
 
 import static csl.security.SecurityConstants.EXPIRATION_TIME;
@@ -34,8 +37,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/api")
 public class AuthenticationService {
 
-    private final static UserAcccountRepository USER_ACCCOUNT_REPOSITORY = new UserAcccountRepository();
-    private final static SettingsRepository SETTINGS_REPOSITORY = new SettingsRepository();
+    private UserAcccountRepository userAcccountRepository = new UserAcccountRepository();
+    private SettingsRepository settingsRepository = new SettingsRepository();
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
     @RequestMapping(value = "/authenticate",
@@ -45,9 +48,9 @@ public class AuthenticationService {
         String hashedPassword = DigestUtils.sha256Hex(request.getPassword());
         LOGGER.info("Login attempt: " + username);
 
-        UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        UserAccount userAccount = userAcccountRepository.getUser(username);
         if (userAccount == null) {
-            userAccount = USER_ACCCOUNT_REPOSITORY.getUserByEmail(username);
+            userAccount = userAcccountRepository.getUserByEmail(username);
         }
         if (userAccount == null) {
             LOGGER.error("Not found");
@@ -56,7 +59,7 @@ public class AuthenticationService {
             LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            String name = SETTINGS_REPOSITORY.getSetting((int) userAccount.getId(), "name");
+            String name = settingsRepository.getSetting((int) userAccount.getId(), "name");
             if (name == null) {
                 name = username;
             }
@@ -77,26 +80,6 @@ public class AuthenticationService {
         }
     }
 
-    private boolean checkValidPassword(String hashedPassword, UserAccount account) {
-        boolean activePasswordOK = account.getPassword().equals(hashedPassword);
-        if (!activePasswordOK) {
-            boolean resettedPasswordOK = account.getResetPassword() != null &&
-                    account.getResetPassword().equals(hashedPassword);
-
-            boolean withinTimeFrame = account.getResetDate() != null &&
-                    account.getResetDate().isAfter(LocalDateTime.now().minusMinutes(30));
-
-            if (resettedPasswordOK && withinTimeFrame) {
-                LOGGER.info("Password has been reset to verified new password");
-                USER_ACCCOUNT_REPOSITORY.updatePassword(account.getUsername(), hashedPassword, null, null);
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @RequestMapping(value = "/signup",
             method = POST,
             headers = {"Content-Type=application/json"})
@@ -107,16 +90,16 @@ public class AuthenticationService {
         String email = request.getEmail();
         LOGGER.info("Add user attempt: " + username);
 
-        UserAccount account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+        UserAccount account = userAcccountRepository.getUser(username);
         if (account != null) {
             return ResponseEntity.status(401).body("Username or email already in use");
         } else {
-            UserAccount userByEmail = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
+            UserAccount userByEmail = userAcccountRepository.getUserByEmail(email);
             if (userByEmail != null) {
                 return ResponseEntity.status(401).body("Username or email already in use");
             } else {
-                USER_ACCCOUNT_REPOSITORY.insertUser(username, hashedPassword, email);
-                account = USER_ACCCOUNT_REPOSITORY.getUser(username);
+                userAcccountRepository.insertUser(username, hashedPassword, email);
+                account = userAcccountRepository.getUser(username);
             }
         }
 
@@ -147,12 +130,12 @@ public class AuthenticationService {
     public ResponseEntity resetPassword(@RequestBody AuthenticationRequest request) {
         LOGGER.info("Reset email");
         String email = request.getEmail();
-        UserAccount account = USER_ACCCOUNT_REPOSITORY.getUserByEmail(email);
+        UserAccount account = userAcccountRepository.getUserByEmail(email);
         if (account != null) {
             String randomPassword = RandomStringUtils.randomAlphabetic(10);
             String hashedRandomPassword = DigestUtils.sha256Hex(randomPassword);
 
-            USER_ACCCOUNT_REPOSITORY.updatePassword(account.getUsername(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
+            userAcccountRepository.updatePassword(account.getUsername(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
             new Thread(() -> MailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
             return ResponseEntity.ok("Email matches");
         } else {
@@ -171,7 +154,7 @@ public class AuthenticationService {
 
         LOGGER.info("Update password attempt for userId: " + userInfo.getUserId());
 
-        UserAccount userAccount = USER_ACCCOUNT_REPOSITORY.getUserById(userInfo.getUserId());
+        UserAccount userAccount = userAcccountRepository.getUserById(userInfo.getUserId());
         if (userAccount == null) {
             LOGGER.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -184,10 +167,49 @@ public class AuthenticationService {
                 return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
             } else {
                 LOGGER.info("Passwords match");
-                USER_ACCCOUNT_REPOSITORY.updatePassword(userAccount.getUsername(), newPasswordHashed, null, null);
+                userAcccountRepository.updatePassword(userAccount.getUsername(), newPasswordHashed, null, null);
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
+    }
+
+    @RequestMapping(value = "/deleteAccount", method = POST)
+    public ResponseEntity deleteAccount(@RequestParam("password") String password) {
+        String passwordHashed = DigestUtils.sha256Hex(new String(Base64.getDecoder().decode(password)));
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        Integer userId = userInfo.getUserId();
+        UserAccount userAccount = userAcccountRepository.getUserById(userId);
+        if (userAccount == null) {
+            LOGGER.error("Account not found for userId: " + userInfo.getUserId());
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } else if (!userAccount.getPassword().equals(passwordHashed)) {
+            LOGGER.error("Could not delete account: password incorrect");
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        } else {
+            AccountService accountService = new AccountService();
+            accountService.deleteAccount(userId);
+            return new ResponseEntity(HttpStatus.OK);
+        }
+    }
+
+    private boolean checkValidPassword(String hashedPassword, UserAccount account) {
+        boolean activePasswordOK = account.getPassword().equals(hashedPassword);
+        if (!activePasswordOK) {
+            boolean resettedPasswordOK = account.getResetPassword() != null &&
+                    account.getResetPassword().equals(hashedPassword);
+
+            boolean withinTimeFrame = account.getResetDate() != null &&
+                    account.getResetDate().isAfter(LocalDateTime.now().minusMinutes(30));
+
+            if (resettedPasswordOK && withinTimeFrame) {
+                LOGGER.info("Password has been reset to verified new password");
+                userAcccountRepository.updatePassword(account.getUsername(), hashedPassword, null, null);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
