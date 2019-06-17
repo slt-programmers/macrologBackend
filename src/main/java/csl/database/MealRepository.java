@@ -36,6 +36,7 @@ public class MealRepository {
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(name, user_id) VALUES(:name, :userId)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -94,6 +95,12 @@ public class MealRepository {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);
         return template.query(SELECT_SQL + " WHERE " + COL_USER_ID + " = :userId", params, new MealWrapper());
+    }
+
+    public int deleteAllForUser(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.update(DELETE_ALL_SQL, params);
     }
 
     class MealWrapper implements RowMapper {

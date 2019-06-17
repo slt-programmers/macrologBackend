@@ -1,6 +1,7 @@
 package csl.database;
 
 import csl.database.model.Ingredient;
+import csl.notification.MailService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class IngredientRepository {
@@ -39,6 +41,7 @@ public class IngredientRepository {
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(meal_id, food_Id, portion_Id, multiplier) VALUES(:mealId, :foodId, :portionId, :multiplier)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET meal_id = :mealId, food_id = :foodId, portion_id = :portionId, multiplier = :multiplier WHERE id = :id";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME;
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE meal_id IN(:mealIds)";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -50,6 +53,21 @@ public class IngredientRepository {
                 .addValue("portionId", ingredient.getPortionId())
                 .addValue("multiplier", ingredient.getMultiplier());
         return template.update(INSERT_SQL, params);
+    }
+
+    public int deleteAllForUser(List<Long> mealIds) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Long id : mealIds) {
+            stringBuilder.append(id);
+            stringBuilder.append(", ");
+        }
+        String mealIdsString = stringBuilder.toString();
+        if (mealIdsString.length() != 0) {
+            mealIdsString = mealIdsString.substring(0, mealIdsString.length() - 2);
+        }
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("mealIds", mealIdsString);
+        return template.update(DELETE_ALL_SQL, params);
     }
 
     void updateIngredientsForMeal(Long mealId, List<Ingredient> newIngredients) {

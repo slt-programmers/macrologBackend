@@ -44,6 +44,7 @@ public class WeightRepository {
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, weight, day, remark) VALUES(:userId, :weight, :day, :remark)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET weight = :weight, day = :day, remark = :remark WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id= :userId";
+    private static final String DELETE_SQL_ALL = "DELETE FROM " + TABLE_NAME + " WHERE user_id= :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -74,6 +75,12 @@ public class WeightRepository {
                 .addValue("userId", userId)
                 .addValue("id", entry);
         return template.update(DELETE_SQL, params);
+    }
+
+    public int deleteAllForUser(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.update(DELETE_SQL_ALL, params);
     }
 
     public List<Weight> getWeightEntryForDay(Integer userId, Date day) {

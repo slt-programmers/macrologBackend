@@ -42,6 +42,7 @@ public class ActivityRepository {
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, calories, day) VALUES(:userId, :name, :calories, :day)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, calories = :calories, day = :day WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
     private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
 
@@ -70,6 +71,12 @@ public class ActivityRepository {
                 .addValue("userId", userId)
                 .addValue("id", entry);
         return template.update(DELETE_SQL, params);
+    }
+
+    public int deleteAllForUser(Integer userId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId);
+        return template.update(DELETE_ALL_SQL, params);
     }
 
     public List<LogActivity> getAllLogActivities(Integer userId) {
