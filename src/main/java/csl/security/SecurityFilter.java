@@ -29,14 +29,12 @@ public class SecurityFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if ("OPTIONS".equalsIgnoreCase(((HttpServletRequest) request).getMethod())) {
-            LOGGER.debug("precheck");
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "*");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Content-Type,Authorization");
             chain.doFilter(request, response);
         } else {
-            LOGGER.debug("actual");
             String getenv = System.getenv("allow.crossorigin");
             if (getenv == null || getenv.equals("")) {
                 getenv = "http://localhost:4200";
@@ -49,7 +47,7 @@ public class SecurityFilter implements Filter {
 
 
             HttpServletRequest req = (HttpServletRequest) request;
-            LOGGER.info("Starting req : {}", req.getRequestURI());
+            LOGGER.debug("Starting req : {}", req.getRequestURI());
             String token = req.getHeader("Authorization");
             if (token != null && token.startsWith("Bearer")) {
                 String jwtToken = token.substring("Bearer".length() + 1);
@@ -80,8 +78,7 @@ public class SecurityFilter implements Filter {
             } else {
                 ((HttpServletResponse) response).sendError(403);
             }
-            LOGGER.info("Token = " + token);
-            LOGGER.info("Finish req : {}", req.getRequestURI());
+            LOGGER.debug("Finish req : {}", req.getRequestURI());
         }
     }
 
