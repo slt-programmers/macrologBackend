@@ -64,8 +64,9 @@ public class SettingsService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllSetting() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
-        // todo is this used?
+        // todo is this used? ja voor personal page, maar die krijgt nu teveel. Ombouwen om /user te gaan gebruiken
         return ResponseEntity.ok(settings);
     }
 
@@ -74,14 +75,18 @@ public class SettingsService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getUserSetting() {
+        UserSettingsDto userSettingsDto = getUserSettingsDto();
+        return ResponseEntity.ok(userSettingsDto);
+    }
+
+    private UserSettingsDto getUserSettingsDto() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
         Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
         UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
         userSettingsDto.setCurrentWeight(currentWeight.getWeight());
-        // TODO GET LATEST SETTINGS IPV ALL SETTINGS
-        return ResponseEntity.ok(userSettingsDto);
+        return userSettingsDto;
     }
 
     @ApiOperation(value = "Get setting")

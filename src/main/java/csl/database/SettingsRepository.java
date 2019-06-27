@@ -135,9 +135,6 @@ public class SettingsRepository {
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
-    private List<Setting> getAllSettings() {
-        return template.query(SELECT_SQL, new SettingsWrapper<Setting>());
-    }
 
     public List<Setting> getAllSettings(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
