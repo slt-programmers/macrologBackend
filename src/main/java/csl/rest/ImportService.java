@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -42,8 +44,10 @@ public class ImportService {
         LOGGER.debug("export = " + export);
 
         List<Setting> settings = export.getAllSettings();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         for (Setting setting : settings) {
-            settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue());
+            settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(), setting.getDay());
         }
 
         List<FoodDto> allFoodDto = export.getAllFood();

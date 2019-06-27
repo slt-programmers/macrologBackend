@@ -2,6 +2,7 @@ package csl.rest;
 
 import csl.database.*;
 import csl.database.model.Portion;
+import csl.database.model.Setting;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
 import csl.dto.ChangePasswordRequest;
@@ -59,9 +60,10 @@ public class AuthenticationService {
             LOGGER.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            String name = settingsRepository.getSetting((int) userAccount.getId(), "name");
-            if (name == null) {
-                name = username;
+            Setting nameSetting = settingsRepository.getLatestSetting((int) userAccount.getId(), "name");
+            String name = username;
+            if (nameSetting != null) {
+                name = nameSetting.getValue();
             }
             String jwt = Jwts.builder()
                     .setSubject("users/TzMUocMF4p")

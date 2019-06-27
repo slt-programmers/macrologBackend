@@ -11,14 +11,17 @@ import csl.security.UserInfo;
 import csl.util.LocalDateParser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import jdk.nashorn.internal.objects.annotations.Setter;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.jni.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +40,7 @@ public class SettingsService {
 
     private WeightService weightService = new WeightService();
 
+
     @ApiOperation(value = "Store new setting or change existing one")
     @RequestMapping(value = "",
             method = PUT,
@@ -44,9 +48,13 @@ public class SettingsService {
     public ResponseEntity changeSetting(@RequestBody Setting setting) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if ("weight".equals(setting.getName())) {
-            weightService.storeWeightEntry(new WeightDto(null, Double.valueOf(setting.getValue()), LocalDate.now(), null));
+            weightService.storeWeightEntry(
+                    new WeightDto(null,
+                            Double.valueOf(setting.getValue()),
+                            setting.getDay()==null?LocalDate.now():setting.getDay().toLocalDate(),
+                    null));
         }
-        settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue());
+        settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(),setting.getDay()==null?Date.valueOf(LocalDate.now()):setting.getDay());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -57,6 +65,7 @@ public class SettingsService {
     public ResponseEntity getAllSetting() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
+        // todo is this used?
         return ResponseEntity.ok(settings);
     }
 
@@ -71,6 +80,7 @@ public class SettingsService {
         Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
         UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
         userSettingsDto.setCurrentWeight(currentWeight.getWeight());
+        // TODO GET LATEST SETTINGS IPV ALL SETTINGS
         return ResponseEntity.ok(userSettingsDto);
     }
 
@@ -78,10 +88,22 @@ public class SettingsService {
     @RequestMapping(value = "/{name}",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getSetting(@PathVariable("name") String name) {
+    public ResponseEntity getSetting(@PathVariable("name") String name,
+                                     @RequestParam(value = "date",required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        String setting = settingsRepo.getSetting(userInfo.getUserId(), name);
-        return ResponseEntity.ok(setting);
+        Setting setting = null;
+        if (StringUtils.isEmpty(toDate)) {
+            setting = settingsRepo.getLatestSetting(userInfo.getUserId(), name);
+        } else {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date utilDate = sdf.parse(toDate);
+                setting = settingsRepo.getValidSetting(userInfo.getUserId(), name, new Date(utilDate.getTime()));
+            } catch (ParseException pe) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+        }
+        return ResponseEntity.ok(setting==null?null:setting.getValue());
     }
 
     private UserSettingsDto mapToUserSettingsDto(List<Setting> settings) {
@@ -102,7 +124,7 @@ public class SettingsService {
     }
 
     private String mapSetting(List<Setting> settings, String identifier) {
-        return settings.stream().filter(s -> s.getName().equals(identifier)).findFirst().orElse(new Setting()).getValue();
+        return settings.stream().filter(s -> s.getName().equals(identifier)).max(Comparator.comparing(Setting::getDay)).orElse(new Setting()).getValue();
     }
 
     private boolean settingsContainGoals(List<Setting> settings) {
