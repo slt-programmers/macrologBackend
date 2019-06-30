@@ -23,6 +23,7 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -62,11 +63,13 @@ public class SettingsService {
     @RequestMapping(value = "",
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @Deprecated
     public ResponseEntity getAllSetting() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         // todo is this used? ja voor personal page, maar die krijgt nu teveel. Ombouwen om /user te gaan gebruiken
+
         return ResponseEntity.ok(settings);
     }
 
