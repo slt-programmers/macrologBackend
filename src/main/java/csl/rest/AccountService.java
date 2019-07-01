@@ -3,6 +3,7 @@ package csl.rest;
 import csl.database.*;
 import csl.database.model.Food;
 import csl.database.model.Meal;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -10,15 +11,32 @@ import static java.util.stream.Collectors.toList;
 
 public class AccountService {
 
-    private ActivityRepository activityRepository = new ActivityRepository();
-    private FoodRepository foodRepository = new FoodRepository();
-    private IngredientRepository ingredientRepository = new IngredientRepository();
-    private LogEntryRepository logEntryRepository = new LogEntryRepository();
-    private MealRepository mealRepository = new MealRepository();
-    private PortionRepository portionRepository = new PortionRepository();
-    private SettingsRepository settingsRepository = new SettingsRepository();
-    private UserAcccountRepository userAcccountRepository = new UserAcccountRepository();
-    private WeightRepository weightRepository = new WeightRepository();
+    @Autowired
+    private ActivityRepository activityRepository;
+
+    @Autowired
+    private IngredientRepository ingredientRepository;
+
+    @Autowired
+    private LogEntryRepository logEntryRepository;
+
+    @Autowired
+    private MealRepository mealRepository;
+
+    @Autowired
+    private PortionRepository portionRepository;
+
+    @Autowired
+    private SettingsRepository settingsRepository;
+
+    @Autowired
+    private UserAcccountRepository userAcccountRepository;
+
+    @Autowired
+    private WeightRepository weightRepository;
+
+    @Autowired
+    private FoodRepository foodRepository;
 
     void deleteAccount(Integer userId) {
         activityRepository.deleteAllForUser(userId);

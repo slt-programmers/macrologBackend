@@ -3,6 +3,7 @@ package csl.database;
 import csl.database.model.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,7 +53,15 @@ public class LogEntryRepository {
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
     private static final String DELETE_SQL_ALL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @Autowired
+    DatabaseHelper databaseHelper;
+
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
 
     public int insertLogEntry(Integer userId, LogEntry entry) {
         SqlParameterSource params = new MapSqlParameterSource()

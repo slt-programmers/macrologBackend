@@ -8,6 +8,7 @@ import csl.security.UserInfo;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -26,12 +26,18 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/import")
 public class ImportService {
 
-    private FoodRepository foodRepository = new FoodRepository();
-    private PortionRepository portionRepository = new PortionRepository();
-    private LogEntryRepository logEntryRepository = new LogEntryRepository();
-    private SettingsRepository settingsRepo = new SettingsRepository();
-    private ActivityRepository activityRepository = new ActivityRepository();
-    private WeightRepository weightRepository = new WeightRepository();
+    @Autowired
+    private FoodRepository foodRepository;
+    @Autowired
+    private PortionRepository portionRepository;
+    @Autowired
+    private LogEntryRepository logEntryRepository;
+    @Autowired
+    private SettingsRepository settingsRepo;
+    @Autowired
+    private ActivityRepository activityRepository;
+    @Autowired
+    private WeightRepository weightRepository;
 
     private Logger LOGGER = LoggerFactory.getLogger(ImportService.class);
 

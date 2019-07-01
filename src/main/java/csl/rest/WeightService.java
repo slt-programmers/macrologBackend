@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @Api(value = "weight")
 public class WeightService {
 
-    private WeightRepository weightRepository = new WeightRepository();
-    private static final Logger LOGGER = LoggerFactory.getLogger(WeightService.class);
+    @Autowired
+    private WeightRepository weightRepository;
 
     @ApiOperation(value = "Retrieve all tracked weights")
     @RequestMapping(value = "",

@@ -1,7 +1,7 @@
 package csl.database;
 
 import csl.database.model.Ingredient;
-import csl.notification.MailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,10 +9,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class IngredientRepository {
@@ -43,7 +43,15 @@ public class IngredientRepository {
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME;
     private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE meal_id IN(:mealIds)";
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @Autowired
+    DatabaseHelper databaseHelper;
+
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
 
     int insertIngredient(Ingredient ingredient) {
         SqlParameterSource params = new MapSqlParameterSource()

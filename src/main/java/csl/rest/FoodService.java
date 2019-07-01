@@ -12,6 +12,7 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Api(value = "food", description = "Operations pertaining to food in the macro logger applications")
 public class FoodService {
 
-    private final static FoodRepository foodRepository = new FoodRepository();
-    private final static PortionRepository portionRepository = new PortionRepository();
+    @Autowired
+    private FoodRepository foodRepository;
+
+    @Autowired
+    private PortionRepository portionRepository;
 
     @ApiOperation(value = "Retrieve all stored foods")
     @RequestMapping(value = "",

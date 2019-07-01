@@ -1,6 +1,7 @@
 package csl.database;
 
 import csl.database.model.Food;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -17,14 +19,14 @@ import java.util.List;
 public class FoodRepository {
     public static final String TABLE_NAME = "food";
 
-    static final String COL_ID = "id";
-    private static final String COL_USER_ID = "user_id";
-    private static final String COL_NAME = "name";
-    private static final String COL_PROTEIN = "protein";
-    private static final String COL_FAT = "fat";
-    private static final String COL_CARBS = "carbs";
+    public static final String COL_ID = "id";
+    private final String COL_USER_ID = "user_id";
+    private final String COL_NAME = "name";
+    private final String COL_PROTEIN = "protein";
+    private final String COL_FAT = "fat";
+    private final String COL_CARBS = "carbs";
 
-    public static final String TABLE_CREATE =
+    public final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
                     COL_USER_ID + " INT(6) NOT NULL, " +
@@ -40,7 +42,15 @@ public class FoodRepository {
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, protein = :protein, fat = :fat, carbs = :carbs WHERE id = :id AND user_id = :userId";
     private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @Autowired
+    DatabaseHelper databaseHelper;
+
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
 
     public FoodRepository() {
     }

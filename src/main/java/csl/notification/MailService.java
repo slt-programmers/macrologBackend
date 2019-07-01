@@ -2,19 +2,23 @@ package csl.notification;
 
 
 import csl.database.model.UserAccount;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
+@Service
+@Slf4j
 public class MailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
-    public static void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
+    public void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
         Session secureSession = getSession();
 
         try {
@@ -32,13 +36,14 @@ public class MailService {
                             "<p>Carmen and Arjan from Macrolog </p>"
                     , "text/html");
 
+            log.debug("Mail send to"  + email);
             Transport.send(message);
         } catch (MessagingException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
 
-    public static void sendConfirmationMail(String email, UserAccount account) {
+    public void sendConfirmationMail(String email, UserAccount account) {
         Session secureSession = getSession();
 
         try {
@@ -63,7 +68,7 @@ public class MailService {
     }
 
 
-    private static Session getSession() {
+    private Session getSession() {
         String username = "macrologwebapp@gmail.com";
         String password = "Macrolog01";
 

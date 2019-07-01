@@ -11,9 +11,8 @@ import csl.security.UserInfo;
 import csl.util.LocalDateParser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jdk.nashorn.internal.objects.annotations.Setter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.jni.Local;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,6 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -35,12 +33,14 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @Api(value = "settings")
 public class SettingsService {
 
-    private SettingsRepository settingsRepo = new SettingsRepository();
+    @Autowired
+    private SettingsRepository settingsRepo;
 
-    private WeightRepository weightRepo = new WeightRepository();
+    @Autowired
+    private WeightRepository weightRepo;
 
-    private WeightService weightService = new WeightService();
-
+    @Autowired
+    private WeightService weightService;
 
     @ApiOperation(value = "Store new setting or change existing one")
     @RequestMapping(value = "",
@@ -52,10 +52,10 @@ public class SettingsService {
             weightService.storeWeightEntry(
                     new WeightDto(null,
                             Double.valueOf(setting.getValue()),
-                            setting.getDay()==null?LocalDate.now():setting.getDay().toLocalDate(),
-                    null));
+                            setting.getDay() == null ? LocalDate.now() : setting.getDay().toLocalDate(),
+                            null));
         }
-        settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(),setting.getDay()==null?Date.valueOf(LocalDate.now()):setting.getDay());
+        settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(), setting.getDay() == null ? Date.valueOf(LocalDate.now()) : setting.getDay());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -97,7 +97,7 @@ public class SettingsService {
             method = GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getSetting(@PathVariable("name") String name,
-                                     @RequestParam(value = "date",required = false) String toDate) {
+                                     @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Setting setting = null;
         if (StringUtils.isEmpty(toDate)) {
@@ -111,7 +111,7 @@ public class SettingsService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         }
-        return ResponseEntity.ok(setting==null?null:setting.getValue());
+        return ResponseEntity.ok(setting == null ? null : setting.getValue());
     }
 
     private UserSettingsDto mapToUserSettingsDto(List<Setting> settings) {
