@@ -193,6 +193,7 @@ databaseChangeLog:
 - changeSet:
     id: 1561990283413-7
     author: arjan (generated)
+
     changes:
     - createTable:
         tableName: settings
@@ -202,7 +203,7 @@ databaseChangeLog:
             constraints:
               primaryKey: true
             name: id
-            type: INT
+            type: BIGINT
         - column:
             constraints:
               nullable: false
@@ -212,10 +213,10 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: setting
-            type: varchar
+            type: ${text.type}
         - column:
             name: value
-            type: varchar
+            type: ${text.type}
         - column:
             name: date
             type: date
@@ -235,9 +236,9 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
-              unique: true
+              unique: true (50)
             name: username
-            type: VARCHAR(30)
+            type: ${text.type}
         - column:
             constraints:
               nullable: false
@@ -284,13 +285,21 @@ databaseChangeLog:
             type: TEXT
         tableName: weight
 - changeSet:
-    id: 1561990283413-10
+    id: 1561990283413-10-mysql
     author: arjan (generated)
+    dbms: mysql
     changes:
-    - addUniqueConstraint:
-        columnNames: user_id, setting, date
-        constraintName: user_Set
-        tableName: settings
+     - sql:
+        comment: Unique constraint op text field
+        sql:  ALTER TABLE settings ADD CONSTRAINT user_set UNIQUE (user_id, setting (50), date)
+- changeSet:
+    id: 1561990283413-10-oracle-h2
+    author: arjan (generated)
+    dbms: oracle ,h2
+    changes:
+     - sql:
+        comment: Unique constraint op text field
+        sql:  ALTER TABLE settings ADD CONSTRAINT user_set UNIQUE (user_id, setting, date)
 - changeSet:
     id: 1561990283413-11
     author: arjan (generated)
