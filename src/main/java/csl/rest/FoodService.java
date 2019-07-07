@@ -30,7 +30,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/food")
-@Api(value = "food", description = "Operations pertaining to food in the macro logger applications")
+@Api(value = "food")
 public class FoodService {
 
     @Autowired

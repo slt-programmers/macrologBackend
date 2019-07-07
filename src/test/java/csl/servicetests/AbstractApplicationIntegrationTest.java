@@ -1,7 +1,6 @@
 package csl.servicetests;
 
 import csl.Application;
-import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
 import csl.notification.MailService;
 import csl.rest.ActivityService;

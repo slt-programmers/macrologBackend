@@ -1,18 +1,12 @@
 package csl.servicetests;
 
-import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 
 @Slf4j
 public class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {

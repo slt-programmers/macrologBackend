@@ -10,6 +10,5 @@ databaseChangeLog:
         value: TINYTEXT
         dbms: mysql
 
-
    - include:
         file: db/changelog/db.changelog-generated-start.yaml
