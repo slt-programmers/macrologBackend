@@ -1,3 +1,13 @@
 language: java
 jdk:
   - openjdk8
+
+addons:
+  sonarcloud:
+    organization: "slt-programmers"
+    token:
+    secure: "X1v5k3wRecq/LdJI7Q3SaZ/CAavQuuVaLfsBb8L02MRNWGyNNn2tCTvolItRvX/Vv31DQipGbRq+/MtHFrUuE4Z+VJw/vktIt9aPflhHmd2p7DvzSAnKOTW5as11GgzsdiMz6TzZ+Z/eycgIVmftyA9Pd/VfA2US014boCdhIXbqTXvQ8EjB2gNvs8QC3h2ehs0p48kFdRLHQkDW1x1uA59FPx5nM1Oq966aLP3ZIM0RzL0eBKaBs+FhSBZwo+rebSoErXdjvy2QgB1DRZzstKZs9NfsMcDwsrlIH5cTXNe6t2XGJ5HSLKuwqz8lWkQvR/FCtx97lFRJeUKtbEKRYhU5GoGe3xSDZnEKOv7NVFilSLVePz+/GgU0iFG3Ag2QeTPi/SOW9C9KuCQZUITxasWUylrdKBYGvnDRx/D94Sc8oK9MBo8+BIMEH7LxwqyZ2MaFIMb0lw/IrS4tvdF+u7pT/+YHVVxc7O6B9keM2MRyt1oXI4EgpyShYYWDtIqyKz53xoIh/xquiR9JHOb7LQ7uvlzDkhZy9lY2SsqaKPkydvtr8tSZUrxG6vRz/oDIc36RzHGCNFZbC6D55IZA6vWWH9xVILy9/nih6zJ3nl7Z4hysLvKnVc4Wwvf2mJ1MdABTNxyWQTYDJibOvDWe3A/BZpWsXc3cYPfPb9Yx5pw="
+
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
