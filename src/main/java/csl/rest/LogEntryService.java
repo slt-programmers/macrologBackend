@@ -156,7 +156,10 @@ public class LogEntryService {
         for (java.util.Date date : collect.keySet()) {
             DayMacro dm = new DayMacro();
             dm.setDay(date);
-            dm.setMacro(collect.get(date).get().getMacrosCalculated());
+            Optional<LogEntryDto> logEntryDtoOfDate = collect.get(date);
+            if (logEntryDtoOfDate.isPresent()){
+                dm.setMacro(logEntryDtoOfDate.get().getMacrosCalculated());
+            }
             retObject.add(dm);
         }
         retObject.sort(Comparator.comparing(DayMacro::getDay));

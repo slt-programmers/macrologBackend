@@ -6,10 +6,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,15 +17,22 @@ import static org.mockito.ArgumentMatchers.eq;
 @Slf4j
 public class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
+
+    @BeforeEach
+    public void resetMocks() {
+        Mockito.reset(mailService);
+    }
+
     @Test
-    public void createUserTest() {
+    public void testSignupNewUser() {
 
-        String userEmail = "itest@test.example";
+        String userName = "newuser";
+        String userEmail = "newuser@test.example";
 
-        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username("itester").build();
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
-        String jwtToken =responseEntity.getHeaders().get("token").get(0);
+        String jwtToken = responseEntity.getHeaders().get("token").get(0);
         log.debug(jwtToken);
         Jws<Claims> claimsJws = getClaimsJws(jwtToken);
         Integer userId = (Integer) claimsJws.getBody().get("userId");
@@ -33,4 +40,32 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
 
         Mockito.verify(mailService).sendConfirmationMail(eq(userEmail), any(UserAccount.class));
     }
+
+    @Test
+    public void testSignupUserOrEmailAlreadyKnown() {
+
+        String userName = "userknown";
+        String userEmail = "emailknown@test.example";
+
+        // 1e: keer aanmaken succesvol:
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
+        ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
+        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+
+        // 2e: keer afgekeurd op username
+        authenticationRequest = AuthenticationRequest.builder().email("diffemail@email.com").password("testpassword").username(userName).build();
+        responseEntity = authenticationService.signUp(authenticationRequest);
+        Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
+
+        // 3e: keer afgekeurd op email
+        authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
+        responseEntity = authenticationService.signUp(authenticationRequest);
+        Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
+
+        Mockito.verify(mailService).sendConfirmationMail(eq(userEmail), any(UserAccount.class));
+        Mockito.times(1);
+
+    }
+
+
 }
