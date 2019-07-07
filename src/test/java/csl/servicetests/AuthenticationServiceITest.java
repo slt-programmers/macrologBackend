@@ -23,7 +23,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
 
         String userName = "newuser";
         String userEmail = "newuser@test.example";
-        Mockito.reset(mailService);
 
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
@@ -34,7 +33,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         Integer userId = (Integer) claimsJws.getBody().get("userId");
         log.debug("User id = " + userId);
 
-        Mockito.verify(mailService).sendConfirmationMail(eq(userEmail), any(UserAccount.class));
     }
 
     @Test
@@ -58,9 +56,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
         responseEntity = authenticationService.signUp(authenticationRequest);
         Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
-
-        Mockito.verify(mailService).sendConfirmationMail(eq(userEmail), any(UserAccount.class));
-        Mockito.times(1);
 
     }
 
