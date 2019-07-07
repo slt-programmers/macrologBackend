@@ -40,7 +40,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
 
         String userName = "userknown";
         String userEmail = "emailknown@test.example";
-        Mockito.reset(mailService);
 
         // 1e: keer aanmaken succesvol:
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
