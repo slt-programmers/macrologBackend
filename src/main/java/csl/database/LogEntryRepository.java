@@ -3,6 +3,7 @@ package csl.database;
 import csl.database.model.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,20 +32,6 @@ public class LogEntryRepository {
     private static final String COL_DAY = "day";
     private static final String COL_MEAL = "meal";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_FOOD_ID + " INT(6) NOT NULL, " +
-                    COL_PORTION_ID + " INT(6) NULL, " +
-                    COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
-                    COL_DAY + " DATE NOT NULL," +
-                    COL_MEAL + " TEXT," +
-                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")," +
-                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String SELECT_ONE_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND food_id = :foodId AND day = :day AND meal = :meal";
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, food_Id, portion_Id, multiplier, day, meal) VALUES(:userId, :foodId, :portionId, :multiplier, :day, :meal)";
@@ -51,7 +39,15 @@ public class LogEntryRepository {
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
     private static final String DELETE_SQL_ALL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @Autowired
+    DatabaseHelper databaseHelper;
+
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
 
     public int insertLogEntry(Integer userId, LogEntry entry) {
         SqlParameterSource params = new MapSqlParameterSource()

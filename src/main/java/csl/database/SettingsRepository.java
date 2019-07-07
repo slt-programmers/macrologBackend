@@ -4,6 +4,7 @@ import csl.database.model.Setting;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,22 +30,22 @@ public class SettingsRepository {
     private static final String COL_VALUE = "value";
     private static final String COL_USER_ID = "user_id";
     private static final String COL_DATE = "date";
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_SETTING + " TEXT(50) NOT NULL, " +
-                    COL_VALUE + " TEXT," +
-                    COL_DATE + " DATE," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")," +
-                    "UNIQUE KEY user_set (" + COL_USER_ID + "," + COL_SETTING + "(50), COL_DATE)" +
-                    ")";
+
+
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, setting, value, date) VALUES(:userId, :setting, :value, :date)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET value = :value WHERE user_id = :userId AND setting = :setting AND date = :date";
     private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @Autowired
+    DatabaseHelper databaseHelper;
+
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsRepository.class);
 
     public SettingsRepository() {
@@ -53,44 +55,44 @@ public class SettingsRepository {
         Setting currentSetting = getLatestSetting(userId, setting);
         if (currentSetting == null) { // geen records
             LOGGER.debug("Insert");
-            return insertSetting(userId, setting, value,null);
+            return insertSetting(userId, setting, value, null);
         } else {
             LOGGER.debug("Update");
             boolean settingFromToday = currentSetting.getDay().toLocalDate().equals(LocalDate.now());
-            if (settingFromToday){
-                return updateSetting(userId, setting, value,Date.valueOf(LocalDate.now()));
+            if (settingFromToday) {
+                return updateSetting(userId, setting, value, Date.valueOf(LocalDate.now()));
             } else {
-                return insertSetting(userId, setting, value,Date.valueOf(LocalDate.now()));
+                return insertSetting(userId, setting, value, Date.valueOf(LocalDate.now()));
 
             }
         }
     }
 
     public int putSetting(Integer userId, String setting, String value, Date date) {
-        Setting currentSetting = getValidSetting(userId, setting,date);
+        Setting currentSetting = getValidSetting(userId, setting, date);
         if (currentSetting == null) { // geen records
             LOGGER.debug("Insert");
-            return insertSetting(userId, setting, value,date);
+            return insertSetting(userId, setting, value, date);
         } else {
             LOGGER.debug("Update");
             boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(date.toLocalDate());
-            if (settingSameDay){
+            if (settingSameDay) {
                 return updateSetting(userId, setting, value, date);
             } else {
-                return insertSetting(userId, setting, value,date);
+                return insertSetting(userId, setting, value, date);
 
             }
         }
     }
 
-    private int updateSetting(Integer userId, String setting, String value,Date date) {
+    private int updateSetting(Integer userId, String setting, String value, Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("id", null)
                 .addValue("setting", setting)
                 .addValue("value", value)
-                .addValue("date",sdf.format(date));
+                .addValue("date", sdf.format(date));
         return template.update(UPDATE_SQL, params);
     }
 
@@ -101,7 +103,7 @@ public class SettingsRepository {
                 .addValue("id", null)
                 .addValue("setting", setting)
                 .addValue("value", value)
-                .addValue("date", date==null?sdf.format(LocalDate.now()):sdf.format(date));
+                .addValue("date", date == null ? sdf.format(LocalDate.now()) : sdf.format(date));
         return template.update(INSERT_SQL, params);
     }
 
@@ -118,7 +120,7 @@ public class SettingsRepository {
                 .addValue("setting", setting);
         String settings = SELECT_SQL + " WHERE  " + COL_SETTING + "= :setting AND " + COL_USER_ID + " = :userId order by date desc";
         List<Setting> queryResults = template.query(settings, params, new SettingsWrapper<Setting>());
-        log.debug("Number of hits for {} :{}",setting, queryResults.size());
+        log.debug("Number of hits for {} :{}", setting, queryResults.size());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
@@ -131,7 +133,7 @@ public class SettingsRepository {
                 .addValue("date", sdf.format(date));
         String settings = SELECT_SQL + " WHERE  " + COL_SETTING + "= :setting AND " + COL_USER_ID + " = :userId AND " + COL_DATE + " <= :date order by date desc";
         List<Setting> queryResults = template.query(settings, params, new SettingsWrapper<Setting>());
-        log.debug("Number of hits for {} :{}",setting, queryResults.size());
+        log.debug("Number of hits for {} :{}", setting, queryResults.size());
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 

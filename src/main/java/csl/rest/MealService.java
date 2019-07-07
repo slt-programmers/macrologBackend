@@ -12,8 +12,7 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +31,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @Api(value = "meals")
 public class MealService {
 
-    private MealRepository mealRepository = new MealRepository();
-    private FoodRepository foodRepository = new FoodRepository();
-    private PortionRepository portionRepository = new PortionRepository();
+    @Autowired
+    private MealRepository mealRepository;
+    @Autowired
+    private FoodRepository foodRepository;
+    @Autowired
+    private PortionRepository portionRepository;
 
     @ApiOperation(value = "Retrieve all meals")
     @RequestMapping(value = "",

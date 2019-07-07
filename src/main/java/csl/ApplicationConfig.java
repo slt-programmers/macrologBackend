@@ -1,6 +1,9 @@
 package csl;
 
 import com.google.common.collect.Lists;
+import csl.database.DatabaseConfig;
+import csl.database.DatabaseHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -17,31 +20,42 @@ import java.util.List;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerConfig {                                    
+public class ApplicationConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
-          .select()
-          .apis(RequestHandlerSelectors.basePackage("csl.rest"))
-          .paths(PathSelectors.any())
-          .build().securitySchemes(Lists.newArrayList(apiKey()))
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("csl.rest"))
+                .paths(PathSelectors.any())
+                .build().securitySchemes(Lists.newArrayList(apiKey()))
                 .securityContexts(Arrays.asList(securityContext()))
                 .apiInfo(metaData());
     }
+
     private ApiInfo metaData() {
         return new ApiInfoBuilder()
                 .title("Macrolog Backend REST API")
                 .description("\"Spring Boot REST API for the Macrolog application\"")
                 .version("1.0.0")
-                .contact(new Contact("Carmen Scholte Lubberink en Arjan Tienkamp","http://carmenscholte.com","arjan.tienkamp@gmail.com;carmenscholtelubberink@gmail.com"))
+                .contact(new Contact("Carmen Scholte Lubberink en Arjan Tienkamp", "http://carmenscholte.com", "arjan.tienkamp@gmail.com;carmenscholtelubberink@gmail.com"))
                 .build();
     }
+
     private ApiKey apiKey() {
         return new ApiKey("apiKey", "Authorization", "header");
     }
+
     private SecurityContext securityContext() {
         return SecurityContext.builder().securityReferences(defaultAuth())
                 .forPaths(PathSelectors.any()).build();
+    }
+
+    @Autowired
+    DatabaseConfig databaseConfig;
+
+    @Bean
+    public DatabaseHelper createHelper() {
+        return new DatabaseHelper(databaseConfig);
     }
 
     private List<SecurityReference> defaultAuth() {

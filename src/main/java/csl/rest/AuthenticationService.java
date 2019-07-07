@@ -1,7 +1,7 @@
 package csl.rest;
 
-import csl.database.*;
-import csl.database.model.Portion;
+import csl.database.SettingsRepository;
+import csl.database.UserAcccountRepository;
 import csl.database.model.Setting;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
@@ -11,11 +11,11 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.swagger.models.auth.In;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +38,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/api")
 public class AuthenticationService {
 
-    private UserAcccountRepository userAcccountRepository = new UserAcccountRepository();
-    private SettingsRepository settingsRepository = new SettingsRepository();
+    @Autowired
+    private UserAcccountRepository userAcccountRepository;
+
+    @Autowired
+    private SettingsRepository settingsRepository;
+
+    @Autowired
+    private MailService mailService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
 
     @RequestMapping(value = "/authenticate",
@@ -121,7 +128,7 @@ public class AuthenticationService {
         responseHeaders.add("token", jwt);
         LOGGER.info("Signup successful");
 
-        new Thread(() -> MailService.sendConfirmationMail(email, newAccount)).start();
+        new Thread(() -> mailService.sendConfirmationMail(email, newAccount)).start();
 
         return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
     }
@@ -138,7 +145,7 @@ public class AuthenticationService {
             String hashedRandomPassword = DigestUtils.sha256Hex(randomPassword);
 
             userAcccountRepository.updatePassword(account.getUsername(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
-            new Thread(() -> MailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
+            new Thread(() -> mailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
             return ResponseEntity.ok("Email matches");
         } else {
             LOGGER.error("Account is null");

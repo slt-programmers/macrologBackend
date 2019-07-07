@@ -1,0 +1,61 @@
+server:
+  port: 8090
+  application:
+     name: demoservice
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      FAIL_ON_NUMBERS_FOR_ENUMS: true
+      ACCEPT_EMPTY_STRING_AS_NULL_OBJECT: true
+      FAIL_ON_UNKNOWN_PROPERTIES: true
+  datasource:
+     url: ${datasource.username}
+     username: ${datasource.username}
+     password: ${datasource.password}
+     driverClassName: com.mysql.cj.jdbc.Driver
+
+---
+spring:
+  profiles: arjan
+
+  datasource:
+     url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=UTC
+     username: arjan
+     password: fhjfgj!3ADD
+
+---
+spring:
+  profiles: carmen
+
+  datasource:
+     url: jdbc:mysql://localhost:3306/macrolog_dev?autoReconnect=true&useSSL=false&serverTimezone=UTC
+     username: macrolog
+     password: Macrolog01
+
+---
+spring:
+  profiles: test
+  datasource:
+     url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
+     username: sa
+     password: sa
+     driverClassName: org.h2.Driver
+
+
+  h2:
+    console:
+      enabled: true
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        sql: INFO
+        type.descriptor.sql.BasicBinder: TRACE
+
+
+

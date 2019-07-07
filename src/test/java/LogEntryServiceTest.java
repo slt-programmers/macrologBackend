@@ -1,13 +1,3 @@
-import csl.dto.DayMacro;
-import csl.dto.Macro;
-import csl.rest.LogEntryService;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-
-import java.util.List;
-
 public class LogEntryServiceTest {
 
 

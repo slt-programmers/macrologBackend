@@ -1,6 +1,7 @@
 package csl.database;
 
 import csl.database.model.UserAccount;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -8,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -25,21 +27,20 @@ public class UserAcccountRepository {
     private static final String COL_RESET_DATE = "reset_date";
     private static final String COL_EMAIL = "email";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USERNAME + " VARCHAR(30) UNIQUE NOT NULL, " +
-                    COL_PASSWORD + " TEXT NOT NULL, " +
-                    COL_RESET_PASSWORD + " TEXT, " +
-                    COL_RESET_DATE + " DATETIME, " +
-                    COL_EMAIL + " TEXT(100) NOT NULL)";
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(username, password, email) VALUES(:username, :password, :email)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, reset_password = :reset_password, reset_date = :reset_date WHERE username = :username";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id";
 
+    @Autowired
+    DatabaseHelper databaseHelper;
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
 
     public UserAcccountRepository() {
     }

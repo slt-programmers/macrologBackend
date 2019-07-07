@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+   - property:
+        name: text.type
+        value: VARCHAR
+        dbms: oracle,h2
+
+   - property:
+        name: text.type
+        value: TINYTEXT
+        dbms: mysql
+
+   - include:
+        file: db/changelog/db.changelog-generated-start.yaml

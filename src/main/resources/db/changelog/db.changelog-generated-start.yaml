@@ -1,0 +1,584 @@
+databaseChangeLog:
+- changeSet:
+    id: 1561990283413-1
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: activity
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: TEXT
+        - column:
+            constraints:
+              nullable: false
+            name: calories
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: day
+            type: date
+
+- changeSet:
+    id: 1561990283413-2
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: food
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: TEXT
+        - column:
+            constraints:
+              nullable: false
+            name: protein
+            type: DECIMAL(5, 2)
+        - column:
+            constraints:
+              nullable: false
+            name: fat
+            type: DECIMAL(5, 2)
+        - column:
+            constraints:
+              nullable: false
+            name: carbs
+            type: DECIMAL(5, 2)
+- changeSet:
+    id: 1561990283413-3
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: ingredient
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: meal_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: food_id
+            type: INT
+        - column:
+            name: portion_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: multiplier
+            type: DECIMAL(5, 2)
+- changeSet:
+    id: 1561990283413-4
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: logentry
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: food_id
+            type: INT
+        - column:
+            name: portion_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: multiplier
+            type: DECIMAL(5, 2)
+        - column:
+            constraints:
+              nullable: false
+            name: day
+            type: date
+        - column:
+            name: meal
+            type: TEXT
+- changeSet:
+    id: 1561990283413-5
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: meal
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: TEXT
+- changeSet:
+    id: 1561990283413-6
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: portion
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: food_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: description
+            type: TEXT
+        - column:
+            name: grams
+            type: DECIMAL(5, 2)
+- changeSet:
+    id: 1561990283413-7
+    author: arjan (generated)
+
+    changes:
+    - createTable:
+        tableName: settings
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: setting
+            type: ${text.type}
+        - column:
+            name: value
+            type: ${text.type}
+        - column:
+            name: date
+            type: date
+- changeSet:
+    id: 1561990283413-8
+    author: arjan (generated)
+    changes:
+    - createTable:
+        tableName: useraccounts
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+              unique: true (50)
+            name: username
+            type: ${text.type}
+        - column:
+            constraints:
+              nullable: false
+            name: password
+            type: TEXT
+        - column:
+            constraints:
+              nullable: false
+            name: email
+            type: TEXT
+        - column:
+            name: reset_password
+            type: TEXT
+        - column:
+            name: reset_date
+            type: datetime
+- changeSet:
+    id: 1561990283413-9
+    author: arjan (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: INT
+        - column:
+            name: weight
+            type: DECIMAL(5, 2)
+        - column:
+            constraints:
+              nullable: false
+            name: day
+            type: date
+        - column:
+            name: remark
+            type: TEXT
+        tableName: weight
+- changeSet:
+    id: 1561990283413-10-mysql
+    author: arjan (generated)
+    dbms: mysql
+    changes:
+     - sql:
+        comment: Unique constraint op text field
+        sql:  ALTER TABLE settings ADD CONSTRAINT user_set UNIQUE (user_id, setting (50), date)
+- changeSet:
+    id: 1561990283413-10-oracle-h2
+    author: arjan (generated)
+    dbms: oracle ,h2
+    changes:
+     - sql:
+        comment: Unique constraint op text field
+        sql:  ALTER TABLE settings ADD CONSTRAINT user_set UNIQUE (user_id, setting, date)
+- changeSet:
+    id: 1561990283413-11
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: food_id
+        indexName: food_id
+        tableName: ingredient
+
+- changeSet:
+    id: 1561990283413-13
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: food_id
+        indexName: portionfood_id
+        tableName: portion
+- changeSet:
+    id: 1561990283413-14
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: meal_id
+        indexName: ingredientmeal_id
+        tableName: ingredient
+- changeSet:
+    id: 1561990283413-15
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: portion_id
+        indexName: portion_id
+        tableName: ingredient
+- changeSet:
+    id: 1561990283413-16
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: portion_id
+        indexName: logentryportion_id
+        tableName: logentry
+- changeSet:
+    id: 1561990283413-17
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_id
+        indexName: user_id
+        tableName: activity
+- changeSet:
+    id: 1561990283413-18
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_id
+        indexName: fooduser_id
+        tableName: food
+- changeSet:
+    id: 1561990283413-19
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_id
+        indexName: logentryuser_id
+        tableName: logentry
+- changeSet:
+    id: 1561990283413-20
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_id
+        indexName: mealuser_id
+        tableName: meal
+- changeSet:
+    id: 1561990283413-21
+    author: arjan (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_id
+        indexName: weightuser_id
+        tableName: weight
+- changeSet:
+    id: 1561990283413-22
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: activity
+        constraintName: activity_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: useraccounts
+        validate: true
+- changeSet:
+    id: 1561990283413-23
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: food
+        constraintName: food_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: useraccounts
+        validate: true
+- changeSet:
+    id: 1561990283413-24
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: meal_id
+        baseTableName: ingredient
+        constraintName: ingredient_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: meal
+        validate: true
+- changeSet:
+    id: 1561990283413-25
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: food_id
+        baseTableName: ingredient
+        constraintName: ingredient_ibfk_2
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: food
+        validate: true
+- changeSet:
+    id: 1561990283413-26
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: portion_id
+        baseTableName: ingredient
+        constraintName: ingredient_ibfk_3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: portion
+        validate: true
+- changeSet:
+    id: 1561990283413-27
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: food_id
+        baseTableName: logentry
+        constraintName: logentry_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: food
+        validate: true
+- changeSet:
+    id: 1561990283413-28
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: portion_id
+        baseTableName: logentry
+        constraintName: logentry_ibfk_2
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: portion
+        validate: true
+- changeSet:
+    id: 1561990283413-29
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: logentry
+        constraintName: logentry_ibfk_3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: useraccounts
+        validate: true
+- changeSet:
+    id: 1561990283413-30
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: meal
+        constraintName: meal_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: useraccounts
+        validate: true
+- changeSet:
+    id: 1561990283413-31
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: food_id
+        baseTableName: portion
+        constraintName: portion_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: food
+        validate: true
+- changeSet:
+    id: 1561990283413-32
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: settings
+        constraintName: settings_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: useraccounts
+        validate: true
+- changeSet:
+    id: 1561990283413-33
+    author: arjan (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: weight
+        constraintName: weight_ibfk_1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: useraccounts
+        validate: true
+

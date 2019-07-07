@@ -2,6 +2,7 @@ package csl.database;
 
 import csl.database.model.Ingredient;
 import csl.database.model.Meal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,22 +25,21 @@ public class MealRepository {
     private static final String COL_USER_ID = "user_id";
     private static final String COL_NAME = "name";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_NAME + " TEXT NOT NULL, " +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(name, user_id) VALUES(:name, :userId)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
     private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
 
-    private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(new JdbcTemplate(DatabaseHelper.getInstance()));
+    @Autowired
+    DatabaseHelper databaseHelper;
+
+    @PostConstruct
+    private void initTemplate() {
+        template = new NamedParameterJdbcTemplate(new JdbcTemplate(databaseHelper));
+    }
+
+    private NamedParameterJdbcTemplate template;
 
     public int insertMeal(Integer userId, Meal meal) {
 
