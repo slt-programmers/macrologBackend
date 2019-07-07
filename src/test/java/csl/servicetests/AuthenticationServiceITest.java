@@ -18,16 +18,12 @@ import static org.mockito.ArgumentMatchers.eq;
 public class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
 
-    @BeforeEach
-    public void resetMocks() {
-        Mockito.reset(mailService);
-    }
-
     @Test
     public void testSignupNewUser() {
 
         String userName = "newuser";
         String userEmail = "newuser@test.example";
+        Mockito.reset(mailService);
 
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
@@ -46,6 +42,7 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
 
         String userName = "userknown";
         String userEmail = "emailknown@test.example";
+        Mockito.reset(mailService);
 
         // 1e: keer aanmaken succesvol:
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
