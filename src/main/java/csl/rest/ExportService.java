@@ -9,6 +9,7 @@ import csl.dto.*;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,11 @@ import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+@Slf4j
 @RestController
 @RequestMapping("/export")
 public class ExportService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExportService.class);
 
     @Autowired
     private FoodRepository foodRepository;
@@ -55,13 +56,13 @@ public class ExportService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
-        LOGGER.info("Export: allFood size = " + allFood.size());
+        log.info("Export: allFood size = " + allFood.size());
 
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
         }
-        LOGGER.info("Export: allFoodDtos size = " + allFoodDtos.size());
+        log.info("Export: allFoodDtos size = " + allFoodDtos.size());
         export.setAllFood(allFoodDtos);
 
         List<csl.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
@@ -71,10 +72,10 @@ public class ExportService {
 
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
-            LOGGER.info("Export: logEntryDto ID " + logEntry.getFoodId());
+            log.info("Export: logEntryDto ID " + logEntry.getFoodId());
 
             FoodDto foodDto = allFoodDtos.stream().filter(f -> {
-                LOGGER.info("Export: foodDto ID " + f.getId());
+                log.info("Export: foodDto ID " + f.getId());
                 return f.getId().equals(logEntry.getFoodId());
             }).findFirst().orElseGet(() ->
                     FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
