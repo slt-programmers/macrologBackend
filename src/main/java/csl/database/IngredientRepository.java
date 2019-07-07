@@ -25,18 +25,6 @@ public class IngredientRepository {
     private static final String COL_PORTION_ID = "portion_id";
     private static final String COL_MULTIPLIER = "multiplier";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_MEAL_ID + " INT(6) NOT NULL, " +
-                    COL_FOOD_ID + " INT(6) NOT NULL, " +
-                    COL_PORTION_ID + " INT(6), " +
-                    "FOREIGN KEY (" + COL_MEAL_ID + ") REFERENCES " + MealRepository.TABLE_NAME + "(" + MealRepository.COL_ID + "), " +
-                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + "), " +
-                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + "), " +
-                    COL_MULTIPLIER + " DEC(5,2) NOT NULL" +
-                    ")";
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(meal_id, food_Id, portion_Id, multiplier) VALUES(:mealId, :foodId, :portionId, :multiplier)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET meal_id = :mealId, food_id = :foodId, portion_id = :portionId, multiplier = :multiplier WHERE id = :id";

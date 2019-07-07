@@ -26,17 +26,6 @@ public class FoodRepository {
     private final String COL_FAT = "fat";
     private final String COL_CARBS = "carbs";
 
-    public final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_NAME + " TEXT NOT NULL, " +
-                    COL_PROTEIN + " DEC(5,2)  NOT NULL, " +
-                    COL_FAT + " DEC(5,2) NOT NULL, " +
-                    COL_CARBS + " DEC(5,2) NOT NULL," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, protein, fat, carbs) VALUES(:userId, :name, :protein, :fat, :carbs)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, protein = :protein, fat = :fat, carbs = :carbs WHERE id = :id AND user_id = :userId";

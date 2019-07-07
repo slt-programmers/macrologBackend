@@ -30,16 +30,8 @@ public class SettingsRepository {
     private static final String COL_VALUE = "value";
     private static final String COL_USER_ID = "user_id";
     private static final String COL_DATE = "date";
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_SETTING + " TEXT(50) NOT NULL, " +
-                    COL_VALUE + " TEXT," +
-                    COL_DATE + " DATE," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")," +
-                    "UNIQUE KEY user_set (" + COL_USER_ID + "," + COL_SETTING + "(50), COL_DATE)" +
-                    ")";
+
+
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, setting, value, date) VALUES(:userId, :setting, :value, :date)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET value = :value WHERE user_id = :userId AND setting = :setting AND date = :date";

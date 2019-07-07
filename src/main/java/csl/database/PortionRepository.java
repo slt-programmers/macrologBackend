@@ -24,15 +24,6 @@ public class PortionRepository {
     private final String COL_DESCRIPTION = "description";
     private final String COL_GRAMS = "grams";
 
-    public final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_FOOD_ID + " INT(6) NOT NULL, " +
-                    COL_DESCRIPTION + " TEXT NOT NULL, " +
-                    COL_GRAMS + " DEC(5,2)," +
-                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")" +
-                    ")";
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(food_Id, description, grams) VALUES(:foodId, :description, :grams)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET food_Id = :foodId, description = :description, grams =:grams WHERE id = :id";

@@ -27,14 +27,6 @@ public class UserAcccountRepository {
     private static final String COL_RESET_DATE = "reset_date";
     private static final String COL_EMAIL = "email";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USERNAME + " VARCHAR(30) UNIQUE NOT NULL, " +
-                    COL_PASSWORD + " TEXT NOT NULL, " +
-                    COL_RESET_PASSWORD + " TEXT, " +
-                    COL_RESET_DATE + " DATETIME, " +
-                    COL_EMAIL + " TEXT(100) NOT NULL)";
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(username, password, email) VALUES(:username, :password, :email)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET password = :password, reset_password = :reset_password, reset_date = :reset_date WHERE username = :username";

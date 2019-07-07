@@ -25,15 +25,6 @@ public class MealRepository {
     private static final String COL_USER_ID = "user_id";
     private static final String COL_NAME = "name";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_NAME + " TEXT NOT NULL, " +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(name, user_id) VALUES(:name, :userId)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name WHERE Id = :id AND user_id = :userId";

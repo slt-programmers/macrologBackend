@@ -29,16 +29,6 @@ public class ActivityRepository {
     private static final String COL_CALORIES = "calories";
     private static final String COL_DAY = "day";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_NAME + " TEXT NOT NULL, " +
-                    COL_CALORIES + " INT(6) NOT NULL, " +
-                    COL_DAY + " DATE NOT NULL," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, name, calories, day) VALUES(:userId, :name, :calories, :day)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, calories = :calories, day = :day WHERE Id = :id AND user_id = :userId";

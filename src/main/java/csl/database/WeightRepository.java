@@ -26,19 +26,6 @@ public class WeightRepository {
     private static final String COL_DAY = "day";
     private static final String COL_REMARK = "remark";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_WEIGHT + " DEC(5,2) NOT NULL, " +
-                    COL_REMARK + " TEXT, " +
-                    COL_DAY + " DATE NOT NULL," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
-    public static final String TABLE_DELETE =
-            "DROP TABLE IF EXISTS " + TABLE_NAME;
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String SELECT_ONE_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND day = :day";
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, weight, day, remark) VALUES(:userId, :weight, :day, :remark)";

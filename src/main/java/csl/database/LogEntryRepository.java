@@ -32,20 +32,6 @@ public class LogEntryRepository {
     private static final String COL_DAY = "day";
     private static final String COL_MEAL = "meal";
 
-    public static final String TABLE_CREATE =
-            "CREATE TABLE " + TABLE_NAME + " (" +
-                    COL_ID + " INT(6) PRIMARY KEY AUTO_INCREMENT, " +
-                    COL_USER_ID + " INT(6) NOT NULL, " +
-                    COL_FOOD_ID + " INT(6) NOT NULL, " +
-                    COL_PORTION_ID + " INT(6) NULL, " +
-                    COL_MULTIPLIER + " DEC(5,2) NOT NULL, " +
-                    COL_DAY + " DATE NOT NULL," +
-                    COL_MEAL + " TEXT," +
-                    "FOREIGN KEY (" + COL_FOOD_ID + ") REFERENCES " + FoodRepository.TABLE_NAME + "(" + FoodRepository.COL_ID + ")," +
-                    "FOREIGN KEY (" + COL_PORTION_ID + ") REFERENCES " + PortionRepository.TABLE_NAME + "(" + PortionRepository.COL_ID + ")," +
-                    "FOREIGN KEY (" + COL_USER_ID + ") REFERENCES " + UserAcccountRepository.TABLE_NAME + "(" + UserAcccountRepository.COL_ID + ")" +
-                    ")";
-
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String SELECT_ONE_SQL = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = :userId AND food_id = :foodId AND day = :day AND meal = :meal";
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(user_id, food_Id, portion_Id, multiplier, day, meal) VALUES(:userId, :foodId, :portionId, :multiplier, :day, :meal)";
