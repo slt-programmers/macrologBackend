@@ -6,6 +6,8 @@ import csl.notification.MailService;
 import csl.rest.ActivityService;
 import csl.rest.AuthenticationService;
 import csl.security.SecurityConstants;
+import csl.security.ThreadLocalHolder;
+import csl.security.UserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -47,12 +49,22 @@ public abstract class AbstractApplicationIntegrationTest {
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
         ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
         Assert.isTrue(202 == responseEntity.getStatusCodeValue());
+        return getUserIdFromResponseHeaderJWT(responseEntity);
+    }
+
+    protected Integer getUserIdFromResponseHeaderJWT( ResponseEntity responseEntity) {
         String jwtToken =responseEntity.getHeaders().get("token").get(0);
-        log.debug(userEmail + " - " +jwtToken);
         Jws<Claims> claims = getClaimsJws(jwtToken);
         Integer userId = (Integer) claims.getBody().get("userId");
         log.debug("User id = " + userId);
+        Assert.notNull(userId, "Geen UserID te herleiden");
         return userId;
+    }
+
+    protected void setUserContextFromJWTResponseHeader(ResponseEntity responseEntity){
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(Integer.valueOf(getUserIdFromResponseHeaderJWT(responseEntity)));
+        ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
     protected Jws<Claims> getClaimsJws(String jwtToken) {

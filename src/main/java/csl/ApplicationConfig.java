@@ -50,11 +50,8 @@ public class ApplicationConfig {
                 .forPaths(PathSelectors.any()).build();
     }
 
-    @Autowired
-    DatabaseConfig databaseConfig;
-
     @Bean
-    public DatabaseHelper createHelper() {
+    public DatabaseHelper createHelper(DatabaseConfig databaseConfig) {
         return new DatabaseHelper(databaseConfig);
     }
 
