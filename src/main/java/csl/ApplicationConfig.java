@@ -3,7 +3,6 @@ package csl;
 import com.google.common.collect.Lists;
 import csl.config.DatabaseConfig;
 import csl.database.DatabaseHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
