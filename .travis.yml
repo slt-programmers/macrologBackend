@@ -14,4 +14,3 @@ script:
 
 notifications:
   slack: homeworkcarmenarjan:YreL13iWQ3xpqtXLpudbTy2m
-    on_success: change
