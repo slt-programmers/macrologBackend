@@ -1,6 +1,6 @@
 package csl;
 
-import csl.database.DatabaseConfig;
+import csl.config.DatabaseConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;

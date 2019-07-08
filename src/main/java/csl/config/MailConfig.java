@@ -1,4 +1,4 @@
-package csl.database;
+package csl.config;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +12,16 @@ import javax.annotation.PostConstruct;
 @Data
 @Configuration
 @EnableConfigurationProperties
-@ConfigurationProperties("spring.datasource")
-public class DatabaseConfig {
+@ConfigurationProperties("mail")
+public class MailConfig {
 
-    private String url;
     private String username;
     private String password;
+    private String host;
+    private String port;
 
     @PostConstruct
     public void configGeladen() {
-        log.info("Database geladen " + username);
+        log.info("Mail geladen " + host);
     }
 }

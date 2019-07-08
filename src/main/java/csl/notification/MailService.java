@@ -1,10 +1,11 @@
 package csl.notification;
 
 
+import csl.config.MailConfig;
 import csl.database.model.UserAccount;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -14,10 +15,15 @@ import java.util.Properties;
 
 @Service
 @Slf4j
+@AutoConfigureBefore(MailConfig.class)
+@EnableConfigurationProperties(MailConfig.class)
 public class MailService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
+    private MailConfig mailConfig;
 
+    public MailService(MailConfig mailConfig) {
+        this.mailConfig = mailConfig;
+    }
     public void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
         Session secureSession = getSession();
 
@@ -39,7 +45,7 @@ public class MailService {
             log.debug("Mail send to"  + email);
             Transport.send(message);
         } catch (MessagingException ex) {
-            LOGGER.error(ex.getMessage());
+            log.error(ex.getMessage());
         }
     }
 
@@ -63,20 +69,20 @@ public class MailService {
 
             Transport.send(message);
         } catch (MessagingException ex) {
-            LOGGER.error(ex.getMessage());
+            log.error(ex.getMessage());
         }
     }
 
 
     private Session getSession() {
-        String username = "macrologwebapp@gmail.com";
-        String password = "Macrolog01";
+        String username = mailConfig.getUsername();
+        String password = mailConfig.getPassword();
 
         Properties properties = System.getProperties();
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.host", "smtp.gmail.com");
-        properties.put("mail.smtp.port", "587");
+        properties.put("mail.smtp.host", mailConfig.getHost());
+        properties.put("mail.smtp.port", mailConfig.getPort());
 
         // Get the default Session object.
         return Session.getInstance(properties,

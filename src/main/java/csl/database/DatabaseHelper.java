@@ -1,5 +1,6 @@
 package csl.database;
 
+import csl.config.DatabaseConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

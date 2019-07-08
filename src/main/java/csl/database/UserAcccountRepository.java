@@ -22,8 +22,6 @@ public class UserAcccountRepository {
 
     static final String COL_ID = "id";
     private static final String COL_USERNAME = "username";
-    private static final String COL_PASSWORD = "password";
-    private static final String COL_RESET_PASSWORD = "reset_password";
     private static final String COL_RESET_DATE = "reset_date";
     private static final String COL_EMAIL = "email";
 
@@ -103,9 +101,9 @@ public class UserAcccountRepository {
             Timestamp ts = rs.getTimestamp(COL_RESET_DATE);
             return new UserAccount(rs.getLong(COL_ID),
                     rs.getString(COL_USERNAME),
-                    rs.getString(COL_PASSWORD),
+                    rs.getString("password"),
                     rs.getString(COL_EMAIL),
-                    rs.getString(COL_RESET_PASSWORD),
+                    rs.getString("reset_password"),
                     ts == null ? null : ts.toLocalDateTime()
             );
         }
