@@ -71,7 +71,7 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
     }
 
     @Test
-    public void testResetPassword() {
+    public void testResetPassword() throws InterruptedException {
 
         String userName = "userResetPassword";
         String userEmail = "userResetPassword@test.example";
@@ -100,7 +100,16 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
 
         String resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
+        int cnt=0;
+        while(resettedPassword == null && cnt < 10) {
+            Thread.sleep(1000);
+            resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
+            cnt++;
+            log.debug("Sleep until we fix better thread waiting.");
+        }
+        Assertions.assertTrue(resettedPassword != null,"Mail has been send");
 
+        log.debug("Reset to " + resettedPassword);
         // inloggen met nieuw wachtwoord
         authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(resettedPassword).build();
         responseEntity = authenticationService.authenticateUser(authenticationRequest);
