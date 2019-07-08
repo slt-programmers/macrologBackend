@@ -17,6 +17,6 @@ public class IntegrationConfiguration {
     @Primary
     public MailService mailService() {
         log.debug("Creating mock mail service");
-        return Mockito.mock(MailService.class);
+        return new MyMockedMailService(null);
     }
 }

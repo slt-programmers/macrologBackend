@@ -29,10 +29,12 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         Integer userId = (Integer) claimsJws.getBody().get("userId");
         log.debug("User id = " + userId);
 
+
+
     }
 
     @Test
-    public void testSignupUserOrEmailAlreadyKnown() {
+    public void testSignupUserOrEmailAlreadyKnown() throws InterruptedException {
 
         String userName = "userknown";
         String userEmail = "emailknown@test.example";
@@ -42,15 +44,29 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
 
+        boolean mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
+        int cnt=0;
+        while(!mailSend && cnt < 10) {
+            Thread.sleep(1000);
+            mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
+            cnt++;
+            log.debug("Sleep until we fix better thread waiting.");
+        }
+        Assertions.assertTrue(mailSend,"Mail has been send");
+
         // 2e: keer afgekeurd op username
         authenticationRequest = AuthenticationRequest.builder().email("diffemail@email.com").password("testpassword").username(userName).build();
         responseEntity = authenticationService.signUp(authenticationRequest);
         Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
+        mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
+        Assertions.assertFalse(mailSend,"Mail should not be send");
 
         // 3e: keer afgekeurd op email
         authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
         responseEntity = authenticationService.signUp(authenticationRequest);
         Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
+        mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
+        Assertions.assertFalse(mailSend,"Mail should not be send");
 
     }
 
@@ -60,7 +76,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         String userName = "userResetPassword";
         String userEmail = "userResetPassword@test.example";
         String password = "password1";
-        String newPassword = "password2";
 
         // 1e: keer aanmaken succesvol:
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password(password).username(userName).build();
@@ -84,7 +99,18 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         responseEntity = authenticationService.authenticateUser(authenticationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
 
-        // TODO Test email en afvangen nieuw wachtwoord
+        String resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
+
+        // inloggen met nieuw wachtwoord
+        authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(resettedPassword).build();
+        responseEntity = authenticationService.authenticateUser(authenticationRequest);
+        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+
+        // inloggen met oude kan niet meer :
+        authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        responseEntity = authenticationService.authenticateUser(authenticationRequest);
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+
     }
 
 
