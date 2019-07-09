@@ -44,6 +44,9 @@ public class AuthenticationService {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private AccountService accountService;
+
     @PostMapping(path = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
         String username = request.getUsername();
@@ -173,7 +176,7 @@ public class AuthenticationService {
 
     @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteAccount(@RequestParam("password") String password) {
-        String passwordHashed = DigestUtils.sha256Hex(new String(Base64.getDecoder().decode(password)));
+        String passwordHashed = DigestUtils.sha256Hex(password);
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAcccountRepository.getUserById(userId);
@@ -184,7 +187,6 @@ public class AuthenticationService {
             log.error("Could not delete account: password incorrect");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            AccountService accountService = new AccountService();
             accountService.deleteAccount(userId);
             return new ResponseEntity(HttpStatus.OK);
         }

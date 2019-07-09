@@ -52,6 +52,9 @@ public class IngredientRepository {
     }
 
     public int deleteAllForUser(List<Long> mealIds) {
+        if (mealIds.isEmpty()){
+            return 0;
+        }
         StringBuilder stringBuilder = new StringBuilder();
         for (Long id : mealIds) {
             stringBuilder.append(id);

@@ -86,6 +86,9 @@ public class PortionRepository {
     }
 
     public int deleteAllForUser(List<Long> foodIds) {
+        if (foodIds.isEmpty()){
+            return 0;
+        }
         StringBuilder stringBuilder = new StringBuilder();
         for (Long id : foodIds) {
             stringBuilder.append(id);

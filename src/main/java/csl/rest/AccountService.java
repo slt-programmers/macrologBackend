@@ -3,12 +3,15 @@ package csl.rest;
 import csl.database.*;
 import csl.database.model.Food;
 import csl.database.model.Meal;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+@Service
 public class AccountService {
 
     @Autowired

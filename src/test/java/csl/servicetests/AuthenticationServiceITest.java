@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 @Slf4j
 public class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
-
     @Test
     public void testSignupNewUser() {
 
@@ -28,9 +27,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         Jws<Claims> claimsJws = getClaimsJws(jwtToken);
         Integer userId = (Integer) claimsJws.getBody().get("userId");
         log.debug("User id = " + userId);
-
-
-
     }
 
     @Test
@@ -122,7 +118,6 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
 
     }
 
-
     @Test
     public void testChangePassword() {
 
@@ -157,8 +152,45 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(newPassword).build();
         responseEntity = authenticationService.authenticateUser(authenticationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+    }
 
+    @Test
+    public void testDeleteAccount() {
 
+        String userName = "userDeleteAccount";
+        String userEmail = "userDeleteAccount@test.example";
+        String password = "password1";
+
+        // 1e: keer aanmaken succesvol:
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password(password).username(userName).build();
+        ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
+        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+
+        setUserContextFromJWTResponseHeader(responseEntity);
+
+        // 1e keer inloggen met wachtwoord
+        authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        responseEntity = authenticationService.authenticateUser(authenticationRequest);
+        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+
+        // verwijder met verkeerd wachtwoord afkeuren
+        responseEntity = authenticationService.deleteAccount("verkeerd");
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+
+        // verwijder met correct wachtwoord uitvoeren
+        responseEntity = authenticationService.deleteAccount(password);
+        Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
+
+        // inloggen kan niet meer:
+        authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        responseEntity = authenticationService.authenticateUser(authenticationRequest);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
+
+    }
+
+    @Test
+    public void deleteFilledAccount(){
+        // TODO; Make test to fill a user with meals and portions and stuff and then do a delete
     }
 
 }
