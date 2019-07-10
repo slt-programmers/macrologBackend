@@ -67,7 +67,6 @@ public class FoodService {
             return ResponseEntity.noContent().build();
         } else {
             FoodDto foodDto = createFoodDto(food, true);
-
             return ResponseEntity.ok(foodDto);
         }
     }

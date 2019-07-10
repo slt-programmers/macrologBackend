@@ -1,12 +1,16 @@
 package csl.servicetests;
 
 import csl.dto.LogActivityDto;
+import csl.dto.LogEntryDto;
+import csl.dto.StoreLogEntryRequest;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import csl.servicetests.utils.AbstractApplicationIntegrationTest;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -21,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
+@Disabled
+public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
 
     private Integer userId;
 
@@ -29,8 +34,9 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
     public void setUserContext() {
 
         if (this.userId == null ) {
-            log.debug("Creating test user for test " + this.getClass().getName());
-            this.userId = createUser(this.getClass().getName());
+            log.debug("Creating test user for test " + this.getClass());
+            Integer activityUser = createUser("logEntryUser");
+            this.userId = activityUser;
         }
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(Integer.valueOf(this.userId));
@@ -38,22 +44,19 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    public void testActivities() {
+    @Disabled
+    public void testLogEntries() {
 
-        List<LogActivityDto> newActivities = Arrays.asList(
-                LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2001-01-01" )))
-                        .name("Running")
-                        .calories(20.0)
-                        .build(),
-                LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2001-01-01" )))
-                        .name("Cycling")
-                        .calories(30.0)
-                        .build()
-
-        );
-        ResponseEntity responseEntity = activityService.storeActivities(newActivities);
+        List<StoreLogEntryRequest> newLogEntries = Arrays.asList(
+                StoreLogEntryRequest.builder()
+                       .day(Date.valueOf(LocalDate.parse("2001-01-01")))
+                       .meal("BREAKFAST")
+                .portionId(null)
+                .foodId(null)
+                .multiplier(1.0)
+                .build()
+         );
+        ResponseEntity responseEntity = logEntryService.storeLogEntries(newLogEntries);
 
         // Check response object from store call
         List<LogActivityDto> newEntries = (List<LogActivityDto>) responseEntity.getBody();

@@ -95,10 +95,12 @@ public class AuthenticationService {
 
         UserAccount account = userAcccountRepository.getUser(username);
         if (account != null) {
+            log.debug("Username of email already in use 1");
             return ResponseEntity.status(401).body("Username or email already in use");
         } else {
             UserAccount userByEmail = userAcccountRepository.getUserByEmail(email);
             if (userByEmail != null) {
+                log.debug("Username or email already in use 2");
                 return ResponseEntity.status(401).body("Username or email already in use");
             } else {
                 userAcccountRepository.insertUser(username, hashedPassword, email);

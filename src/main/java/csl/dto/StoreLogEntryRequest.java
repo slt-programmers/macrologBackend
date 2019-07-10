@@ -1,9 +1,15 @@
 package csl.dto;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 
 import java.util.Date;
 
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class StoreLogEntryRequest {
 
     private Long id;
@@ -17,53 +23,4 @@ public class StoreLogEntryRequest {
     private Date day;
     @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK", required = true, example = "BREAKFAST")
     private String meal;
-
-
-    public Long getFoodId() {
-        return foodId;
-    }
-
-    public void setFoodId(Long foodId) {
-        this.foodId = foodId;
-    }
-
-    public Long getPortionId() {
-        return portionId;
-    }
-
-    public void setPortionId(Long portionId) {
-        this.portionId = portionId;
-    }
-
-    public Double getMultiplier() {
-        return multiplier;
-    }
-
-    public void setMultiplier(Double multiplier) {
-        this.multiplier = multiplier;
-    }
-
-    public Date getDay() {
-        return day;
-    }
-
-    public void setDay(Date day) {
-        this.day = day;
-    }
-
-    public String getMeal() {
-        return meal;
-    }
-
-    public void setMeal(String meal) {
-        this.meal = meal;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

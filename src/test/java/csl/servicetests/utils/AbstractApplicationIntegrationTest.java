@@ -5,6 +5,8 @@ import csl.dto.AuthenticationRequest;
 import csl.notification.MailService;
 import csl.rest.ActivityService;
 import csl.rest.AuthenticationService;
+import csl.rest.FoodService;
+import csl.rest.LogEntryService;
 import csl.security.SecurityConstants;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
@@ -47,6 +49,12 @@ public abstract class AbstractApplicationIntegrationTest {
 
     @Autowired
     protected ActivityService activityService;
+
+    @Autowired
+    protected LogEntryService logEntryService;
+
+    @Autowired
+    protected FoodService foodService;
 
     @Autowired
     protected AuthenticationService authenticationService;
