@@ -1,13 +1,11 @@
 package csl.servicetests;
 
 import csl.dto.LogActivityDto;
-import csl.dto.LogEntryDto;
 import csl.dto.StoreLogEntryRequest;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import csl.servicetests.utils.AbstractApplicationIntegrationTest;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

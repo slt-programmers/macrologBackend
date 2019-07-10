@@ -12,14 +12,12 @@ import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,6 +27,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/food")
 @Api(value = "food")
 public class FoodService {
@@ -40,9 +39,7 @@ public class FoodService {
     private PortionRepository portionRepository;
 
     @ApiOperation(value = "Retrieve all stored foods")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllFood() {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -57,9 +54,7 @@ public class FoodService {
     }
 
     @ApiOperation(value = "Retrieve information about specific food")
-    @RequestMapping(value = "/{id}",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getFoodInformation(@PathVariable("id") Long id) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Food food = foodRepository.getFoodById(userInfo.getUserId(), id);
@@ -72,9 +67,7 @@ public class FoodService {
     }
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
-    @RequestMapping(value = "",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (addFoodRequest.getId() != null) {

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -157,6 +158,83 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(portion2.getGrams()).isEqualTo(300.0);
         assertThat(portion2.getId()).isNotNull();
         assertThat(portion2.getMacros()).isNotNull();
+
+    }
+
+    @Test
+    public void testFoodAddPortion() {
+
+        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name("foodAddPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        ResponseEntity responseEntity = foodService.addFood(addFoodRequestZonderPortions);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+
+        ResponseEntity allFoodEntity = foodService.getAllFood();
+        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+
+        List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
+        FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodAddPortion")).findFirst().get();
+
+        AddFoodRequest foodWithAddedPortionRequest = AddFoodRequest.builder()
+                .id(savedFood.getId())
+                .carbs(20.0)
+                .fat(30.0)
+                .protein(40.0)
+                .name("newName")
+                .portions(Arrays.asList(PortionDto.builder()
+                        .description("newPortion")
+                        .grams(2.0)
+                        .build()))
+                .build();
+        foodService.addFood(foodWithAddedPortionRequest);
+
+        allFoodEntity = foodService.getAllFood();
+        foodDtos = (List<FoodDto>) allFoodEntity.getBody();
+        Optional<FoodDto> originalFood = foodDtos.stream().filter(f -> f.getName().equals("foodAddPortion")).findFirst();
+        assertThat(originalFood.isPresent()).isFalse();
+
+        FoodDto alteredFood = foodDtos.stream().filter(f -> f.getName().equals("newName")).findFirst().get();
+
+        assertThat(alteredFood.getName()).isEqualTo("newName");
+        assertThat(alteredFood.getCarbs()).isEqualTo(20.0);
+        assertThat(alteredFood.getFat()).isEqualTo(30.0);
+        assertThat(alteredFood.getProtein()).isEqualTo(40.0);
+        assertThat(alteredFood.getPortions()).hasSize(1);
+
+        PortionDto portion2 = alteredFood.getPortions().stream().filter(p -> p.getDescription().equals("newPortion")).findFirst().get();
+        assertThat(portion2.getGrams()).isEqualTo(2.0);
+        assertThat(portion2.getId()).isNotNull();
+        assertThat(portion2.getMacros()).isNotNull();
+
+        // Alter the portion
+        AddFoodRequest foodWithAlteredPortionRequest = AddFoodRequest.builder()
+                .id(savedFood.getId())
+                .carbs(20.0)
+                .fat(30.0)
+                .protein(40.0)
+                .name("newName")
+                .portions(Arrays.asList(PortionDto.builder()
+                        .description("newPortionName")
+                        .grams(3.0)
+                        .id(portion2.getId())
+                        .build()))
+                .build();
+        foodService.addFood(foodWithAlteredPortionRequest);
+
+        allFoodEntity = foodService.getAllFood();
+        foodDtos = (List<FoodDto>) allFoodEntity.getBody();
+
+        alteredFood = foodDtos.stream().filter(f -> f.getName().equals("newName")).findFirst().get();
+
+        assertThat(alteredFood.getName()).isEqualTo("newName");
+        assertThat(alteredFood.getCarbs()).isEqualTo(20.0);
+        assertThat(alteredFood.getFat()).isEqualTo(30.0);
+        assertThat(alteredFood.getProtein()).isEqualTo(40.0);
+        assertThat(alteredFood.getPortions()).hasSize(1);
+
+        PortionDto portionAltered = alteredFood.getPortions().stream().filter(p -> p.getDescription().equals("newPortionName")).findFirst().get();
+        assertThat(portionAltered.getGrams()).isEqualTo(3.0);
+        assertThat(portionAltered.getId()).isNotNull();
+        assertThat(portionAltered.getMacros()).isNotNull();
 
     }
 
