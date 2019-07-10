@@ -2,6 +2,8 @@ package csl.servicetests;
 
 import csl.dto.AuthenticationRequest;
 import csl.dto.ChangePasswordRequest;
+import csl.servicetests.utils.AbstractApplicationIntegrationTest;
+import csl.servicetests.utils.MyMockedMailService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
@@ -178,8 +180,7 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
 
         // verwijder met correct wachtwoord uitvoeren
-        responseEntity = authenticationService.deleteAccount(password);
-        Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
+        deleteAccount(password);
 
         // inloggen kan niet meer:
         authenticationRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -187,6 +188,8 @@ public class AuthenticationServiceITest extends AbstractApplicationIntegrationTe
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
 
     }
+
+
 
     @Test
     public void deleteFilledAccount(){

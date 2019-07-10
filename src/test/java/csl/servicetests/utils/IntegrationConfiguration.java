@@ -1,8 +1,7 @@
-package csl.servicetests;
+package csl.servicetests.utils;
 
 import csl.notification.MailService;
 import lombok.extern.slf4j.Slf4j;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;

@@ -3,7 +3,6 @@ package csl.rest;
 import csl.database.*;
 import csl.database.model.Food;
 import csl.database.model.Meal;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

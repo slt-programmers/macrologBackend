@@ -1,4 +1,4 @@
-package csl.servicetests;
+package csl.servicetests.utils;
 
 import csl.Application;
 import csl.dto.AuthenticationRequest;
@@ -12,16 +12,22 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 
 @Slf4j
@@ -67,6 +73,12 @@ public abstract class AbstractApplicationIntegrationTest {
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
+    protected void deleteAccount(String password) {
+        ResponseEntity responseEntity;
+        responseEntity = authenticationService.deleteAccount(password);
+        Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
+    }
+
     protected Jws<Claims> getClaimsJws(String jwtToken) {
         try {
             return Jwts.parser()
@@ -75,5 +87,10 @@ public abstract class AbstractApplicationIntegrationTest {
         } catch (UnsupportedEncodingException uoe) {
             throw new RuntimeException("Unabled to read token");
         }
+    }
+
+    protected boolean isEqualDate(Date date, LocalDate localDate) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault()).toLocalDate().equals(localDate);
     }
 }

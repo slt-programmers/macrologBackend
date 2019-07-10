@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Date;
 
 import static csl.security.SecurityConstants.EXPIRATION_TIME;

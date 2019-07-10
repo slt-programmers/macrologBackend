@@ -14,7 +14,8 @@ import javax.annotation.PostConstruct;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Repository
@@ -34,6 +35,8 @@ public class ActivityRepository {
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET name = :name, calories = :calories, day = :day WHERE Id = :id AND user_id = :userId";
     private static final String DELETE_SQL = "DELETE FROM " + TABLE_NAME + " WHERE id = :id AND user_id = :userId";
     private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE user_id = :userId";
+
+    DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     DatabaseHelper databaseHelper;
@@ -86,12 +89,11 @@ public class ActivityRepository {
         return template.query(myLogs, params, new LogActivityWrapper());
     }
 
-    public List<LogActivity> getAllLogActivities(Integer userId, java.util.Date date) {
+    public List<LogActivity> getAllLogActivities(Integer userId, LocalDate date) {
         log.debug("Getting entries for " + date);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("date", sdf.format(date));
+                .addValue("date",date.format(dbFormatter));
         String myLogs = SELECT_SQL + " WHERE  " + COL_DAY + "= :date AND " + COL_USER_ID + " = :userId";
         return template.query(myLogs, params, new LogActivityWrapper());
     }

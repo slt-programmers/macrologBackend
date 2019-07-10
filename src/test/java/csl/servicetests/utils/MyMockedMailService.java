@@ -1,4 +1,4 @@
-package csl.servicetests;
+package csl.servicetests.utils;
 
 import csl.config.MailConfig;
 import csl.database.model.UserAccount;

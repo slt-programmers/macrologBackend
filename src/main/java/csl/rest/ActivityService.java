@@ -5,6 +5,7 @@ import csl.database.model.LogActivity;
 import csl.dto.LogActivityDto;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
+import csl.util.LocalDateParser;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -19,8 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,16 +44,8 @@ public class ActivityService {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         LOGGER.debug("Request for " + userInfo);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date parsedDate;
-        try {
-            parsedDate = sdf.parse(date);
-        } catch (ParseException e) {
-            LOGGER.error(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-
-        List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), parsedDate);
+        LocalDate localDate = LocalDateParser.parse(date);
+        List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), localDate);
         List<LogActivityDto> logEntryDtos = mapToDtos(allLogEntries);
 
         return ResponseEntity.ok(logEntryDtos);
@@ -70,7 +62,7 @@ public class ActivityService {
             LogActivity entry = mapActivityDtoToDomain(logEntry);
             if (logEntry.getId() == null) {
                 logActitivyRepository.insertActivity(userInfo.getUserId(), entry);
-                List<LogActivity> addedEntryMatches = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay());
+                List<LogActivity> addedEntryMatches = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay().toLocalDate());
                 if (addedEntryMatches.size() > 1) {
                     LogActivity newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogActivity::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
                     addedEntryMatches = new ArrayList<>();
@@ -103,7 +95,7 @@ public class ActivityService {
     @RequestMapping(value = "/{id}",
             method = DELETE,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeActivity(@PathVariable("id") Long logEntryId) {
+    public ResponseEntity deleteActivity(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logActitivyRepository.deleteLogActivity(userInfo.getUserId(), logEntryId);
         return ResponseEntity.status(HttpStatus.OK).build();
