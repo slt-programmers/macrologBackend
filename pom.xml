@@ -17,7 +17,7 @@
     </parent>
 
     <properties>
-        <sonar.sources>src/main, src/test</sonar.sources>
+        <sonar.sources>src/main,src/test</sonar.sources>
         <sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>
     </properties>
 
