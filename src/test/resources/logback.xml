@@ -14,7 +14,7 @@
     <logger name="org.springframework.security" level="ERROR"/>
     <logger name="org.springframework.web" level="ERROR"/>
     <logger name="org.apache.commons.dbcp2" level="ERROR"/>
-    <logger name="csl" level="DEBUG"/>
+    <logger name="slt" level="DEBUG"/>
 
     <root>
         <level value="INFO"/>
