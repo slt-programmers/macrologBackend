@@ -16,10 +16,10 @@
         <version>2.0.0.RELEASE</version>
     </parent>
 
-    <properties>
-        <sonar.sources>src/main,src/test</sonar.sources>
-        <sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>
-    </properties>
+    <!--<properties>-->
+        <!--<sonar.sources>src/main,src/test</sonar.sources>-->
+        <!--<sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>-->
+    <!--</properties>-->
 
     <!-- Add typical dependencies for a web application -->
     <dependencies>
