@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import slt.Application;
+import slt.database.model.Setting;
 import slt.dto.AddFoodRequest;
 import slt.dto.FoodDto;
 import slt.dto.RegistrationRequest;
@@ -140,5 +141,10 @@ public abstract class AbstractApplicationIntegrationTest {
         );
         ResponseEntity responseEntity = logEntryService.storeLogEntries(newLogEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
+    }
+    protected void storeSetting(String name, String value) {
+        Setting setting = Setting.builder().name(name).value(value).build();
+        ResponseEntity responseEntity = settingsService.storeSetting(setting);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
 }

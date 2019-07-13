@@ -43,17 +43,6 @@ public class LogEntryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogEntryService.class);
 
-    @ApiOperation(value = "Retrieve all stored logentries")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAllLogEntries() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<slt.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
-
-        return ResponseEntity.ok(mapToDtos(userInfo, allLogEntries));
-    }
-
     @ApiOperation(value = "Retrieve all stored logentries for date")
     @RequestMapping(value = "/day/{date}",
             method = GET,
@@ -95,7 +84,7 @@ public class LogEntryService {
             if (logEntry.getId() == null) {
                 logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
                 List<LogEntry> addedEntryMatches = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
-                if (addedEntryMatches.size() > 1) {
+                if (addedEntryMatches.size() > 1) { // same food, but logged twice with maybe different portions
                     LogEntry newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogEntry::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
                     addedEntryMatches = new ArrayList<>();
                     addedEntryMatches.add(newestEntry);

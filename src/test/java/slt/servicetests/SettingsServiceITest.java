@@ -139,11 +139,7 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
         return (UserSettingsDto) userSettingEntity.getBody();
     }
 
-    private void storeSetting(String name, String value) {
-        Setting setting = Setting.builder().name(name).value(value).build();
-        ResponseEntity responseEntity = settingsService.storeSetting(setting);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-    }
+
 
 
     private java.sql.Date fromLocalDateToSQLDate(LocalDate localDate) {
