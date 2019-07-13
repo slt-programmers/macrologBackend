@@ -60,9 +60,21 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
+    public void testFoodAlreadyExists() {
+
+        AddFoodRequest foodOriginal = AddFoodRequest.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
+        ResponseEntity responseEntity = foodService.addFood(foodOriginal);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+
+        AddFoodRequest foodDuplicate = AddFoodRequest.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
+        responseEntity = foodService.addFood(foodDuplicate);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
     public void testFoodMultiplePortion() {
 
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder()
+        AddFoodRequest addFoodRequestMetPortions = AddFoodRequest.builder()
                 .name("foodMultiplePortion")
                 .carbs(1.0)
                 .fat(2.0)
@@ -79,7 +91,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
                         )
                 )
                 .build();
-        ResponseEntity responseEntity = foodService.addFood(addFoodRequestZonderPortions);
+        ResponseEntity responseEntity = foodService.addFood(addFoodRequestMetPortions);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
         ResponseEntity allFoodEntity = foodService.getAllFood();
@@ -104,7 +116,6 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(portion2.getGrams()).isEqualTo(300.0);
         assertThat(portion2.getId()).isNotNull();
         assertThat(portion2.getMacros()).isNotNull();
-
     }
 
     @Test

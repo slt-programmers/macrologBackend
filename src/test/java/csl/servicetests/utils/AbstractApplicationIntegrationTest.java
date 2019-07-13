@@ -1,12 +1,12 @@
 package csl.servicetests.utils;
 
 import csl.Application;
+import csl.dto.AddFoodRequest;
 import csl.dto.AuthenticationRequest;
+import csl.dto.FoodDto;
+import csl.dto.StoreLogEntryRequest;
 import csl.notification.MailService;
-import csl.rest.ActivityService;
-import csl.rest.AuthenticationService;
-import csl.rest.FoodService;
-import csl.rest.LogEntryService;
+import csl.rest.*;
 import csl.security.SecurityConstants;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
@@ -29,7 +29,11 @@ import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Slf4j
@@ -58,6 +62,18 @@ public abstract class AbstractApplicationIntegrationTest {
 
     @Autowired
     protected AuthenticationService authenticationService;
+
+    @Autowired
+    protected SettingsService settingsService;
+
+    @Autowired
+    protected WeightService weightService;
+
+    @Autowired
+    protected ImportService importService;
+
+    @Autowired
+    protected ExportService exportService;
 
     protected Integer createUser(String userEmail)  {
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
@@ -100,5 +116,29 @@ public abstract class AbstractApplicationIntegrationTest {
     protected boolean isEqualDate(Date date, LocalDate localDate) {
         return Instant.ofEpochMilli(date.getTime())
                 .atZone(ZoneId.systemDefault()).toLocalDate().equals(localDate);
+    }
+
+
+    protected FoodDto createFood(AddFoodRequest addFoodRequestZonderPortions) {
+        ResponseEntity responseEntity = foodService.addFood(addFoodRequestZonderPortions);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        ResponseEntity allFoodEntity = foodService.getAllFood();
+        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
+        return foodDtos.stream().filter(f -> f.getName().equals(addFoodRequestZonderPortions.getName())).findFirst().get();
+    }
+
+    protected void createLogEntry(String day, FoodDto savedFood, Long portionId, double multiplier) {
+        List<StoreLogEntryRequest> newLogEntries = Arrays.asList(
+                StoreLogEntryRequest.builder()
+                        .day(java.sql.Date.valueOf(LocalDate.parse(day)))
+                        .meal("BREAKFAST")
+                        .portionId(portionId)
+                        .foodId(savedFood.getId())
+                        .multiplier(multiplier)
+                        .build()
+        );
+        ResponseEntity responseEntity = logEntryService.storeLogEntries(newLogEntries);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
     }
 }

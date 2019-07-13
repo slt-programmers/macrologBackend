@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 @RestController
 @AllArgsConstructor
 @RequestMapping("/food")

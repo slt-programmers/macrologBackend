@@ -46,7 +46,7 @@ public class SettingsService {
     @RequestMapping(value = "",
             method = PUT,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity changeSetting(@RequestBody Setting setting) {
+    public ResponseEntity storeSetting(@RequestBody Setting setting) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if ("weight".equals(setting.getName())) {
             weightService.storeWeightEntry(
@@ -57,20 +57,6 @@ public class SettingsService {
         }
         settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(), setting.getDay() == null ? Date.valueOf(LocalDate.now()) : setting.getDay());
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    @ApiOperation(value = "Get all settings")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Deprecated
-    public ResponseEntity getAllSetting() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-
-        List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
-        // todo is this used? ja voor personal page, maar die krijgt nu teveel. Ombouwen om /user te gaan gebruiken
-
-        return ResponseEntity.ok(settings);
     }
 
     @ApiOperation(value = "Get user settings")
@@ -99,12 +85,13 @@ public class SettingsService {
     public ResponseEntity getSetting(@PathVariable("name") String name,
                                      @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Setting setting = null;
+        Setting setting;
         if (StringUtils.isEmpty(toDate)) {
             setting = settingsRepo.getLatestSetting(userInfo.getUserId(), name);
         } else {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                sdf.setLenient(false);
                 java.util.Date utilDate = sdf.parse(toDate);
                 setting = settingsRepo.getValidSetting(userInfo.getUserId(), name, new Date(utilDate.getTime()));
             } catch (ParseException pe) {
@@ -118,30 +105,27 @@ public class SettingsService {
         UserSettingsDto dto = new UserSettingsDto();
         dto.setName(mapSetting(settings, "name"));
         dto.setGender(mapSetting(settings, "gender"));
-        dto.setAge(Integer.valueOf(mapSetting(settings, "age")));
-        dto.setBirthday(LocalDateParser.parse(mapSetting(settings, "birthday")));
-        dto.setHeight(Integer.valueOf(mapSetting(settings, "height")));
-        dto.setActivity(Double.valueOf(mapSetting(settings, "activity")));
+        String ageSetting = mapSetting(settings, "age");
+        dto.setAge(StringUtils.isEmpty(ageSetting)?null:Integer.valueOf(ageSetting));
+        String birthdaySetting = mapSetting(settings, "birthday");
+        dto.setBirthday(StringUtils.isEmpty(birthdaySetting)?null:LocalDateParser.parse(birthdaySetting));
+        String heightSetting = mapSetting(settings, "height");
+        dto.setHeight(StringUtils.isEmpty(heightSetting)?null:Integer.valueOf(heightSetting));
+        String activitySetting = mapSetting(settings, "activity");
+        dto.setActivity(StringUtils.isEmpty(activitySetting)?null:Double.valueOf(activitySetting));
 
-        if (settingsContainGoals(settings)) {
-            dto.setGoalProtein(Integer.valueOf(mapSetting(settings, "goalProtein")));
-            dto.setGoalFat(Integer.valueOf(mapSetting(settings, "goalFat")));
-            dto.setGoalCarbs(Integer.valueOf(mapSetting(settings, "goalCarbs")));
-        }
+        String goalProteinSetting = mapSetting(settings, "goalProtein");
+        dto.setGoalProtein(StringUtils.isEmpty(goalProteinSetting)?null:Integer.valueOf(goalProteinSetting));
+        String goalFatSetting = mapSetting(settings, "goalFat");
+        dto.setGoalFat(StringUtils.isEmpty(goalFatSetting)?null:Integer.valueOf(goalFatSetting));
+        String goalCarbsSetting = mapSetting(settings, "goalCarbs");
+        dto.setGoalCarbs(StringUtils.isEmpty(goalCarbsSetting)?null:Integer.valueOf(goalCarbsSetting));
+
         return dto;
     }
 
     private String mapSetting(List<Setting> settings, String identifier) {
         return settings.stream().filter(s -> s.getName().equals(identifier)).max(Comparator.comparing(Setting::getDay)).orElse(new Setting()).getValue();
-    }
-
-    private boolean settingsContainGoals(List<Setting> settings) {
-        for (Setting setting : settings) {
-            if (setting.getName().contains("goal")) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

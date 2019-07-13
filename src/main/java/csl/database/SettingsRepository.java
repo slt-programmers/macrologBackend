@@ -137,7 +137,6 @@ public class SettingsRepository {
         return queryResults.isEmpty() ? null : queryResults.get(0);
     }
 
-
     public List<Setting> getAllSettings(Integer userId) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId);

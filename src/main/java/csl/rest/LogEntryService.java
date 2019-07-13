@@ -117,7 +117,7 @@ public class LogEntryService {
     @RequestMapping(value = "/{id}",
             method = DELETE,
             headers = {"Content-Type=application/json"})
-    public ResponseEntity storeLogEntry(@PathVariable("id") Long logEntryId) {
+    public ResponseEntity deleteLogEntry(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logEntryRepository.deleteLogEntry(userInfo.getUserId(), logEntryId);
         return ResponseEntity.status(HttpStatus.OK).build();
