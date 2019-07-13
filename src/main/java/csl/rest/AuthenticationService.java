@@ -5,7 +5,9 @@ import csl.database.UserAcccountRepository;
 import csl.database.model.Setting;
 import csl.database.model.UserAccount;
 import csl.dto.AuthenticationRequest;
+import csl.dto.RegistrationRequest;
 import csl.dto.ChangePasswordRequest;
+import csl.dto.ResetPasswordRequest;
 import csl.notification.MailService;
 import csl.security.ThreadLocalHolder;
 import csl.security.UserInfo;
@@ -86,7 +88,7 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity signUp(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity signUp(@RequestBody RegistrationRequest request) {
         log.info(request.getEmail());
         String username = request.getUsername();
         String hashedPassword = DigestUtils.sha256Hex(request.getPassword());
@@ -130,7 +132,7 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/resetPassword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity resetPassword(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity resetPassword(@RequestBody ResetPasswordRequest request) {
         log.info("Reset email");
         String email = request.getEmail();
         UserAccount account = userAcccountRepository.getUserByEmail(email);

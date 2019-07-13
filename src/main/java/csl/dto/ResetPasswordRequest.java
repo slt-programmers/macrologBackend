@@ -7,9 +7,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationRequest {
+public class ResetPasswordRequest {
 
-    private String username;
-    private String password;
+    private String email;
 
 }

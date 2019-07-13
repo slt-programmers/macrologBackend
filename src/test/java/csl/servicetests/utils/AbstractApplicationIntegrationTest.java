@@ -1,7 +1,7 @@
 package csl.servicetests.utils;
 
 import csl.Application;
-import csl.dto.AuthenticationRequest;
+import csl.dto.RegistrationRequest;
 import csl.notification.MailService;
 import csl.rest.ActivityService;
 import csl.rest.AuthenticationService;
@@ -60,8 +60,8 @@ public abstract class AbstractApplicationIntegrationTest {
     protected AuthenticationService authenticationService;
 
     protected Integer createUser(String userEmail)  {
-        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
-        ResponseEntity responseEntity = authenticationService.signUp(authenticationRequest);
+        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
+        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
         Assert.isTrue(202 == responseEntity.getStatusCodeValue());
         return getUserIdFromResponseHeaderJWT(responseEntity);
     }
