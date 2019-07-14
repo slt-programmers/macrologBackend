@@ -1,7 +1,6 @@
 package slt.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +21,7 @@ import slt.notification.MailService;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.JWTBuilder;
+import slt.util.PasswordUtils;
 
 import java.time.LocalDateTime;
 
@@ -45,7 +45,7 @@ public class AuthenticationService {
     @PostMapping(path = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
         String username = request.getUsername();
-        String hashedPassword = DigestUtils.sha256Hex(request.getPassword());
+        String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
         log.info("Login attempt {} ", username);
 
         UserAccount userAccount = userAcccountRepository.getUser(username);
@@ -78,7 +78,7 @@ public class AuthenticationService {
     public ResponseEntity signUp(@RequestBody RegistrationRequest request) {
         log.info(request.getEmail());
         String username = request.getUsername();
-        String hashedPassword = DigestUtils.sha256Hex(request.getPassword());
+        String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
         String email = request.getEmail();
         log.info("Add user attempt: {}", username);
 
@@ -118,7 +118,7 @@ public class AuthenticationService {
         UserAccount account = userAcccountRepository.getUserByEmail(email);
         if (account != null) {
             String randomPassword = RandomStringUtils.randomAlphabetic(10);
-            String hashedRandomPassword = DigestUtils.sha256Hex(randomPassword);
+            String hashedRandomPassword = PasswordUtils.hashPassword(randomPassword);
 
             userAcccountRepository.updatePassword(account.getUsername(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
             new Thread(() -> mailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
@@ -131,9 +131,9 @@ public class AuthenticationService {
 
     @PostMapping(path = "/changePassword", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request) {
-        String oldPasswordHashed = DigestUtils.sha256Hex(request.getOldPassword());
-        String newPasswordHashed = DigestUtils.sha256Hex(request.getNewPassword());
-        String confirmPasswordHashed = DigestUtils.sha256Hex(request.getConfirmPassword());
+        String oldPasswordHashed = PasswordUtils.hashPassword(request.getOldPassword());
+        String newPasswordHashed = PasswordUtils.hashPassword(request.getNewPassword());
+        String confirmPasswordHashed = PasswordUtils.hashPassword(request.getConfirmPassword());
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
         log.info("Update password attempt for userId: {}", userInfo.getUserId());
@@ -159,7 +159,7 @@ public class AuthenticationService {
 
     @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteAccount(@RequestParam("password") String password) {
-        String passwordHashed = DigestUtils.sha256Hex(password);
+        String passwordHashed = PasswordUtils.hashPassword(password);
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAcccountRepository.getUserById(userId);

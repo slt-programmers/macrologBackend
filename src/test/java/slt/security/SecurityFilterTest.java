@@ -15,9 +15,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class SecurityFilterTest {
 

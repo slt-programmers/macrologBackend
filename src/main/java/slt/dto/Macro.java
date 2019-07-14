@@ -10,7 +10,6 @@ public class Macro {
     private Double fat;
     @ApiModelProperty(notes = "Number of carbs", required = true)
     private Double carbs;
-    private Double calories;
 
     public Macro(Double protein, Double fat, Double carbs) {
         this.protein = protein;

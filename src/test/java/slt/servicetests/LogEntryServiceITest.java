@@ -212,6 +212,55 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
+    public void testGetMacrosMultipleLogEntriesOnADay(){
+
+        String day = "1960-01-05";
+        String nameFood = "macrostestMultipleAdAY";
+
+        // 1 create a food without portion:
+        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+
+        createLogEntry(day,savedFood, null, 1.0);
+        createLogEntry(day,savedFood, null, 3.0);
+
+        // check correctly added:
+        List<LogEntryDto> entriesForDay = getLogEntriesForDay(day);
+        assertThat(entriesForDay).hasSize(2);
+
+        ResponseEntity macrosFromPeriod = logEntryService.getMacrosFromPeriod("1960-01-05", "1960-01-06");
+        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+
+        List<DayMacro> foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        assertThat(foundMacros).hasSize(1);
+        assertThat(foundMacros.get(0).getMacro().getProtein()).isEqualTo(savedFood.getProtein()*4);
+        assertThat(foundMacros.get(0).getMacro().getFat()).isEqualTo(savedFood.getFat()*4);
+        assertThat(foundMacros.get(0).getMacro().getCarbs()).isEqualTo(savedFood.getCarbs()*4);
+
+
+        // 4 eenheden en calorieen: 9xfat 4xprotein 4xcarb controle
+        assertThat(foundMacros.get(0).getMacro().getCalories()).
+                isEqualTo(savedFood.getCarbs()*4*4 + savedFood.getProtein()*4*4 + savedFood.getFat()*4*9);
+
+
+        macrosFromPeriod = logEntryService.getMacrosFromPeriod("1960-01-01", "1960-01-05");
+        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+
+        foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        assertThat(foundMacros).hasSize(1);
+
+        macrosFromPeriod = logEntryService.getMacrosFromPeriod("1960-01-01", "1960-01-04");
+        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+
+        foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        assertThat(foundMacros).hasSize(0);
+
+
+    }
+
+
+
+    @Test
     public void testGetMacrosWithPortion(){
 
         String day = "2002-01-05";
