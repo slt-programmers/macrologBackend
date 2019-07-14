@@ -25,9 +25,6 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-
 @RestController
 @RequestMapping("/settings")
 @Api(value = "settings")

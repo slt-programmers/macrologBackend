@@ -3,8 +3,6 @@ package slt.rest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,14 +21,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-
 @Slf4j
 @RestController
 @RequestMapping("/activities")
 @Api(value = "logs")
 public class ActivityService {
-
 
     @Autowired
     private ActivityRepository logActitivyRepository;
@@ -79,7 +74,7 @@ public class ActivityService {
 
 
     @ApiOperation(value = "Delete activity")
-    @DeleteMapping(value="/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteActivity(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logActitivyRepository.deleteLogActivity(userInfo.getUserId(), logEntryId);

@@ -17,8 +17,6 @@ import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-
 @RestController
 @RequestMapping("/weight")
 @Api(value = "weight")
