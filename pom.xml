@@ -16,10 +16,14 @@
         <version>2.0.0.RELEASE</version>
     </parent>
 
-    <!--<properties>-->
-        <!--<sonar.sources>src/main,src/test</sonar.sources>-->
-        <!--<sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>-->
-    <!--</properties>-->
+    <properties>
+        <sonar.sources>src/main</sonar.sources>
+        <sonar.tests>src/test</sonar.tests>
+        <sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>
+
+        <!--File src/test/java/PortionRepositoryTest.java can't be indexed twice. Please check that inclusion/exclusion patterns produce disjoint sets for main and test files-->
+
+    </properties>
 
     <!-- Add typical dependencies for a web application -->
     <dependencies>
