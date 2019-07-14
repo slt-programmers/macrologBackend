@@ -6,8 +6,7 @@ import lombok.*;
 import java.util.Date;
 
 @Builder
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class StoreLogEntryRequest {
