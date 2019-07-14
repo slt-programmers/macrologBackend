@@ -20,7 +20,7 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>
-
+        <sonar.java.libraries>${HOME}/.m2/repository</sonar.java.libraries>
         <!--File src/test/java/PortionRepositoryTest.java can't be indexed twice. Please check that inclusion/exclusion patterns produce disjoint sets for main and test files-->
 
     </properties>
