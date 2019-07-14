@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import slt.database.FoodRepository;
 import slt.database.MealRepository;
 import slt.database.PortionRepository;
@@ -24,8 +21,6 @@ import slt.security.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-
 @RestController
 @RequestMapping("/meals")
 @Api(value = "meals")
@@ -39,9 +34,7 @@ public class MealService {
     private PortionRepository portionRepository;
 
     @ApiOperation(value = "Retrieve all meals")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllMeals() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Meal> allMeals = mealRepository.getAllMeals(userInfo.getUserId());
@@ -50,9 +43,7 @@ public class MealService {
     }
 
     @ApiOperation(value = "Insert meal")
-    @RequestMapping(value = "",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeMeal(@RequestBody Meal meal) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (meal.getId() == null) {
@@ -65,9 +56,7 @@ public class MealService {
     }
 
     @ApiOperation(value = "Delete meal")
-    @RequestMapping(value = "/{id}",
-            method = DELETE,
-            headers = {"Content-Type=application/json"})
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteMeal(@PathVariable("id") Long mealId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         mealRepository.deleteMeal(userInfo.getUserId(), mealId);

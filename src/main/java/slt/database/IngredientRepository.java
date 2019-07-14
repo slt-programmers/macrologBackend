@@ -55,17 +55,8 @@ public class IngredientRepository {
         if (mealIds.isEmpty()){
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Long id : mealIds) {
-            stringBuilder.append(id);
-            stringBuilder.append(", ");
-        }
-        String mealIdsString = stringBuilder.toString();
-        if (mealIdsString.length() != 0) {
-            mealIdsString = mealIdsString.substring(0, mealIdsString.length() - 2);
-        }
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("mealIds", mealIdsString);
+                .addValue("mealIds", mealIds);
         return template.update(DELETE_ALL_SQL, params);
     }
 

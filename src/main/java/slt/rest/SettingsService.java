@@ -43,9 +43,7 @@ public class SettingsService {
     private WeightService weightService;
 
     @ApiOperation(value = "Store new setting or change existing one")
-    @RequestMapping(value = "",
-            method = PUT,
-            headers = {"Content-Type=application/json"})
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeSetting(@RequestBody Setting setting) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if ("weight".equals(setting.getName())) {
@@ -60,9 +58,7 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Get user settings")
-    @RequestMapping(value = "/user",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/user",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getUserSetting() {
         UserSettingsDto userSettingsDto = getUserSettingsDto();
         return ResponseEntity.ok(userSettingsDto);
@@ -79,9 +75,7 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Get setting")
-    @RequestMapping(value = "/{name}",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{name}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getSetting(@PathVariable("name") String name,
                                      @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

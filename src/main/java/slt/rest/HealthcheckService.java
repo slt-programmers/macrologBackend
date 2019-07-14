@@ -4,10 +4,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequestMapping("/healthcheck")
@@ -15,9 +14,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class HealthcheckService {
 
     @ApiOperation(value = "Is healthy?")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity isHealthy() {
         boolean healthy = true;
         return ResponseEntity.ok(healthy);

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
@@ -47,9 +48,7 @@ public class ExportService {
     private WeightRepository weightRepository;
 
     @ApiOperation(value = "Retrieve all stored information")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAll() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
@@ -96,7 +95,7 @@ public class ExportService {
 
             Macro macrosCalculated = new Macro();
             if (portionDto != null) {
-                macrosCalculated = logEntryDto.getPortion().getMacros().clone();
+                macrosCalculated = logEntryDto.getPortion().getMacros().createCopy();
                 macrosCalculated.multiply(multiplier);
 
             } else {
@@ -131,6 +130,7 @@ public class ExportService {
         if (withPortions) {
             List<slt.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
             for (slt.database.model.Portion portion : foodPortions) {
+
                 PortionDto currDto = new PortionDto();
                 currDto.setDescription(portion.getDescription());
                 currDto.setGrams(portion.getGrams());

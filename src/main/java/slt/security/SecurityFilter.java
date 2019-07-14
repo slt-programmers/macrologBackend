@@ -38,7 +38,7 @@ public class SecurityFilter implements Filter {
     }
 
     protected String getFromEnvironment() {
-        return System.getenv("allow.crossorigin");
+        return System.getenv("allow.crossorigin");//NOSONAR
     }
 
     @Override

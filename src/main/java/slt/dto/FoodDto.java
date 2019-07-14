@@ -2,13 +2,16 @@ package slt.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FoodDto {
 
@@ -17,63 +20,12 @@ public class FoodDto {
     private Double protein;
     private Double fat;
     private Double carbs;
-    private List<PortionDto> portions;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Double getProtein() {
-        return protein;
-    }
-
-    public void setProtein(Double protein) {
-        this.protein = protein;
-    }
-
-    public Double getFat() {
-        return fat;
-    }
-
-    public void setFat(Double fat) {
-        this.fat = fat;
-    }
-
-    public Double getCarbs() {
-        return carbs;
-    }
-
-    public void setCarbs(Double carbs) {
-        this.carbs = carbs;
-    }
-
-    public List<PortionDto> getPortions() {
-        if (portions == null) {
-            portions = new ArrayList<>();
-        }
-        return portions;
-    }
-
-    public void setPortions(List<PortionDto> portionDtos) {
-        this.portions = portionDtos;
-    }
+    @Singular
+    private List<PortionDto> portions = new ArrayList<>();
 
     public void addPortion(PortionDto currDto) {
-        if (portions == null) {
-            portions = new ArrayList<>();
-        }
         portions.add(currDto);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
 }

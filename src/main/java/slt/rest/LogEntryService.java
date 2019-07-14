@@ -2,6 +2,7 @@ package slt.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RestController
 @RequestMapping("/logs")
 @Api(value = "logs")
+@Slf4j
 public class LogEntryService {
 
     @Autowired
@@ -41,22 +43,18 @@ public class LogEntryService {
     @Autowired
     private LogEntryRepository logEntryRepository;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogEntryService.class);
-
     @ApiOperation(value = "Retrieve all stored logentries for date")
-    @RequestMapping(value = "/day/{date}",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getLogEntriesForDay(@PathVariable("date") String date) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        LOGGER.debug("Request for " + userInfo);
+        log.debug("Request for " + userInfo);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date parsedDate;
         try {
             parsedDate = sdf.parse(date);
         } catch (ParseException e) {
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
 
@@ -67,9 +65,7 @@ public class LogEntryService {
     }
 
     @ApiOperation(value = "Store logentries")
-    @RequestMapping(value = "",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeLogEntries(@RequestBody List<StoreLogEntryRequest> logEntries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogEntryDto> newEntries = new ArrayList<>();
@@ -90,7 +86,7 @@ public class LogEntryService {
                     addedEntryMatches.add(newestEntry);
                 }
                 if (addedEntryMatches.size() != 1) {
-                    LOGGER.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getFoodId() + " - " + entry.getDay());
+                    log.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getFoodId() + " - " + entry.getDay());
                 }
                 newEntries.add(mapToDto(userInfo, addedEntryMatches.get(0)));
             } else {
@@ -103,18 +99,14 @@ public class LogEntryService {
     }
 
     @ApiOperation(value = "Delete logentry")
-    @RequestMapping(value = "/{id}",
-            method = DELETE,
-            headers = {"Content-Type=application/json"})
+    @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteLogEntry(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logEntryRepository.deleteLogEntry(userInfo.getUserId(), logEntryId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @RequestMapping(value = "/macros",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/macros", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
@@ -125,14 +117,14 @@ public class LogEntryService {
             parsedFromDate = sdf.parse(fromDate);
             parsedToDate = sdf.parse(toDate);
         } catch (ParseException e) {
-            LOGGER.error(e.getMessage());
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
 
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedFromDate, parsedToDate);
 
         List<LogEntryDto> logEntryDtos = transformToDtos(allLogEntries, userInfo);
-        LOGGER.debug("Aantal dtos: " + logEntryDtos.size());
+        log.debug("Aantal dtos: " + logEntryDtos.size());
 
         Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
             LogEntryDto logEntryDto = new LogEntryDto();
@@ -195,7 +187,7 @@ public class LogEntryService {
 
         Macro macrosCalculated = new Macro();
         if (portion != null) {
-            macrosCalculated = dto.getPortion().getMacros().clone();
+            macrosCalculated = dto.getPortion().getMacros().createCopy();
             macrosCalculated.multiply(multiplier);
 
         } else {
@@ -213,12 +205,12 @@ public class LogEntryService {
 
     private List<LogEntryDto> transformToDtos(List<slt.database.model.LogEntry> allLogEntries, UserInfo userInfo) {
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
-        LOGGER.info("Export: allFood size = " + allFood.size());
+        log.info("Export: allFood size = " + allFood.size());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
             allFoodDtos.add(createFoodDto(food, true));
         }
-        LOGGER.info("Export: allFoodDtos size = " + allFoodDtos.size());
+        log.info("Export: allFoodDtos size = " + allFoodDtos.size());
 
 
         List<LogEntryDto> allDtos = new ArrayList<>();
@@ -248,7 +240,7 @@ public class LogEntryService {
 
             Macro macrosCalculated = new Macro();
             if (portionDto != null) {
-                macrosCalculated = logEntryDto.getPortion().getMacros().clone();
+                macrosCalculated = logEntryDto.getPortion().getMacros().createCopy();
                 macrosCalculated.multiply(multiplier);
 
             } else {

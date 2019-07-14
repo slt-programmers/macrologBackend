@@ -2,16 +2,14 @@ package slt.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import slt.database.ActivityRepository;
 import slt.database.model.LogActivity;
 import slt.dto.LogActivityDto;
@@ -27,23 +25,22 @@ import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/activities")
 @Api(value = "logs")
 public class ActivityService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActivityService.class);
+
     @Autowired
     private ActivityRepository logActitivyRepository;
 
     @ApiOperation(value = "Retrieve all stored activities for date")
-    @RequestMapping(value = "/day/{date}",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getActivitiesForDay(@PathVariable("date") String date) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        LOGGER.debug("Request for " + userInfo);
+        log.debug("Request for " + userInfo);
         LocalDate localDate = LocalDateParser.parse(date);
         List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), localDate);
         List<LogActivityDto> logEntryDtos = mapToDtos(allLogEntries);
@@ -52,9 +49,7 @@ public class ActivityService {
     }
 
     @ApiOperation(value = "Store activities")
-    @RequestMapping(value = "",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeActivities(@RequestBody List<LogActivityDto> logActivities) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogActivityDto> newEntries = new ArrayList<>();
@@ -69,7 +64,7 @@ public class ActivityService {
                     addedEntryMatches.add(newestEntry);
                 }
                 if (addedEntryMatches.size() != 1) {
-                    LOGGER.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getName() + " - " + entry.getDay());
+                    log.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getName() + " - " + entry.getDay());
                 }
                 newEntries.add(mapToDto(addedEntryMatches.get(0)));
             } else {
@@ -82,6 +77,15 @@ public class ActivityService {
         return ResponseEntity.ok(newEntries);
     }
 
+
+    @ApiOperation(value = "Delete activity")
+    @DeleteMapping(value="/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity deleteActivity(@PathVariable("id") Long logEntryId) {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        logActitivyRepository.deleteLogActivity(userInfo.getUserId(), logEntryId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     private LogActivity mapActivityDtoToDomain(LogActivityDto logEntry) {
         LogActivity entry = new LogActivity();
         entry.setName(logEntry.getName());
@@ -89,16 +93,6 @@ public class ActivityService {
         entry.setDay(new Date(logEntry.getDay().getTime()));
         entry.setId(logEntry.getId());
         return entry;
-    }
-
-    @ApiOperation(value = "Delete activity")
-    @RequestMapping(value = "/{id}",
-            method = DELETE,
-            headers = {"Content-Type=application/json"})
-    public ResponseEntity deleteActivity(@PathVariable("id") Long logEntryId) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        logActitivyRepository.deleteLogActivity(userInfo.getUserId(), logEntryId);
-        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     private List<LogActivityDto> mapToDtos(List<LogActivity> allLogActivities) {

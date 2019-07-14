@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import slt.database.WeightRepository;
 import slt.database.model.Weight;
 import slt.dto.WeightDto;
@@ -31,9 +28,7 @@ public class WeightService {
     private WeightRepository weightRepository;
 
     @ApiOperation(value = "Retrieve all tracked weights")
-    @RequestMapping(value = "",
-            method = GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllWeightEntries() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
@@ -42,9 +37,7 @@ public class WeightService {
     }
 
     @ApiOperation(value = "Store weight entry")
-    @RequestMapping(value = "",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Weight entry = mapWeightDtoToDomain(weightEntry);
@@ -64,10 +57,9 @@ public class WeightService {
         return ResponseEntity.ok().build();
     }
 
+
     @ApiOperation(value = "Delete weight entry")
-    @RequestMapping(value = "/{id}",
-            method = DELETE,
-            headers = {"Content-Type=application/json"})
+    @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteWeightEntry(@PathVariable("id") Long weightEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         weightRepository.deleteWeight(userInfo.getUserId(), weightEntryId);

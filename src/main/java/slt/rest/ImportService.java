@@ -1,11 +1,14 @@
 package slt.rest;
 
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +26,7 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
+@Slf4j
 @RequestMapping("/import")
 public class ImportService {
 
@@ -39,15 +43,11 @@ public class ImportService {
     @Autowired
     private WeightRepository weightRepository;
 
-    private Logger LOGGER = LoggerFactory.getLogger(ImportService.class);
-
     @ApiOperation(value = "Import exported json")
-    @RequestMapping(value = "",
-            method = POST,
-            headers = {"Content-Type=application/json"})
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity setAll(@RequestBody Export export) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        LOGGER.debug("export = " + export);
+        log.debug("export = " + export);
 
         List<Setting> settings = export.getAllSettings();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -106,8 +106,8 @@ public class ImportService {
         if (matches.size() == 1) {
             foundFood = matches.get(0);
         } else {
-            LOGGER.error("Multiple Food with name " + foodName + " found");
-            LOGGER.error("Selecting first from list");
+            log.error("Multiple Food with name " + foodName + " found");
+            log.error("Selecting first from list");
             foundFood = matches.get(0);
         }
         return foundFood;

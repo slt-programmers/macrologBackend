@@ -26,7 +26,7 @@ public class PortionRepository {
     private static final String SELECT_SQL = "SELECT * FROM " + TABLE_NAME;
     private static final String INSERT_SQL = "INSERT INTO " + TABLE_NAME + "(food_Id, description, grams) VALUES(:foodId, :description, :grams)";
     private static final String UPDATE_SQL = "UPDATE " + TABLE_NAME + " SET food_Id = :foodId, description = :description, grams =:grams WHERE id = :id";
-    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE food_id IN(:foodIds)";
+    private static final String DELETE_ALL_SQL = "DELETE FROM " + TABLE_NAME + " WHERE food_id IN (:foodIds)";
 
     @Autowired
     DatabaseHelper databaseHelper;
@@ -88,17 +88,8 @@ public class PortionRepository {
         if (foodIds.isEmpty()){
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Long id : foodIds) {
-            stringBuilder.append(id);
-            stringBuilder.append(", ");
-        }
-        String foodIdsString = stringBuilder.toString();
-        if (foodIdsString.length() != 0) {
-            foodIdsString = foodIdsString.substring(0, foodIdsString.length() - 2);
-        }
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("foodIds", foodIdsString);
+                .addValue("foodIds", foodIds);
         return template.update(DELETE_ALL_SQL, params);
     }
 
