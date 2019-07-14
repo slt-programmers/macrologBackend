@@ -4,8 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -17,69 +17,83 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 @Order(1)
+@Slf4j
 public class SecurityFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityFilter.class);
+    private String allowOrigin = null;
+
+    protected String getAllowOrigin() {
+        return allowOrigin;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) {
-        LOGGER.debug("Security filter init");
+
+        if (allowOrigin == null) {
+            String allowOriginEnv = getFromEnvironment();
+            allowOrigin= StringUtils.isEmpty(allowOriginEnv)?"http://localhost:4200":allowOriginEnv;
+        }
+        log.debug("Security filter init");
+        log.debug("Only accepting requests form " + allowOrigin);
+    }
+
+    protected String getFromEnvironment() {
+        return System.getenv("allow.crossorigin");
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if ("OPTIONS".equalsIgnoreCase(((HttpServletRequest) request).getMethod())) {
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
-            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "*");
+            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getAllowOrigin());
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Content-Type,Authorization");
             chain.doFilter(request, response);
         } else {
-            String getenv = System.getenv("allow.crossorigin");
-            if (getenv == null || getenv.equals("")) {
-                getenv = "http://localhost:4200";
-            }
 
-            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getenv);
+            ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getAllowOrigin());
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Max-Age", "3600");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
 
             HttpServletRequest req = (HttpServletRequest) request;
-            LOGGER.debug("Starting req : {}", req.getRequestURI());
+            log.debug("Starting req : {}", req.getRequestURI());
             String token = req.getHeader("Authorization");
             if (token != null && token.startsWith("Bearer")) {
                 String jwtToken = token.substring("Bearer".length() + 1);
-                LOGGER.debug(jwtToken);
+                log.debug(jwtToken);
                 Object userId;
                 try {
                     Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
                     userId = claimsJws.getBody().get("userId");
-                    LOGGER.debug("Userid from token = " + userId);
+                    log.debug("Userid from token = " + userId);
                     UserInfo userInfo = new UserInfo();
                     userInfo.setUserId(Integer.valueOf(userId.toString()));
                     ThreadLocalHolder.getThreadLocal().set(userInfo);
                     chain.doFilter(request, response);
                 } catch (ExpiredJwtException expiredEx) {
-                    LOGGER.debug("ExpiredJWT token.");
+                    log.debug("ExpiredJWT token.");
                     ((HttpServletResponse) response).sendError(403, "Expired session");
+                } catch (Exception general) {
+                    log.debug("Incorrect token");
+                    ((HttpServletResponse) response).sendError(403, "Invalid token");
                 }
-            } else if (((HttpServletRequest) request).getRequestURI().startsWith("/swagger-resources") ||
-                    ((HttpServletRequest) request).getRequestURI().startsWith("/webjars/") ||
-                    ((HttpServletRequest) request).getRequestURI().startsWith("/v2/api-docs") ||
-                    ((HttpServletRequest) request).getRequestURI().startsWith("/swagger-ui.html")) {
-                LOGGER.debug("Swagger");
-                chain.doFilter(request, response);
-
-            } else if (((HttpServletRequest) request).getRequestURI().startsWith("/api/")) {
-                LOGGER.debug("Unsecured section of website");
+            } else if (isPublicResourceURL((HttpServletRequest) request)) {
                 chain.doFilter(request, response);
             } else {
                 ((HttpServletResponse) response).sendError(403);
             }
-            LOGGER.debug("Finish req : {}", req.getRequestURI());
+            log.debug("Finish req : {}", req.getRequestURI());
         }
+    }
+
+    protected boolean isPublicResourceURL(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/swagger-resources") ||
+                request.getRequestURI().startsWith("/webjars/") ||
+                request.getRequestURI().startsWith("/api/") ||
+                request.getRequestURI().startsWith("/v2/api-docs") ||
+                request.getRequestURI().startsWith("/swagger-ui.html");
     }
 
     @Override

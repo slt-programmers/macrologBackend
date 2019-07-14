@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -23,13 +21,9 @@ import slt.dto.ResetPasswordRequest;
 import slt.notification.MailService;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.util.JWTBuilder;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Date;
-
-import static slt.security.SecurityConstants.EXPIRATION_TIME;
-import static slt.security.SecurityConstants.SECRET;
 
 @RestController
 @RequestMapping("/api")
@@ -70,16 +64,9 @@ public class AuthenticationService {
             if (nameSetting != null) {
                 name = nameSetting.getValue();
             }
-            String jwt = Jwts.builder()
-                    .setSubject("users/TzMUocMF4p")
-                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                    .claim("name", name)
-                    .claim("userId", userAccount.getId())
-                    .signWith(
-                            SignatureAlgorithm.HS256,
-                            SECRET.getBytes(StandardCharsets.UTF_8)
-                    )
-                    .compact();
+            JWTBuilder builder = new JWTBuilder();
+            String jwt = builder.generateJWT(name, userAccount.getId());
+
             MultiValueMap<String, String> responseHeaders = new HttpHeaders();
             responseHeaders.add("token", jwt);
             log.info("Login successful");
@@ -112,16 +99,9 @@ public class AuthenticationService {
 
         UserAccount newAccount = account;
 
-        String jwt = Jwts.builder()
-                .setSubject("users/TzMUocMF4p")
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .claim("name", username)
-                .claim("userId", newAccount.getId())
-                .signWith(
-                        SignatureAlgorithm.HS256,
-                        SECRET.getBytes(StandardCharsets.UTF_8)
-                )
-                .compact();
+        JWTBuilder builder = new JWTBuilder();
+        String jwt = builder.generateJWT(username, newAccount.getId());
+
         MultiValueMap<String, String> responseHeaders = new HttpHeaders();
         responseHeaders.add("token", jwt);
         log.info("Signup successful");

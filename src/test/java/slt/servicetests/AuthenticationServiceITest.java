@@ -194,6 +194,36 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
     }
 
+    @Test
+    void testDeleteAccountTwice() {
+
+        String userName = "userDeleteAccount";
+        String userEmail = "userDeleteAccount@test.example";
+        String password = "password1";
+
+        // 1e: keer aanmaken succesvol:
+        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
+        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+
+        setUserContextFromJWTResponseHeader(responseEntity);
+
+        // 1e keer inloggen met wachtwoord
+        AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        responseEntity = authenticationService.authenticateUser(authRequest);
+        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+
+
+        // verwijder met correct wachtwoord uitvoeren
+        deleteAccount(password);
+
+        // verwijder nomaals
+        responseEntity = authenticationService.deleteAccount(password);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
+
+    }
+
+
 
     @Test
     void deleteFilledAccount() {
