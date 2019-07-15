@@ -1,7 +1,6 @@
 package slt.database.model;
 
 import lombok.*;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.sql.Date;
 import java.time.LocalDate;

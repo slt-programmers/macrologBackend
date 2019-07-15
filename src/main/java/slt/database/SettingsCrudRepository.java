@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import slt.database.entities.Setting;
-import slt.database.entities.UserAccount;
 
 import java.util.Date;
 import java.util.List;

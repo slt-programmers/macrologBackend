@@ -17,7 +17,6 @@ import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;

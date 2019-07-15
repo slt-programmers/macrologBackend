@@ -5,6 +5,10 @@ jdk:
 get:
   depth: false
 
+branches:
+  only:
+  - /.*/
+
 addons:
   sonarcloud:
     organization: "slt-programmers"
