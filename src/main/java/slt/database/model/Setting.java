@@ -1,6 +1,7 @@
 package slt.database.model;
 
 import lombok.*;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -16,5 +17,6 @@ public class Setting {
     private String name;
     private String value;
     private Date day = Date.valueOf(LocalDate.now());
+
 
 }

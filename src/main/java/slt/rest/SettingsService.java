@@ -84,7 +84,7 @@ public class SettingsService {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 sdf.setLenient(false);
                 java.util.Date utilDate = sdf.parse(toDate);
-                setting = settingsRepo.getValidSetting(userInfo.getUserId(), name, new Date(utilDate.getTime()));
+                setting = settingsRepo.getValidSettingOLD(userInfo.getUserId(), name, new Date(utilDate.getTime()));
             } catch (ParseException pe) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }

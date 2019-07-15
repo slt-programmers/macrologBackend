@@ -10,8 +10,13 @@ spring:
       FAIL_ON_NUMBERS_FOR_ENUMS: true
       ACCEPT_EMPTY_STRING_AS_NULL_OBJECT: true
       FAIL_ON_UNKNOWN_PROPERTIES: true
+  jpa:
+    show-sql: true
+#    hibernate:
+#       ddl-auto: validate
+    properties.hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
   datasource:
-     url: ${datasource.username}
+     url: ${datasource.url}
      username: ${datasource.username}
      password: ${datasource.password}
      driverClassName: com.mysql.cj.jdbc.Driver

@@ -47,8 +47,6 @@ public class ImportService {
         log.debug("export = " + export);
 
         List<Setting> settings = export.getAllSettings();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
         for (Setting setting : settings) {
             settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(), setting.getDay());
         }

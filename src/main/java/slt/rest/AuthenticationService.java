@@ -120,7 +120,7 @@ public class AuthenticationService {
             String randomPassword = RandomStringUtils.randomAlphabetic(10);
             String hashedRandomPassword = PasswordUtils.hashPassword(randomPassword);
 
-            userAcccountRepository.updatePassword(account.getUsername(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
+            userAcccountRepository.updatePassword(account.getId(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
             new Thread(() -> mailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
             return ResponseEntity.ok("Email matches");
         } else {
@@ -151,7 +151,7 @@ public class AuthenticationService {
                 return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
             } else {
                 log.info("Passwords match");
-                userAcccountRepository.updatePassword(userAccount.getUsername(), newPasswordHashed, null, null);
+                userAcccountRepository.updatePassword(userAccount.getId(), newPasswordHashed, null, null);
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
@@ -186,7 +186,7 @@ public class AuthenticationService {
 
             if (resettedPasswordOK && withinTimeFrame) {
                 log.info("Password has been reset to verified new password");
-                userAcccountRepository.updatePassword(account.getUsername(), hashedPassword, null, null);
+                userAcccountRepository.updatePassword(account.getId(), hashedPassword, null, null);
                 return true;
             } else {
                 return false;

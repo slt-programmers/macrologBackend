@@ -2,6 +2,7 @@ package slt.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import slt.security.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/meals")
 @Api(value = "meals")
@@ -47,7 +49,7 @@ public class MealService {
     public ResponseEntity storeMeal(@RequestBody Meal meal) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (meal.getId() == null) {
-            System.out.println(meal);
+            log.debug(meal.getName());
             mealRepository.insertMeal(userInfo.getUserId(), meal);
         } else {
             mealRepository.updateMeal(userInfo.getUserId(), meal);
