@@ -3,8 +3,6 @@ package slt;
 import com.google.common.collect.Lists;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import slt.config.DatabaseConfig;
-import slt.database.DatabaseHelper;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -47,11 +45,6 @@ public class ApplicationConfig {
     private SecurityContext securityContext() {
         return SecurityContext.builder().securityReferences(defaultAuth())
                 .forPaths(PathSelectors.any()).build();
-    }
-
-    @Bean
-    public DatabaseHelper createHelper(DatabaseConfig databaseConfig) {
-        return new DatabaseHelper(databaseConfig);
     }
 
     private List<SecurityReference> defaultAuth() {
