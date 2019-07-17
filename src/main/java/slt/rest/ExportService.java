@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
-import slt.database.model.Food;
-import slt.database.model.LogActivity;
-import slt.database.model.Setting;
-import slt.database.model.Weight;
+import slt.database.entities.*;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -25,7 +22,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/export")
 public class ExportService {
-
 
     @Autowired
     private FoodRepository foodRepository;
@@ -60,10 +56,10 @@ public class ExportService {
         log.info("Export: allFoodDtos size = " + allFoodDtos.size());
         export.setAllFood(allFoodDtos);
 
-        List<slt.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
 
         List<LogEntryDto> allDtos = new ArrayList<>();
-        for (slt.database.model.LogEntry logEntry : allLogEntries) {
+        for (LogEntry logEntry : allLogEntries) {
 
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
@@ -109,7 +105,7 @@ public class ExportService {
         export.setAllLogEntries(allDtos);
 
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
-        export.setAllSettings(settings);
+        export.setAllSettingDtos(transformToOldSetting(settings));
 
         List<LogActivity> activities = activityRepository.getAllLogActivities(userInfo.getUserId());
         List<LogActivityDto> collectedActivityDtos = activities.stream().map(this::mapActivityToDto).collect(Collectors.toList());
@@ -126,8 +122,8 @@ public class ExportService {
         FoodDto foodDto = mapFoodToFoodDto(food);
 
         if (withPortions) {
-            List<slt.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (slt.database.model.Portion portion : foodPortions) {
+            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
+            for (Portion portion : foodPortions) {
 
                 PortionDto currDto = new PortionDto();
                 currDto.setDescription(portion.getDescription());
@@ -162,11 +158,22 @@ public class ExportService {
     private WeightDto mapWeightToDto(Weight weightEntry) {
         WeightDto dto = new WeightDto();
         dto.setDay(weightEntry.getDay().toLocalDate());
-        dto.setId(weightEntry.getId());
+        dto.setId(weightEntry.getId().longValue());
         dto.setWeight(weightEntry.getWeight());
         dto.setRemark(weightEntry.getRemark());
 
         return dto;
+    }
+    private List<SettingDto> transformToOldSetting(List<slt.database.entities.Setting> newSetting) {
+        return newSetting.stream().map(s -> transformToOldSetting(s)).collect(Collectors.toList());
+    }
+
+    private SettingDto transformToOldSetting(slt.database.entities.Setting newSetting) {
+        return SettingDto.builder().name(newSetting.getName())
+                .value(newSetting.getValue())
+                .day(newSetting.getDay())
+                .id(newSetting.getId().longValue())
+                .build();
     }
 
 }

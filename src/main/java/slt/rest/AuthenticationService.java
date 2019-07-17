@@ -10,9 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import slt.database.SettingsRepository;
-import slt.database.UserAcccountRepository;
-import slt.database.model.Setting;
-import slt.database.model.UserAccount;
+import slt.database.UserAccountRepository;
+import slt.database.entities.UserAccount;
 import slt.dto.AuthenticationRequest;
 import slt.dto.ChangePasswordRequest;
 import slt.dto.RegistrationRequest;
@@ -31,7 +30,7 @@ import java.time.LocalDateTime;
 public class AuthenticationService {
 
     @Autowired
-    private UserAcccountRepository userAcccountRepository;
+    private UserAccountRepository userAccountRepository;
 
     @Autowired
     private SettingsRepository settingsRepository;
@@ -48,9 +47,9 @@ public class AuthenticationService {
         String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
         log.info("Login attempt {} ", username);
 
-        UserAccount userAccount = userAcccountRepository.getUser(username);
+        UserAccount userAccount = userAccountRepository.getUser(username);
         if (userAccount == null) {
-            userAccount = userAcccountRepository.getUserByEmail(username);
+            userAccount = userAccountRepository.getUserByEmail(username);
         }
         if (userAccount == null) {
             log.error("Not found");
@@ -59,7 +58,7 @@ public class AuthenticationService {
             log.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            Setting nameSetting = settingsRepository.getLatestSetting((int) userAccount.getId(), "name");
+            slt.database.entities.Setting nameSetting = settingsRepository.getLatestSetting((int) userAccount.getId(), "name");
             String name = username;
             if (nameSetting != null) {
                 name = nameSetting.getValue();
@@ -82,18 +81,18 @@ public class AuthenticationService {
         String email = request.getEmail();
         log.info("Add user attempt: {}", username);
 
-        UserAccount account = userAcccountRepository.getUser(username);
+        UserAccount account = userAccountRepository.getUser(username);
         if (account != null) {
             log.debug("Username of email already in use 1");
             return ResponseEntity.status(401).body("Username or email already in use");
         } else {
-            UserAccount userByEmail = userAcccountRepository.getUserByEmail(email);
+            UserAccount userByEmail = userAccountRepository.getUserByEmail(email);
             if (userByEmail != null) {
                 log.debug("Username or email already in use 2");
                 return ResponseEntity.status(401).body("Username or email already in use");
             } else {
-                userAcccountRepository.insertUser(username, hashedPassword, email);
-                account = userAcccountRepository.getUser(username);
+                userAccountRepository.insertUser(username, hashedPassword, email);
+                account = userAccountRepository.getUser(username);
             }
         }
 
@@ -115,12 +114,12 @@ public class AuthenticationService {
     public ResponseEntity resetPassword(@RequestBody ResetPasswordRequest request) {
         log.info("Reset email");
         String email = request.getEmail();
-        UserAccount account = userAcccountRepository.getUserByEmail(email);
+        UserAccount account = userAccountRepository.getUserByEmail(email);
         if (account != null) {
             String randomPassword = RandomStringUtils.randomAlphabetic(10);
             String hashedRandomPassword = PasswordUtils.hashPassword(randomPassword);
 
-            userAcccountRepository.updatePassword(account.getId(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
+            userAccountRepository.updatePassword(account.getId(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
             new Thread(() -> mailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
             return ResponseEntity.ok("Email matches");
         } else {
@@ -138,7 +137,7 @@ public class AuthenticationService {
 
         log.info("Update password attempt for userId: {}", userInfo.getUserId());
 
-        UserAccount userAccount = userAcccountRepository.getUserById(userInfo.getUserId());
+        UserAccount userAccount = userAccountRepository.getUserById(userInfo.getUserId());
         if (userAccount == null) {
             log.error("Not found");
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -151,7 +150,7 @@ public class AuthenticationService {
                 return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
             } else {
                 log.info("Passwords match");
-                userAcccountRepository.updatePassword(userAccount.getId(), newPasswordHashed, null, null);
+                userAccountRepository.updatePassword(userAccount.getId(), newPasswordHashed, null, null);
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
@@ -162,7 +161,7 @@ public class AuthenticationService {
         String passwordHashed = PasswordUtils.hashPassword(password);
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAcccountRepository.getUserById(userId);
+        UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (userAccount == null) {
             log.error("Account not found for userId: {}", userInfo.getUserId());
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -186,7 +185,7 @@ public class AuthenticationService {
 
             if (resettedPasswordOK && withinTimeFrame) {
                 log.info("Password has been reset to verified new password");
-                userAcccountRepository.updatePassword(account.getId(), hashedPassword, null, null);
+                userAccountRepository.updatePassword(account.getId(), hashedPassword, null, null);
                 return true;
             } else {
                 return false;

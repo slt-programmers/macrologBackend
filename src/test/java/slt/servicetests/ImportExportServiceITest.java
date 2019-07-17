@@ -113,7 +113,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
         assertThat(export.getAllLogEntries()).hasSize(2);
         assertThat(export.getAllActivities()).hasSize(2);
         assertThat(export.getAllWeights()).hasSize(1);
-        assertThat(export.getAllSettings()).hasSize(1);
+        assertThat(export.getAllSettingDtos()).hasSize(1);
 
         ResponseEntity importEntity = importService.setAll(export);
         assertThat(importEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?

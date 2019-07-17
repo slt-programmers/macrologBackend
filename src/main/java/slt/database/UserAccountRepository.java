@@ -1,15 +1,21 @@
 package slt.database;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import slt.database.model.UserAccount;
+import slt.database.entities.UserAccount;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+interface UserAccountCrudRepository extends CrudRepository<slt.database.entities.UserAccount,Integer> {
+    List<UserAccount> findByUsername(String username);
+    List<UserAccount> findByEmailIgnoreCase(String email);
+}
+
 @Repository
-public class UserAcccountRepository {
+public class UserAccountRepository {
 
     @Autowired
     UserAccountCrudRepository userAccountCrudRepository;
@@ -17,10 +23,10 @@ public class UserAcccountRepository {
     @Autowired
     DatabaseHelper databaseHelper;
 
-    public UserAcccountRepository() {
+    public UserAccountRepository() {
     }
 
-    public Integer updatePassword(Long accountId, String password, String resetPassword, LocalDateTime resetDate) {
+    public Integer updatePassword(Integer accountId, String password, String resetPassword, LocalDateTime resetDate) {
 
         Optional<slt.database.entities.UserAccount> byId = userAccountCrudRepository.findById(accountId.intValue());
         if (byId.isPresent()) {

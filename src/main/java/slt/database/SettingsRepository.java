@@ -2,13 +2,25 @@ package slt.database;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import slt.database.model.Setting;
+import slt.database.entities.Setting;
 
 import javax.transaction.Transactional;
 import java.sql.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+
+interface SettingsCrudRepository extends CrudRepository<Setting,Integer> {
+
+    List<Setting> findByUserIdOrderByDayDesc(Integer userId);
+    List<Setting> findByUserIdAndNameOrderByDayDesc(Integer userId, String name);
+    void deleteByUserId(Integer userId);
+
+    @Query("select s from Setting s where s.userId = :userId and s.name = :name and s.day <= :day")
+    List<Setting> findByUserIdAndNameWithDayBeforeDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
+}
 
 @Repository
 @Slf4j
@@ -47,21 +59,18 @@ public class SettingsRepository {
 
     public Setting getLatestSetting(Integer userId, String setting) {
         List<slt.database.entities.Setting> byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
-        List<Setting> queryResults = transformToOldSetting(byUserIdAndName);
-        log.debug("Number of hits for {} :{}", setting, queryResults.size());
-        return queryResults.isEmpty() ? null : queryResults.get(0);
+        log.debug("Number of hits for {} :{}", setting, byUserIdAndName.size());
+        return byUserIdAndName.isEmpty() ? null : byUserIdAndName.get(0);
     }
 
     public Setting getValidSettingOLD(Integer userId, String setting, Date date) {
 
         List<slt.database.entities.Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
-        List<Setting> queryResults = transformToOldSetting(byUserIdAndNameWithDayBeforeDay);
-        log.debug("Number of hits for {} :{}", setting, queryResults.size());
-        return queryResults.isEmpty() ? null : queryResults.get(0);
+        log.debug("Number of hits for {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
+        return byUserIdAndNameWithDayBeforeDay.isEmpty() ? null : byUserIdAndNameWithDayBeforeDay.get(0);
     }
 
-    public slt.database.entities.Setting getValidSetting(Integer userId, String setting, Date date) {
-
+    public Setting getValidSetting(Integer userId, String setting, Date date) {
         List<slt.database.entities.Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
         log.debug("Number of hits for {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
         return byUserIdAndNameWithDayBeforeDay.isEmpty() ? null : byUserIdAndNameWithDayBeforeDay.get(0);
@@ -69,16 +78,7 @@ public class SettingsRepository {
 
     public List<Setting> getAllSettings(Integer userId) {
         List<slt.database.entities.Setting> byUserId = settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
-        return transformToOldSetting(byUserId);
-    }
-
-    private List<Setting> transformToOldSetting(List<slt.database.entities.Setting> newSetting) {
-        return newSetting.stream().map(s -> transformToOldSetting(s)).collect(Collectors.toList());
-
-    }
-
-    private Setting transformToOldSetting(slt.database.entities.Setting newSetting) {
-        return Setting.builder().name(newSetting.getName()).value(newSetting.getValue()).day(newSetting.getDay()).id(newSetting.getId().longValue()).build();
+        return byUserId;
     }
 
 }

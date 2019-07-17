@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.FoodRepository;
 import slt.database.MealRepository;
 import slt.database.PortionRepository;
-import slt.database.model.Food;
+import slt.database.entities.Food;
 import slt.database.model.Ingredient;
 import slt.database.model.Meal;
 import slt.dto.IngredientDto;

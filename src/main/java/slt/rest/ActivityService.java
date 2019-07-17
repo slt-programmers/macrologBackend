@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.ActivityRepository;
-import slt.database.model.LogActivity;
+import slt.database.entities.LogActivity;
 import slt.dto.LogActivityDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;

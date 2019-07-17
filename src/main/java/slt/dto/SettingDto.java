@@ -1,4 +1,4 @@
-package slt.database.model;
+package slt.dto;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Setting {
+public class SettingDto {
 
     private Long id;
     private String name;

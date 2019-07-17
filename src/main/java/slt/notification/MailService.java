@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import slt.config.MailConfig;
-import slt.database.model.UserAccount;
+import slt.database.entities.UserAccount;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

@@ -12,8 +12,8 @@ class DatabaseExportTest {
 //    @Test
 //    public void exportSettingsDatabase() {
 //        Integer userId = -1;
-//        List<Setting> allSettings = settingsRepo.getAllSettings(userId);
-//        LOGGER.debug("all Settings:" + allSettings);
+//        List<SettingDto> allSettingDtos = settingsRepo.getAllSettingDtos(userId);
+//        LOGGER.debug("all Settings:" + allSettingDtos);
 //
 //    }
 

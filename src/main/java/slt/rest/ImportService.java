@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
-import slt.database.model.*;
+import slt.database.entities.*;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -45,9 +45,9 @@ public class ImportService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("export = " + export);
 
-        List<Setting> settings = export.getAllSettings();
-        for (Setting setting : settings) {
-            settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(), setting.getDay());
+        List<SettingDto> settingDtos = export.getAllSettingDtos();
+        for (SettingDto settingDto : settingDtos) {
+            settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay());
         }
 
         List<FoodDto> allFoodDto = export.getAllFood();

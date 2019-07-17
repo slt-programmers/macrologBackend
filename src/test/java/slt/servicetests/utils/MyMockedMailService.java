@@ -1,7 +1,7 @@
 package slt.servicetests.utils;
 
 import slt.config.MailConfig;
-import slt.database.model.UserAccount;
+import slt.database.entities.UserAccount;
 import slt.notification.MailService;
 
 import java.util.ArrayList;

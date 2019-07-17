@@ -80,7 +80,7 @@ public class WeightServiceITest extends AbstractApplicationIntegrationTest {
         WeightDto weightDto = weightEntries.stream().filter(w -> w.getDay().equals(LocalDate.parse("1980-01-02"))).findFirst().get();
         assertThat(weightDto.getWeight()).isEqualTo(13.0);
 
-        // update weight on same day (updating a weight) (update the weight only)
+        // update weight on same day (updating a weight) (update the weight only) (Dit is een delete+insert!)
         WeightDto weight4 = WeightDto.builder()
                 .weight(14.0)
                 .id(weightDto.getId())
@@ -94,6 +94,7 @@ public class WeightServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(weightEntries).hasSize(2);
         assertThat(weightEntries.stream().filter(w->w.getDay().equals(LocalDate.parse("1980-01-02"))).findFirst().get().getWeight()).isEqualTo(14.0);
 
+//        WeightDto updatedIdOnWeight = weightEntries.stream().filter(w->w.getDay().equals(LocalDate.parse("1980-01-02"))).findFirst().get();
         // update weight on update the weight only and day
         WeightDto weight5 = WeightDto.builder()
                 .weight(15.0)

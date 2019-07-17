@@ -11,11 +11,11 @@ import static slt.security.SecurityConstants.SECRET;
 
 public class JWTBuilder {
 
-    public String generateJWT(String name, Long userId) {
+    public String generateJWT(String name,  Integer userId) {
         return generateJWT(name, userId, new Date(System.currentTimeMillis() + EXPIRATION_TIME));
     }
 
-    public String generateJWT(String name, Long userId, Date expirationDate) {
+    public String generateJWT(String name, Integer userId, Date expirationDate) {
         return Jwts.builder()
                 .setSubject("users/TzMUocMF4p")
                 .setExpiration(expirationDate)

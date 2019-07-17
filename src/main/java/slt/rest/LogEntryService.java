@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.FoodRepository;
 import slt.database.LogEntryRepository;
 import slt.database.PortionRepository;
-import slt.database.model.Food;
-import slt.database.model.LogEntry;
-import slt.database.model.Portion;
+import slt.database.entities.Food;
+import slt.database.entities.LogEntry;
+import slt.database.entities.Portion;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.util.LocalDateParser;
 
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,16 +45,9 @@ public class LogEntryService {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("Request for " + userInfo);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date parsedDate;
-        try {
-            parsedDate = sdf.parse(date);
-        } catch (ParseException e) {
-            log.error(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        LocalDate parsedDate = LocalDateParser.parse(date);
 
-        List<slt.database.model.LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedDate);
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), Date.valueOf(parsedDate));
         List<LogEntryDto> logEntryDtos = mapToDtos(userInfo, allLogEntries);
 
         return ResponseEntity.ok(logEntryDtos);
@@ -66,7 +59,7 @@ public class LogEntryService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogEntryDto> newEntries = new ArrayList<>();
         for (StoreLogEntryRequest logEntry : logEntries) {
-            slt.database.model.LogEntry entry = new slt.database.model.LogEntry();
+            LogEntry entry = new LogEntry();
             entry.setPortionId(logEntry.getPortionId());
             entry.setFoodId(logEntry.getFoodId());
             entry.setMultiplier(logEntry.getMultiplier());
@@ -106,18 +99,9 @@ public class LogEntryService {
     public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date parsedFromDate;
-        java.util.Date parsedToDate;
-        try {
-            parsedFromDate = sdf.parse(fromDate);
-            parsedToDate = sdf.parse(toDate);
-        } catch (ParseException e) {
-            log.error(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-
-        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedFromDate, parsedToDate);
+        LocalDate parsedFromDate = LocalDateParser.parse(fromDate);
+        LocalDate parsedToDate = LocalDateParser.parse(toDate);
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), Date.valueOf(parsedFromDate),Date.valueOf( parsedToDate));
 
         List<LogEntryDto> logEntryDtos = transformToDtos(allLogEntries, userInfo);
         log.debug("Aantal dtos: " + logEntryDtos.size());
@@ -146,7 +130,7 @@ public class LogEntryService {
 
     private List<LogEntryDto> mapToDtos(UserInfo userInfo, List<LogEntry> allLogEntries) {
         List<LogEntryDto> allDtos = new ArrayList<>();
-        for (slt.database.model.LogEntry logEntry : allLogEntries) {
+        for (LogEntry logEntry : allLogEntries) {
             LogEntryDto dto = mapToDto(userInfo, logEntry);
             allDtos.add(dto);
         }
@@ -199,7 +183,7 @@ public class LogEntryService {
      * REFACTOR ONDERSTAANDE NAAR COMMON USAGE BIJ EXPORT
      */
 
-    private List<LogEntryDto> transformToDtos(List<slt.database.model.LogEntry> allLogEntries, UserInfo userInfo) {
+    private List<LogEntryDto> transformToDtos(List<LogEntry> allLogEntries, UserInfo userInfo) {
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         log.info("Export: allFood size = " + allFood.size());
         List<FoodDto> allFoodDtos = new ArrayList<>();
@@ -210,7 +194,7 @@ public class LogEntryService {
 
 
         List<LogEntryDto> allDtos = new ArrayList<>();
-        for (slt.database.model.LogEntry logEntry : allLogEntries) {
+        for (LogEntry logEntry : allLogEntries) {
 
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
@@ -255,8 +239,8 @@ public class LogEntryService {
         FoodDto foodDto = mapFoodToFoodDto(food);
 
         if (withPortions) {
-            List<slt.database.model.Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (slt.database.model.Portion portion : foodPortions) {
+            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
+            for (Portion portion : foodPortions) {
                 PortionDto currDto = new PortionDto();
                 currDto.setDescription(portion.getDescription());
                 currDto.setGrams(portion.getGrams());

@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.WeightRepository;
-import slt.database.model.Weight;
+import slt.database.entities.Weight;
 import slt.dto.WeightDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -38,36 +38,54 @@ public class WeightService {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+
         Weight entry = mapWeightDtoToDomain(weightEntry);
+
         List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
 
-        boolean weightDayAlreadyRegistered = (storedWeight != null && storedWeight.size() > 0);
+        boolean weightRegisteredOnSameDay = (storedWeight != null && storedWeight.size() > 0);
 
-        if (weightEntry.getId() == null && !weightDayAlreadyRegistered) {
+        if (weightRegisteredOnSameDay && storedWeight.get(0).getId().equals(weightEntry.getId())) {
+            // Simpele update
+            Weight weightUpdate = storedWeight.get(0);
+            weightUpdate.setRemark(entry.getRemark());
+            weightUpdate.setWeight(entry.getWeight());
+            weightRepository.updateWeight(userInfo.getUserId(), weightUpdate);
+        } else if (weightRegisteredOnSameDay && !storedWeight.get(0).getId().equals(weightEntry.getId())) {
+            // Update de reeds bestaande weight met de nieuwe entries.
+            Weight weightToBeUpdated = storedWeight.get(0);
+            weightToBeUpdated.setRemark(entry.getRemark());
+            weightToBeUpdated.setWeight(entry.getWeight());
+            weightToBeUpdated.setDay(entry.getDay());
+            weightRepository.updateWeight(userInfo.getUserId(), weightToBeUpdated);
+        } else if (!weightRegisteredOnSameDay && entry.getId() == null) {
+            // Opslaan van een nieuwe weight
+            entry.setUserId(userInfo.getUserId());
             weightRepository.insertWeight(userInfo.getUserId(), entry);
-        } else {
-            if (weightDayAlreadyRegistered) {
-                entry.setId(storedWeight.get(0).getId());
-            }
+        } else if (!weightRegisteredOnSameDay && entry.getId() != null) {
+            // update van entry
             weightRepository.updateWeight(userInfo.getUserId(), entry);
+        } else {
+            throw new UnsupportedOperationException("Niet afgevangen update van weight");
         }
+
 
         return ResponseEntity.ok().build();
     }
 
 
     @ApiOperation(value = "Delete weight entry")
-    @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteWeightEntry(@PathVariable("id") Long weightEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        weightRepository.deleteWeight(userInfo.getUserId(), weightEntryId);
+        weightRepository.deleteWeightByIdAndUserId(weightEntryId, userInfo.getUserId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     private WeightDto mapToDto(Weight weightEntry) {
         WeightDto dto = new WeightDto();
         dto.setDay(weightEntry.getDay().toLocalDate());
-        dto.setId(weightEntry.getId());
+        dto.setId(weightEntry.getId() == null ? null : weightEntry.getId().longValue());
         dto.setWeight(weightEntry.getWeight());
         dto.setRemark(weightEntry.getRemark());
         return dto;
@@ -76,7 +94,7 @@ public class WeightService {
     private Weight mapWeightDtoToDomain(@RequestBody WeightDto weightEntry) {
         Weight entry = new Weight();
         entry.setDay(Date.valueOf(weightEntry.getDay()));
-        entry.setId(weightEntry.getId());
+        entry.setId(weightEntry.getId() == null ? null : weightEntry.getId().intValue());
         entry.setWeight(weightEntry.getWeight());
         entry.setRemark(weightEntry.getRemark());
         return entry;

@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.FoodRepository;
 import slt.database.PortionRepository;
-import slt.database.model.Food;
-import slt.database.model.Portion;
+import slt.database.entities.Food;
+import slt.database.entities.Portion;
 import slt.dto.AddFoodRequest;
 import slt.dto.FoodDto;
 import slt.dto.Macro;
@@ -84,7 +84,7 @@ public class FoodService {
                 Long id = portionDto.getId();
                 if (id != null) {
                     // update portion
-                    slt.database.model.Portion newPortion = new slt.database.model.Portion();
+                    Portion newPortion = new Portion();
                     newPortion.setId(portionDto.getId());
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
@@ -92,7 +92,7 @@ public class FoodService {
 
                 } else {
                     // add portion
-                    slt.database.model.Portion newPortion = new slt.database.model.Portion();
+                    Portion newPortion = new Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
                     portionRepository.addPortion(newFood.getId(), newPortion);
@@ -113,15 +113,14 @@ public class FoodService {
                 newFood.setFat(addFoodRequest.getFat());
                 newFood.setProtein(addFoodRequest.getProtein());
 
-                int insertedRows = foodRepository.insertFood(userInfo.getUserId(), newFood);
-                if (insertedRows == 1 && addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
-                    Food addedFood = foodRepository.getFood(userInfo.getUserId(), addFoodRequest.getName());
+                Food insertedFood = foodRepository.insertFood(userInfo.getUserId(), newFood);
+                if (addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
+
                     for (PortionDto portionDto : addFoodRequest.getPortions()) {
-                        slt.database.model.Portion newPortion = new slt.database.model.Portion();
+                        Portion newPortion = new Portion();
                         newPortion.setDescription(portionDto.getDescription());
                         newPortion.setGrams(portionDto.getGrams());
-
-                        portionRepository.addPortion(addedFood.getId(), newPortion);
+                        portionRepository.addPortion(insertedFood.getId(), newPortion);
                     }
                 }
 
@@ -164,7 +163,7 @@ public class FoodService {
     }
 
     // Naar een util brengen:
-    static Macro calculateMacro(Food food, slt.database.model.Portion portion) {
+    static Macro calculateMacro(Food food, Portion portion) {
         Macro calculatedMacros = new Macro();
         // FoodDto has been entered for 100g
         calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());

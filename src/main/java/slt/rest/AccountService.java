@@ -3,7 +3,7 @@ package slt.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import slt.database.*;
-import slt.database.model.Food;
+import slt.database.entities.Food;
 import slt.database.model.Meal;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class AccountService {
     private SettingsRepository settingsRepository;
 
     @Autowired
-    private UserAcccountRepository userAcccountRepository;
+    private UserAccountRepository userAccountRepository;
 
     @Autowired
     private WeightRepository weightRepository;
@@ -51,12 +51,12 @@ public class AccountService {
         mealRepository.deleteAllForUser(userId);
 
         List<Food> allFood = foodRepository.getAllFood(userId);
-        List<Long> foodIds = allFood.stream().map(Food::getId).collect(toList());
+        List<Integer> foodIds = allFood.stream().map(f->f.getId().intValue()).collect(toList());
         portionRepository.deleteAllForUser(foodIds);
         foodRepository.deleteAllForUser(userId);
 
         settingsRepository.deleteAllForUser(userId);
-        userAcccountRepository.deleteUser(userId);
+        userAccountRepository.deleteUser(userId);
     }
 
 }

@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.SettingsRepository;
 import slt.database.WeightRepository;
-import slt.database.model.Setting;
-import slt.database.model.Weight;
+import slt.database.entities.Weight;
+import slt.dto.SettingDto;
 import slt.dto.UserSettingsDto;
 import slt.dto.WeightDto;
 import slt.security.ThreadLocalHolder;
@@ -39,18 +39,18 @@ public class SettingsService {
     @Autowired
     private WeightService weightService;
 
-    @ApiOperation(value = "Store new setting or change existing one")
+    @ApiOperation(value = "Store new settingDto or change existing one")
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeSetting(@RequestBody Setting setting) {
+    public ResponseEntity storeSetting(@RequestBody SettingDto settingDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if ("weight".equals(setting.getName())) {
+        if ("weight".equals(settingDto.getName())) {
             weightService.storeWeightEntry(
                     new WeightDto(null,
-                            Double.valueOf(setting.getValue()),
-                            setting.getDay() == null ? LocalDate.now() : setting.getDay().toLocalDate(),
+                            Double.valueOf(settingDto.getValue()),
+                            settingDto.getDay() == null ? LocalDate.now() : settingDto.getDay().toLocalDate(),
                             null));
         }
-        settingsRepo.putSetting(userInfo.getUserId(), setting.getName(), setting.getValue(), setting.getDay() == null ? Date.valueOf(LocalDate.now()) : setting.getDay());
+        settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay() == null ? Date.valueOf(LocalDate.now()) : settingDto.getDay());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -63,7 +63,7 @@ public class SettingsService {
 
     private UserSettingsDto getUserSettingsDto() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
+        List<slt.database.entities.Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
         Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
         UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
@@ -76,7 +76,7 @@ public class SettingsService {
     public ResponseEntity getSetting(@PathVariable("name") String name,
                                      @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Setting setting;
+        slt.database.entities.Setting setting;
         if (StringUtils.isEmpty(toDate)) {
             setting = settingsRepo.getLatestSetting(userInfo.getUserId(), name);
         } else {
@@ -92,7 +92,7 @@ public class SettingsService {
         return ResponseEntity.ok(setting == null ? null : setting.getValue());
     }
 
-    private UserSettingsDto mapToUserSettingsDto(List<Setting> settings) {
+    private UserSettingsDto mapToUserSettingsDto(List<slt.database.entities.Setting> settings) {
         UserSettingsDto dto = new UserSettingsDto();
         dto.setName(mapSetting(settings, "name"));
         dto.setGender(mapSetting(settings, "gender"));
@@ -115,8 +115,8 @@ public class SettingsService {
         return dto;
     }
 
-    private String mapSetting(List<Setting> settings, String identifier) {
-        return settings.stream().filter(s -> s.getName().equals(identifier)).max(Comparator.comparing(Setting::getDay)).orElse(new Setting()).getValue();
+    private String mapSetting(List<slt.database.entities.Setting> settings, String identifier) {
+        return settings.stream().filter(s -> s.getName().equals(identifier)).max(Comparator.comparing(slt.database.entities.Setting::getDay)).orElse(new slt.database.entities.Setting()).getValue();
     }
 
 }
