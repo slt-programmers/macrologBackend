@@ -28,12 +28,7 @@ public class ActivityRepository {
     @Autowired
     private LogActivityCrudRepository logActivityCrudRepository;
 
-    public LogActivity insertActivity(Integer userId, LogActivity entry) {
-        entry.setUserId(userId);
-        return logActivityCrudRepository.save(entry);
-    }
-
-    public LogActivity updateLogActivity(Integer userId, LogActivity entry) {
+    public LogActivity saveActivity(Integer userId, LogActivity entry) {
         entry.setUserId(userId);
         return logActivityCrudRepository.save(entry);
     }

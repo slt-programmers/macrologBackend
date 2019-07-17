@@ -51,7 +51,7 @@ public class ActivityService {
         for (LogActivityDto logEntry : logActivities) {
             LogActivity entry = mapActivityDtoToDomain(logEntry);
             if (logEntry.getId() == null) {
-                logActitivyRepository.insertActivity(userInfo.getUserId(), entry);
+                logActitivyRepository.saveActivity(userInfo.getUserId(), entry);
                 List<LogActivity> addedEntryMatches = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay().toLocalDate());
                 if (addedEntryMatches.size() > 1) {
                     LogActivity newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogActivity::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
@@ -64,7 +64,7 @@ public class ActivityService {
                 newEntries.add(mapToDto(addedEntryMatches.get(0)));
             } else {
                 // TODO BUG? Add to list of new entries? Why only new?
-                logActitivyRepository.updateLogActivity(userInfo.getUserId(), entry);
+                logActitivyRepository.saveActivity(userInfo.getUserId(), entry);
                 newEntries.add(mapToDto(entry));
             }
         }

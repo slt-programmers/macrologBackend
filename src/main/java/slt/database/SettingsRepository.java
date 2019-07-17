@@ -30,7 +30,7 @@ public class SettingsRepository {
     private SettingsCrudRepository settingsCrudRepository;
 
     public void putSetting(Integer userId, String setting, String value, Date date) {
-        slt.database.entities.Setting currentSetting = getValidSetting(userId, setting, date);
+        Setting currentSetting = getValidSetting(userId, setting, date);
         if (currentSetting == null) { // geen records
             log.debug("Insert");
             insertSetting(userId, setting, value, date).getId();
@@ -46,10 +46,9 @@ public class SettingsRepository {
         }
     }
 
-    public slt.database.entities.Setting insertSetting(Integer userId, String setting, String value, Date date) {
-        slt.database.entities.Setting newSetting = slt.database.entities.Setting.builder().day(date).name(setting).userId(userId).value(value).build();
-        slt.database.entities.Setting savedSetting = settingsCrudRepository.save(newSetting);
-        return savedSetting;
+    public Setting insertSetting(Integer userId, String setting, String value, Date date) {
+        Setting newSetting = Setting.builder().day(date).name(setting).userId(userId).value(value).build();
+        return settingsCrudRepository.save(newSetting);
     }
 
     @Transactional
@@ -58,27 +57,19 @@ public class SettingsRepository {
     }
 
     public Setting getLatestSetting(Integer userId, String setting) {
-        List<slt.database.entities.Setting> byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
-        log.debug("Number of hits for {} :{}", setting, byUserIdAndName.size());
+        List<Setting> byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
+        log.debug("Number of hits for setting{} :{}", setting, byUserIdAndName.size());
         return byUserIdAndName.isEmpty() ? null : byUserIdAndName.get(0);
     }
 
-    public Setting getValidSettingOLD(Integer userId, String setting, Date date) {
-
-        List<slt.database.entities.Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
-        log.debug("Number of hits for {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
-        return byUserIdAndNameWithDayBeforeDay.isEmpty() ? null : byUserIdAndNameWithDayBeforeDay.get(0);
-    }
-
     public Setting getValidSetting(Integer userId, String setting, Date date) {
-        List<slt.database.entities.Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
-        log.debug("Number of hits for {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
+        List<Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
+        log.debug("Number of hits for setting on date {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
         return byUserIdAndNameWithDayBeforeDay.isEmpty() ? null : byUserIdAndNameWithDayBeforeDay.get(0);
     }
 
     public List<Setting> getAllSettings(Integer userId) {
-        List<slt.database.entities.Setting> byUserId = settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
-        return byUserId;
+        return settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
 }

@@ -36,16 +36,11 @@ public class LogEntryRepository {
     @Autowired
     private LogEntryCrudRepository logEntryCrudRepository;
 
-    public LogEntry insertLogEntry(Integer userId, LogEntry entry) {
+    public LogEntry saveLogEntry(Integer userId, LogEntry entry) {
         entry.setUserId(userId);
         return logEntryCrudRepository.save(entry);
     }
-
-    public LogEntry updateLogEntry(Integer userId, LogEntry entry) {
-        entry.setUserId(userId);
-        return logEntryCrudRepository.save(entry);
-    }
-
+    
     @Transactional
     public void deleteLogEntry(Integer userId, Long logEntryId) {
         logEntryCrudRepository.deleteByUserIdAndId(userId, logEntryId);

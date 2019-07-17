@@ -28,7 +28,7 @@ public class UserAccountRepository {
 
     public Integer updatePassword(Integer accountId, String password, String resetPassword, LocalDateTime resetDate) {
 
-        Optional<slt.database.entities.UserAccount> byId = userAccountCrudRepository.findById(accountId.intValue());
+        Optional<slt.database.entities.UserAccount> byId = userAccountCrudRepository.findById(accountId);
         if (byId.isPresent()) {
             byId.get().setPassword(password);
             byId.get().setResetDate(resetDate);

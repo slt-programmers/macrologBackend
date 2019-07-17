@@ -77,7 +77,7 @@ public class FoodService {
             newFood.setFat(addFoodRequest.getFat());
             newFood.setProtein(addFoodRequest.getProtein());
 
-            foodRepository.updateFood(userInfo.getUserId(), newFood);
+            foodRepository.saveFood(userInfo.getUserId(), newFood);
 
             // remove portions not supported yet.
             for (PortionDto portionDto : addFoodRequest.getPortions()) {
@@ -88,14 +88,14 @@ public class FoodService {
                     newPortion.setId(portionDto.getId());
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
-                    portionRepository.updatePortion(newFood.getId(), newPortion);
+                    portionRepository.savePortion(newFood.getId(), newPortion);
 
                 } else {
                     // add portion
                     Portion newPortion = new Portion();
                     newPortion.setDescription(portionDto.getDescription());
                     newPortion.setGrams(portionDto.getGrams());
-                    portionRepository.addPortion(newFood.getId(), newPortion);
+                    portionRepository.savePortion(newFood.getId(), newPortion);
                 }
             }
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -113,14 +113,14 @@ public class FoodService {
                 newFood.setFat(addFoodRequest.getFat());
                 newFood.setProtein(addFoodRequest.getProtein());
 
-                Food insertedFood = foodRepository.insertFood(userInfo.getUserId(), newFood);
+                Food insertedFood = foodRepository.saveFood(userInfo.getUserId(), newFood);
                 if (addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
 
                     for (PortionDto portionDto : addFoodRequest.getPortions()) {
                         Portion newPortion = new Portion();
                         newPortion.setDescription(portionDto.getDescription());
                         newPortion.setGrams(portionDto.getGrams());
-                        portionRepository.addPortion(insertedFood.getId(), newPortion);
+                        portionRepository.savePortion(insertedFood.getId(), newPortion);
                     }
                 }
 

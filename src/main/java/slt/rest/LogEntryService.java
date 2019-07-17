@@ -67,7 +67,7 @@ public class LogEntryService {
             entry.setMeal(logEntry.getMeal());
             entry.setId(logEntry.getId());
             if (logEntry.getId() == null) {
-                logEntryRepository.insertLogEntry(userInfo.getUserId(), entry);
+                logEntryRepository.saveLogEntry(userInfo.getUserId(), entry);
                 List<LogEntry> addedEntryMatches = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
                 if (addedEntryMatches.size() > 1) { // same food, but logged twice with maybe different portions
                     LogEntry newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogEntry::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
@@ -79,7 +79,7 @@ public class LogEntryService {
                 }
                 newEntries.add(mapToDto(userInfo, addedEntryMatches.get(0)));
             } else {
-                logEntryRepository.updateLogEntry(userInfo.getUserId(), entry);
+                logEntryRepository.saveLogEntry(userInfo.getUserId(), entry);
                 newEntries.add(mapToDto(userInfo, entry));
             }
         }

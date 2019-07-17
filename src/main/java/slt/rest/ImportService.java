@@ -53,7 +53,7 @@ public class ImportService {
         List<FoodDto> allFoodDto = export.getAllFood();
         for (FoodDto foodDto : allFoodDto) {
             Food food = mapFoodDtoToFood(foodDto);
-            foodRepository.insertFood(userInfo.getUserId(), food);
+            foodRepository.saveFood(userInfo.getUserId(), food);
 
             // We hebben de database ID nodig, dus opnieuw ophalen:
             Food foodDB = foodRepository.getFood(userInfo.getUserId(), food.getName());
@@ -61,7 +61,7 @@ public class ImportService {
 
             for (PortionDto portionDto : portionDtos) {
                 Portion portion = mapPortionDtoToPortion(portionDto);
-                portionRepository.addPortion(foodDB.getId(), portion);
+                portionRepository.savePortion(foodDB.getId(), portion);
             }
         }
 
@@ -78,7 +78,7 @@ public class ImportService {
                 Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
                 logEntry.setPortionId(portionDB.getId());
             }
-            logEntryRepository.insertLogEntry(userInfo.getUserId(), logEntry);
+            logEntryRepository.saveLogEntry(userInfo.getUserId(), logEntry);
         }
 
         List<WeightDto> allWeights = export.getAllWeights();
@@ -87,7 +87,7 @@ public class ImportService {
 
         List<LogActivityDto> allActivities = export.getAllActivities();
         allActivities.stream().map(this::mapActivityDtoToDomain)
-                .forEach(activityDomain -> activityRepository.insertActivity(userInfo.getUserId(), activityDomain));
+                .forEach(activityDomain -> activityRepository.saveActivity(userInfo.getUserId(), activityDomain));
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }

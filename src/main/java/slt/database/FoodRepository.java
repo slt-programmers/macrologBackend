@@ -30,16 +30,11 @@ public class FoodRepository {
         return foodCrudRepository.findByUserId(userId);
     }
 
-    public Food insertFood(Integer userId, Food food) {
+    public Food saveFood(Integer userId, Food food) {
         food.setUserId(userId);
         return foodCrudRepository.save(food);
     }
-
-    public Food updateFood(Integer userId, Food food) {
-        food.setUserId(userId);
-        return foodCrudRepository.save(food);
-    }
-
+    
     public Food getFood(Integer userId, String name) {
         List<Food> queryResults = foodCrudRepository.findByUserIdAndName(userId, name);
         return queryResults.isEmpty() ? null : queryResults.get(0);

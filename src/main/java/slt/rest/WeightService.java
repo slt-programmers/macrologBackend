@@ -45,13 +45,13 @@ public class WeightService {
 
         boolean weightRegisteredOnSameDay = (storedWeight != null && storedWeight.size() > 0);
 
-        if (weightRegisteredOnSameDay && storedWeight.get(0).getId().equals(weightEntry.getId())) {
+        if (weightRegisteredOnSameDay && weightEntry.getId()!= null && storedWeight.get(0).getId().equals(weightEntry.getId().intValue())) {
             // Simpele update
             Weight weightUpdate = storedWeight.get(0);
             weightUpdate.setRemark(entry.getRemark());
             weightUpdate.setWeight(entry.getWeight());
             weightRepository.updateWeight(userInfo.getUserId(), weightUpdate);
-        } else if (weightRegisteredOnSameDay && !storedWeight.get(0).getId().equals(weightEntry.getId())) {
+        } else if (weightRegisteredOnSameDay && (weightEntry.getId() == null || !storedWeight.get(0).getId().equals(weightEntry.getId().intValue()))) {
             // Update de reeds bestaande weight met de nieuwe entries.
             Weight weightToBeUpdated = storedWeight.get(0);
             weightToBeUpdated.setRemark(entry.getRemark());

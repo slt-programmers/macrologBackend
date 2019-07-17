@@ -27,12 +27,7 @@ public class PortionRepository {
     private PortionCrudRepository portionCrudRepository;
 
 
-    public Portion addPortion(Long foodId, Portion portion) {
-        portion.setFoodId(foodId.intValue());
-        return portionCrudRepository.save(portion);
-    }
-
-    public Portion updatePortion(Long foodId, Portion portion) {
+    public Portion savePortion(Long foodId, Portion portion) {
         portion.setFoodId(foodId.intValue());
         return portionCrudRepository.save(portion);
     }
