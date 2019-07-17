@@ -24,7 +24,7 @@ spring:
 
 mail:
    username: macrologwebapp@gmail.com
-   password: ${mail.password}
+   password: ${mailpassword}
    host: smtp.gmail.com
    port: 587
 
