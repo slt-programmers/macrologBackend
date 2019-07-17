@@ -20,12 +20,6 @@ public class UserAccountRepository {
     @Autowired
     UserAccountCrudRepository userAccountCrudRepository;
 
-    @Autowired
-    DatabaseHelper databaseHelper;
-
-    public UserAccountRepository() {
-    }
-
     public Integer updatePassword(Integer accountId, String password, String resetPassword, LocalDateTime resetDate) {
 
         Optional<slt.database.entities.UserAccount> byId = userAccountCrudRepository.findById(accountId);
@@ -46,8 +40,7 @@ public class UserAccountRepository {
                 .username(username)
                 .password(password)
                 .build();
-        slt.database.entities.UserAccount savedAccount = userAccountCrudRepository.save(userAccount);
-        return savedAccount;
+        return  userAccountCrudRepository.save(userAccount);
     }
 
     public UserAccount getUser(String username) {

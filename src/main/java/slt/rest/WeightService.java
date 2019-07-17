@@ -43,19 +43,19 @@ public class WeightService {
 
         List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
 
-        boolean weightRegisteredOnSameDay = (storedWeight != null && storedWeight.size() > 0);
+        boolean weightRegisteredOnSameDay = (storedWeight != null && !storedWeight.isEmpty());
 
         if (weightRegisteredOnSameDay && weightEntry.getId()!= null && storedWeight.get(0).getId().equals(weightEntry.getId().intValue())) {
             // Simpele update
             Weight weightUpdate = storedWeight.get(0);
             weightUpdate.setRemark(entry.getRemark());
-            weightUpdate.setWeight(entry.getWeight());
+            weightUpdate.setValue(entry.getValue());
             weightRepository.updateWeight(userInfo.getUserId(), weightUpdate);
         } else if (weightRegisteredOnSameDay && (weightEntry.getId() == null || !storedWeight.get(0).getId().equals(weightEntry.getId().intValue()))) {
             // Update de reeds bestaande weight met de nieuwe entries.
             Weight weightToBeUpdated = storedWeight.get(0);
             weightToBeUpdated.setRemark(entry.getRemark());
-            weightToBeUpdated.setWeight(entry.getWeight());
+            weightToBeUpdated.setValue(entry.getValue());
             weightToBeUpdated.setDay(entry.getDay());
             weightRepository.updateWeight(userInfo.getUserId(), weightToBeUpdated);
         } else if (!weightRegisteredOnSameDay && entry.getId() == null) {
@@ -86,7 +86,7 @@ public class WeightService {
         WeightDto dto = new WeightDto();
         dto.setDay(weightEntry.getDay().toLocalDate());
         dto.setId(weightEntry.getId() == null ? null : weightEntry.getId().longValue());
-        dto.setWeight(weightEntry.getWeight());
+        dto.setWeight(weightEntry.getValue());
         dto.setRemark(weightEntry.getRemark());
         return dto;
     }
@@ -95,7 +95,7 @@ public class WeightService {
         Weight entry = new Weight();
         entry.setDay(Date.valueOf(weightEntry.getDay()));
         entry.setId(weightEntry.getId() == null ? null : weightEntry.getId().intValue());
-        entry.setWeight(weightEntry.getWeight());
+        entry.setValue(weightEntry.getWeight());
         entry.setRemark(weightEntry.getRemark());
         return entry;
     }

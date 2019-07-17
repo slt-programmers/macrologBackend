@@ -159,13 +159,13 @@ public class ExportService {
         WeightDto dto = new WeightDto();
         dto.setDay(weightEntry.getDay().toLocalDate());
         dto.setId(weightEntry.getId().longValue());
-        dto.setWeight(weightEntry.getWeight());
+        dto.setWeight(weightEntry.getValue());
         dto.setRemark(weightEntry.getRemark());
 
         return dto;
     }
     private List<SettingDto> transformToOldSetting(List<slt.database.entities.Setting> newSetting) {
-        return newSetting.stream().map(s -> transformToOldSetting(s)).collect(Collectors.toList());
+        return newSetting.stream().map(this::transformToOldSetting).collect(Collectors.toList());
     }
 
     private SettingDto transformToOldSetting(slt.database.entities.Setting newSetting) {

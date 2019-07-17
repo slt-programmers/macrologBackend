@@ -21,7 +21,8 @@ public class Weight {
     @Column(columnDefinition="bigint")
     private Integer id;
 
-    private Double weight = 0.0;
+    @Column(name = "weight")
+    private Double value = 0.0;
     private Date day = Date.valueOf(LocalDate.now());
 
     @Column(length = 65535, columnDefinition="TEXT")

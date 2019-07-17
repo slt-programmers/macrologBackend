@@ -67,7 +67,7 @@ public class SettingsService {
         List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
         Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
         UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
-        userSettingsDto.setCurrentWeight(currentWeight.getWeight());
+        userSettingsDto.setCurrentWeight(currentWeight.getValue());
         return userSettingsDto;
     }
 

@@ -37,7 +37,7 @@ public class WeightRepository {
             throw new IllegalArgumentException("Update on non existing entry");
         }
         Weight weight = byId.get();
-        weight.setWeight(entry.getWeight());
+        weight.setValue(entry.getValue());
         weight.setRemark(entry.getRemark());
         weight.setDay(entry.getDay());
         entry.setUserId(userId);
@@ -55,13 +55,11 @@ public class WeightRepository {
     }
 
     public List<Weight> getWeightEntryForDay(Integer userId, Date day) {
-        List<slt.database.entities.Weight> byUserId = weightCrudRepository.findByUserIdAndDay(userId, day);
-        return byUserId;
+        return weightCrudRepository.findByUserIdAndDay(userId, day);
     }
 
     public List<Weight> getAllWeightEntries(Integer userId) {
-        List<slt.database.entities.Weight> byUserId = weightCrudRepository.findByUserId(userId);
-        return byUserId;
+        return weightCrudRepository.findByUserId(userId);
     }
 
 }
