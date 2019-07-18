@@ -1,20 +1,21 @@
 package slt.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+@Slf4j
 public class LocalDateParser {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalDateParser.class);
 
     private static DateTimeFormatter standardFormat = DateTimeFormatter.ISO_LOCAL_DATE;
     private static DateTimeFormatter shortFormat = DateTimeFormatter.ofPattern("yyyy-M-d");
     private static DateTimeFormatter reversedFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static DateTimeFormatter reversedShortFormat = DateTimeFormatter.ofPattern("d-M-yyyy");
+
+    private LocalDateParser() {
+    }
 
     public static LocalDate parse(String stringDate) {
         LocalDate date;
@@ -30,7 +31,7 @@ public class LocalDateParser {
                     try {
                         date = LocalDate.parse(stringDate, reversedShortFormat);
                     } catch (DateTimeParseException ex4) {
-                        LOGGER.error("Could not parse string " + stringDate + " to LocalDate");
+                        log.error("Could not parse string [{}] to LocalDate.", stringDate);
                         throw ex4;
                     }
                 }
