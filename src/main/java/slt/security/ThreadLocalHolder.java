@@ -1,7 +1,10 @@
 package slt.security;
 
 public class ThreadLocalHolder {
-    static private ThreadLocal<UserInfo> threadLocal = new ThreadLocal<>();
+    private static ThreadLocal<UserInfo> threadLocal = new ThreadLocal<>();
+
+    private ThreadLocalHolder() {
+    }
 
     public static ThreadLocal<UserInfo> getThreadLocal() {
         return threadLocal;

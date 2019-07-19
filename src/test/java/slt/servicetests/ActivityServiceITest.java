@@ -82,7 +82,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Assert.isTrue(200 == activitiesForDay.getStatusCodeValue());
 
         List<LogActivityDto> newResponseEntries= (List<LogActivityDto>) activitiesForDay.getBody();
-        assertEquals(newResponseEntries.size(),2);
+        assertEquals(2,newResponseEntries.size());
 
         Optional<LogActivityDto> runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(),"Running");
@@ -109,7 +109,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Assert.isTrue(200 == activitiesForDay.getStatusCodeValue());
 
         newResponseEntries= (List<LogActivityDto>) activitiesForDay.getBody();
-        assertEquals(newResponseEntries.size(),1);
+        assertEquals(1,newResponseEntries.size());
 
         runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(),"Running");
@@ -119,12 +119,12 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         responseEntity = activityService.storeActivities(Arrays.asList(runningResponse.get()));
         Assert.isTrue(200 == responseEntity.getStatusCodeValue());
         newResponseEntries= (List<LogActivityDto>) responseEntity.getBody();
-        assertEquals(newResponseEntries.size(),1);
+        assertEquals(1,newResponseEntries.size());
 
         activitiesForDay = activityService.getActivitiesForDay("2001-01-01");
         Assert.isTrue(200 == activitiesForDay.getStatusCodeValue());
         newResponseEntries= (List<LogActivityDto>) activitiesForDay.getBody();
-        assertEquals(newResponseEntries.size(),1);
+        assertEquals(1,newResponseEntries.size());
         runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(),"Running");
         assertTrue(runningResponse.get().getCalories().equals(44.0), "Calorien bijgewerkt");

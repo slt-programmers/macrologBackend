@@ -14,8 +14,7 @@ public class LocalDateParser {
     private static DateTimeFormatter reversedFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static DateTimeFormatter reversedShortFormat = DateTimeFormatter.ofPattern("d-M-yyyy");
 
-    private LocalDateParser() {
-    }
+    private LocalDateParser() {}
 
     public static LocalDate parse(String stringDate) {
         LocalDate date;
