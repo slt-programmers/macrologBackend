@@ -1,9 +1,8 @@
 package slt.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
@@ -15,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
+import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
@@ -60,8 +60,10 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.getAllUsers();
         Assertions.assertNotNull(response.getBody());
-        someUser = (UserAccount) ((List) response.getBody()).get(0);
-        Assertions.assertEquals(234, someUser.getId());
+        UserAccountDto expectedDto = new UserAccountDto(234, null, null, null, false);
+        UserAccountDto actualDto = (UserAccountDto) ((List) response.getBody()).get(0);
+        Assertions.assertEquals(expectedDto.getId(), actualDto.getId());
+        Assertions.assertEquals(expectedDto.isAdmin(), actualDto.isAdmin());
         Mockito.verify(userRepo).getAllUsers();
     }
 

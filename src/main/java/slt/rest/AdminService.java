@@ -9,9 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
+import slt.dto.LogEntryDto;
+import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,7 +41,8 @@ public class AdminService {
         } else {
             List<UserAccount> userAccounts = userAccountRepository.getAllUsers();
             userAccounts = userAccounts.stream().filter(acc -> !acc.getId().equals(userId)).collect(Collectors.toList());
-            return ResponseEntity.ok(userAccounts);
+            List<UserAccountDto> userAccountDtos = mapToDtos(userAccounts);
+            return ResponseEntity.ok(userAccountDtos);
         }
     }
 
@@ -60,5 +64,20 @@ public class AdminService {
         }
     }
 
+    private List<UserAccountDto> mapToDtos(List<UserAccount> accounts) {
+        List<UserAccountDto> dtos = new ArrayList<>();
+        for (UserAccount account : accounts) {
+            dtos.add(mapToDto(account));
+        }
+        return dtos;
+    }
 
+    private UserAccountDto mapToDto(UserAccount account) {
+        return new UserAccountDto(
+                account.getId(),
+                null,
+                account.getUsername(),
+                account.getEmail(),
+                account.isAdmin());
+    }
 }

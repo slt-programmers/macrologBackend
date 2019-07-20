@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.SettingsRepository;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.AuthenticationRequest;
-import slt.dto.ChangePasswordRequest;
-import slt.dto.RegistrationRequest;
-import slt.dto.ResetPasswordRequest;
+import slt.dto.*;
 import slt.notification.MailService;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -69,7 +66,10 @@ public class AuthenticationService {
             MultiValueMap<String, String> responseHeaders = new HttpHeaders();
             responseHeaders.add("token", jwt);
             log.info("Login successful");
-            return new ResponseEntity<>("{\"name\":\"" + name + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
+            UserAccountDto response = new UserAccountDto();
+            response.setUserName(name);
+            response.setToken((jwt));
+            return new ResponseEntity<>(response, responseHeaders, HttpStatus.ACCEPTED);
         }
     }
 
