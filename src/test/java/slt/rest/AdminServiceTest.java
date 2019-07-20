@@ -1,6 +1,7 @@
 package slt.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,11 @@ import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.times;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,6 +43,43 @@ class AdminServiceTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(123);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
+    }
+
+    @Test
+    void getAllUsers() {
+        UserAccount adminUser = new UserAccount();
+        adminUser.setId(123);
+        adminUser.setAdmin(true);
+        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
+        UserAccount someUser = new UserAccount();
+        someUser.setId(234);
+        List<UserAccount> users = new ArrayList<>();
+        users.add(someUser);
+        users.add(adminUser);
+        Mockito.when(userRepo.getAllUsers()).thenReturn(users);
+
+        ResponseEntity response = adminService.getAllUsers();
+        Assertions.assertNotNull(response.getBody());
+        someUser = (UserAccount) ((List) response.getBody()).get(0);
+        Assertions.assertEquals(234, someUser.getId());
+        Mockito.verify(userRepo).getAllUsers();
+    }
+
+    @Test
+    void getAllUsersUnauthorized() {
+        UserAccount nonAdminUser = new UserAccount();
+        nonAdminUser.setId(123);
+        Mockito.when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
+        UserAccount someUser = new UserAccount();
+        someUser.setId(234);
+        List<UserAccount> users = new ArrayList<>();
+        users.add(someUser);
+        users.add(nonAdminUser);
+        Mockito.when(userRepo.getAllUsers()).thenReturn(users);
+
+        ResponseEntity response = adminService.getAllUsers();
+        Assertions.assertEquals(401, response.getStatusCodeValue());
+        Mockito.verify(userRepo, times(0)).getAllUsers();
     }
 
     @Test

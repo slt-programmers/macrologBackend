@@ -12,6 +12,9 @@ import slt.database.entities.UserAccount;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/admin")
 @Slf4j
@@ -22,6 +25,22 @@ public class AdminService {
 
     @Autowired
     private UserAccountRepository userAccountRepository;
+
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getAllUsers() {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        Integer userId = userInfo.getUserId();
+        UserAccount userAccount = userAccountRepository.getUserById(userId);
+        if (!userAccount.isAdmin()) {
+            log.error("Not authorized to delete account");
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        } else {
+            List<UserAccount> userAccounts = userAccountRepository.getAllUsers();
+            userAccounts = userAccounts.stream().filter(acc -> !acc.getId().equals(userId)).collect(Collectors.toList());
+            return ResponseEntity.ok(userAccounts);
+        }
+    }
 
     @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteAccount(@RequestParam("userId") Integer deleteUserId) {
@@ -40,4 +59,6 @@ public class AdminService {
             return new ResponseEntity(HttpStatus.OK);
         }
     }
+
+
 }
