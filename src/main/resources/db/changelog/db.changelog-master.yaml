@@ -12,3 +12,6 @@ databaseChangeLog:
 
    - include:
         file: db/changelog/db.changelog-generated-start.yaml
+
+   - include:
+        file: db/changelog/meal-uniquename.yaml

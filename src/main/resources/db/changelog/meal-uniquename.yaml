@@ -1,0 +1,28 @@
+databaseChangeLog:
+
+- changeSet:
+    id: 20190720-changetypename
+    author: arjan
+    changes:
+    - modifyDataType:
+        columnName: name
+        newDataType: ${text.type}
+        tableName: meal
+
+- changeSet:
+    id:  20190720-MealsMYSQL
+    author: arjan
+    dbms: mysql
+    changes:
+     - sql:
+        comment: Unique constraint on name per user
+        sql:  ALTER TABLE meal ADD CONSTRAINT meal_uk1 UNIQUE (user_id, name (50))
+
+- changeSet:
+    id: 20190720-MealsOracleH2
+    author: arjan
+    dbms: oracle,h2
+    changes:
+     - sql:
+        comment: Unique constraint on name per user
+        sql:  ALTER TABLE meal ADD CONSTRAINT meal_uk1 UNIQUE (user_id, name)

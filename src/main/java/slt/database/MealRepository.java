@@ -3,7 +3,6 @@ package slt.database;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import slt.database.entities.Ingredient;
 import slt.database.entities.Meal;
 
 import javax.transaction.Transactional;
@@ -16,6 +15,8 @@ interface MealCrudRepository extends CrudRepository<Meal, Long> {
     void deleteByUserId(Integer userId);
 
     List<Meal> findByUserId(Integer userId);
+
+    Meal findByUserIdAndName(Integer userId, String name);
 }
 
 @Repository
@@ -28,29 +29,19 @@ public class MealRepository {
     @Autowired
     IngredientCrudRepository ingredientCrudRepository;
 
-//    public Meal insertMeal(Integer userId, Meal meal, List<Ingredient> ingredients) {
-//
-//        meal.setUserId(userId);
-//        Meal savedMeal = mealCrudRepository.save(meal);
-//
-//        for (Ingredient ingredient : ingredients) {
-//            ingredient.setMealId(savedMeal.getId());
-//            ingredientRepository.saveIngredient(ingredient);
-//        }
-//        return savedMeal;
-//    }
-//
-//    public Meal updateMeal(Integer userId, Meal meal, List<Ingredient>ingredients ) {
-//        meal.setUserId(userId);
-//        Meal saved = mealCrudRepository.save(meal);
-//        ingredientRepository.updateIngredientsForMeal(meal.getId(), ingredients);
-//        return saved;
-//    }
+    public Meal saveMeal(Integer userId, Meal meal) {
+        meal.setUserId(userId);
+        Meal saved = mealCrudRepository.save(meal);
+        return saved;
+    }
+
+    public Meal findByName(Integer userId, String name) {
+        return mealCrudRepository.findByUserIdAndName(userId,name);
+    }
 
     @Transactional
     public void deleteMeal(Integer userId, Long mealId) {
-        ingredientRepository.deleteIngredientsForMeal(mealId);
-        mealCrudRepository.deleteByUserIdAndId(userId,mealId);
+        mealCrudRepository.deleteByUserIdAndId(userId, mealId);
     }
 
     public List<Meal> getAllMeals(Integer userId) {

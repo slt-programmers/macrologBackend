@@ -19,8 +19,9 @@ public class Ingredient {
     @Column(columnDefinition="bigint")
     private Long id;
 
-    @Column(name = "meal_id")
-    private Long mealId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meal_id")
+    private Meal meal;
 
     @Column(name = "food_id")
     private Long foodId;
