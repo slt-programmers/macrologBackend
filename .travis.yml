@@ -20,14 +20,14 @@ install:
 
 jobs:
   allow_failures: 
-  - script: sonar-scanner -Dsonar.projectKey=slt-programmers_macrologWebapp
+  - script: mvn install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
   include: 
   - stage: "unit test and scan"
     if: branch = master
     script: mvn install
   - stage: "unit test and scan"
     if: branch = master
-    script: sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
+    script: mvn install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
   - stage: "integration test"
     if: branch = release
     script: mvn install
