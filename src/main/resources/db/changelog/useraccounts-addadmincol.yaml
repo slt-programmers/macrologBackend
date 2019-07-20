@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+- changeSet:
+    id: 20190720-addadmincol
+    author: carmen
+    changes:
+      - addColumn:
+          tableName: useraccounts
+          columns:
+            - column:
+                name: is_admin
+                type: BOOLEAN
+                defaultValueBoolean: "0"
+                constraints:
+                  - nullable: false
+
+

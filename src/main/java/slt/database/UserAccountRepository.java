@@ -34,7 +34,6 @@ public class UserAccountRepository {
     }
 
     public slt.database.entities.UserAccount insertUser(String username, String password, String email) {
-
         slt.database.entities.UserAccount userAccount = slt.database.entities.UserAccount.builder()
                 .email(email)
                 .username(username)
@@ -64,12 +63,13 @@ public class UserAccountRepository {
 
     private UserAccount transformToOther(slt.database.entities.UserAccount jpaEntity) {
         return UserAccount.builder()
-                .email(jpaEntity.getEmail())
                 .id(jpaEntity.getId())
+                .username(jpaEntity.getUsername())
+                .email(jpaEntity.getEmail())
                 .password(jpaEntity.getPassword())
                 .resetDate(jpaEntity.getResetDate())
                 .resetPassword(jpaEntity.getResetPassword())
-                .username(jpaEntity.getUsername())
+                .isAdmin(jpaEntity.isAdmin())
                 .build();
     }
 }

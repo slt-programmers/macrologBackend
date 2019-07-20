@@ -30,6 +30,7 @@ public class MyMockedMailService extends MailService {
     public void sendConfirmationMail(String email, UserAccount account) {
         confirmationMailsSend.add(email);
     }
+
     public boolean verifyConfirmationSendTo(String email){
         return confirmationMailsSend.remove(email);
     }
