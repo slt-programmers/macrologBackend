@@ -32,7 +32,7 @@ jobs:
     if: branch = release
     script: mvn install
     
-# Integration test has yet to be defined, for now just ng test again
+# Integration test has yet to be defined, for now just mvn install
 
 
 addons:
