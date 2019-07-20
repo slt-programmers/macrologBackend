@@ -27,7 +27,7 @@ public class AdminService {
     private UserAccountRepository userAccountRepository;
 
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/getAllUsers", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllUsers() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
