@@ -14,9 +14,9 @@ stages:
 - "unit test and scan"
 - "integration test"
 
-install: 
+install:
   - mvn versions:set -DnewVersion=1.0.${TRAVIS_BUILD_NUMBER}
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent
+#  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent
 
 jobs:
   allow_failures: 
@@ -27,7 +27,7 @@ jobs:
     script: mvn install
   - stage: "unit test and scan"
     if: branch = master
-    script: mvn install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
+    script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
   - stage: "integration test"
     if: branch = release
     script: mvn install
