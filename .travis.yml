@@ -15,8 +15,7 @@ stages:
 - "integration test"
 
 install:
-  - mvn versions:set -DnewVersion=1.0.${TRAVIS_BUILD_NUMBER}
-#  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent
+  - mvn clean versions:set -DnewVersion=1.0.${TRAVIS_BUILD_NUMBER}
 
 jobs:
   allow_failures: 

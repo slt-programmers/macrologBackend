@@ -17,9 +17,6 @@ public class AccountService {
     private ActivityRepository activityRepository;
 
     @Autowired
-    private IngredientRepository ingredientRepository;
-
-    @Autowired
     private LogEntryRepository logEntryRepository;
 
     @Autowired
@@ -45,9 +42,6 @@ public class AccountService {
         weightRepository.deleteAllForUser(userId);
         logEntryRepository.deleteAllForUser(userId);
 
-        List<Meal> meals = mealRepository.getAllMeals(userId);
-        List<Long> mealIds = meals.stream().map(Meal::getId).collect(toList());
-        ingredientRepository.deleteAllForUser(mealIds);
         mealRepository.deleteAllForUser(userId);
 
         List<Food> allFood = foodRepository.getAllFood(userId);

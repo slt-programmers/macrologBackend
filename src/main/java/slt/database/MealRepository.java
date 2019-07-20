@@ -21,18 +21,13 @@ interface MealCrudRepository extends CrudRepository<Meal, Long> {
 
 @Repository
 public class MealRepository {
-    private static final IngredientRepository ingredientRepository = new IngredientRepository();
 
     @Autowired
     MealCrudRepository mealCrudRepository;
 
-    @Autowired
-    IngredientCrudRepository ingredientCrudRepository;
-
     public Meal saveMeal(Integer userId, Meal meal) {
         meal.setUserId(userId);
-        Meal saved = mealCrudRepository.save(meal);
-        return saved;
+        return  mealCrudRepository.save(meal);
     }
 
     public Meal findByName(Integer userId, String name) {

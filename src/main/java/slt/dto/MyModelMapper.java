@@ -34,18 +34,6 @@ public class MyModelMapper {
                     return mappingContext.getDestination();
                 });
 
-//        modelMapper.createTypeMap(Meal.class, MealDto.class)
-//                .setPostConverter(mappingContext -> {
-//                    if (mappingContext.getDestination().getIngredients() != null) {
-//                        for (IngredientDto ingredientDto : mappingContext.getDestination().getIngredients()) {
-//                            Food foodById = foodRepository.getFoodById(1, 1l);
-////                            modelMapper.map(foodById, FoodDto.class);
-//                            ingredientDto.setFood(FoodDto.builder().name("food1").build());
-//                        }
-//                    }
-//                    return mappingContext.getDestination();
-//                });
-
         modelMapper.createTypeMap(Ingredient.class,IngredientDto.class)
                 .setPostConverter(mappingContext -> {
                     Long foodId = mappingContext.getSource().getFoodId();

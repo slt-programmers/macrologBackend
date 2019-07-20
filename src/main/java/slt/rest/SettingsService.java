@@ -89,7 +89,11 @@ public class SettingsService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         }
-        return ResponseEntity.ok(setting == null ? null : setting.getValue());
+        if (setting == null){
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.ok(setting.getValue());
+        }
     }
 
     private UserSettingsDto mapToUserSettingsDto(List<slt.database.entities.Setting> settings) {
