@@ -9,14 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.LogEntryDto;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -40,7 +38,6 @@ public class AdminService {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
             List<UserAccount> userAccounts = userAccountRepository.getAllUsers();
-            userAccounts = userAccounts.stream().filter(acc -> !acc.getId().equals(userId)).collect(Collectors.toList());
             List<UserAccountDto> userAccountDtos = mapToDtos(userAccounts);
             return ResponseEntity.ok(userAccountDtos);
         }
@@ -58,6 +55,9 @@ public class AdminService {
         } else if (toBeDeletedAccount == null) {
             log.error("Account not found for userId: {}", userInfo.getUserId());
             return new ResponseEntity(HttpStatus.NOT_FOUND);
+        } else if (toBeDeletedAccount.isAdmin()){
+            log.error("Cannot delete admin account");
+            return new ResponseEntity((HttpStatus.BAD_REQUEST));
         } else {
             accountService.deleteAccount(deleteUserId);
             return new ResponseEntity(HttpStatus.OK);

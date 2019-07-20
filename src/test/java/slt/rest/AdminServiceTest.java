@@ -60,10 +60,11 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.getAllUsers();
         Assertions.assertNotNull(response.getBody());
-        UserAccountDto expectedDto = new UserAccountDto(234, null, null, null, false);
-        UserAccountDto actualDto = (UserAccountDto) ((List) response.getBody()).get(0);
-        Assertions.assertEquals(expectedDto.getId(), actualDto.getId());
-        Assertions.assertEquals(expectedDto.isAdmin(), actualDto.isAdmin());
+        List<UserAccountDto> userDtos = (List) response.getBody();
+
+        Assertions.assertEquals(2, userDtos.size());
+        Assertions.assertEquals(234, userDtos.get(0).getId());
+        Assertions.assertEquals(123, userDtos.get(1).getId());
         Mockito.verify(userRepo).getAllUsers();
     }
 
@@ -113,6 +114,22 @@ class AdminServiceTest {
         Assertions.assertEquals(404, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
     }
+
+
+    @Test
+    void deleteAccountAdminItself() {
+        UserAccount adminUser = new UserAccount();
+        adminUser.setId(123);
+        adminUser.setAdmin(true);
+
+        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
+        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
+
+        ResponseEntity response = adminService.deleteAccount(123);
+        Assertions.assertEquals(400, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+    }
+
 
     @Test
     void deleteAccountUnauthorized() {
