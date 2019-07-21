@@ -1,26 +1,22 @@
 package slt.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class MealDto {
+public class AddMealRequest {
 
     private Long id;
     @ApiModelProperty(notes = "Name of meal", required = true)
     private String name;
     @ApiModelProperty(notes = "List of ingredients", required = true)
-    private List<IngredientDto> ingredients = new ArrayList<>();
+    private List<AddMealIngredientDto> ingredients = new ArrayList<>();
 
 }

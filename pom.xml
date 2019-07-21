@@ -20,10 +20,8 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.exclusions>src/main/java/slt/Application.java</sonar.exclusions>
-        <sonar.java.libraries>${HOME}/.m2/repository</sonar.java.libraries>
+        <!--<sonar.java.libraries>${HOME}/.m2/repository</sonar.java.libraries>-->
         <sonar.java.binaries>target/classes</sonar.java.binaries>
-        <!--File src/test/java/PortionRepositoryTest.java can't be indexed twice. Please check that inclusion/exclusion patterns produce disjoint sets for main and test files-->
-
     </properties>
 
     <!-- Add typical dependencies for a web application -->
@@ -126,7 +124,15 @@
             <version>1.1</version>
         </dependency>
 
-         <!-- Testing -->
+        <!-- Mapping objecten -->
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

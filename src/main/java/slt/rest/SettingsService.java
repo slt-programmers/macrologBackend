@@ -55,7 +55,7 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Get user settings")
-    @GetMapping(path = "/user",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getUserSetting() {
         UserSettingsDto userSettingsDto = getUserSettingsDto();
         return ResponseEntity.ok(userSettingsDto);
@@ -72,7 +72,7 @@ public class SettingsService {
     }
 
     @ApiOperation(value = "Get setting")
-    @GetMapping(path = "/{name}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getSetting(@PathVariable("name") String name,
                                      @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -89,7 +89,11 @@ public class SettingsService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         }
-        return ResponseEntity.ok(setting == null ? null : setting.getValue());
+        if (setting == null) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.ok(setting.getValue());
+        }
     }
 
     private UserSettingsDto mapToUserSettingsDto(List<slt.database.entities.Setting> settings) {
@@ -97,20 +101,20 @@ public class SettingsService {
         dto.setName(mapSetting(settings, "name"));
         dto.setGender(mapSetting(settings, "gender"));
         String ageSetting = mapSetting(settings, "age");
-        dto.setAge(StringUtils.isEmpty(ageSetting)?null:Integer.valueOf(ageSetting));
+        dto.setAge(StringUtils.isEmpty(ageSetting) ? null : Integer.valueOf(ageSetting));
         String birthdaySetting = mapSetting(settings, "birthday");
-        dto.setBirthday(StringUtils.isEmpty(birthdaySetting)?null:LocalDateParser.parse(birthdaySetting));
+        dto.setBirthday(StringUtils.isEmpty(birthdaySetting) ? null : LocalDateParser.parse(birthdaySetting));
         String heightSetting = mapSetting(settings, "height");
-        dto.setHeight(StringUtils.isEmpty(heightSetting)?null:Integer.valueOf(heightSetting));
+        dto.setHeight(StringUtils.isEmpty(heightSetting) ? null : Integer.valueOf(heightSetting));
         String activitySetting = mapSetting(settings, "activity");
-        dto.setActivity(StringUtils.isEmpty(activitySetting)?null:Double.valueOf(activitySetting));
+        dto.setActivity(StringUtils.isEmpty(activitySetting) ? null : Double.valueOf(activitySetting));
 
         String goalProteinSetting = mapSetting(settings, "goalProtein");
-        dto.setGoalProtein(StringUtils.isEmpty(goalProteinSetting)?null:Integer.valueOf(goalProteinSetting));
+        dto.setGoalProtein(StringUtils.isEmpty(goalProteinSetting) ? null : Integer.valueOf(goalProteinSetting));
         String goalFatSetting = mapSetting(settings, "goalFat");
-        dto.setGoalFat(StringUtils.isEmpty(goalFatSetting)?null:Integer.valueOf(goalFatSetting));
+        dto.setGoalFat(StringUtils.isEmpty(goalFatSetting) ? null : Integer.valueOf(goalFatSetting));
         String goalCarbsSetting = mapSetting(settings, "goalCarbs");
-        dto.setGoalCarbs(StringUtils.isEmpty(goalCarbsSetting)?null:Integer.valueOf(goalCarbsSetting));
+        dto.setGoalCarbs(StringUtils.isEmpty(goalCarbsSetting) ? null : Integer.valueOf(goalCarbsSetting));
 
         return dto;
     }

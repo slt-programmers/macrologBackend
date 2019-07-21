@@ -28,6 +28,8 @@ public class UserAccount {
     @Column(length = 65535, columnDefinition="clob")
     private String resetPassword;
     private LocalDateTime resetDate;
+    @Column(name = "is_admin")
+    private boolean isAdmin;
 
     @OneToMany (
             cascade = CascadeType.ALL,

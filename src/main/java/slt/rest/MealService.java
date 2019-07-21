@@ -11,9 +11,15 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.FoodRepository;
 import slt.database.MealRepository;
 import slt.database.PortionRepository;
+import slt.database.entities.Meal;
+import slt.dto.AddMealRequest;
 import slt.dto.MealDto;
+import slt.dto.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -28,19 +34,36 @@ public class MealService {
     @Autowired
     private PortionRepository portionRepository;
 
+    @Autowired
+    private MyModelMapper myModelMapper;
+
     @ApiOperation(value = "Retrieve all meals")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAllMeals() {
-//        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-//        List<Meal> allMeals = mealRepository.getAllMeals(userInfo.getUserId());
-//        List<MealDto> allMealDtos = mapToDto(userInfo.getUserId(), allMeals);
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    public ResponseEntity<List<MealDto>> getAllMeals() {
+
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        List<Meal> allMeals = mealRepository.getAllMeals(userInfo.getUserId());
+
+        List<MealDto> allMealsDto = allMeals.stream()
+                .map(meal -> myModelMapper.getConfiguredMapper().map(meal, MealDto.class))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(allMealsDto);
     }
 
-    @ApiOperation(value = "Insert meal")
+    @ApiOperation(value = "Save meal")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeMeal(@RequestBody MealDto mealDto) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    public ResponseEntity<MealDto> storeMeal(@RequestBody AddMealRequest mealDto) {
+
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        Meal map = myModelMapper.getConfiguredMapper().map(mealDto, Meal.class);
+
+        if (mealRepository.findByName(userInfo.getUserId(), mealDto.getName()) != null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        Meal meal = mealRepository.saveMeal(userInfo.getUserId(), map);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(myModelMapper.getConfiguredMapper().map(meal,MealDto.class));
     }
 
     @ApiOperation(value = "Delete meal")
@@ -48,39 +71,6 @@ public class MealService {
     public ResponseEntity deleteMeal(@PathVariable("id") Long mealId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         mealRepository.deleteMeal(userInfo.getUserId(), mealId);
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-//    private List<MealDto> mapToDto(Integer userId, List<Meal> meals) {
-//        List<MealDto> mealDtos = new ArrayList<>();
-//
-//        for (Meal meal : meals) {
-//            MealDto mealDto = new MealDto();
-//            mealDto.setId(meal.getId());
-//            mealDto.setName(meal.getName());
-//            List<IngredientDto> ingredientDtos = new ArrayList<>();
-//            for (Ingredient ingredient : meal.getIngredients()) {
-//                IngredientDto ingredientDto = new IngredientDto();
-//                ingredientDto.setId(ingredient.getId());
-//                Long foodId = ingredient.getFoodId();
-//                ingredientDto.setFoodId(foodId);
-//                Food food = foodRepository.getFoodById(userId, foodId);
-//                ingredientDto.setFood(FoodService.mapFoodToFoodDto(food));
-//
-//                Long portionId = ingredient.getPortionId();
-//                if (portionId != null && portionId != 0) {
-//                    ingredientDto.setPortionId(portionId);
-//                    ingredientDto.setPortion(FoodService.mapPortionToPortionDto(portionRepository.getPortion(foodId, portionId), food));
-//                }
-//                ingredientDto.setMultiplier(ingredient.getMultiplier());
-//
-//                ingredientDtos.add(ingredientDto);
-//            }
-//            mealDto.setIngredients(ingredientDtos);
-//
-//            mealDtos.add(mealDto);
-//        }
-//
-//        return mealDtos;
-//    }
 }

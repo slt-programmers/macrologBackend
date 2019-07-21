@@ -98,7 +98,7 @@ public class SecurityFilter implements Filter {
 
     @Override
     public void destroy() {
-
+      // Do nothing
     }
 
 }

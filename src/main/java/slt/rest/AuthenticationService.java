@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.SettingsRepository;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.AuthenticationRequest;
-import slt.dto.ChangePasswordRequest;
-import slt.dto.RegistrationRequest;
-import slt.dto.ResetPasswordRequest;
+import slt.dto.*;
 import slt.notification.MailService;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -58,18 +55,19 @@ public class AuthenticationService {
             log.error("Unautorized");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            slt.database.entities.Setting nameSetting = settingsRepository.getLatestSetting((int) userAccount.getId(), "name");
-            String name = username;
-            if (nameSetting != null) {
-                name = nameSetting.getValue();
-            }
             JWTBuilder builder = new JWTBuilder();
-            String jwt = builder.generateJWT(name, userAccount.getId());
+            String jwt = builder.generateJWT(userAccount.getUsername(), userAccount.getId());
 
             MultiValueMap<String, String> responseHeaders = new HttpHeaders();
             responseHeaders.add("token", jwt);
             log.info("Login successful");
-            return new ResponseEntity<>("{\"name\":\"" + name + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
+            UserAccountDto response = new UserAccountDto();
+            response.setId(userAccount.getId());
+            response.setUserName(userAccount.getUsername());
+            response.setToken((jwt));
+            response.setEmail(userAccount.getEmail());
+            response.setAdmin(userAccount.isAdmin());
+            return new ResponseEntity<>(response, responseHeaders, HttpStatus.ACCEPTED);
         }
     }
 
@@ -107,7 +105,13 @@ public class AuthenticationService {
 
         new Thread(() -> mailService.sendConfirmationMail(email, newAccount)).start();
 
-        return new ResponseEntity<>("{\"name\":\"" + username + "\", \"token\":\"" + jwt + "\"}", responseHeaders, HttpStatus.ACCEPTED);
+        UserAccountDto userDto = new UserAccountDto();
+        userDto.setId(newAccount.getId());
+        userDto.setUserName(newAccount.getUsername());
+        userDto.setEmail(newAccount.getEmail());
+        userDto.setToken(jwt);
+        userDto.setAdmin(newAccount.isAdmin());
+        return new ResponseEntity<>(userDto, responseHeaders, HttpStatus.ACCEPTED);
     }
 
     @PostMapping(path = "/resetPassword", produces = MediaType.APPLICATION_JSON_VALUE)

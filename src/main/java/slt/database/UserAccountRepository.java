@@ -4,14 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import slt.database.entities.UserAccount;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 interface UserAccountCrudRepository extends CrudRepository<slt.database.entities.UserAccount,Integer> {
+
     List<UserAccount> findByUsername(String username);
+
     List<UserAccount> findByEmailIgnoreCase(String email);
+
+    List<UserAccount> findAll();
+
 }
 
 @Repository
@@ -34,13 +39,21 @@ public class UserAccountRepository {
     }
 
     public slt.database.entities.UserAccount insertUser(String username, String password, String email) {
-
         slt.database.entities.UserAccount userAccount = slt.database.entities.UserAccount.builder()
                 .email(email)
                 .username(username)
                 .password(password)
                 .build();
         return  userAccountCrudRepository.save(userAccount);
+    }
+
+    public List<UserAccount> getAllUsers() {
+        List<slt.database.entities.UserAccount> all = userAccountCrudRepository.findAll();
+        List<UserAccount> allAccounts = new ArrayList<>();
+        for(UserAccount account : all) {
+            allAccounts.add(transformToOther(account));
+        }
+        return allAccounts;
     }
 
     public UserAccount getUser(String username) {
@@ -64,12 +77,13 @@ public class UserAccountRepository {
 
     private UserAccount transformToOther(slt.database.entities.UserAccount jpaEntity) {
         return UserAccount.builder()
-                .email(jpaEntity.getEmail())
                 .id(jpaEntity.getId())
+                .username(jpaEntity.getUsername())
+                .email(jpaEntity.getEmail())
                 .password(jpaEntity.getPassword())
                 .resetDate(jpaEntity.getResetDate())
                 .resetPassword(jpaEntity.getResetPassword())
-                .username(jpaEntity.getUsername())
+                .isAdmin(jpaEntity.isAdmin())
                 .build();
     }
 }

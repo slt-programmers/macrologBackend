@@ -72,6 +72,9 @@ public abstract class AbstractApplicationIntegrationTest {
     @Autowired
     protected ExportService exportService;
 
+    @Autowired
+    protected MealService mealService;
+
     protected Integer createUser(String userEmail) {
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
         ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);

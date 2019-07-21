@@ -9,10 +9,9 @@ import lombok.*;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-public class IngredientDto {
+public class AddMealIngredientDto {
 
-    private Long id;
-    private Double multiplier;
-    private FoodDto food;
+    private Long foodId;
     private Long portionId;
+    private Double multiplier;
 }
