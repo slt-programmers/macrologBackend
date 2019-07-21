@@ -1,9 +1,8 @@
-package slt.utils;
+package slt.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import slt.util.LocalDateParser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;

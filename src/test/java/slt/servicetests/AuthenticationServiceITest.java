@@ -227,7 +227,6 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
     }
 
 
-
     @Test
     void deleteFilledAccount() {
 
@@ -304,7 +303,6 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         storeSetting("export1", "export1value");
 
         deleteAccount(password);
-
 
     }
 

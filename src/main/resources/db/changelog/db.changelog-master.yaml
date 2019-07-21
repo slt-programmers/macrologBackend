@@ -15,3 +15,6 @@ databaseChangeLog:
 
    - include:
         file: db/changelog/meal-uniquename.yaml
+
+   - include:
+       file: db/changelog/useraccounts-addadmincol.yaml

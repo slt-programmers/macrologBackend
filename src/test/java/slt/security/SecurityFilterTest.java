@@ -21,27 +21,22 @@ class SecurityFilterTest {
 
    @Test
     void testInitZonderAllowGezet() {
-
         SecurityFilter sf = new SecurityFilter();
         sf.init(null);
         Assertions.assertThat(sf.getAllowOrigin()).isEqualTo("http://localhost:4200");
-
     }
 
     @Test
     void testIniMetAllowGezet() {
-
         SecurityFilter sf = Mockito.spy(SecurityFilter.class);
         when(sf.getFromEnvironment()).thenReturn("server1");
         sf.init(null);
         Assertions.assertThat(sf.getAllowOrigin()).isEqualTo("server1");
-
     }
 
 
     @Test
     void doFilterOPTIONS() throws IOException, ServletException {
-
         SecurityFilter sf = Mockito.spy(SecurityFilter.class);
         when(sf.getAllowOrigin()).thenReturn("server1");
 
@@ -61,7 +56,6 @@ class SecurityFilterTest {
 
     @Test
     void doFilterZonderToken403() throws IOException, ServletException {
-
         SecurityFilter sf = Mockito.spy(SecurityFilter.class);
         when(sf.getAllowOrigin()).thenReturn("server1");
 
