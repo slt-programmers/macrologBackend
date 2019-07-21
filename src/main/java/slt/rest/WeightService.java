@@ -35,7 +35,7 @@ public class WeightService {
     }
 
     @ApiOperation(value = "Store weight entry")
-    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
