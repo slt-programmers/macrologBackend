@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import slt.database.*;
 import slt.database.entities.Food;
-import slt.database.entities.Meal;
 
 import java.util.List;
 

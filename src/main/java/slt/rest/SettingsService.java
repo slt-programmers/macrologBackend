@@ -120,7 +120,10 @@ public class SettingsService {
     }
 
     private String mapSetting(List<slt.database.entities.Setting> settings, String identifier) {
-        return settings.stream().filter(s -> s.getName().equals(identifier)).max(Comparator.comparing(slt.database.entities.Setting::getDay)).orElse(new slt.database.entities.Setting()).getValue();
+        return settings.stream()
+                .filter(s -> s.getName().equals(identifier))
+                .max(Comparator.comparing(slt.database.entities.Setting::getDay))
+                .orElse(new slt.database.entities.Setting()).getValue();
     }
 
 }
