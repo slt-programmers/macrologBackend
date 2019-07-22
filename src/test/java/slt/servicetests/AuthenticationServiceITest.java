@@ -51,13 +51,6 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
 
         boolean mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
-        int cnt = 0;
-        while (!mailSend && cnt < 10) {
-            Thread.sleep(1000);
-            mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
-            cnt++;
-            log.debug("Sleep until we fix better thread waiting.");
-        }
         Assertions.assertTrue(mailSend, "Mail has been send");
 
         // 2e: keer afgekeurd op username
@@ -106,13 +99,6 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
 
         String resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
-        int count = 0;
-        while (resettedPassword == null && count < 10) {
-            Thread.sleep(1000);
-            resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
-            count++;
-            log.debug("Sleep until we fix better thread waiting.");
-        }
         Assertions.assertNotNull(resettedPassword, "Mail has been send");
 
         log.debug("Reset to " + resettedPassword);

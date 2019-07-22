@@ -89,7 +89,6 @@ public class MailService {
 
 
             log.debug("Mail send to"  + email);
-
             sendEmailFactory.send(email, from, subject, body);
 
         } catch (MessagingException ex) {

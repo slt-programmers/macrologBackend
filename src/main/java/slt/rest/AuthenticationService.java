@@ -102,7 +102,8 @@ public class AuthenticationService {
         responseHeaders.add("token", jwt);
         log.info("Signup successful");
 
-        new Thread(() -> mailService.sendConfirmationMail(email, newAccount)).start();
+
+        mailService.sendConfirmationMail(email, newAccount);
 
         UserAccountDto userDto = new UserAccountDto();
         userDto.setId(newAccount.getId());
@@ -124,7 +125,8 @@ public class AuthenticationService {
             account.setResetPassword(hashedRandomPassword);
             account.setResetDate(LocalDateTime.now());
             userAccountRepository.saveAccount(account);
-            new Thread(() -> mailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
+            mailService.sendPasswordRetrievalMail(email, randomPassword, account);
+
             return ResponseEntity.ok("Email matches");
         } else {
             log.error("Account is null");

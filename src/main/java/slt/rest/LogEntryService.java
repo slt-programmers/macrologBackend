@@ -117,12 +117,11 @@ public class LogEntryService {
         })));
 
         List<DayMacro> retObject = new ArrayList<>();
-        for (java.util.Date date : collect.keySet()) {
+        for (Map.Entry<java.util.Date, Optional<LogEntryDto>> dateOptionalEntry : collect.entrySet()) {
             DayMacro dm = new DayMacro();
-            dm.setDay(date);
-            Optional<LogEntryDto> logEntryDtoOfDate = collect.get(date);
-            if (logEntryDtoOfDate.isPresent()) {
-                dm.setMacro(logEntryDtoOfDate.get().getMacrosCalculated());
+            dm.setDay(dateOptionalEntry.getKey());
+            if (dateOptionalEntry.getValue().isPresent()) {
+                dm.setMacro(dateOptionalEntry.getValue().get().getMacrosCalculated());
             }
             retObject.add(dm);
         }
