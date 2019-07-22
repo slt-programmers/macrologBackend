@@ -33,7 +33,7 @@ class MyModelMapperTest {
     PortionRepository portionRepository;
 
     @InjectMocks
-    MyModelMapper mapper ;
+    MyModelMapper mapper;
 
     @BeforeAll
     void setUp() {
@@ -151,7 +151,7 @@ class MyModelMapperTest {
 
 
         Food foodEntity = Food.builder().id(2l).build();
-        Mockito.when(foodRepository.getFoodById(isNull(),eq(2l))).thenReturn(foodEntity);
+        Mockito.when(foodRepository.getFoodById(isNull(), eq(2l))).thenReturn(foodEntity);
         Meal mapped = mapper.getConfiguredMapper().map(dto, Meal.class);
         mapper.getConfiguredMapper().validate();
 
@@ -182,6 +182,97 @@ class MyModelMapperTest {
         assertThat(ingredientMappedBack.getFoodId()).isEqualTo(30l);
         assertThat(ingredientMappedBack.getMultiplier()).isEqualTo(3.0);
         assertThat(ingredientMappedBack.getMeal()).isEqualTo(mapped);
+
+    }
+
+    @Test
+    public void testFoodMapping() {
+
+        FoodDto dto = FoodDto.builder()
+                .id(3000l)
+                .fat(1.0)
+                .protein(2.0)
+                .carbs(3.0)
+                .name("food")
+                .portions(
+                        Arrays.asList(
+                                PortionDto.builder()
+                                        .grams(5.0)
+                                        .description("portion")
+                                        .macros(Macro.builder()
+                                                .carbs(3.0)
+                                                .fat(45.0)
+                                                .protein(13.0)
+                                                .build()
+                                        )
+                                        .build()
+                        ))
+                .build();
+
+        Food mapped = mapper.getConfiguredMapper().map(dto, Food.class);
+        mapper.getConfiguredMapper().validate();
+
+        assertThat(mapped.getName()).isEqualTo(dto.getName());
+        assertThat(mapped.getCarbs()).isEqualTo(dto.getCarbs());
+        assertThat(mapped.getFat()).isEqualTo(dto.getFat());
+        assertThat(mapped.getProtein()).isEqualTo(dto.getProtein());
+        assertThat(mapped.getId()).isEqualTo(dto.getId());
+
+
+        FoodDto mappedBack = mapper.getConfiguredMapper().map(mapped,FoodDto.class);
+        mapper.getConfiguredMapper().validate();
+
+        assertThat(mappedBack.getName()).isEqualTo(dto.getName());
+        assertThat(mappedBack.getCarbs()).isEqualTo(dto.getCarbs());
+        assertThat(mappedBack.getFat()).isEqualTo(dto.getFat());
+        assertThat(mappedBack.getProtein()).isEqualTo(dto.getProtein());
+        assertThat(mappedBack.getId()).isEqualTo(dto.getId());
+    }
+
+    @Test
+    public void testPortionMapping(){
+        Portion portion = Portion.builder()
+                .id(1l)
+                .description("desc")
+                .foodId(2)
+                .grams(30.0)
+                .build();
+
+        PortionDto map = mapper.getConfiguredMapper().map(portion, PortionDto.class);
+        mapper.getConfiguredMapper().validate();
+
+        assertThat(map.getId()).isEqualTo(portion.getId());
+        assertThat(map.getDescription()).isEqualTo(portion.getDescription());
+        assertThat(map.getGrams()).isEqualTo(portion.getGrams());
+        assertThat(map.getMacros()).isNull();
+    }
+
+    @Test
+    public void testSetting(){
+        LocalDate localDate = LocalDate.parse("2010-01-02");
+
+        Setting setting = Setting.builder()
+                .day(Date.valueOf(localDate))
+                .name("setting")
+                .userId(1)
+                .value("waarde")
+                .build();
+
+        SettingDto dto = mapper.getConfiguredMapper().map(setting,SettingDto.class);
+        mapper.getConfiguredMapper().validate();
+
+        assertThat(dto.getDay().toLocalDate()).isEqualTo(localDate);
+        assertThat(dto.getName()).isEqualTo(setting.getName());
+        assertThat(dto.getValue()).isEqualTo(setting.getValue());
+        assertThat(dto.getId()).isEqualTo(setting.getId());
+
+        Setting mappedBack = mapper.getConfiguredMapper().map(dto,Setting.class);
+        mapper.getConfiguredMapper().validate();
+        assertThat(mappedBack.getDay().toLocalDate()).isEqualTo(localDate);
+        assertThat(mappedBack.getName()).isEqualTo(setting.getName());
+        assertThat(mappedBack.getValue()).isEqualTo(setting.getValue());
+        assertThat(mappedBack.getId()).isEqualTo(setting.getId());
+
 
     }
 }

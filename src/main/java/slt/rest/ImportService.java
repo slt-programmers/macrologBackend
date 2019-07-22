@@ -16,7 +16,6 @@ import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
-import java.sql.Date;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -38,6 +37,8 @@ public class ImportService {
     private ActivityRepository activityRepository;
     @Autowired
     private WeightRepository weightRepository;
+    @Autowired
+    private MyModelMapper myModelMapper;
 
     @ApiOperation(value = "Import exported json")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,18 +46,14 @@ public class ImportService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("export = " + export);
 
-        List<SettingDto> settingDtos = export.getAllSettingDtos();
-        for (SettingDto settingDto : settingDtos) {
-            settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay());
-        }
+
 
         List<FoodDto> allFoodDto = export.getAllFood();
         for (FoodDto foodDto : allFoodDto) {
-            Food food = mapFoodDtoToFood(foodDto);
-            foodRepository.saveFood(userInfo.getUserId(), food);
+            Food food = myModelMapper.getConfiguredMapper().map(foodDto,Food.class);
+            food.setId(null);// force a new entry
+            Food foodDB = foodRepository.saveFood(userInfo.getUserId(), food);
 
-            // We hebben de database ID nodig, dus opnieuw ophalen:
-            Food foodDB = foodRepository.getFood(userInfo.getUserId(), food.getName());
             List<PortionDto> portionDtos = foodDto.getPortions();
 
             for (PortionDto portionDto : portionDtos) {
@@ -81,13 +78,33 @@ public class ImportService {
             logEntryRepository.saveLogEntry(userInfo.getUserId(), logEntry);
         }
 
+        List<SettingDto> settingDtos = export.getAllSettingDtos();
+        settingDtos.stream()
+                .map(s -> myModelMapper.getConfiguredMapper().map(s, Setting.class))
+                .forEach(settingDomain -> {
+                    settingDomain.setId(null); // force add new entry
+                    settingsRepo.putSetting(userInfo.getUserId(),settingDomain);
+                });
+
+        for (SettingDto settingDto : settingDtos) {
+            settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay());
+        }
+
         List<WeightDto> allWeights = export.getAllWeights();
-        allWeights.stream().map(this::mapWeightToDomain)
-                .forEach(weightDomain -> weightRepository.insertWeight(userInfo.getUserId(), weightDomain));
+        allWeights.stream()
+                .map(w -> myModelMapper.getConfiguredMapper().map(w, Weight.class))
+                .forEach(weightDomain -> {
+                    weightDomain.setId(null); // force add new entry
+                    weightRepository.insertWeight(userInfo.getUserId(), weightDomain);
+                });
 
         List<LogActivityDto> allActivities = export.getAllActivities();
-        allActivities.stream().map(this::mapActivityDtoToDomain)
-                .forEach(activityDomain -> activityRepository.saveActivity(userInfo.getUserId(), activityDomain));
+        allActivities.stream().map(a -> myModelMapper.getConfiguredMapper().map(a, LogActivity.class))
+                .forEach(
+                        activityDomain -> {
+                            activityDomain.setId(null); // force add new entry
+                            activityRepository.saveActivity(userInfo.getUserId(), activityDomain);
+                        });
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -129,31 +146,5 @@ public class ImportService {
         return portion;
     }
 
-    private static Food mapFoodDtoToFood(FoodDto foodDto) {
-        Food food = new Food();
-        food.setName(foodDto.getName());
-        food.setId(null);
-        food.setProtein(foodDto.getProtein());
-        food.setCarbs(foodDto.getCarbs());
-        food.setFat(foodDto.getFat());
-        return food;
-    }
 
-    private Weight mapWeightToDomain(WeightDto weightEntry) {
-        Weight entry = new Weight();
-        entry.setDay(Date.valueOf(weightEntry.getDay()));
-        entry.setId(null);
-        entry.setValue(weightEntry.getWeight());
-        entry.setRemark(weightEntry.getRemark());
-        return entry;
-    }
-
-    private LogActivity mapActivityDtoToDomain(LogActivityDto logEntry) {
-        LogActivity entry = new LogActivity();
-        entry.setName(logEntry.getName());
-        entry.setCalories(logEntry.getCalories());
-        entry.setDay(new Date(logEntry.getDay().getTime()));
-        entry.setId(logEntry.getId());
-        return entry;
-    }
 }

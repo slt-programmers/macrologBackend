@@ -1,6 +1,7 @@
 package slt.dto;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.*;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 @Component
+@Slf4j
 public class MyModelMapper {
 
     @Autowired
@@ -67,6 +69,7 @@ public class MyModelMapper {
                     return mappingContext.getDestination();
                 });
     }
+
     private void addIngredientDtoIngredient(ModelMapper modelMapper) {
         modelMapper.createTypeMap(IngredientDto.class, Ingredient.class)
                 .setPostConverter(mappingContext -> {
@@ -135,20 +138,20 @@ public class MyModelMapper {
 
     private PropertyMap<WeightDto, Weight> getWeightDtoWeightPropertyMap() {
         return new PropertyMap<WeightDto, Weight>() {
-                @Override
-                protected void configure() {
-                    map().setValue(source.getWeight());
-                    skip().setUserId(null);
-                }
-            };
+            @Override
+            protected void configure() {
+                map().setValue(source.getWeight());
+                skip().setUserId(null);
+            }
+        };
     }
 
     private PropertyMap<Weight, WeightDto> getWeightWeightDtoPropertyMap() {
         return new PropertyMap<Weight, WeightDto>() {
-                @Override
-                protected void configure() {
-                    map().setWeight(source.getValue());
-                }
-            };
+            @Override
+            protected void configure() {
+                map().setWeight(source.getValue());
+            }
+        };
     }
 }

@@ -22,7 +22,7 @@ interface LogEntryCrudRepository extends CrudRepository<LogEntry, Long> {
 
     List<LogEntry> findByUserId(Integer userId);
 
-    List<LogEntry> findByUserIdAndDay(Integer userId, java.util.Date date);
+    List<LogEntry> findByUserIdAndDay(Integer userId, Date date);
 
     @Query("select l from LogEntry l where l.userId = :userId and l.day >= :begin and l.day <= :end")
     List<LogEntry> findByUserIdWithDayAfterAndDayBefore(@Param("userId") Integer userId, @Param("begin") Date begin, @Param("end") Date end);

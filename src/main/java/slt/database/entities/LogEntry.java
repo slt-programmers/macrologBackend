@@ -28,7 +28,9 @@ public class LogEntry {
     private Long portionId;
 
     private Double multiplier;
+
     private Date day;
+
     private String meal;
 
     @Column(name = "user_id")

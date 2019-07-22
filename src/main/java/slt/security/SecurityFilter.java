@@ -1,9 +1,6 @@
 package slt.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.annotation.Order;
@@ -75,7 +72,7 @@ public class SecurityFilter implements Filter {
                 } catch (ExpiredJwtException expiredEx) {
                     log.debug("ExpiredJWT token.");
                     ((HttpServletResponse) response).sendError(403, "Expired session");
-                } catch (Exception general) {
+                } catch (MalformedJwtException malformedJwt) {
                     log.debug("Incorrect token");
                     ((HttpServletResponse) response).sendError(403, "Invalid token");
                 }

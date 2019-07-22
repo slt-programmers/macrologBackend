@@ -12,10 +12,7 @@ import slt.database.FoodRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.Food;
 import slt.database.entities.Portion;
-import slt.dto.AddFoodRequest;
-import slt.dto.FoodDto;
-import slt.dto.Macro;
-import slt.dto.PortionDto;
+import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
@@ -35,6 +32,9 @@ public class FoodService {
 
     @Autowired
     private PortionRepository portionRepository;
+
+    @Autowired
+    private MyModelMapper myModelMapper;
 
     @ApiOperation(value = "Retrieve all stored foods")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -130,7 +130,7 @@ public class FoodService {
     }
 
     private FoodDto createFoodDto(Food food, boolean withPortions) {
-        FoodDto foodDto = mapFoodToFoodDto(food);
+        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food,FoodDto.class );
 
         if (withPortions) {
             List<Portion> foodPortions = portionRepository.getPortions(food.getId());
@@ -142,24 +142,11 @@ public class FoodService {
         return foodDto;
     }
 
-    static PortionDto mapPortionToPortionDto(Portion portion, Food food) {
-        PortionDto currDto = new PortionDto();
-        currDto.setDescription(portion.getDescription());
-        currDto.setGrams(portion.getGrams());
-        currDto.setId(portion.getId());
+    PortionDto mapPortionToPortionDto(Portion portion, Food food) {
+        PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
         Macro calculatedMacros = calculateMacro(food, portion);
         currDto.setMacros(calculatedMacros);
         return currDto;
-    }
-
-    static FoodDto mapFoodToFoodDto(Food food) {
-        FoodDto foodDto = new FoodDto();
-        foodDto.setName(food.getName());
-        foodDto.setId(food.getId());
-        foodDto.setProtein(food.getProtein());
-        foodDto.setCarbs(food.getCarbs());
-        foodDto.setFat(food.getFat());
-        return foodDto;
     }
 
     // Naar een util brengen:

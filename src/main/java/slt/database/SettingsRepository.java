@@ -46,6 +46,25 @@ public class SettingsRepository {
         }
     }
 
+
+    public void putSetting(Integer userId, Setting setting) {
+        setting.setUserId(userId);
+        Setting currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
+        if (currentSetting == null) { // geen records
+            log.debug("Insert");
+            saveSetting(userId,setting);
+        } else {
+            log.debug("Update");
+            boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(setting.getDay().toLocalDate());
+            if (settingSameDay) {
+                currentSetting.setValue(setting.getValue());
+                settingsCrudRepository.save(currentSetting);
+            } else {
+                saveSetting(userId, setting);
+            }
+        }
+    }
+
     public Setting insertSetting(Integer userId, String setting, String value, Date date) {
         Setting newSetting = Setting.builder().day(date).name(setting).userId(userId).value(value).build();
         return settingsCrudRepository.save(newSetting);
@@ -72,5 +91,9 @@ public class SettingsRepository {
         return settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
+    public Setting saveSetting(Integer userId, Setting settingDomain) {
+        settingDomain.setUserId(userId);
+        return settingsCrudRepository.save(settingDomain);
+    }
 }
 

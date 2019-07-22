@@ -39,6 +39,9 @@ public class LogEntryService {
     @Autowired
     private LogEntryRepository logEntryRepository;
 
+    @Autowired
+    private MyModelMapper myModelMapper;
+
     @ApiOperation(value = "Retrieve all stored logentries for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getLogEntriesForDay(@PathVariable("date") String date) {
@@ -88,7 +91,7 @@ public class LogEntryService {
     }
 
     @ApiOperation(value = "Delete logentry")
-    @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deleteLogEntry(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logEntryRepository.deleteLogEntry(userInfo.getUserId(), logEntryId);
@@ -101,7 +104,7 @@ public class LogEntryService {
 
         LocalDate parsedFromDate = LocalDateParser.parse(fromDate);
         LocalDate parsedToDate = LocalDateParser.parse(toDate);
-        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), Date.valueOf(parsedFromDate),Date.valueOf( parsedToDate));
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), Date.valueOf(parsedFromDate), Date.valueOf(parsedToDate));
 
         List<LogEntryDto> logEntryDtos = transformToDtos(allLogEntries, userInfo);
         log.debug("Aantal dtos: " + logEntryDtos.size());
@@ -118,7 +121,7 @@ public class LogEntryService {
             DayMacro dm = new DayMacro();
             dm.setDay(date);
             Optional<LogEntryDto> logEntryDtoOfDate = collect.get(date);
-            if (logEntryDtoOfDate.isPresent()){
+            if (logEntryDtoOfDate.isPresent()) {
                 dm.setMacro(logEntryDtoOfDate.get().getMacrosCalculated());
             }
             retObject.add(dm);
@@ -141,17 +144,19 @@ public class LogEntryService {
         LogEntryDto dto = new LogEntryDto();
         Food food = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
         dto.setId(logEntry.getId());
-        FoodDto foodDto = FoodService.mapFoodToFoodDto(food);
+        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food, FoodDto.class);
         List<Portion> portions = portionRepository.getPortions(food.getId());
         List<PortionDto> portionDtos = new ArrayList<>();
 
         Portion portion = null;
         if (portions != null) {
-            portionDtos = portions.stream().map(p -> new PortionDto(p.getId(), p.getDescription(), p.getGrams())).collect(Collectors.toList());
+            portionDtos = portions.stream()
+                    .map(p -> myModelMapper.getConfiguredMapper().map(p,PortionDto.class ))
+                    .collect(Collectors.toList());
 
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
                 portion = portionRepository.getPortion(food.getId(), logEntry.getPortionId());
-                PortionDto portionDto = new PortionDto(portion.getId(), portion.getDescription(), portion.getGrams());
+                PortionDto portionDto =myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
                 Macro calculatedMacros = FoodService.calculateMacro(food, portion);
                 portionDto.setMacros(calculatedMacros);
                 dto.setPortion(portionDto);
@@ -199,8 +204,14 @@ public class LogEntryService {
             LogEntryDto logEntryDto = new LogEntryDto();
             logEntryDto.setId(logEntry.getId());
 
-            FoodDto foodDto = allFoodDtos.stream().filter(f -> f.getId().equals(logEntry.getFoodId())).findFirst().orElseGet(() ->
-                    FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
+            FoodDto foodDto = allFoodDtos
+                    .stream()
+                    .filter(f -> f.getId().equals(logEntry.getFoodId()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        Food foodById = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
+                        return myModelMapper.getConfiguredMapper().map(foodById, FoodDto.class);
+                    });
             logEntryDto.setFood(foodDto);
 
             PortionDto portionDto = null;
@@ -236,30 +247,15 @@ public class LogEntryService {
     }
 
     public FoodDto createFoodDto(Food food, boolean withPortions) {
-        FoodDto foodDto = mapFoodToFoodDto(food);
+        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food,FoodDto.class);
 
         if (withPortions) {
             List<Portion> foodPortions = portionRepository.getPortions(food.getId());
             for (Portion portion : foodPortions) {
-                PortionDto currDto = new PortionDto();
-                currDto.setDescription(portion.getDescription());
-                currDto.setGrams(portion.getGrams());
-                currDto.setId(portion.getId());
-
+                PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
                 foodDto.addPortion(currDto);
             }
         }
-        return foodDto;
-    }
-
-
-    public static FoodDto mapFoodToFoodDto(Food food) {
-        FoodDto foodDto = new FoodDto();
-        foodDto.setName(food.getName());
-        foodDto.setId(food.getId());
-        foodDto.setProtein(food.getProtein());
-        foodDto.setCarbs(food.getCarbs());
-        foodDto.setFat(food.getFat());
         return foodDto;
     }
 }
