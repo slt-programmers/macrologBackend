@@ -36,6 +36,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         Jws<Claims> claimsJws = getClaimsJws(jwtToken);
         Integer userId = (Integer) claimsJws.getBody().get("userId");
         log.debug("User id = " + userId);
+
     }
 
     @Test

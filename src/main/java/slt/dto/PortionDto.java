@@ -18,11 +18,4 @@ public class PortionDto {
     private Double grams;
     @ApiModelProperty(notes = "bord oid", required = true, example = "bord")
     private Macro macros;
-
-    public PortionDto(Long id, String description, Double grams) {
-        this.id = id;
-        this.description = description;
-        this.grams = grams;
-    }
-
 }

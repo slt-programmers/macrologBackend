@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WeightServiceITest extends AbstractApplicationIntegrationTest {
 
     private Integer userId;
-    private List<WeightDto> weightEntries;
 
     @BeforeAll
     public synchronized  void setUserContext() {

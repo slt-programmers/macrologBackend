@@ -42,8 +42,8 @@ spring:
      password: fhjfgj!3ADD
 
 mail:
-   username: doethetniet@gmail.com
-   password: 'doethetniet'
+   username: macrologwebapp@gmail.com
+   password: Macrolog01
 ---
 spring:
   profiles: carmen
