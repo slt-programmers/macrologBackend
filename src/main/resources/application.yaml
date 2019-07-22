@@ -13,8 +13,6 @@ spring:
   jpa:
      properties:
        hibernate:
-         jdbc:
-           time_zone: UTC
          dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 #    properties.hibernate.jdbc.time_zone : UTC
 #    show-sql: true
@@ -39,7 +37,6 @@ spring:
   profiles: arjan
 
   datasource:
-#     url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=UTC
      url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=CET
      username: arjan
      password: fhjfgj!3ADD
@@ -76,12 +73,6 @@ spring:
       enabled: true
   jpa:
     show-sql: true
-    properties:
-      hibernate:
-        jdbc:
-          time_zone: UTC
-
-hibernate.jdbc.timeZone: UTC
 
 mail:
    username: doethetnietp@gmail.com
