@@ -2,6 +2,7 @@ package slt.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,7 @@ public class AuthenticationService {
         String username = request.getUsername();
         String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
         log.info("Login attempt {} ", username);
+        if (StringUtils.isEmpty(username)) username = request.getEmail(); // only 1 exists
 
         UserAccount userAccount = userAccountRepository.getUser(username);
         if (userAccount == null) {
