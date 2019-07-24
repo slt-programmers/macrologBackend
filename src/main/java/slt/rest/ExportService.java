@@ -24,7 +24,13 @@ import java.util.stream.Collectors;
 public class ExportService {
 
     @Autowired
+    private MyModelMapper myModelMapper;
+
+    @Autowired
     private FoodRepository foodRepository;
+
+    @Autowired
+    private SettingsRepository settingsRepo;
 
     @Autowired
     private PortionRepository portionRepository;
@@ -33,16 +39,10 @@ public class ExportService {
     private LogEntryRepository logEntryRepository;
 
     @Autowired
-    private SettingsRepository settingsRepo;
-
-    @Autowired
     private ActivityRepository activityRepository;
 
     @Autowired
     private WeightRepository weightRepository;
-
-    @Autowired
-    private MyModelMapper myModelMapper;
 
     @ApiOperation(value = "Retrieve all stored information")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

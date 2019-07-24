@@ -219,7 +219,6 @@ class MyModelMapperTest {
         assertThat(mapped.getProtein()).isEqualTo(dto.getProtein());
         assertThat(mapped.getId()).isEqualTo(dto.getId());
 
-
         FoodDto mappedBack = mapper.getConfiguredMapper().map(mapped,FoodDto.class);
         mapper.getConfiguredMapper().validate();
 
