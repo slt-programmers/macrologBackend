@@ -17,6 +17,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -248,7 +249,7 @@ class MyModelMapperTest {
     }
 
     @Test
-    public void testSetting(){
+    public void testSettingMapping(){
         LocalDate localDate = LocalDate.parse("2010-01-02");
 
         Setting setting = Setting.builder()
@@ -272,6 +273,78 @@ class MyModelMapperTest {
         assertThat(mappedBack.getName()).isEqualTo(setting.getName());
         assertThat(mappedBack.getValue()).isEqualTo(setting.getValue());
         assertThat(mappedBack.getId()).isEqualTo(setting.getId());
+    }
+
+    @Test
+    public void testLogEntryMapping(){
+
+
+        int userId = 100;
+        Food food1 = Food.builder()
+                .id(1l)
+                .carbs(2.0)
+                .fat(3.0)
+                .protein(4.0)
+                .userId(userId)
+                .name("food1")
+                .build();
+
+        Portion food1Portion = Portion.builder()
+                .foodId(food1.getId().intValue())
+                .description("p1f1")
+                .grams(30.0)
+                .id(20l)
+                .build();
+
+        Portion food1Portion2 = Portion.builder()
+                .foodId(food1.getId().intValue())
+                .description("p2f1")
+                .grams(40.0)
+                .id(30l)
+                .build();
+
+        LocalDate localDate = LocalDate.parse("2010-04-01");
+        LogEntry logEntry = LogEntry.builder()
+                .day(Date.valueOf(localDate))
+                .meal("BREAKFAST")
+                .multiplier(3.0)
+                .foodId(food1.getId())
+                .portionId(food1Portion.getId())
+                .id(30l)
+                .userId(userId)
+                .build();
+
+
+        Mockito.when(foodRepository.getFoodById(eq(userId), eq(food1.getId()))).thenReturn(food1);
+
+        List<Portion> portionList = Arrays.asList(food1Portion,food1Portion2);
+        Mockito.when(portionRepository.getPortions(eq(food1.getId()))).thenReturn(portionList);
+
+        LogEntryDto mapped = mapper.getConfiguredMapper().map(logEntry, LogEntryDto.class);
+        mapper.getConfiguredMapper().validate();
+
+        assertThat(mapped.getId()).isEqualTo(logEntry.getId());
+        assertThat(mapped.getMeal()).isEqualTo(logEntry.getMeal());
+        assertThat(mapped.getMultiplier()).isEqualTo(logEntry.getMultiplier());
+        assertThat(mapped.getDay()).isInSameDayAs(Date.valueOf(localDate));
+
+        assertThat(mapped.getPortion()).isNotNull();
+        assertThat(mapped.getPortion().getId()).isEqualTo(food1Portion.getId());
+        assertThat(mapped.getPortion().getDescription()).isEqualTo(food1Portion.getDescription());
+        assertThat(mapped.getPortion().getMacros()).isNotNull();
+        assertThat(mapped.getPortion().getMacros().getCalories()).isGreaterThan(1.0);
+
+
+        assertThat(mapped.getFood()).isNotNull();
+        assertThat(mapped.getFood().getId()).isEqualTo(food1.getId());
+        assertThat(mapped.getFood().getPortions()).isNotEmpty();
+        assertThat(mapped.getFood().getPortions()).hasSize(2);
+        assertThat(mapped.getFood().getName()).isEqualTo(food1.getName());
+
+        assertThat(mapped.getFood().getPortions().get(0).getMacros()).isNotNull();
+        assertThat(mapped.getFood().getPortions().get(0).getMacros().getCalories()).isGreaterThan(1);
+        assertThat(mapped.getFood().getPortions().get(1).getMacros()).isNotNull();
+        assertThat(mapped.getFood().getPortions().get(1).getMacros().getCalories()).isGreaterThan(1);
 
 
     }

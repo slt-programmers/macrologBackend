@@ -12,6 +12,8 @@ import slt.database.entities.*;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -36,6 +38,7 @@ public class MyModelMapper {
         addMealDtoMeal(modelMapper);
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
+        addLogEntryLogEntryDto(modelMapper);
 
         // Weight
         PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
@@ -94,6 +97,58 @@ public class MyModelMapper {
                     }
 
                     mappingContext.getDestination().setFood(mappedFoodDto);
+
+                    return mappingContext.getDestination();
+                });
+    }
+    static Macro calculateMacro(FoodDto food, PortionDto portion) {
+        Macro calculatedMacros = new Macro();
+        // FoodDto has been entered for 100g
+        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
+        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
+        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+
+        return calculatedMacros;
+    }
+    private void addLogEntryLogEntryDto(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(LogEntry.class, LogEntryDto.class)
+                .setPostConverter(mappingContext -> {
+
+                    Long foodId = mappingContext.getSource().getFoodId();
+                    Integer userId = mappingContext.getSource().getUserId();
+                    Food foodById = foodRepository.getFoodById(userId, foodId);
+                    FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
+
+                    List<Portion> foodPortions = portionRepository.getPortions(foodId);
+                    for (Portion portion : foodPortions) {
+                        PortionDto currDto = modelMapper.map(portion,PortionDto.class);
+                        currDto.setMacros(calculateMacro(mappedFoodDto,currDto));
+                        mappedFoodDto.addPortion(currDto);
+                    }
+                    mappingContext.getDestination().setFood(mappedFoodDto);
+
+                    Long selectedPortionId = mappingContext.getSource().getPortionId();
+                    if (selectedPortionId != null){
+                        Optional<PortionDto> first = mappedFoodDto.getPortions().stream().filter(p -> p.getId().equals(selectedPortionId)).findFirst();
+                        if (first.isPresent()){
+                            mappingContext.getDestination().setPortion(first.get());
+                        } else {
+                            log.error("Unknown portion {} with food {}",selectedPortionId,foodById);
+                        }
+                    }
+
+                    Macro macrosCalculated = new Macro();
+                    Double multiplier = mappingContext.getSource().getMultiplier();
+                    if (selectedPortionId != null) {
+                        macrosCalculated = mappingContext.getDestination().getPortion().getMacros().createCopy();
+                        macrosCalculated.multiply(multiplier);
+
+                    } else {
+                        macrosCalculated.setCarbs(multiplier * mappedFoodDto.getCarbs());
+                        macrosCalculated.setFat(multiplier * mappedFoodDto.getFat());
+                        macrosCalculated.setProtein(multiplier * mappedFoodDto.getProtein());
+                    }
+                    mappingContext.getDestination().setMacrosCalculated(macrosCalculated);
 
                     return mappingContext.getDestination();
                 });
