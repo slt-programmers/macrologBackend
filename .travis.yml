@@ -5,10 +5,10 @@ jdk:
 get:
   depth: false
 
-branches:
-  only:
-    - master
-    - release
+#branches:
+#  only:
+#    - master
+#    - release
 
 stages:
 - "unit test and scan"
