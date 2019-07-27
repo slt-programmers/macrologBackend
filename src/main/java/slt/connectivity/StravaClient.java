@@ -135,8 +135,8 @@ public class StravaClient {
             final LocalDateTime localDateTimeEndOfDay = date.atStartOfDay().plusDays(1);
 
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                    .queryParam("before", localDateTimeEndOfDay.atZone(ZoneId.systemDefault()).toEpochSecond())
-                    .queryParam("after", localDateTimeStartOfDay.atZone(ZoneId.systemDefault()).toEpochSecond());
+                    .queryParam("before", localDateTimeEndOfDay.atZone(ZoneId.of("UTC")).toEpochSecond())
+                    .queryParam("after", localDateTimeStartOfDay.atZone(ZoneId.of("UTC")).toEpochSecond());
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

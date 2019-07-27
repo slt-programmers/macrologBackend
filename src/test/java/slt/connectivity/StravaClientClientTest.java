@@ -172,7 +172,8 @@ class StravaClientClientTest {
         final HttpHeaders headers = capturedHttpEntity.getValue().getHeaders();
         assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer myToken");
 
-        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // of andersom?
+        assertThat(capturedUrl.getValue()).endsWith("?before=978652800&after=978566400"); // UTC
+//        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // of andersom?
     }
 
     @Test
