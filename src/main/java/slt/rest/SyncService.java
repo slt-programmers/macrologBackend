@@ -4,26 +4,21 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import slt.connectivity.ListedActivityDto;
 import slt.connectivity.StravaActivityService;
-import slt.database.ActivityRepository;
-import slt.database.entities.LogActivity;
-import slt.dto.LogActivityDto;
-import slt.dto.MyModelMapper;
 import slt.dto.SyncedAccount;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.LocalDateParser;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController

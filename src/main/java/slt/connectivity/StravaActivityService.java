@@ -36,14 +36,14 @@ public class StravaActivityService {
     @Autowired
     StravaClient stravaClient;
 
-    final String STRAVA_CLIENT_AUTHORIZATION_CODE = "STRAVA_CLIENT_AUTHORIZATION_CODE";
-    final String STRAVA_ACCESS_TOKEN = "STRAVA_ACCESS_TOKEN";
-    final String STRAVA_EXPIRES_AT = "STRAVA_EXPIRES_AT";
-    final String STRAVA_REFRESH_TOKEN = "STRAVA_REFRESH_TOKEN";
-    final String STRAVA_PROFILE_MEDIUM = "STRAVA_PROFILE_MEDIUM";
-    final String STRAVA_LASTNAME = "STRAVA_LASTNAME";
-    final String STRAVA_FIRSTNAME = "STRAVA_FIRSTNAME";
-    final String STRAVA_ATHLETE_ID = "STRAVA_ATHLETE_ID";
+    private final static String STRAVA_CLIENT_AUTHORIZATION_CODE = "STRAVA_CLIENT_AUTHORIZATION_CODE";
+    private final static String STRAVA_ACCESS_TOKEN = "STRAVA_ACCESS_TOKEN";
+    private final static String STRAVA_EXPIRES_AT = "STRAVA_EXPIRES_AT";
+    private final static String STRAVA_REFRESH_TOKEN = "STRAVA_REFRESH_TOKEN";
+    private final static String STRAVA_PROFILE_MEDIUM = "STRAVA_PROFILE_MEDIUM";
+    private final static String STRAVA_LASTNAME = "STRAVA_LASTNAME";
+    private final static String STRAVA_FIRSTNAME = "STRAVA_FIRSTNAME";
+    private final static String STRAVA_ATHLETE_ID = "STRAVA_ATHLETE_ID";
 
     public boolean isStravaConnected(Integer userId) {
         return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID) != null);

@@ -64,11 +64,10 @@ public class StravaClient {
             return gevondenToken;
 
         } catch (RestClientException restClientException) {
-            log.error("Fout bij versturen.", restClientException.getLocalizedMessage());
+            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
             if (restClientException instanceof HttpClientErrorException) {
                 log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
             }
-            restClientException.printStackTrace();
             return null;
         }
     }
@@ -153,7 +152,7 @@ public class StravaClient {
 
 //            {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
             log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
-            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage());
+            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
             return null;
         }
     }
@@ -179,7 +178,7 @@ public class StravaClient {
 
 //            {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
             log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
-            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage());
+            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
             return null;
         }
     }

@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("all")
 public class ActivityDetailsDto {
     long id;
     String name;
