@@ -105,17 +105,19 @@ public class StravaActivityService {
     }
 
     public List<ListedActivityDto> getStravaActivitiesForDay(Integer userId, LocalDate date) {
-        StravaToken token = getStravaToken(userId);
 
+        if (!isStravaConnected(userId)) {
+            log.error("Strava has not been setup for this user");
+            return new ArrayList<>();
+        }
+
+        StravaToken token = getStravaToken(userId);
         log.error("Check is valid token");
         if (token == null) {
             log.error("Unable to get new token");
-            return null;
+            return new ArrayList<>();
         }
-        if (!isStravaConnected(userId)) {
-            log.error("Strava has not been setup for this user");
-            return null;
-        }
+
 
         log.debug("Token is valid");
         final List<ListedActivityDto> activitiesForDay = stravaClient.getActivitiesForDay(token.getAccess_token(), date);
