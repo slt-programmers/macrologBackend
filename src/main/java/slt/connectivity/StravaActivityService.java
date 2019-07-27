@@ -36,14 +36,14 @@ public class StravaActivityService {
     @Autowired
     StravaClient stravaClient;
 
-    private final static String STRAVA_CLIENT_AUTHORIZATION_CODE = "STRAVA_CLIENT_AUTHORIZATION_CODE";
-    private final static String STRAVA_ACCESS_TOKEN = "STRAVA_ACCESS_TOKEN";
-    private final static String STRAVA_EXPIRES_AT = "STRAVA_EXPIRES_AT";
-    private final static String STRAVA_REFRESH_TOKEN = "STRAVA_REFRESH_TOKEN";
-    private final static String STRAVA_PROFILE_MEDIUM = "STRAVA_PROFILE_MEDIUM";
-    private final static String STRAVA_LASTNAME = "STRAVA_LASTNAME";
-    private final static String STRAVA_FIRSTNAME = "STRAVA_FIRSTNAME";
-    private final static String STRAVA_ATHLETE_ID = "STRAVA_ATHLETE_ID";
+    private static final String STRAVA_CLIENT_AUTHORIZATION_CODE = "STRAVA_CLIENT_AUTHORIZATION_CODE";
+    private static final String STRAVA_ACCESS_TOKEN = "STRAVA_ACCESS_TOKEN";
+    private static final String STRAVA_EXPIRES_AT = "STRAVA_EXPIRES_AT";
+    private static final String STRAVA_REFRESH_TOKEN = "STRAVA_REFRESH_TOKEN";
+    private static final String STRAVA_PROFILE_MEDIUM = "STRAVA_PROFILE_MEDIUM";
+    private static final String STRAVA_LASTNAME = "STRAVA_LASTNAME";
+    private static final String STRAVA_FIRSTNAME = "STRAVA_FIRSTNAME";
+    private static final String STRAVA_ATHLETE_ID = "STRAVA_ATHLETE_ID";
 
     public boolean isStravaConnected(Integer userId) {
         return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID) != null);
@@ -57,13 +57,11 @@ public class StravaActivityService {
             final Setting athletId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
             final Setting image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE_MEDIUM);
 
-            SyncedAccount syncedAccount = SyncedAccount.builder()
+            return SyncedAccount.builder()
                     .syncedAccountId(Long.valueOf(athletId.getValue()))
                     .image(image.getValue())
                     .name(firstname.getValue() + " " + lastname.getValue())
                     .build();
-            return syncedAccount;
-
         } else {
             return null;
         }
@@ -89,12 +87,11 @@ public class StravaActivityService {
             settingsRepository.putSetting(userId, STRAVA_FIRSTNAME, stravaToken.getAthlete().getFirstname(), null);
             settingsRepository.putSetting(userId, STRAVA_ATHLETE_ID, stravaToken.getAthlete().getId().toString(), null);
 
-            SyncedAccount syncedAccount = SyncedAccount.builder()
+            return SyncedAccount.builder()
                     .image(stravaToken.getAthlete().getProfile_medium())
                     .syncedAccountId(stravaToken.getAthlete().getId())
                     .name(stravaToken.getAthlete().getFirstname() + " " + stravaToken.getAthlete().getLastname())
                     .build();
-            return syncedAccount;
         } else {
             return null;
         }
@@ -115,7 +112,7 @@ public class StravaActivityService {
             log.error("Unable to get new token");
             return null;
         }
-        if (!isStravaConnected(userId)){
+        if (!isStravaConnected(userId)) {
             log.error("Strava has not been setup for this user");
             return null;
         }

@@ -16,6 +16,7 @@ import slt.config.StravaConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,72 +37,57 @@ public class StravaClient {
     StravaConfig stravaConfig;
 
     public StravaToken getStravaToken(String authorizationCode) {
-        String grant_type = "authorization_code";
+        String grantType = "authorization_code";
         String tokenUrl = "https://www.strava.com/oauth/token";
 
         String clientId = stravaConfig.getClientId().toString();
         String clientSecret = stravaConfig.getClientSecret();
-        Map req_payload = new HashMap();
-        req_payload.put("client_id", clientId);
-        req_payload.put("client_secret", clientSecret);
-        req_payload.put("code", authorizationCode);
-        req_payload.put("grant_type", grant_type);
+        Map reqPayload = new HashMap();
+        reqPayload.put("client_id", clientId);
+        reqPayload.put("client_secret", clientSecret);
+        reqPayload.put("code", authorizationCode);
+        reqPayload.put("grant_type", grantType);
 
-        return getStravaToken(tokenUrl, req_payload);
+        return getStravaToken(tokenUrl, reqPayload);
 
     }
 
-    private StravaToken getStravaToken(String tokenUrl, Map req_payload) {
+    private StravaToken getStravaToken(String tokenUrl, Map reqPayload) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            final HttpEntity<HashMap> entity = new HttpEntity(req_payload, headers);
+            final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
             ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(tokenUrl, HttpMethod.POST, entity, StravaToken.class);
 
             StravaToken gevondenToken = responseEntity.getBody();
             log.debug("Gevonden token {}", gevondenToken.access_token);
             return gevondenToken;
 
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return null;
         } catch (RestClientException restClientException) {
             log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
-            if (restClientException instanceof HttpClientErrorException) {
-                log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
-            }
             return null;
         }
     }
 
     public StravaToken refreshToken(String refreshToken) {
         String tokenUrl = "https://www.strava.com/oauth/token";
-        String grant_type = "refresh_token";
+        String grantType = "refresh_token";
 
         String clientId = stravaConfig.getClientId().toString();
         String clientSecret = stravaConfig.getClientSecret();
 
-        Map req_payload = new HashMap();
-        req_payload.put("client_id", clientId);
-        req_payload.put("client_secret", clientSecret);
-        req_payload.put("refresh_token", refreshToken);
-        req_payload.put("grant_type", grant_type);
+        Map reqPayload = new HashMap();
+        reqPayload.put("client_id", clientId);
+        reqPayload.put("client_secret", clientSecret);
+        reqPayload.put("refresh_token", refreshToken);
+        reqPayload.put("grant_type", grantType);
 
-        return getStravaToken(tokenUrl, req_payload);
-
-//        try {
-//            final HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//            final HttpEntity<StravaToken> entity = new HttpEntity(req_payload, headers);
-//            ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(tokenUrl, HttpMethod.POST, entity, StravaToken.class);
-//
-//            return responseEntity.getBody();
-//
-//        } catch (RestClientException restClientException) {
-//            log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
-//            log.error("Fout bij versturen.", restClientException.getLocalizedMessage());
-//            restClientException.printStackTrace();
-//            return null;
-//        }
+        return getStravaToken(tokenUrl, reqPayload);
     }
 
 
@@ -146,14 +132,16 @@ public class StravaClient {
             };
             ResponseEntity<List<ListedActivityDto>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
 
-            List<ListedActivityDto> gevondenActivities = responseEntity.getBody();
-            return gevondenActivities;
+            return responseEntity.getBody();
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return new ArrayList<>();
         } catch (RestClientException restClientException) {
 
 //            {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
-            log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
             log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
-            return null;
+            return new ArrayList<>();
         }
     }
 
@@ -174,10 +162,13 @@ public class StravaClient {
             log.debug(gevondenActivity.getStart_date_local() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.type + " " + gevondenActivity.getId());
             return gevondenActivity;
 
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return null;
         } catch (RestClientException restClientException) {
 
 //            {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
-            log.error(((HttpClientErrorException) restClientException).getResponseBodyAsString());
             log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
             return null;
         }

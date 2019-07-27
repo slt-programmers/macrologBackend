@@ -177,6 +177,35 @@ class StravaClientClientTest {
     }
 
     @Test
+    public void getAthleteActivitiesWithError() {
+        MockitoAnnotations.initMocks(this);
+
+        ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<List<ListedActivityDto>>() {
+        };
+
+        ResponseEntity<List<ListedActivityDto>> mockEntitity = mock(ResponseEntity.class);
+        List<ListedActivityDto> retList = Arrays.asList(ListedActivityDto.builder().build());
+        when(mockEntitity.getBody()).thenReturn(retList);
+
+        ArgumentCaptor<HttpEntity> capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
+        ArgumentCaptor<String> capturedUrl = ArgumentCaptor.forClass(String.class);
+
+        when(restTemplate.exchange(capturedUrl.capture(), eq(HttpMethod.GET), capturedHttpEntity.capture(), eq(parameterizedTypeReference)))
+                .thenThrow(new RestClientException("oops"));
+
+        final List<ListedActivityDto> retActivities = stravaClient.getActivitiesForDay("myToken", LocalDate.parse("2001-01-04"));
+
+        assertThat(retActivities).isEmpty();
+
+        log.debug(capturedUrl.getValue());
+        final HttpHeaders headers = capturedHttpEntity.getValue().getHeaders();
+        assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer myToken");
+
+        assertThat(capturedUrl.getValue()).endsWith("?before=978652800&after=978566400"); // UTC
+//        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // of andersom?
+    }
+
+    @Test
     public void getActivityDetails() {
 
         String userToken = "47e01e81a381081d4f0cf1b67df25c5080ceb8b4";
