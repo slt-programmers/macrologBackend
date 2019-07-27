@@ -17,7 +17,7 @@
     <logger name="org.apache.commons.dbcp2" level="ERROR"/>
 
     <root>
-        <level value="DEBUG"/>
+        <level value="INFO"/>
         <appender-ref ref="output"/>
     </root>
 

@@ -21,4 +21,7 @@ public class LogActivityDto {
     private Double calories;
     @ApiModelProperty(notes = "Day of activity", required = true)
     private Date day;
+
+    private String syncedWith;
+    private Long syncedId;
 }

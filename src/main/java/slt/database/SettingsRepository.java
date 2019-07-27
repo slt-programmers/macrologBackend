@@ -10,12 +10,15 @@ import slt.database.entities.Setting;
 
 import javax.transaction.Transactional;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-interface SettingsCrudRepository extends CrudRepository<Setting,Integer> {
+interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
 
     List<Setting> findByUserIdOrderByDayDesc(Integer userId);
+
     List<Setting> findByUserIdAndNameOrderByDayDesc(Integer userId, String name);
+
     void deleteByUserId(Integer userId);
 
     @Query("select s from Setting s where s.userId = :userId and s.name = :name and s.day <= :day")
@@ -30,6 +33,7 @@ public class SettingsRepository {
     private SettingsCrudRepository settingsCrudRepository;
 
     public void putSetting(Integer userId, String setting, String value, Date date) {
+        date = date == null ? Date.valueOf(LocalDate.now()):date;
         Setting currentSetting = getValidSetting(userId, setting, date);
         if (currentSetting == null) { // geen records
             log.debug("Insert");
@@ -52,7 +56,7 @@ public class SettingsRepository {
         Setting currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
         if (currentSetting == null) { // geen records
             log.debug("Insert");
-            saveSetting(userId,setting);
+            saveSetting(userId, setting);
         } else {
             log.debug("Update");
             boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(setting.getDay().toLocalDate());

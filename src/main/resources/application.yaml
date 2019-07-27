@@ -32,6 +32,10 @@ mail:
    host: smtp.gmail.com
    port: 587
 
+strava:
+  client-id: ${strava.id}
+  client-secret: ${strava.secret}
+
 ---
 spring:
   profiles: arjan
@@ -40,6 +44,10 @@ spring:
      url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=CET
      username: arjan
      password: fhjfgj!3ADD
+
+strava:
+  client-id: 37498
+  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
 
 mail:
    username: macrologwebapp@gmail.com
@@ -53,10 +61,13 @@ spring:
      username: macrolog
      password: Macrolog01
 
+strava:
+  client-id: 37498
+  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
+
 mail:
    username: doethetniet@gmail.com
    password: 'doethetniet'
-
 
 ---
 spring:
@@ -67,12 +78,15 @@ spring:
      password: sa
      driverClassName: org.h2.Driver
 
-
   h2:
     console:
       enabled: true
-  jpa:
-    show-sql: true
+#  jpa:
+#    show-sql: true
+
+strava:
+  client-id: 37498
+  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
 
 mail:
    username: doethetnietp@gmail.com

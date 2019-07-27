@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+- changeSet:
+    id: 20190724-addactivitysync
+    author: arjan
+    changes:
+      - addColumn:
+          tableName: activity
+          columns:
+            - column:
+                name: synced_id
+                type: BIGINT
+            - column:
+                name: synced_with
+                type: ${text.type}
+
+

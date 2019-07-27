@@ -101,6 +101,7 @@ public class MyModelMapper {
                     return mappingContext.getDestination();
                 });
     }
+
     static Macro calculateMacro(FoodDto food, PortionDto portion) {
         Macro calculatedMacros = new Macro();
         // FoodDto has been entered for 100g
@@ -110,6 +111,7 @@ public class MyModelMapper {
 
         return calculatedMacros;
     }
+
     private void addLogEntryLogEntryDto(ModelMapper modelMapper) {
         modelMapper.createTypeMap(LogEntry.class, LogEntryDto.class)
                 .setPostConverter(mappingContext -> {
