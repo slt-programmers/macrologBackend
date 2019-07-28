@@ -245,6 +245,16 @@ class MyModelMapperTest {
         assertThat(map.getDescription()).isEqualTo(portion.getDescription());
         assertThat(map.getGrams()).isEqualTo(portion.getGrams());
         assertThat(map.getMacros()).isNull();
+
+        map.setMacros(Macro.builder().protein(1.0).fat(2.0).carbs(3.0).build());
+
+        final PortionDto mappedBack = mapper.getConfiguredMapper().map(map, PortionDto.class);
+        mapper.getConfiguredMapper().validate();
+
+        assertThat(mappedBack.getId()).isEqualTo(portion.getId());
+        assertThat(mappedBack.getDescription()).isEqualTo(portion.getDescription());
+        assertThat(mappedBack.getGrams()).isEqualTo(portion.getGrams());
+
     }
 
     @Test
@@ -347,4 +357,5 @@ class MyModelMapperTest {
 
 
     }
+
 }
