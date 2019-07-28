@@ -3,6 +3,7 @@ package slt.connectivity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import slt.config.StravaConfig;
 import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
 import slt.database.entities.LogActivity;
@@ -34,13 +35,16 @@ public class StravaActivityService {
     ActivityRepository activityRepository;
 
     @Autowired
+    StravaConfig stravaConfig;
+
+    @Autowired
     StravaClient stravaClient;
 
     private static final String STRAVA_CLIENT_AUTHORIZATION_CODE = "STRAVA_CLIENT_AUTHORIZATION_CODE";
     private static final String STRAVA_ACCESS_TOKEN = "STRAVA_ACCESS_TOKEN";
     private static final String STRAVA_EXPIRES_AT = "STRAVA_EXPIRES_AT";
     private static final String STRAVA_REFRESH_TOKEN = "STRAVA_REFRESH_TOKEN";
-    private static final String STRAVA_PROFILE_MEDIUM = "STRAVA_PROFILE_MEDIUM";
+    private static final String STRAVA_PROFILE = "STRAVA_PROFILE";
     private static final String STRAVA_LASTNAME = "STRAVA_LASTNAME";
     private static final String STRAVA_FIRSTNAME = "STRAVA_FIRSTNAME";
     private static final String STRAVA_ATHLETE_ID = "STRAVA_ATHLETE_ID";
@@ -55,7 +59,7 @@ public class StravaActivityService {
             final Setting firstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
             final Setting lastname = settingsRepository.getLatestSetting(userId, STRAVA_LASTNAME);
             final Setting athletId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
-            final Setting image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE_MEDIUM);
+            final Setting image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
 
             return SyncedAccount.builder()
                     .syncedAccountId(Long.valueOf(athletId.getValue()))
@@ -63,7 +67,7 @@ public class StravaActivityService {
                     .name(firstname.getValue() + " " + lastname.getValue())
                     .build();
         } else {
-            return null;
+            return SyncedAccount.builder().syncedApplicationId(stravaConfig.getClientId()).build();
         }
     }
 
@@ -82,7 +86,7 @@ public class StravaActivityService {
 
             storeTokenSettings(userId, stravaToken);
 
-            settingsRepository.putSetting(userId, STRAVA_PROFILE_MEDIUM, stravaToken.getAthlete().getProfile_medium(), null);
+            settingsRepository.putSetting(userId, STRAVA_PROFILE, stravaToken.getAthlete().getProfile(), null);
             settingsRepository.putSetting(userId, STRAVA_LASTNAME, stravaToken.getAthlete().getLastname(), null);
             settingsRepository.putSetting(userId, STRAVA_FIRSTNAME, stravaToken.getAthlete().getFirstname(), null);
             settingsRepository.putSetting(userId, STRAVA_ATHLETE_ID, stravaToken.getAthlete().getId().toString(), null);
@@ -97,6 +101,28 @@ public class StravaActivityService {
         }
     }
 
+    public void unRegisterStrava(Integer userId){
+        if (!isStravaConnected(userId)) {
+            log.error("Strava has not been setup for this user");
+            return;
+        }
+        try {
+            StravaToken token = getStravaToken(userId);
+            stravaClient.unregister(token);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        settingsRepository.deleteAllForUser(userId,STRAVA_ACCESS_TOKEN);
+        settingsRepository.deleteAllForUser(userId,STRAVA_ATHLETE_ID);
+        settingsRepository.deleteAllForUser(userId,STRAVA_CLIENT_AUTHORIZATION_CODE);
+        settingsRepository.deleteAllForUser(userId,STRAVA_EXPIRES_AT);
+        settingsRepository.deleteAllForUser(userId,STRAVA_FIRSTNAME);
+        settingsRepository.deleteAllForUser(userId,STRAVA_LASTNAME);
+        settingsRepository.deleteAllForUser(userId,STRAVA_PROFILE);
+        settingsRepository.deleteAllForUser(userId,STRAVA_REFRESH_TOKEN);
+
+    }
     private void storeTokenSettings(Integer userId, StravaToken stravaToken) {
         log.debug("Storing token update");
         settingsRepository.putSetting(userId, STRAVA_ACCESS_TOKEN, stravaToken.getAccess_token(), null);

@@ -10,4 +10,5 @@ public class SyncedAccount {
     String image;
     String name;
     Long syncedAccountId;
+    Integer syncedApplicationId;
 }

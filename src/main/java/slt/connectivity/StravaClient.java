@@ -173,4 +173,27 @@ public class StravaClient {
             return null;
         }
     }
+
+    public boolean unregister(StravaToken token) {
+        try {
+            final HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Authorization", String.format("Bearer %s", token.getAccess_token()));
+
+            final HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange("https://www.strava.com/oauth/deauthorize", HttpMethod.POST, entity, String.class);
+
+            String gevondenToken = responseEntity.getBody();
+            log.debug("Response {}", gevondenToken);
+            return true;
+
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return false;
+        } catch (RestClientException restClientException) {
+            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
+            return false;
+        }
+    }
 }

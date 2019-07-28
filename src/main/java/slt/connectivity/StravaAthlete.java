@@ -10,4 +10,5 @@ public class StravaAthlete {
     String firstname;
     String lastname;
     String profile_medium;
+    String profile;
 }

@@ -21,6 +21,8 @@ interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
 
     void deleteByUserId(Integer userId);
 
+    void deleteAllByUserIdAndName(Integer userId, String name);
+
     @Query("select s from Setting s where s.userId = :userId and s.name = :name and s.day <= :day")
     List<Setting> findByUserIdAndNameWithDayBeforeDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
 }
@@ -77,6 +79,11 @@ public class SettingsRepository {
     @Transactional
     public void deleteAllForUser(Integer userId) {
         settingsCrudRepository.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public void deleteAllForUser(Integer userId, String name) {
+        settingsCrudRepository.deleteAllByUserIdAndName(userId,name);
     }
 
     public Setting getLatestSetting(Integer userId, String setting) {
