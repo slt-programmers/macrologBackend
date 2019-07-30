@@ -7,8 +7,9 @@
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework" level="INFO"/>
     <logger name="liquibase" level="INFO"/>
+    <logger name="slt" level="DEBUG"/>
     <logger name="org.springframework.cloud.stream" level="INFO"/>
     <logger name="org.liquibase" level="INFO"/>
     <logger name="org.springframework.security" level="ERROR"/>
@@ -16,7 +17,7 @@
     <logger name="org.apache.commons.dbcp2" level="ERROR"/>
 
     <root>
-        <level value="INFO"/>
+        <level value="DEBUG"/>
         <appender-ref ref="output"/>
     </root>
 

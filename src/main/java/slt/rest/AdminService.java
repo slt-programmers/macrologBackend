@@ -29,12 +29,12 @@ public class AdminService {
 
 
     @GetMapping(path = "/getAllUsers", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAllUsers() {
+    public ResponseEntity<List<UserAccountDto>> getAllUsers() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
-            log.error("Not authorized to delete account");
+            log.error("Not authorized to get all users");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
             List<UserAccount> userAccounts = userAccountRepository.getAllUsers();

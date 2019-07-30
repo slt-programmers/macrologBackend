@@ -12,10 +12,7 @@ import slt.database.FoodRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.Food;
 import slt.database.entities.Portion;
-import slt.dto.AddFoodRequest;
-import slt.dto.FoodDto;
-import slt.dto.Macro;
-import slt.dto.PortionDto;
+import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
@@ -35,6 +32,9 @@ public class FoodService {
 
     @Autowired
     private PortionRepository portionRepository;
+
+    @Autowired
+    private MyModelMapper myModelMapper;
 
     @ApiOperation(value = "Retrieve all stored foods")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -70,67 +70,73 @@ public class FoodService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (addFoodRequest.getId() != null) {
             // Update request
-            Food newFood = new Food();
-            newFood.setId(addFoodRequest.getId());
-            newFood.setName(addFoodRequest.getName());
-            newFood.setCarbs(addFoodRequest.getCarbs());
-            newFood.setFat(addFoodRequest.getFat());
-            newFood.setProtein(addFoodRequest.getProtein());
-
-            foodRepository.saveFood(userInfo.getUserId(), newFood);
-
-            // remove portions not supported yet.
-            for (PortionDto portionDto : addFoodRequest.getPortions()) {
-                Long id = portionDto.getId();
-                if (id != null) {
-                    // update portion
-                    Portion newPortion = new Portion();
-                    newPortion.setId(portionDto.getId());
-                    newPortion.setDescription(portionDto.getDescription());
-                    newPortion.setGrams(portionDto.getGrams());
-                    portionRepository.savePortion(newFood.getId(), newPortion);
-
-                } else {
-                    // add portion
-                    Portion newPortion = new Portion();
-                    newPortion.setDescription(portionDto.getDescription());
-                    newPortion.setGrams(portionDto.getGrams());
-                    portionRepository.savePortion(newFood.getId(), newPortion);
-                }
-            }
+            updateFoodRequest(addFoodRequest, userInfo);
             return ResponseEntity.status(HttpStatus.CREATED).build();
-
-
         } else {
             Food food = foodRepository.getFood(userInfo.getUserId(), addFoodRequest.getName());
             if (food != null) {
                 String errorMessage = "This food is already in your database";
                 return ResponseEntity.badRequest().body(errorMessage);
             } else {
-                Food newFood = new Food();
-                newFood.setName(addFoodRequest.getName());
-                newFood.setCarbs(addFoodRequest.getCarbs());
-                newFood.setFat(addFoodRequest.getFat());
-                newFood.setProtein(addFoodRequest.getProtein());
+                return createNewFood(addFoodRequest, userInfo);
+            }
+        }
+    }
 
-                Food insertedFood = foodRepository.saveFood(userInfo.getUserId(), newFood);
-                if (addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
+    private ResponseEntity createNewFood(@RequestBody AddFoodRequest addFoodRequest, UserInfo userInfo) {
+        Food newFood = new Food();
+        newFood.setName(addFoodRequest.getName());
+        newFood.setCarbs(addFoodRequest.getCarbs());
+        newFood.setFat(addFoodRequest.getFat());
+        newFood.setProtein(addFoodRequest.getProtein());
 
-                    for (PortionDto portionDto : addFoodRequest.getPortions()) {
-                        Portion newPortion = new Portion();
-                        newPortion.setDescription(portionDto.getDescription());
-                        newPortion.setGrams(portionDto.getGrams());
-                        portionRepository.savePortion(insertedFood.getId(), newPortion);
-                    }
-                }
+        Food insertedFood = foodRepository.saveFood(userInfo.getUserId(), newFood);
+        if (addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
 
-                return ResponseEntity.status(HttpStatus.CREATED).build();
+            for (PortionDto portionDto : addFoodRequest.getPortions()) {
+                Portion newPortion = new Portion();
+                newPortion.setDescription(portionDto.getDescription());
+                newPortion.setGrams(portionDto.getGrams());
+                portionRepository.savePortion(insertedFood.getId(), newPortion);
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    private void updateFoodRequest(@RequestBody AddFoodRequest addFoodRequest, UserInfo userInfo) {
+        Food newFood = new Food();
+        newFood.setId(addFoodRequest.getId());
+        newFood.setName(addFoodRequest.getName());
+        newFood.setCarbs(addFoodRequest.getCarbs());
+        newFood.setFat(addFoodRequest.getFat());
+        newFood.setProtein(addFoodRequest.getProtein());
+
+        foodRepository.saveFood(userInfo.getUserId(), newFood);
+
+        // remove portions not supported yet.
+        for (PortionDto portionDto : addFoodRequest.getPortions()) {
+            Long id = portionDto.getId();
+            if (id != null) {
+                // update portion
+                Portion newPortion = new Portion();
+                newPortion.setId(portionDto.getId());
+                newPortion.setDescription(portionDto.getDescription());
+                newPortion.setGrams(portionDto.getGrams());
+                portionRepository.savePortion(newFood.getId(), newPortion);
+
+            } else {
+                // add portion
+                Portion newPortion = new Portion();
+                newPortion.setDescription(portionDto.getDescription());
+                newPortion.setGrams(portionDto.getGrams());
+                portionRepository.savePortion(newFood.getId(), newPortion);
             }
         }
     }
 
     private FoodDto createFoodDto(Food food, boolean withPortions) {
-        FoodDto foodDto = mapFoodToFoodDto(food);
+        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food,FoodDto.class );
 
         if (withPortions) {
             List<Portion> foodPortions = portionRepository.getPortions(food.getId());
@@ -142,24 +148,11 @@ public class FoodService {
         return foodDto;
     }
 
-    static PortionDto mapPortionToPortionDto(Portion portion, Food food) {
-        PortionDto currDto = new PortionDto();
-        currDto.setDescription(portion.getDescription());
-        currDto.setGrams(portion.getGrams());
-        currDto.setId(portion.getId());
+    PortionDto mapPortionToPortionDto(Portion portion, Food food) {
+        PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
         Macro calculatedMacros = calculateMacro(food, portion);
         currDto.setMacros(calculatedMacros);
         return currDto;
-    }
-
-    static FoodDto mapFoodToFoodDto(Food food) {
-        FoodDto foodDto = new FoodDto();
-        foodDto.setName(food.getName());
-        foodDto.setId(food.getId());
-        foodDto.setProtein(food.getProtein());
-        foodDto.setCarbs(food.getCarbs());
-        foodDto.setFat(food.getFat());
-        return foodDto;
     }
 
     // Naar een util brengen:

@@ -11,10 +11,14 @@ spring:
       ACCEPT_EMPTY_STRING_AS_NULL_OBJECT: true
       FAIL_ON_UNKNOWN_PROPERTIES: true
   jpa:
+     properties:
+       hibernate:
+         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+#    properties.hibernate.jdbc.time_zone : UTC
 #    show-sql: true
 #    hibernate:
 #       ddl-auto: validate
-    properties.hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+#    properties.hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
   datasource:
      url: ${datasource.url}
      username: ${datasource.username}
@@ -33,19 +37,19 @@ spring:
   profiles: arjan
 
   datasource:
-     url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=UTC
+     url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=CET
      username: arjan
      password: fhjfgj!3ADD
 
 mail:
-   username: doethetniet@gmail.com
-   password: 'doethetniet'
+   username: macrologwebapp@gmail.com
+   password: Macrolog01
 ---
 spring:
   profiles: carmen
 
   datasource:
-     url: jdbc:mysql://localhost:3306/macrolog_dev?autoReconnect=true&useSSL=false&serverTimezone=UTC
+     url: jdbc:mysql://localhost:3306/macrolog_dev?autoReconnect=true&useSSL=false&serverTimezone=CET
      username: macrolog
      password: Macrolog01
 

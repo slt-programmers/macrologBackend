@@ -9,11 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.WeightRepository;
 import slt.database.entities.Weight;
+import slt.dto.MyModelMapper;
 import slt.dto.WeightDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +25,18 @@ public class WeightService {
     @Autowired
     private WeightRepository weightRepository;
 
+    @Autowired
+    MyModelMapper myModelMapper;
+
     @ApiOperation(value = "Retrieve all tracked weights")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllWeightEntries() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
-        List<WeightDto> collectedDtos = allWeightEntries.stream().map(this::mapToDto).collect(Collectors.toList());
+        List<WeightDto> collectedDtos = allWeightEntries
+                .stream()
+                .map(w->myModelMapper.getConfiguredMapper().map(w,WeightDto.class ))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(collectedDtos);
     }
 
@@ -39,8 +45,7 @@ public class WeightService {
     public ResponseEntity storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
-        Weight entry = mapWeightDtoToDomain(weightEntry);
-
+        Weight entry = myModelMapper.getConfiguredMapper().map(weightEntry, Weight.class);
         List<Weight> storedWeight = weightRepository.getWeightEntryForDay(userInfo.getUserId(), entry.getDay());
 
         boolean weightRegisteredOnSameDay = (storedWeight != null && !storedWeight.isEmpty());
@@ -68,11 +73,8 @@ public class WeightService {
         } else {
             throw new UnsupportedOperationException("Niet afgevangen update van weight");
         }
-
-
         return ResponseEntity.ok().build();
     }
-
 
     @ApiOperation(value = "Delete weight entry")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -82,21 +84,4 @@ public class WeightService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private WeightDto mapToDto(Weight weightEntry) {
-        WeightDto dto = new WeightDto();
-        dto.setDay(weightEntry.getDay().toLocalDate());
-        dto.setId(weightEntry.getId() == null ? null : weightEntry.getId().longValue());
-        dto.setWeight(weightEntry.getValue());
-        dto.setRemark(weightEntry.getRemark());
-        return dto;
-    }
-
-    private Weight mapWeightDtoToDomain(@RequestBody WeightDto weightEntry) {
-        Weight entry = new Weight();
-        entry.setDay(Date.valueOf(weightEntry.getDay()));
-        entry.setId(weightEntry.getId() == null ? null : weightEntry.getId().intValue());
-        entry.setValue(weightEntry.getWeight());
-        entry.setRemark(weightEntry.getRemark());
-        return entry;
-    }
 }

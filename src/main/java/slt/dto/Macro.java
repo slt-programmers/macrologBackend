@@ -2,12 +2,14 @@ package slt.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Macro {
 
     @ApiModelProperty(notes = "Number of protein", required = true)
@@ -17,6 +19,7 @@ public class Macro {
     @ApiModelProperty(notes = "Number of carbs", required = true)
     private Double carbs;
 
+    public void setCalories(Double d){}
     public Double getCalories() {
         return fat * 9 + carbs * 4 + protein * 4;
     }

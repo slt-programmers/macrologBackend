@@ -91,8 +91,7 @@ public class AuthenticationService {
                 log.debug("Username or email already in use 2");
                 return ResponseEntity.status(401).body("Username or email already in use");
             } else {
-                userAccountRepository.insertUser(username, hashedPassword, email);
-                account = userAccountRepository.getUser(username);
+                account = userAccountRepository.insertUser(username, hashedPassword, email);
             }
         }
 
@@ -105,7 +104,8 @@ public class AuthenticationService {
         responseHeaders.add("token", jwt);
         log.info("Signup successful");
 
-        new Thread(() -> mailService.sendConfirmationMail(email, newAccount)).start();
+
+        mailService.sendConfirmationMail(email, newAccount);
 
         UserAccountDto userDto = new UserAccountDto();
         userDto.setId(newAccount.getId());
@@ -124,9 +124,11 @@ public class AuthenticationService {
         if (account != null) {
             String randomPassword = RandomStringUtils.randomAlphabetic(10);
             String hashedRandomPassword = PasswordUtils.hashPassword(randomPassword);
+            account.setResetPassword(hashedRandomPassword);
+            account.setResetDate(LocalDateTime.now());
+            userAccountRepository.saveAccount(account);
+            mailService.sendPasswordRetrievalMail(email, randomPassword, account);
 
-            userAccountRepository.updatePassword(account.getId(), account.getPassword(), hashedRandomPassword, LocalDateTime.now());
-            new Thread(() -> mailService.sendPasswordRetrievalMail(email, randomPassword, account)).start();
             return ResponseEntity.ok("Email matches");
         } else {
             log.error("Account is null");
@@ -156,7 +158,10 @@ public class AuthenticationService {
                 return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
             } else {
                 log.info("Passwords match");
-                userAccountRepository.updatePassword(userAccount.getId(), newPasswordHashed, null, null);
+                userAccount.setPassword(newPasswordHashed);
+                userAccount.setResetDate(null);
+                userAccount.setResetPassword(null);
+                userAccountRepository.saveAccount(userAccount);
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
@@ -191,7 +196,10 @@ public class AuthenticationService {
 
             if (resettedPasswordOK && withinTimeFrame) {
                 log.info("Password has been reset to verified new password");
-                userAccountRepository.updatePassword(account.getId(), hashedPassword, null, null);
+                account.setPassword(hashedPassword);
+                account.setResetDate(null);
+                account.setResetDate(null);
+                userAccountRepository.saveAccount(account);
                 return true;
             } else {
                 return false;

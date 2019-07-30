@@ -11,15 +11,16 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.ActivityRepository;
 import slt.database.entities.LogActivity;
 import slt.dto.LogActivityDto;
+import slt.dto.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.LocalDateParser;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -30,6 +31,9 @@ public class ActivityService {
     @Autowired
     private ActivityRepository logActitivyRepository;
 
+    @Autowired
+    private MyModelMapper myModelMapper;
+
     @ApiOperation(value = "Retrieve all stored activities for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getActivitiesForDay(@PathVariable("date") String date) {
@@ -38,7 +42,10 @@ public class ActivityService {
         log.debug("Request for " + userInfo);
         LocalDate localDate = LocalDateParser.parse(date);
         List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), localDate);
-        List<LogActivityDto> logEntryDtos = mapToDtos(allLogEntries);
+
+        List<LogActivityDto> logEntryDtos = allLogEntries.stream()
+                .map(logEntry -> myModelMapper.getConfiguredMapper().map(logEntry, LogActivityDto.class))
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(logEntryDtos);
     }
@@ -49,7 +56,7 @@ public class ActivityService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogActivityDto> newEntries = new ArrayList<>();
         for (LogActivityDto logEntry : logActivities) {
-            LogActivity entry = mapActivityDtoToDomain(logEntry);
+            LogActivity entry = myModelMapper.getConfiguredMapper().map(logEntry,LogActivity.class );
             if (logEntry.getId() == null) {
                 logActitivyRepository.saveActivity(userInfo.getUserId(), entry);
                 List<LogActivity> addedEntryMatches = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay().toLocalDate());
@@ -61,11 +68,11 @@ public class ActivityService {
                 if (addedEntryMatches.size() != 1) {
                     log.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getName() + " - " + entry.getDay());
                 }
-                newEntries.add(mapToDto(addedEntryMatches.get(0)));
+                newEntries.add(myModelMapper.getConfiguredMapper().map(addedEntryMatches.get(0),LogActivityDto.class));
             } else {
                 // TODO BUG? Add to list of new entries? Why only new?
                 logActitivyRepository.saveActivity(userInfo.getUserId(), entry);
-                newEntries.add(mapToDto(entry));
+                newEntries.add(myModelMapper.getConfiguredMapper().map(entry,LogActivityDto.class));
             }
         }
 
@@ -81,32 +88,4 @@ public class ActivityService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private LogActivity mapActivityDtoToDomain(LogActivityDto logEntry) {
-        LogActivity entry = new LogActivity();
-        entry.setName(logEntry.getName());
-        entry.setCalories(logEntry.getCalories());
-        entry.setDay(new Date(logEntry.getDay().getTime()));
-        entry.setId(logEntry.getId());
-        return entry;
-    }
-
-    private List<LogActivityDto> mapToDtos(List<LogActivity> allLogActivities) {
-        List<LogActivityDto> allDtos = new ArrayList<>();
-        for (LogActivity logEntry : allLogActivities) {
-
-            LogActivityDto dto = mapToDto(logEntry);
-            allDtos.add(dto);
-        }
-
-        return allDtos;
-    }
-
-    private LogActivityDto mapToDto(LogActivity logEntry) {
-        LogActivityDto dto = new LogActivityDto();
-        dto.setCalories(logEntry.getCalories());
-        dto.setName(logEntry.getName());
-        dto.setId(logEntry.getId());
-        dto.setDay(logEntry.getDay());
-        return dto;
-    }
 }

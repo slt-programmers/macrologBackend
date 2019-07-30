@@ -24,16 +24,19 @@ import java.util.stream.Collectors;
 public class ExportService {
 
     @Autowired
+    private MyModelMapper myModelMapper;
+
+    @Autowired
     private FoodRepository foodRepository;
+
+    @Autowired
+    private SettingsRepository settingsRepo;
 
     @Autowired
     private PortionRepository portionRepository;
 
     @Autowired
     private LogEntryRepository logEntryRepository;
-
-    @Autowired
-    private SettingsRepository settingsRepo;
 
     @Autowired
     private ActivityRepository activityRepository;
@@ -68,8 +71,12 @@ public class ExportService {
             FoodDto foodDto = allFoodDtos.stream().filter(f -> {
                 log.info("Export: foodDto ID " + f.getId());
                 return f.getId().equals(logEntry.getFoodId());
-            }).findFirst().orElseGet(() ->
-                    FoodService.mapFoodToFoodDto(foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId())));
+            }).findFirst().orElseGet(() -> {
+                        Food foodById = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
+                        return myModelMapper.getConfiguredMapper().map(foodById, FoodDto.class);
+                    }
+            );
+
             logEntryDto.setFood(foodDto);
 
             PortionDto portionDto = null;
@@ -105,75 +112,35 @@ public class ExportService {
         export.setAllLogEntries(allDtos);
 
         List<Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
-        export.setAllSettingDtos(transformToOldSetting(settings));
+        List<SettingDto> collectedSettingsDto = settings.stream()
+                .map(s -> myModelMapper.getConfiguredMapper().map(s, SettingDto.class))
+                .collect(Collectors.toList());
+        export.setAllSettingDtos(collectedSettingsDto);
 
         List<LogActivity> activities = activityRepository.getAllLogActivities(userInfo.getUserId());
-        List<LogActivityDto> collectedActivityDtos = activities.stream().map(this::mapActivityToDto).collect(Collectors.toList());
+        List<LogActivityDto> collectedActivityDtos = activities.stream()
+                .map(a -> myModelMapper.getConfiguredMapper().map(a,LogActivityDto.class ))
+                .collect(Collectors.toList());
         export.setAllActivities(collectedActivityDtos);
 
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
-        List<WeightDto> collectedWeightDtos = allWeightEntries.stream().map(this::mapWeightToDto).collect(Collectors.toList());
+        List<WeightDto> collectedWeightDtos = allWeightEntries.stream()
+                .map(w -> myModelMapper.getConfiguredMapper().map(w,WeightDto.class ))
+                .collect(Collectors.toList());
         export.setAllWeights(collectedWeightDtos);
 
         return ResponseEntity.ok(export);
     }
 
     private FoodDto createFoodDto(Food food, boolean withPortions) {
-        FoodDto foodDto = mapFoodToFoodDto(food);
-
+        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food, FoodDto.class);
         if (withPortions) {
             List<Portion> foodPortions = portionRepository.getPortions(food.getId());
             for (Portion portion : foodPortions) {
-
-                PortionDto currDto = new PortionDto();
-                currDto.setDescription(portion.getDescription());
-                currDto.setGrams(portion.getGrams());
-                currDto.setId(portion.getId());
-
+                PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
                 foodDto.addPortion(currDto);
             }
         }
         return foodDto;
     }
-
-    private static FoodDto mapFoodToFoodDto(Food food) {
-        FoodDto foodDto = new FoodDto();
-        foodDto.setName(food.getName());
-        foodDto.setId(food.getId());
-        foodDto.setProtein(food.getProtein());
-        foodDto.setCarbs(food.getCarbs());
-        foodDto.setFat(food.getFat());
-        return foodDto;
-    }
-
-    private LogActivityDto mapActivityToDto(LogActivity logEntry) {
-        LogActivityDto dto = new LogActivityDto();
-        dto.setCalories(logEntry.getCalories());
-        dto.setName(logEntry.getName());
-        dto.setId(logEntry.getId());
-        dto.setDay(logEntry.getDay());
-        return dto;
-    }
-
-    private WeightDto mapWeightToDto(Weight weightEntry) {
-        WeightDto dto = new WeightDto();
-        dto.setDay(weightEntry.getDay().toLocalDate());
-        dto.setId(weightEntry.getId().longValue());
-        dto.setWeight(weightEntry.getValue());
-        dto.setRemark(weightEntry.getRemark());
-
-        return dto;
-    }
-    private List<SettingDto> transformToOldSetting(List<slt.database.entities.Setting> newSetting) {
-        return newSetting.stream().map(this::transformToOldSetting).collect(Collectors.toList());
-    }
-
-    private SettingDto transformToOldSetting(slt.database.entities.Setting newSetting) {
-        return SettingDto.builder().name(newSetting.getName())
-                .value(newSetting.getValue())
-                .day(newSetting.getDay())
-                .id(newSetting.getId().longValue())
-                .build();
-    }
-
 }

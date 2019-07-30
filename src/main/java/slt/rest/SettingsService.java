@@ -56,7 +56,7 @@ public class SettingsService {
 
     @ApiOperation(value = "Get user settings")
     @GetMapping(path = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getUserSetting() {
+    public ResponseEntity<UserSettingsDto> getUserSetting() {
         UserSettingsDto userSettingsDto = getUserSettingsDto();
         return ResponseEntity.ok(userSettingsDto);
     }
@@ -73,7 +73,7 @@ public class SettingsService {
 
     @ApiOperation(value = "Get setting")
     @GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getSetting(@PathVariable("name") String name,
+    public ResponseEntity<String> getSetting(@PathVariable("name") String name,
                                      @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         slt.database.entities.Setting setting;
@@ -120,7 +120,10 @@ public class SettingsService {
     }
 
     private String mapSetting(List<slt.database.entities.Setting> settings, String identifier) {
-        return settings.stream().filter(s -> s.getName().equals(identifier)).max(Comparator.comparing(slt.database.entities.Setting::getDay)).orElse(new slt.database.entities.Setting()).getValue();
+        return settings.stream()
+                .filter(s -> s.getName().equals(identifier))
+                .max(Comparator.comparing(slt.database.entities.Setting::getDay))
+                .orElse(new slt.database.entities.Setting()).getValue();
     }
 
 }
