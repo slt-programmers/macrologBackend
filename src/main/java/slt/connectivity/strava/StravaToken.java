@@ -1,9 +1,10 @@
-package slt.connectivity;
+package slt.connectivity.strava;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import slt.connectivity.strava.dto.StravaAthleteDto;
 
 @Data
 @Builder
@@ -16,6 +17,6 @@ public class StravaToken {
     Long expires_in;
     String refresh_token;
     String access_token;
-    StravaAthlete athlete;
+    StravaAthleteDto athlete;
 
 }

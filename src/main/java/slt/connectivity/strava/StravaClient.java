@@ -1,4 +1,4 @@
-package slt.connectivity;
+package slt.connectivity.strava;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -12,6 +12,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import slt.config.StravaConfig;
+import slt.connectivity.strava.dto.ActivityDetailsDto;
+import slt.connectivity.strava.dto.ListedActivityDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -159,7 +161,7 @@ public class StravaClient {
 
             ActivityDetailsDto gevondenActivity = responseEntity.getBody();
 
-            log.debug(gevondenActivity.getStart_date_local() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.type + " " + gevondenActivity.getId());
+            log.debug(gevondenActivity.getStart_date_local() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.getType() + " " + gevondenActivity.getId());
             return gevondenActivity;
 
         } catch (HttpClientErrorException httpClientErrorException) {

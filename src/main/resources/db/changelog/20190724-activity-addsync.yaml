@@ -14,4 +14,13 @@ databaseChangeLog:
                 name: synced_with
                 type: ${text.type}
 
-
+- changeSet:
+    id: 20190729-addactivitystatus
+    author: arjan
+    changes:
+      - addColumn:
+          tableName: activity
+          columns:
+            - column:
+                name: status
+                type: ${text.type}

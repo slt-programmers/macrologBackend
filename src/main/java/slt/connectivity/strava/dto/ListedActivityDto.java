@@ -1,4 +1,4 @@
-package slt.connectivity;
+package slt.connectivity.strava.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,10 @@ import org.joda.time.DateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("all")
-public class ActivityDetailsDto {
+public class ListedActivityDto {
     long id;
     String name;
-    Double calories;
     String type;
     DateTime start_date_local;
+    Double calories;
 }

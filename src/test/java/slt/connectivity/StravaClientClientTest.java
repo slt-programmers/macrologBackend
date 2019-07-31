@@ -11,6 +11,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import slt.config.StravaConfig;
+import slt.connectivity.strava.StravaClient;
+import slt.connectivity.strava.StravaToken;
+import slt.connectivity.strava.dto.ActivityDetailsDto;
+import slt.connectivity.strava.dto.ListedActivityDto;
 
 import java.time.LocalDate;
 import java.util.Arrays;

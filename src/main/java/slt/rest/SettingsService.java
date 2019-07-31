@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import slt.connectivity.StravaActivityService;
+import slt.connectivity.strava.StravaActivityService;
 import slt.database.SettingsRepository;
 import slt.database.WeightRepository;
 import slt.database.entities.Weight;

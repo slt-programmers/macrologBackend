@@ -32,4 +32,7 @@ public class LogActivity {
     @Column(name = "synced_id")
     private Long syncedId;
 
+    @Column
+    private String status;
+
 }

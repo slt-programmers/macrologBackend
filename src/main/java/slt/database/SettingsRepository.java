@@ -88,7 +88,7 @@ public class SettingsRepository {
 
     public Setting getLatestSetting(Integer userId, String setting) {
         List<Setting> byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
-        log.debug("Number of hits for setting{} :{}", setting, byUserIdAndName.size());
+        log.debug("Number of hits for setting {} :{}", setting, byUserIdAndName.size());
         return byUserIdAndName.isEmpty() ? null : byUserIdAndName.get(0);
     }
 
