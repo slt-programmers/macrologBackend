@@ -142,15 +142,6 @@ class StravaClientClientTest {
         assertThat(stravaToken.getAccess_token()).isEqualTo("A");
     }
 
-//    @Test
-//    public void getUserInfo() {
-//        StravaClient stravaClient = new StravaClient();
-//        stravaClient.getUserInfo();
-//
-//// {"id":234234,"username":"34523","resource_state":2,"firstname":"FEREW","lastname":"2342342","city":"Groningen","state":"GR","country":"The Netherlands","sex":"M","premium":false,"summit":false,"created_at":"2014-04-23T10:55:52Z","updated_at":"2019-07-20T17:47:03Z","badge_type_id":0,"profile_medium":"https://dgalywyr863hv.medium.jpg","profile":"https://ge.jpg","friend":null,"follower":null}
-//
-//    }
-
     @Test
     public void getAthleteActivities() {
         MockitoAnnotations.initMocks(this);
@@ -237,13 +228,23 @@ class StravaClientClientTest {
         assertThat(capturedUrl.getValue()).endsWith("/" + activityDetailId);
 
     }
-//request
-//    http://www.strava.com/oauth/authorize?client_id=XXXXX&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=activity:read
-// info about scope: https://developers.strava.com/docs/authentication/
 
+    @Test
+    public void unregister(){
+        MockitoAnnotations.initMocks(this);
+        ArgumentCaptor<HttpEntity> varArgs = ArgumentCaptor.forClass(HttpEntity.class);
 
-// response
-// http://localhost/exchange_token?state=&code=fqfqfqfqfqfq&scope=read
-    // check scope!!
+        ResponseEntity<String> mockEntitity = mock(ResponseEntity.class);
+
+        when(restTemplate.exchange(eq("https://www.strava.com/oauth/deauthorize"), eq(HttpMethod.POST), varArgs.capture(), eq(String.class)))
+                .thenReturn(mockEntitity);
+
+        final boolean success = stravaClient.unregister(StravaToken.builder().access_token("A").build());
+
+        final HttpHeaders headers = varArgs.getValue().getHeaders();
+        assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer A");
+        assertThat(success).isTrue();
+
+    }
 
 }

@@ -297,7 +297,7 @@ class StravaActivityServiceTest {
                 LogActivity.builder().syncedId(1L).status("DELETED").build());
         final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1, LocalDate.parse("2001-01-01"), true);
 
-        when(activityRepository.saveActivity(eq(1), any(LogActivity.class)));
+        when(activityRepository.saveActivity(eq(1), any(LogActivity.class))).thenReturn(LogActivity.builder().build());
 
 
         // dirty aanpassing van de parameter lijst naar niet meer gedelete
