@@ -157,21 +157,7 @@ public class StravaActivityService {
         settingsRepository.saveSetting(userId, expireAt);
     }
 
-    public List<ListedActivityDto> getStravaActivitiesForDay(Integer userId, LocalDate date) {
-
-        if (!isStravaConnected(userId)) {
-            log.error("Strava has not been setup for this user");
-            return new ArrayList<>();
-        }
-
-        StravaToken token = getStravaToken(userId);
-        log.error("Check is valid token");
-        if (token == null) {
-            log.error("Unable to get new token");
-            return new ArrayList<>();
-        }
-
-        log.debug("Token is valid");
+    public List<ListedActivityDto> getStravaActivitiesForDay(StravaToken token, LocalDate date) {
         return stravaClient.getActivitiesForDay(token.getAccess_token(), date);
 
     }
@@ -217,31 +203,32 @@ public class StravaActivityService {
 
             log.debug("Strava is connected. Syncing");
             StravaToken token = getStravaToken(userId);
+            if (token != null) {
+                final List<ListedActivityDto> stravaActivitiesForDay = getStravaActivitiesForDay(token, date);
 
-            final List<ListedActivityDto> stravaActivitiesForDay = getStravaActivitiesForDay(userId, date);
+                for (ListedActivityDto stravaActivity : stravaActivitiesForDay) {
+                    log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
+                    final long id = stravaActivity.getId();
+                    final Optional<LogActivity> matchingMacrologActivity = dayActivities.stream()
+                            .filter(a -> a.getSyncedId() != null && a.getSyncedId() == id)
+                            .findAny();
 
-            for (ListedActivityDto stravaActivity : stravaActivitiesForDay) {
-                log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
-                final long id = stravaActivity.getId();
-                final Optional<LogActivity> matchingMacrologActivity = dayActivities.stream()
-                        .filter(a -> a.getSyncedId() != null && a.getSyncedId() == id)
-                        .findAny();
-
-                if (matchingMacrologActivity.isPresent()) {
-                    final LogActivity matchedMacrologActivity = matchingMacrologActivity.get();
-                    log.debug("Activity [{}] already known", matchedMacrologActivity.getName());
-                    if (forceUpdate && "DELETED".equals(matchedMacrologActivity.getStatus())) {
-                        log.debug("Setting status to back to null");
-                        matchedMacrologActivity.setStatus(null);
-                        log.debug("Refreshing the activity details");
-                        syncActivity(token, id, matchedMacrologActivity);
-                        activityRepository.saveActivity(userId, matchedMacrologActivity);
+                    if (matchingMacrologActivity.isPresent()) {
+                        final LogActivity matchedMacrologActivity = matchingMacrologActivity.get();
+                        log.debug("Activity [{}] already known", matchedMacrologActivity.getName());
+                        if (forceUpdate && "DELETED".equals(matchedMacrologActivity.getStatus())) {
+                            log.debug("Setting status to back to null");
+                            matchedMacrologActivity.setStatus(null);
+                            log.debug("Refreshing the activity details");
+                            syncActivity(token, id, matchedMacrologActivity);
+                            activityRepository.saveActivity(userId, matchedMacrologActivity);
+                        }
+                    } else {
+                        log.debug("Activity [{}] not known");
+                        final LogActivity newMacrologActivity = createNewMacrologActivity(date, token, stravaActivity, id);
+                        final LogActivity savedNewActivity = activityRepository.saveActivity(userId, newMacrologActivity);
+                        newActivities.add(savedNewActivity);
                     }
-                } else {
-                    log.debug("Activity [{}] not known");
-                    final LogActivity newMacrologActivity = createNewMacrologActivity(date, token, stravaActivity, id);
-                    final LogActivity savedNewActivity = activityRepository.saveActivity(userId, newMacrologActivity);
-                    newActivities.add(savedNewActivity);
                 }
             }
         }
