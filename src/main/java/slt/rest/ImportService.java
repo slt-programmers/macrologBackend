@@ -88,6 +88,7 @@ public class ImportService {
 
         for (SettingDto settingDto : settingDtos) {
             Setting setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
+            setting.setId(null);
             settingsRepo.putSetting(userInfo.getUserId(), setting);
         }
 
