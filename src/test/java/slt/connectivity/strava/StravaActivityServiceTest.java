@@ -170,6 +170,7 @@ class StravaActivityServiceTest {
 
         stravaActivityService.unRegisterStrava(1);
 
+        verify(settingsRepository,times(8)).deleteAllForUser(eq(1), any(String.class));
     }
 
     @Test
@@ -191,7 +192,7 @@ class StravaActivityServiceTest {
         when(stravaClient.getActivitiesForDay(eq("a"),any(LocalDate.class) )).thenReturn(new ArrayList<>());
 
         final List<ListedActivityDto> results = stravaActivityService.getStravaActivitiesForDay(StravaToken.builder().access_token("a").build(), LocalDate.now());
-        assertThat(results.isEmpty());
+        assertThat(results.isEmpty()).isTrue();
     }
 
     @Test
