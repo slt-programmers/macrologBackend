@@ -1,7 +1,6 @@
 package slt.connectivity.strava;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import slt.config.StravaConfig;
@@ -34,7 +33,6 @@ public class StravaActivityService {
     @Autowired
     ActivityService activityService;
 
-    // TODO via service
     @Autowired
     ActivityRepository activityRepository;
 
@@ -44,6 +42,7 @@ public class StravaActivityService {
     @Autowired
     StravaClient stravaClient;
 
+    private static final String STRAVA = "STRAVA";
     private static final String STRAVA_CLIENT_AUTHORIZATION_CODE = "STRAVA_CLIENT_AUTHORIZATION_CODE";
     private static final String STRAVA_ACCESS_TOKEN = "STRAVA_ACCESS_TOKEN";
     private static final String STRAVA_EXPIRES_AT = "STRAVA_EXPIRES_AT";
@@ -65,7 +64,7 @@ public class StravaActivityService {
             final Setting athletId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
             final Setting image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
 
-            final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, "STRAVA");
+            final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
             return SyncedAccount.builder()
                     .syncedAccountId(Long.valueOf(athletId.getValue()))
@@ -95,8 +94,9 @@ public class StravaActivityService {
 
         if (stravaToken != null) {
 
+            // Initial save of all settings.
             settingsRepository.putSetting(userId, STRAVA_ACCESS_TOKEN, stravaToken.getAccess_token(), null);
-            settingsRepository.putSetting(userId, STRAVA_REFRESH_TOKEN,stravaToken.getRefresh_token(), null);
+            settingsRepository.putSetting(userId, STRAVA_REFRESH_TOKEN, stravaToken.getRefresh_token(), null);
             settingsRepository.putSetting(userId, STRAVA_EXPIRES_AT, stravaToken.getExpires_at().toString(), null);
             settingsRepository.putSetting(userId, STRAVA_PROFILE, stravaToken.getAthlete().getProfile(), null);
             settingsRepository.putSetting(userId, STRAVA_LASTNAME, stravaToken.getAthlete().getLastname(), null);
@@ -104,7 +104,7 @@ public class StravaActivityService {
             settingsRepository.putSetting(userId, STRAVA_ATHLETE_ID, stravaToken.getAthlete().getId().toString(), null);
 
 
-            final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, "STRAVA");
+            final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
             return SyncedAccount.builder()
                     .image(stravaToken.getAthlete().getProfile_medium())
@@ -127,7 +127,6 @@ public class StravaActivityService {
             stravaClient.unregister(token);
         } catch (Exception e) {
             log.error("Error during unregister of {} ", userId, e);
-            e.printStackTrace();
         }
 
         settingsRepository.deleteAllForUser(userId, STRAVA_ACCESS_TOKEN);
@@ -144,7 +143,6 @@ public class StravaActivityService {
     @Transactional
     private void storeTokenSettings(Integer userId, StravaToken stravaToken) {
         log.debug("Storing token update");
-        // TODO: Update the tokens if exist instead of adding new ones.
 
         final Setting accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
         final Setting refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
@@ -155,8 +153,8 @@ public class StravaActivityService {
         expireAt.setValue(stravaToken.getExpires_at().toString());
 
         settingsRepository.saveSetting(userId, accessToken);
-        settingsRepository.putSetting(userId, refreshToken);
-        settingsRepository.putSetting(userId, expireAt);
+        settingsRepository.saveSetting(userId, refreshToken);
+        settingsRepository.saveSetting(userId, expireAt);
     }
 
     public List<ListedActivityDto> getStravaActivitiesForDay(Integer userId, LocalDate date) {
@@ -173,18 +171,8 @@ public class StravaActivityService {
             return new ArrayList<>();
         }
 
-
         log.debug("Token is valid");
-        final List<ListedActivityDto> activitiesForDay = stravaClient.getActivitiesForDay(token.getAccess_token(), date);
-
-        for (ListedActivityDto listedActivityDto : activitiesForDay) {
-            final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), listedActivityDto.getId());
-            log.debug(listedActivityDto.getStart_date_local() + " - " + listedActivityDto.getName() + " " + listedActivityDto.getType() + " " + listedActivityDto.getId());
-            log.debug("Calorien: " + activityDetail.getCalories());
-            listedActivityDto.setCalories(activityDetail.getCalories());
-        }
-
-        return activitiesForDay;
+        return stravaClient.getActivitiesForDay(token.getAccess_token(), date);
 
     }
 
@@ -226,40 +214,55 @@ public class StravaActivityService {
                                      boolean forceUpdate) {
         List<LogActivity> newActivities = new ArrayList<>();
         if (isStravaConnected(userId)) {
-            log.debug("Strava is connected. Syncing");
 
-            // TODO: Only get details when activity has not been synced yet
+            log.debug("Strava is connected. Syncing");
+            StravaToken token = getStravaToken(userId);
+
             final List<ListedActivityDto> stravaActivitiesForDay = getStravaActivitiesForDay(userId, date);
 
-            for (ListedActivityDto foundActivityFromSync : stravaActivitiesForDay) {
-                log.debug("Checking to sync {}-{} ", foundActivityFromSync.getName(), foundActivityFromSync.getId());
-                final long id = foundActivityFromSync.getId();
-                final Optional<LogActivity> matchWithStoredActivity = dayActivities.stream().filter(a -> a.getSyncedId() != null && a.getSyncedId() == id).findAny();
-                if (matchWithStoredActivity.isPresent()) {
-                    final LogActivity logActivityMatchedWithSync = matchWithStoredActivity.get();
-                    log.debug("Activity [{}] already known", logActivityMatchedWithSync.getName());
-                    if (forceUpdate) {
-                        if ("DELETED".equals(logActivityMatchedWithSync.getStatus())){
-                            log.debug("Setting status to back to null");
-                            logActivityMatchedWithSync.setStatus(null);
-                            activityRepository.saveActivity(userId, logActivityMatchedWithSync);
-                        }
+            for (ListedActivityDto stravaActivity : stravaActivitiesForDay) {
+                log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
+                final long id = stravaActivity.getId();
+                final Optional<LogActivity> matchingMacrologActivity = dayActivities.stream()
+                        .filter(a -> a.getSyncedId() != null && a.getSyncedId() == id)
+                        .findAny();
+
+                if (matchingMacrologActivity.isPresent()) {
+                    final LogActivity matchedMacrologActivity = matchingMacrologActivity.get();
+                    log.debug("Activity [{}] already known", matchedMacrologActivity.getName());
+                    if (forceUpdate && "DELETED".equals(matchedMacrologActivity.getStatus())) {
+                        log.debug("Setting status to back to null");
+                        matchedMacrologActivity.setStatus(null);
+                        log.debug("Refreshing the activity details");
+                        syncActivity(token, id, matchedMacrologActivity);
+                        activityRepository.saveActivity(userId, matchedMacrologActivity);
                     }
                 } else {
                     log.debug("Activity [{}] not known");
-                    final LogActivity newActivityFromSync = LogActivity.builder()
-                            .day(Date.valueOf(date))
-                            .name(foundActivityFromSync.getType() + ": " + foundActivityFromSync.getName())
-                            .calories(foundActivityFromSync.getCalories())
-                            .syncedId(foundActivityFromSync.getId())
-                            .syncedWith("STRAVA")
-                            .build();
-                    final LogActivity logActivity = activityRepository.saveActivity(userId, newActivityFromSync);
-                    newActivities.add(logActivity);
+                    final LogActivity newMacrologActivity = createNewMacrologActivity(date, token, stravaActivity, id);
+                    final LogActivity savedNewActivity = activityRepository.saveActivity(userId, newMacrologActivity);
+                    newActivities.add(savedNewActivity);
                 }
             }
         }
         return newActivities;
+    }
+
+    private LogActivity createNewMacrologActivity(LocalDate date, StravaToken token, ListedActivityDto stravaActivity, long id) {
+        final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), id);
+        return LogActivity.builder()
+                .day(Date.valueOf(date))
+                .name(stravaActivity.getType() + ": " + stravaActivity.getName())
+                .calories(activityDetail.getCalories())
+                .syncedId(stravaActivity.getId())
+                .syncedWith(STRAVA)
+                .build();
+    }
+
+    private void syncActivity(StravaToken token, Long stravaActivityId, LogActivity storedActivity) {
+        final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
+        storedActivity.setName(activityDetail.getType() + ": " + activityDetail.getName());
+        storedActivity.setCalories(activityDetail.getCalories());
     }
 
     private boolean isExpired(StravaToken token) {

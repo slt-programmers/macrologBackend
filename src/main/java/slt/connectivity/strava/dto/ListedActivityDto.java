@@ -16,5 +16,4 @@ public class ListedActivityDto {
     String name;
     String type;
     DateTime start_date_local;
-    Double calories;
 }

@@ -38,6 +38,10 @@ public class StravaClient {
     @Autowired
     StravaConfig stravaConfig;
 
+    private static final String ERROR_MESSAGE = "Fout bij versturen.";
+    private static final String BEARER_MESSAGE = "Bearer %s";
+
+
     public StravaToken getStravaToken(String authorizationCode) {
         String grantType = "authorization_code";
         String tokenUrl = "https://www.strava.com/oauth/token";
@@ -68,10 +72,10 @@ public class StravaClient {
 
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
-            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
             return null;
         } catch (RestClientException restClientException) {
-            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
             return null;
         }
     }
@@ -92,28 +96,6 @@ public class StravaClient {
         return getStravaToken(tokenUrl, reqPayload);
     }
 
-
-//    public void getUserInfo() {
-//        try {
-//            String url = "https://www.strava.com/api/v3/athlete";
-//            String userToken = "7c4e26b2b9788f8cdeb57befc3993e3ac57d2b96";
-//
-//            final HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            headers.add("Authorization", String.format("Bearer %s", userToken));
-//
-//            final HttpEntity<String> entity = new HttpEntity<>(headers);
-//            ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-//
-//            String gevondenActivity = responseEntity.getBody();
-//
-//            log.debug(gevondenActivity);
-//
-//        } catch (RestClientException restClientException) {
-//            log.error("Fout bij versturen.", restClientException.getLocalizedMessage());
-//        }
-//    }
-
     public List<ListedActivityDto> getActivitiesForDay(String token, LocalDate date) {
         try {
             String url = "https://www.strava.com/api/v3/athlete/activities";
@@ -127,7 +109,7 @@ public class StravaClient {
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", String.format("Bearer %s", token));
+            headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token));
 
             final HttpEntity entity = new HttpEntity<>(headers);
             ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<List<ListedActivityDto>>() {
@@ -137,12 +119,11 @@ public class StravaClient {
             return responseEntity.getBody();
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
-            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
             return new ArrayList<>();
         } catch (RestClientException restClientException) {
 
-//            {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
-            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
             return new ArrayList<>();
         }
     }
@@ -154,7 +135,7 @@ public class StravaClient {
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", String.format("Bearer %s", token));
+            headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token));
 
             final HttpEntity<ActivityDetailsDto> entity = new HttpEntity<>(headers);
             ResponseEntity<ActivityDetailsDto> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, ActivityDetailsDto.class);
@@ -166,12 +147,10 @@ public class StravaClient {
 
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
-            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
             return null;
         } catch (RestClientException restClientException) {
-
-//            {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
-            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
             return null;
         }
     }
@@ -180,7 +159,7 @@ public class StravaClient {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", String.format("Bearer %s", token.getAccess_token()));
+            headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token.getAccess_token()));
 
             final HttpEntity<String> entity = new HttpEntity<>(headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange("https://www.strava.com/oauth/deauthorize", HttpMethod.POST, entity, String.class);
@@ -191,10 +170,10 @@ public class StravaClient {
 
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
-            log.error("Fout bij versturen. {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
             return false;
         } catch (RestClientException restClientException) {
-            log.error("Fout bij versturen. {}", restClientException.getLocalizedMessage(), restClientException);
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
             return false;
         }
     }
