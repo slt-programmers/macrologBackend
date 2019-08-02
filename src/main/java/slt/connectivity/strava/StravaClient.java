@@ -18,6 +18,7 @@ import slt.connectivity.strava.dto.ListedActivityDto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +97,12 @@ public class StravaClient {
         return getStravaToken(tokenUrl, reqPayload);
     }
 
+    private long getUTCEpoch(LocalDateTime localDateTime) {
+        ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.systemDefault());
+        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+        return utcZoned.toEpochSecond();
+    }
+
     public List<ListedActivityDto> getActivitiesForDay(String token, LocalDate date) {
         try {
             String url = "https://www.strava.com/api/v3/athlete/activities";
@@ -104,8 +111,8 @@ public class StravaClient {
             final LocalDateTime localDateTimeEndOfDay = date.atStartOfDay().plusDays(1);
 
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                    .queryParam("before", localDateTimeEndOfDay.atZone(ZoneId.of("UTC")).toEpochSecond())
-                    .queryParam("after", localDateTimeStartOfDay.atZone(ZoneId.of("UTC")).toEpochSecond());
+                    .queryParam("before", getUTCEpoch(localDateTimeEndOfDay))
+                    .queryParam("after", getUTCEpoch(localDateTimeStartOfDay));
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
