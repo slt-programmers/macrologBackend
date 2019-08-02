@@ -194,10 +194,10 @@ public class StravaActivityService {
         return token;
     }
 
-    public List<LogActivity> syncDay(List<LogActivity> dayActivities,
-                                     Integer userId,
-                                     LocalDate date,
-                                     boolean forceUpdate) {
+    public List<LogActivity> getExtraStravaActivities(List<LogActivity> dayActivities,
+                                                      Integer userId,
+                                                      LocalDate date,
+                                                      boolean forceUpdate) {
         List<LogActivity> newActivities = new ArrayList<>();
         if (isStravaConnected(userId)) {
 
@@ -230,6 +230,8 @@ public class StravaActivityService {
                         newActivities.add(savedNewActivity);
                     }
                 }
+            } else {
+                log.debug("No valid token");
             }
         }
         return newActivities;

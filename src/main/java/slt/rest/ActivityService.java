@@ -51,7 +51,7 @@ public class ActivityService {
 
         List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), localDate);
 
-        List<LogActivity> extraSynced = stravaActivityService.syncDay(allLogEntries,userInfo.getUserId(),localDate,forceSync);
+        List<LogActivity> extraSynced = stravaActivityService.getExtraStravaActivities(allLogEntries,userInfo.getUserId(),localDate,forceSync);
         allLogEntries.addAll(extraSynced);
 
         List<LogActivityDto> logEntryDtos = allLogEntries.stream()

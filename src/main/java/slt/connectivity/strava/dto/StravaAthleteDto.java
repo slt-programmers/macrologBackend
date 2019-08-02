@@ -1,10 +1,11 @@
 package slt.connectivity.strava.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @SuppressWarnings("all")
-public class StravaAthleteDto {
+@Builder public class StravaAthleteDto {
     Long id;
     String username;
     String firstname;
