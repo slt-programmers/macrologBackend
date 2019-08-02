@@ -87,7 +87,9 @@ public class ImportService {
                 });
 
         for (SettingDto settingDto : settingDtos) {
-            settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay());
+            Setting setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
+            setting.setId(null);
+            settingsRepo.putSetting(userInfo.getUserId(), setting);
         }
 
         List<WeightDto> allWeights = export.getAllWeights();

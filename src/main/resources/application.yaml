@@ -24,6 +24,9 @@ spring:
      username: ${datasource.username}
      password: ${datasource.password}
      driverClassName: com.mysql.cj.jdbc.Driver
+     hikari:
+       maximumPoolSize: 9
+       
 
 
 mail:

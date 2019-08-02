@@ -10,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.SettingsRepository;
 import slt.database.WeightRepository;
+import slt.database.entities.Setting;
 import slt.database.entities.Weight;
+import slt.dto.MyModelMapper;
 import slt.dto.SettingDto;
 import slt.dto.UserSettingsDto;
 import slt.dto.WeightDto;
@@ -39,6 +41,9 @@ public class SettingsService {
     @Autowired
     private WeightService weightService;
 
+    @Autowired
+    private MyModelMapper myModelMapper;
+
     @ApiOperation(value = "Store new settingDto or change existing one")
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity storeSetting(@RequestBody SettingDto settingDto) {
@@ -50,9 +55,23 @@ public class SettingsService {
                             settingDto.getDay() == null ? LocalDate.now() : settingDto.getDay().toLocalDate(),
                             null));
         }
-        settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay() == null ? Date.valueOf(LocalDate.now()) : settingDto.getDay());
+        if (settingDto.getDay() == null) {
+            settingDto.setDay(Date.valueOf(LocalDate.now()));
+        }
+        Setting setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
+        settingsRepo.putSetting(userInfo.getUserId(), setting);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+//    @ApiOperation(value = "Store new UserSettingsDto or change existing values")
+//    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity storeUserSettings(@RequestBody UserSettingsDto userSettingsDto) {
+//        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+//
+//        //TODO make put method with UserSettingsDto (don't forget weight handling)
+//
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
 
     @ApiOperation(value = "Get user settings")
     @GetMapping(path = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,20 +80,9 @@ public class SettingsService {
         return ResponseEntity.ok(userSettingsDto);
     }
 
-    private UserSettingsDto getUserSettingsDto() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<slt.database.entities.Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
-        List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
-        Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
-        UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
-        userSettingsDto.setCurrentWeight(currentWeight.getValue());
-        return userSettingsDto;
-    }
-
     @ApiOperation(value = "Get setting")
     @GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getSetting(@PathVariable("name") String name,
-                                     @RequestParam(value = "date", required = false) String toDate) {
+    public ResponseEntity<String> getSetting(@PathVariable("name") String name, @RequestParam(value = "date", required = false) String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         slt.database.entities.Setting setting;
         if (StringUtils.isEmpty(toDate)) {
@@ -94,6 +102,16 @@ public class SettingsService {
         } else {
             return ResponseEntity.ok(setting.getValue());
         }
+    }
+
+    private UserSettingsDto getUserSettingsDto() {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        List<slt.database.entities.Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
+        List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
+        Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
+        UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
+        userSettingsDto.setCurrentWeight(currentWeight.getValue());
+        return userSettingsDto;
     }
 
     private UserSettingsDto mapToUserSettingsDto(List<slt.database.entities.Setting> settings) {

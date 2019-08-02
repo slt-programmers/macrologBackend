@@ -22,12 +22,14 @@ public class Setting {
 
     @Column(name = "setting")
     private String name;
+
     @Column(length = 65535, columnDefinition="TEXT")
     private String value;
+
     @Column(name = "date")
     private Date day = Date.valueOf(LocalDate.now());
+
     @Column(name = "user_id")
     private Integer userId;
-
 
 }
