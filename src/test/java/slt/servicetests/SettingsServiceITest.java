@@ -32,7 +32,7 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
             }
         }
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(Integer.valueOf(this.userId));
+        userInfo.setUserId(this.userId);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
@@ -60,13 +60,13 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(savedSetting.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         assertThat(savedSetting.getBody().toString().equals("v1"));
 
-        // SettingDto yesterday doesnt exist
+        // SettingDto yesterday refer to next valid setting
         LocalDate yesterDay = LocalDate.now().minusDays(1);
         ResponseEntity yesterDayEntity = settingsService.getSetting("n1", yesterDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         assertThat(yesterDayEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        assertThat(yesterDayEntity.getBody()).isNull();
+        assertThat(yesterDayEntity.getBody().toString().equals("v1"));
 
-        // SettingDto tomorrow does exist
+        // SettingDto tomorrow refer to previously valid setting
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         ResponseEntity tomorrowEntity = settingsService.getSetting("n1", tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         assertThat(tomorrowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -138,9 +138,6 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(userSettingEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         return (UserSettingsDto) userSettingEntity.getBody();
     }
-
-
-
 
     private java.sql.Date fromLocalDateToSQLDate(LocalDate localDate) {
         String dateForm = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

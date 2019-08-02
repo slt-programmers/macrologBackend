@@ -144,6 +144,7 @@ public abstract class AbstractApplicationIntegrationTest {
         ResponseEntity responseEntity = logEntryService.storeLogEntries(newLogEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
     }
+
     protected void storeSetting(String name, String value) {
         SettingDto settingDto = SettingDto.builder().name(name).value(value).build();
         ResponseEntity responseEntity = settingsService.storeSetting(settingDto);

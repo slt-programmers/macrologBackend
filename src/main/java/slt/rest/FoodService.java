@@ -92,7 +92,6 @@ public class FoodService {
 
         Food insertedFood = foodRepository.saveFood(userInfo.getUserId(), newFood);
         if (addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
-
             for (PortionDto portionDto : addFoodRequest.getPortions()) {
                 Portion newPortion = new Portion();
                 newPortion.setDescription(portionDto.getDescription());
@@ -137,7 +136,6 @@ public class FoodService {
 
     private FoodDto createFoodDto(Food food, boolean withPortions) {
         FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food,FoodDto.class );
-
         if (withPortions) {
             List<Portion> foodPortions = portionRepository.getPortions(food.getId());
             for (Portion portion : foodPortions) {
@@ -148,15 +146,15 @@ public class FoodService {
         return foodDto;
     }
 
-    PortionDto mapPortionToPortionDto(Portion portion, Food food) {
+    private PortionDto mapPortionToPortionDto(Portion portion, Food food) {
         PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
         Macro calculatedMacros = calculateMacro(food, portion);
         currDto.setMacros(calculatedMacros);
         return currDto;
     }
 
-    // Naar een util brengen:
-    static Macro calculateMacro(Food food, Portion portion) {
+    //TODO Naar een util brengen
+    private static Macro calculateMacro(Food food, Portion portion) {
         Macro calculatedMacros = new Macro();
         // FoodDto has been entered for 100g
         calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());

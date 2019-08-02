@@ -29,7 +29,7 @@ public class AdminServiceITest extends AbstractApplicationIntegrationTest {
             this.userId = createUser(this.getClass().getName());
         }
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(Integer.valueOf(this.userId));
+        userInfo.setUserId(this.userId);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

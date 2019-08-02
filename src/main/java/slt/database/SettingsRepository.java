@@ -12,14 +12,20 @@ import javax.transaction.Transactional;
 import java.sql.Date;
 import java.util.List;
 
-interface SettingsCrudRepository extends CrudRepository<Setting,Integer> {
+interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
 
     List<Setting> findByUserIdOrderByDayDesc(Integer userId);
+
     List<Setting> findByUserIdAndNameOrderByDayDesc(Integer userId, String name);
+
     void deleteByUserId(Integer userId);
 
-    @Query("select s from Setting s where s.userId = :userId and s.name = :name and s.day <= :day")
+    @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day <= :day ORDER BY s.day DESC")
     List<Setting> findByUserIdAndNameWithDayBeforeDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
+
+    @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day >= :day ORDER BY s.day ASC")
+    List<Setting> findByUserIdAndNameWithDayAfterDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
+
 }
 
 @Repository
@@ -29,30 +35,12 @@ public class SettingsRepository {
     @Autowired
     private SettingsCrudRepository settingsCrudRepository;
 
-    public void putSetting(Integer userId, String setting, String value, Date date) {
-        Setting currentSetting = getValidSetting(userId, setting, date);
-        if (currentSetting == null) { // geen records
-            log.debug("Insert");
-            insertSetting(userId, setting, value, date).getId();
-        } else {
-            log.debug("Update");
-            boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(date.toLocalDate());
-            if (settingSameDay) {
-                currentSetting.setValue(value);
-                settingsCrudRepository.save(currentSetting);
-            } else {
-                insertSetting(userId, setting, value, date).getId();
-            }
-        }
-    }
-
-
     public void putSetting(Integer userId, Setting setting) {
         setting.setUserId(userId);
         Setting currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
         if (currentSetting == null) { // geen records
             log.debug("Insert");
-            saveSetting(userId,setting);
+            saveSetting(userId, setting);
         } else {
             log.debug("Update");
             boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(setting.getDay().toLocalDate());
@@ -63,11 +51,6 @@ public class SettingsRepository {
                 saveSetting(userId, setting);
             }
         }
-    }
-
-    public Setting insertSetting(Integer userId, String setting, String value, Date date) {
-        Setting newSetting = Setting.builder().day(date).name(setting).userId(userId).value(value).build();
-        return settingsCrudRepository.save(newSetting);
     }
 
     @Transactional
@@ -83,17 +66,24 @@ public class SettingsRepository {
 
     public Setting getValidSetting(Integer userId, String setting, Date date) {
         List<Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
-        log.debug("Number of hits for setting on date {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
-        return byUserIdAndNameWithDayBeforeDay.isEmpty() ? null : byUserIdAndNameWithDayBeforeDay.get(0);
+        log.debug("Number of hits for setting on or before date {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
+
+        if (byUserIdAndNameWithDayBeforeDay.isEmpty()) {
+            List<Setting> byUserIdAndNameWithDayAfterDay = settingsCrudRepository.findByUserIdAndNameWithDayAfterDay(userId, setting, date);
+            log.debug("Number of hits for setting on or after date {} :{}", setting, byUserIdAndNameWithDayAfterDay.size());
+            return byUserIdAndNameWithDayAfterDay.isEmpty() ? null : byUserIdAndNameWithDayAfterDay.get(0);
+        } else {
+            return byUserIdAndNameWithDayBeforeDay.get(0);
+        }
     }
 
     public List<Setting> getAllSettings(Integer userId) {
         return settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
-    public Setting saveSetting(Integer userId, Setting settingDomain) {
+    private void saveSetting(Integer userId, Setting settingDomain) {
         settingDomain.setUserId(userId);
-        return settingsCrudRepository.save(settingDomain);
+        settingsCrudRepository.save(settingDomain);
     }
 }
 
