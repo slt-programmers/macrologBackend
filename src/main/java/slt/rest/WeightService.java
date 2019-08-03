@@ -35,7 +35,7 @@ public class WeightService {
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
         List<WeightDto> collectedDtos = allWeightEntries
                 .stream()
-                .map(w->myModelMapper.getConfiguredMapper().map(w,WeightDto.class ))
+                .map(weight -> myModelMapper.getConfiguredMapper().map(weight, WeightDto.class))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(collectedDtos);
     }
@@ -50,7 +50,7 @@ public class WeightService {
 
         boolean weightRegisteredOnSameDay = (storedWeight != null && !storedWeight.isEmpty());
 
-        if (weightRegisteredOnSameDay && weightEntry.getId()!= null && storedWeight.get(0).getId().equals(weightEntry.getId().intValue())) {
+        if (weightRegisteredOnSameDay && weightEntry.getId() != null && storedWeight.get(0).getId().equals(weightEntry.getId().intValue())) {
             // Simpele update
             Weight weightUpdate = storedWeight.get(0);
             weightUpdate.setRemark(entry.getRemark());

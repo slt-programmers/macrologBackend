@@ -12,10 +12,9 @@ import java.time.LocalDate;
 @Builder
 public class SettingDto {
 
-    private Long id;
+    private Integer id;
     private String name;
     private String value;
     private Date day = Date.valueOf(LocalDate.now());
-
 
 }

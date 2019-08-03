@@ -78,6 +78,14 @@ public class StravaActivityService {
     }
 
 
+    private void saveSetting(Integer userId, String name, String value){
+
+        settingsRepository.putSetting(userId,Setting.builder()
+                .userId(userId)
+                .name(name)
+                .value(value)
+                .day(Date.valueOf(LocalDate.now())).build());
+    }
     // scope=read -- > alleen private --> geeft errors bij ophalen details
     // scope=read,activity:read_all --> moet
     public SyncedAccount registerStravaConnectivity(Integer userId, String clientAuthorizationCode) {
@@ -95,14 +103,14 @@ public class StravaActivityService {
         if (stravaToken != null) {
 
             // Initial save of all settings.
-            settingsRepository.putSetting(userId, STRAVA_ACCESS_TOKEN, stravaToken.getAccess_token(), null);
-            settingsRepository.putSetting(userId, STRAVA_REFRESH_TOKEN, stravaToken.getRefresh_token(), null);
-            settingsRepository.putSetting(userId, STRAVA_EXPIRES_AT, stravaToken.getExpires_at().toString(), null);
-            settingsRepository.putSetting(userId, STRAVA_PROFILE, stravaToken.getAthlete().getProfile(), null);
-            settingsRepository.putSetting(userId, STRAVA_LASTNAME, stravaToken.getAthlete().getLastname(), null);
-            settingsRepository.putSetting(userId, STRAVA_FIRSTNAME, stravaToken.getAthlete().getFirstname(), null);
-            settingsRepository.putSetting(userId, STRAVA_ATHLETE_ID, stravaToken.getAthlete().getId().toString(), null);
 
+            saveSetting(userId, STRAVA_ACCESS_TOKEN, stravaToken.getAccess_token());
+            saveSetting(userId, STRAVA_REFRESH_TOKEN, stravaToken.getRefresh_token());
+            saveSetting(userId, STRAVA_EXPIRES_AT, stravaToken.getExpires_at().toString());
+            saveSetting(userId, STRAVA_PROFILE, stravaToken.getAthlete().getProfile());
+            saveSetting(userId, STRAVA_LASTNAME, stravaToken.getAthlete().getLastname());
+            saveSetting(userId, STRAVA_FIRSTNAME, stravaToken.getAthlete().getFirstname());
+            saveSetting(userId, STRAVA_ATHLETE_ID, stravaToken.getAthlete().getId().toString());
 
             final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 

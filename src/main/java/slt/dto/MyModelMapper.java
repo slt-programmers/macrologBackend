@@ -102,7 +102,7 @@ public class MyModelMapper {
                 });
     }
 
-    static Macro calculateMacro(FoodDto food, PortionDto portion) {
+    private static Macro calculateMacro(FoodDto food, PortionDto portion) {
         Macro calculatedMacros = new Macro();
         // FoodDto has been entered for 100g
         calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
@@ -123,19 +123,19 @@ public class MyModelMapper {
 
                     List<Portion> foodPortions = portionRepository.getPortions(foodId);
                     for (Portion portion : foodPortions) {
-                        PortionDto currDto = modelMapper.map(portion,PortionDto.class);
-                        currDto.setMacros(calculateMacro(mappedFoodDto,currDto));
+                        PortionDto currDto = modelMapper.map(portion, PortionDto.class);
+                        currDto.setMacros(calculateMacro(mappedFoodDto, currDto));
                         mappedFoodDto.addPortion(currDto);
                     }
                     mappingContext.getDestination().setFood(mappedFoodDto);
 
                     Long selectedPortionId = mappingContext.getSource().getPortionId();
-                    if (selectedPortionId != null){
+                    if (selectedPortionId != null) {
                         Optional<PortionDto> first = mappedFoodDto.getPortions().stream().filter(p -> p.getId().equals(selectedPortionId)).findFirst();
-                        if (first.isPresent()){
+                        if (first.isPresent()) {
                             mappingContext.getDestination().setPortion(first.get());
                         } else {
-                            log.error("Unknown portion {} with food {}",selectedPortionId,foodById);
+                            log.error("Unknown portion {} with food {}", selectedPortionId, foodById);
                         }
                     }
 
@@ -211,4 +211,5 @@ public class MyModelMapper {
             }
         };
     }
+
 }

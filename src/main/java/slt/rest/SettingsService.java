@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import slt.connectivity.strava.StravaActivityService;
 import slt.database.SettingsRepository;
 import slt.database.WeightRepository;
+import slt.database.entities.Setting;
 import slt.database.entities.Weight;
+import slt.dto.MyModelMapper;
 import slt.dto.SettingDto;
 import slt.dto.SyncedAccount;
 import slt.dto.UserSettingsDto;
@@ -42,6 +44,9 @@ public class SettingsService {
     private WeightService weightService;
 
     @Autowired
+    private MyModelMapper myModelMapper;
+
+    @Autowired
     private StravaActivityService stravaActivityService;
 
     @ApiOperation(value = "Store new settingDto or change existing one")
@@ -55,25 +60,29 @@ public class SettingsService {
                             settingDto.getDay() == null ? LocalDate.now() : settingDto.getDay().toLocalDate(),
                             null));
         }
-        settingsRepo.putSetting(userInfo.getUserId(), settingDto.getName(), settingDto.getValue(), settingDto.getDay() == null ? Date.valueOf(LocalDate.now()) : settingDto.getDay());
+        if (settingDto.getDay() == null) {
+            settingDto.setDay(Date.valueOf(LocalDate.now()));
+        }
+        Setting setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
+        settingsRepo.putSetting(userInfo.getUserId(), setting);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+//    @ApiOperation(value = "Store new UserSettingsDto or change existing values")
+//    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity storeUserSettings(@RequestBody UserSettingsDto userSettingsDto) {
+//        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+//
+//        //TODO make put method with UserSettingsDto (don't forget weight handling)
+//
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
 
     @ApiOperation(value = "Get user settings")
     @GetMapping(path = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserSettingsDto> getUserSetting() {
         UserSettingsDto userSettingsDto = getUserSettingsDto();
         return ResponseEntity.ok(userSettingsDto);
-    }
-
-    private UserSettingsDto getUserSettingsDto() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<slt.database.entities.Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
-        List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
-        Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
-        UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
-        userSettingsDto.setCurrentWeight(currentWeight.getValue());
-        return userSettingsDto;
     }
 
     @ApiOperation(value = "Get setting")
@@ -101,33 +110,14 @@ public class SettingsService {
         }
     }
 
-    @ApiOperation(value = "Get connectivity settings")
-    @GetMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SyncedAccount> getConnectivitySetting(@PathVariable("name") String name) {
+    private UserSettingsDto getUserSettingsDto() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        SyncedAccount syncedAccount = stravaActivityService.getStravaConnectivity(userInfo.getUserId());
-
-        if (syncedAccount == null) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.ok(syncedAccount);
-        }
-    }
-    @ApiOperation(value = "Store  connectivity settings")
-    @PostMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SyncedAccount> storeConnectivitySetting(@RequestBody SettingDto code) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final SyncedAccount syncedAccount = stravaActivityService.registerStravaConnectivity(userInfo.getUserId(), code.getValue());
-        return ResponseEntity.ok(syncedAccount);
-    }
-
-
-    @ApiOperation(value = "Disconnect connectivity settings")
-    @DeleteMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SyncedAccount> disConnectConnectivitySetting(@PathVariable("name") String name) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        stravaActivityService.unRegisterStrava(userInfo.getUserId());
-        return ResponseEntity.ok().build();
+        List<slt.database.entities.Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
+        List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
+        Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
+        UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
+        userSettingsDto.setCurrentWeight(currentWeight.getValue());
+        return userSettingsDto;
     }
 
     private UserSettingsDto mapToUserSettingsDto(List<slt.database.entities.Setting> settings) {

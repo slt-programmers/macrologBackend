@@ -122,7 +122,7 @@ class StravaActivityServiceTest {
     void registerStravaConnectivityTokenOK() {
 
         settingsRepository.putSetting(eq(1), any(Setting.class));
-        settingsRepository.putSetting(eq(1), any(String.class),any(String.class),Mockito.isNull());
+        settingsRepository.putSetting(eq(1), any(Setting.class));
 
         Mockito.times(8);
         final StravaToken stravaToken = StravaToken.builder()
@@ -322,7 +322,6 @@ class StravaActivityServiceTest {
 
         when(stravaClient.refreshToken(eq("B"))).thenReturn(StravaToken.builder().expires_at(LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC)).build());
 
-        when(settingsRepository.saveSetting(eq(1),any(Setting.class))).thenReturn(Setting.builder().build());
 
         stravaActivityService.unRegisterStrava(1);
 
