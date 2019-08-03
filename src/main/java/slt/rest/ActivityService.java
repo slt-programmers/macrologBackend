@@ -38,8 +38,6 @@ public class ActivityService {
     @Autowired
     private StravaActivityService stravaActivityService;
 
-
-
     @ApiOperation(value = "Retrieve all stored activities for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getActivitiesForDay(@PathVariable("date") String date,
@@ -55,7 +53,7 @@ public class ActivityService {
         allLogEntries.addAll(extraSynced);
 
         List<LogActivityDto> logEntryDtos = allLogEntries.stream()
-                .filter(l -> !"DELETED".equals(l.getStatus()))
+                .filter(logActivity -> !"DELETED".equals(logActivity.getStatus()))
                 .map(logEntry -> myModelMapper.getConfiguredMapper().map(logEntry, LogActivityDto.class))
                 .collect(Collectors.toList());
 

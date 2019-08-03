@@ -21,10 +21,9 @@ interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
 
     void deleteByUserId(Integer userId);
 
-    @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day <= :day ORDER BY s.day DESC")
     void deleteAllByUserIdAndName(Integer userId, String name);
 
-    @Query("select s from Setting s where s.userId = :userId and s.name = :name and s.day <= :day")
+    @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day <= :day ORDER BY s.day DESC")
     List<Setting> findByUserIdAndNameWithDayBeforeDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
 
     @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day >= :day ORDER BY s.day ASC")
@@ -69,17 +68,17 @@ public class SettingsRepository {
 
     public Setting getLatestSetting(Integer userId, String setting) {
         List<Setting> byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
-        log.debug("Number of hits for setting {} :{}", setting, byUserIdAndName.size());
+        log.trace("Number of hits for setting {} :{}", setting, byUserIdAndName.size());
         return byUserIdAndName.isEmpty() ? null : byUserIdAndName.get(0);
     }
 
     public Setting getValidSetting(Integer userId, String setting, Date date) {
         List<Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
-        log.debug("Number of hits for setting on or before date {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
+        log.trace("Number of hits for setting on or before date {} :{}", setting, byUserIdAndNameWithDayBeforeDay.size());
 
         if (byUserIdAndNameWithDayBeforeDay.isEmpty()) {
             List<Setting> byUserIdAndNameWithDayAfterDay = settingsCrudRepository.findByUserIdAndNameWithDayAfterDay(userId, setting, date);
-            log.debug("Number of hits for setting on or after date {} :{}", setting, byUserIdAndNameWithDayAfterDay.size());
+            log.trace("Number of hits for setting on or after date {} :{}", setting, byUserIdAndNameWithDayAfterDay.size());
             return byUserIdAndNameWithDayAfterDay.isEmpty() ? null : byUserIdAndNameWithDayAfterDay.get(0);
         } else {
             return byUserIdAndNameWithDayBeforeDay.get(0);

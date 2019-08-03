@@ -27,8 +27,6 @@ spring:
      hikari:
        maximumPoolSize: 9
        
-
-
 mail:
    username: macrologwebapp@gmail.com
    password: ${mailpassword}
@@ -53,8 +51,8 @@ strava:
   client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
 
 mail:
-   username: macrologwebapp@gmail.com
-   password: Macrolog01
+   username: doethetniet@gmail.com
+   password: 'doethetniet'
 ---
 spring:
   profiles: carmen
