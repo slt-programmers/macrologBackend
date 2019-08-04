@@ -81,7 +81,10 @@ class MyModelMapperTest {
         LogActivityDto dto = LogActivityDto.builder()
                 .calories(1.0)
                 .day(day)
-                .name("running").build();
+                .name("running")
+                .syncedId(12l)
+                .syncedWith("STRAVA")
+                .build();
 
         LogActivity mapped = mapper.getConfiguredMapper().map(dto, LogActivity.class);
         mapper.getConfiguredMapper().validate();
@@ -89,6 +92,8 @@ class MyModelMapperTest {
         assertThat(mapped.getDay().toLocalDate()).isEqualTo(localDate);
         assertThat(mapped.getName()).isEqualTo(dto.getName());
         assertThat(mapped.getCalories()).isEqualTo(dto.getCalories());
+        assertThat(mapped.getSyncedId()).isEqualTo(dto.getSyncedId());
+        assertThat(mapped.getSyncedWith()).isEqualTo(dto.getSyncedWith());
 
         LogActivity mappedBack = mapper.getConfiguredMapper().map(mapped, LogActivity.class);
         mapper.getConfiguredMapper().validate();
@@ -96,6 +101,8 @@ class MyModelMapperTest {
         assertThat(mappedBack.getDay().toLocalDate()).isEqualTo(localDate);
         assertThat(mappedBack.getName()).isEqualTo(dto.getName());
         assertThat(mappedBack.getCalories()).isEqualTo(dto.getCalories());
+        assertThat(mappedBack.getSyncedId()).isEqualTo(dto.getSyncedId());
+        assertThat(mappedBack.getSyncedWith()).isEqualTo(dto.getSyncedWith());
     }
 
     @Test

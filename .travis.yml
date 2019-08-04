@@ -5,11 +5,6 @@ jdk:
 get:
   depth: false
 
-branches:
-  only:
-    - master
-    - release
-
 stages:
 - "unit test and scan"
 - "integration test"
@@ -22,10 +17,10 @@ jobs:
   - script: mvn install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
   include: 
   - stage: "unit test and scan"
-    if: branch = master
+    if: branch != release
     script: mvn install
   - stage: "unit test and scan"
-    if: branch = master
+    if: branch != release
     script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
   - stage: "integration test"
     if: branch = release

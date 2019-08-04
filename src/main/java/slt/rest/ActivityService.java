@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import slt.connectivity.strava.StravaActivityService;
 import slt.database.ActivityRepository;
 import slt.database.entities.LogActivity;
 import slt.dto.LogActivityDto;
@@ -34,16 +35,25 @@ public class ActivityService {
     @Autowired
     private MyModelMapper myModelMapper;
 
+    @Autowired
+    private StravaActivityService stravaActivityService;
+
     @ApiOperation(value = "Retrieve all stored activities for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getActivitiesForDay(@PathVariable("date") String date) {
+    public ResponseEntity getActivitiesForDay(@PathVariable("date") String date,
+                                              @RequestParam(value = "forceSync", defaultValue = "false") boolean forceSync) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("Request for " + userInfo);
         LocalDate localDate = LocalDateParser.parse(date);
+
         List<LogActivity> allLogEntries = logActitivyRepository.getAllLogActivities(userInfo.getUserId(), localDate);
 
+        List<LogActivity> extraSynced = stravaActivityService.getExtraStravaActivities(allLogEntries,userInfo.getUserId(),localDate,forceSync);
+        allLogEntries.addAll(extraSynced);
+
         List<LogActivityDto> logEntryDtos = allLogEntries.stream()
+                .filter(logActivity -> !"DELETED".equals(logActivity.getStatus()))
                 .map(logEntry -> myModelMapper.getConfiguredMapper().map(logEntry, LogActivityDto.class))
                 .collect(Collectors.toList());
 

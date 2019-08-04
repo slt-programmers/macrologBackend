@@ -1,9 +1,6 @@
 package slt.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -14,6 +11,7 @@ import java.sql.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "activity")
+@Builder
 public class LogActivity {
 
     @Id
@@ -27,4 +25,14 @@ public class LogActivity {
 
     @Column(name = "user_id")
     private Integer userId;
+
+    @Column(name = "synced_with")
+    private String syncedWith;
+
+    @Column(name = "synced_id")
+    private Long syncedId;
+
+    @Column
+    private String status;
+
 }

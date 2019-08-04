@@ -1,6 +1,7 @@
 package slt.database;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -10,15 +11,18 @@ import javax.transaction.Transactional;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
-interface LogActivityCrudRepository extends CrudRepository<LogActivity, Integer> {
-    void deleteByUserIdAndId(Integer userId, Long activtyId);
+interface LogActivityCrudRepository extends CrudRepository<LogActivity, Long> {
+    void deleteByUserIdAndId(Integer userId, Long activityId);
 
     void deleteByUserId(Integer userId);
 
     List<LogActivity> findByUserId(Integer userId);
 
     List<LogActivity> findByUserIdAndDay(Integer userId, Date date);
+
+    Long countByUserIdAndSyncedWith(Integer userId, String strava);
 }
 
 @Repository
@@ -35,7 +39,16 @@ public class ActivityRepository {
 
     @Transactional
     public void deleteLogActivity(Integer userId, Long activtyId) {
-        logActivityCrudRepository.deleteByUserIdAndId(userId, activtyId);
+        final Optional<LogActivity> byId = logActivityCrudRepository.findById(activtyId);
+        if (byId.isPresent()) {
+            final LogActivity logActivity = byId.get();
+            if (StringUtils.isNotEmpty(logActivity.getSyncedWith())) {
+                logActivity.setStatus("DELETED");
+                logActivityCrudRepository.save(logActivity);
+            } else {
+                logActivityCrudRepository.deleteByUserIdAndId(userId, activtyId);
+            }
+        }
     }
 
     @Transactional
@@ -53,4 +66,7 @@ public class ActivityRepository {
         return logActivityCrudRepository.findByUserIdAndDay(userId, Date.valueOf(date));
     }
 
+    public Long countByUserIdAndSyncedWith(Integer userId, String strava) {
+        return logActivityCrudRepository.countByUserIdAndSyncedWith(userId, strava);
+    }
 }
