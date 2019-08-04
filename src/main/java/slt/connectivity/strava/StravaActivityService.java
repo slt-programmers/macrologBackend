@@ -264,7 +264,7 @@ public class StravaActivityService {
             String ret = new String(p,"UTF-8");
             return ret;
         } catch (UnsupportedEncodingException e) {
-            log.error("Unable to make text UTF {}",original,e;
+            log.error("Unable to make text UTF {}",original,e);
             return "--";
         }
     }
