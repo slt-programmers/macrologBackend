@@ -12,6 +12,7 @@ import slt.database.entities.*;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +26,17 @@ public class MyModelMapper {
     @Autowired
     PortionRepository portionRepository;
 
+    private ModelMapper configuredMapper;
+
+
     public org.modelmapper.ModelMapper getConfiguredMapper() {
+        return configuredMapper;
+
+    }
+
+    public MyModelMapper(){
+
+        log.debug("Creating Macrolog ModelMapper");
         org.modelmapper.ModelMapper modelMapper = new org.modelmapper.ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
@@ -41,12 +52,30 @@ public class MyModelMapper {
         addLogEntryLogEntryDto(modelMapper);
 
         // Weight
-        PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
-        PropertyMap<Weight, WeightDto> weightEntityMapper = getWeightWeightDtoPropertyMap();
-
+        final PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
+        final PropertyMap<Weight, WeightDto> weightEntityMapper = getWeightWeightDtoPropertyMap();
         modelMapper.addMappings(weightDtoMapper);
         modelMapper.addMappings(weightEntityMapper);
-        return modelMapper;
+
+        // Setting
+        final PropertyMap<SettingDto, Setting> settingDtoMapper = getSettingDtoSettingPropertyMap();
+        modelMapper.addMappings(settingDtoMapper);
+
+        // Portion
+        final PropertyMap<Portion, PortionDto> portionPortionDtoPropertyMap = getPortionPortionDtoPropertyMap();
+        modelMapper.addMappings(portionPortionDtoPropertyMap);
+
+        // Food
+        final PropertyMap<FoodDto, Food> foodDtoFoodPropertyMap = getFoodDtoFoodPropertyMap();
+        final PropertyMap<Food, FoodDto> foodFoodDtoPropertyMap = getFoodFoodDtoPropertyMap();
+        modelMapper.addMappings(foodDtoFoodPropertyMap);
+        modelMapper.addMappings(foodFoodDtoPropertyMap);
+
+        // LogActivity
+        final PropertyMap<LogActivityDto, LogActivity> logActivityDtoLogActivityPropertyMap = geLogActivityDtoLogActivityPropertyMap();
+        modelMapper.addMappings(logActivityDtoLogActivityPropertyMap);
+
+        this.configuredMapper = modelMapper;
     }
 
     private void addAddMealRequestMeal(ModelMapper modelMapper) {
@@ -194,7 +223,7 @@ public class MyModelMapper {
     }
 
     private PropertyMap<WeightDto, Weight> getWeightDtoWeightPropertyMap() {
-        return new PropertyMap<WeightDto, Weight>() {
+        return new PropertyMap<>() {
             @Override
             protected void configure() {
                 map().setValue(source.getWeight());
@@ -204,7 +233,7 @@ public class MyModelMapper {
     }
 
     private PropertyMap<Weight, WeightDto> getWeightWeightDtoPropertyMap() {
-        return new PropertyMap<Weight, WeightDto>() {
+        return new PropertyMap<>() {
             @Override
             protected void configure() {
                 map().setWeight(source.getValue());
@@ -212,4 +241,48 @@ public class MyModelMapper {
         };
     }
 
+    private PropertyMap<SettingDto, Setting> getSettingDtoSettingPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setUserId(null);
+            }
+        };
+    }
+
+    private PropertyMap<Portion, PortionDto> getPortionPortionDtoPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setMacros(null);
+            }
+        };
+    }
+
+    private PropertyMap<FoodDto, Food> getFoodDtoFoodPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setUserId(null);
+            }
+        };
+    }
+    private PropertyMap<Food, FoodDto> getFoodFoodDtoPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setPortions(new ArrayList<>());
+            }
+        };
+    }
+
+    private PropertyMap<LogActivityDto, LogActivity> geLogActivityDtoLogActivityPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setUserId(null);
+                skip().setStatus(null);
+            }
+        };
+    }
 }
