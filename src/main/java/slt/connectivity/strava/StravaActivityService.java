@@ -14,6 +14,7 @@ import slt.dto.SyncedAccount;
 import slt.rest.ActivityService;
 
 import javax.transaction.Transactional;
+import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -249,16 +250,31 @@ public class StravaActivityService {
         final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), id);
         return LogActivity.builder()
                 .day(Date.valueOf(date))
-                .name(stravaActivity.getType() + ": " + stravaActivity.getName())
+                .name(makeUTF8(stravaActivity.getType() + ": " + stravaActivity.getName()))
                 .calories(activityDetail.getCalories())
                 .syncedId(stravaActivity.getId())
                 .syncedWith(STRAVA)
                 .build();
     }
 
+    private String makeUTF8(String original){
+        try {
+
+            byte[] p = original.getBytes("ISO-8859-1");
+            String ret = new String(p,"UTF-8");
+            return ret;
+        } catch (UnsupportedEncodingException e) {
+            log.error("Unable to make text UTF {}",original,e;
+            return "--";
+        }
+    }
     private void syncActivity(StravaToken token, Long stravaActivityId, LogActivity storedActivity) {
+
         final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
-        storedActivity.setName(activityDetail.getType() + ": " + activityDetail.getName());
+
+        String name = activityDetail.getType() + ": " + activityDetail.getName();
+
+        storedActivity.setName(makeUTF8(name));
         storedActivity.setCalories(activityDetail.getCalories());
     }
 
