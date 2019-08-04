@@ -63,8 +63,8 @@ class AdminServiceTest {
         List<UserAccountDto> userDtos = (List) response.getBody();
 
         Assertions.assertEquals(2, userDtos.size());
-        Assertions.assertEquals(234, userDtos.get(0).getId());
-        Assertions.assertEquals(123, userDtos.get(1).getId());
+        Assertions.assertEquals(234, userDtos.get(0).getId().intValue());
+        Assertions.assertEquals(123, userDtos.get(1).getId().intValue());
         Mockito.verify(userRepo).getAllUsers();
     }
 

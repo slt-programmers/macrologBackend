@@ -64,7 +64,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Optional<LogActivityDto> running = newEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(running.isPresent(), "Running");
 
-        assertEquals(20.0, running.get().getCalories());
+        assertEquals(20.0, running.get().getCalories().doubleValue());
         assertEquals("Running", running.get().getName());
         Assertions.assertNotNull(isEqualDate(running.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(running.get().getId());
@@ -72,7 +72,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Optional<LogActivityDto> cycling = newEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
         assertTrue(cycling.isPresent(), "Cycling");
 
-        assertEquals(30.0, cycling.get().getCalories());
+        assertEquals(30.0, cycling.get().getCalories().doubleValue());
         assertEquals("Cycling", cycling.get().getName());
         Assertions.assertNotNull(isEqualDate(cycling.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(cycling.get().getId());
@@ -87,7 +87,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Optional<LogActivityDto> runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(), "Running");
 
-        assertEquals(20.0, runningResponse.get().getCalories());
+        assertEquals(20.0, runningResponse.get().getCalories().doubleValue());
         assertEquals("Running", runningResponse.get().getName());
         Assertions.assertNotNull(isEqualDate(runningResponse.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(runningResponse.get().getId());
@@ -95,7 +95,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Optional<LogActivityDto> cyclingResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
         assertTrue(cyclingResponse.isPresent(), "Cycling");
 
-        assertEquals(30.0, cyclingResponse.get().getCalories());
+        assertEquals(30.0, cyclingResponse.get().getCalories().doubleValue());
         assertEquals("Cycling", cyclingResponse.get().getName());
         Assertions.assertNotNull(isEqualDate(cyclingResponse.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(cyclingResponse.get().getId());
