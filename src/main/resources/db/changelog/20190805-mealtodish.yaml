@@ -10,4 +10,5 @@ databaseChangeLog:
       - renameColumn:
             newColumnName: dish_id
             oldColumnName: meal_id
+            columnDataType: INT
             tableName: ingredient

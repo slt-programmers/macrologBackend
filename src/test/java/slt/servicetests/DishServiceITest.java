@@ -86,8 +86,8 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
                 .name(dishName)
                 .ingredients(
                         Arrays.asList(
-                                AddDishIngredientDto.builder().foodId(food1.getId()).multiplier(1.0).build(),
-                                AddDishIngredientDto.builder().foodId(food2.getId()).multiplier(3.0).build()
+                                AddDishIngredientDto.builder().food(food1).multiplier(1.0).build(),
+                                AddDishIngredientDto.builder().food(food2).multiplier(3.0).build()
                         )
                 )
                 .build();
@@ -134,11 +134,11 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
                 .ingredients(
                         Arrays.asList(
                                 AddDishIngredientDto.builder()
-                                        .foodId(food1.getId())
-                                        .portionId(food1Portion1.getId())
+                                        .food(food1)
+                                        .portion(food1Portion1)
                                         .multiplier(1.0)
                                         .build(),
-                                AddDishIngredientDto.builder().foodId(food2.getId()).multiplier(3.0).build()
+                                AddDishIngredientDto.builder().food(food2).multiplier(3.0).build()
                         )
                 )
                 .build();

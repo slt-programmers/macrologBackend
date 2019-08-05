@@ -50,6 +50,8 @@ public class MyModelMapper {
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
         addLogEntryLogEntryDto(modelMapper);
+        addDishIngredientDtoIngredient(modelMapper);
+
         final PropertyMap<AddDishIngredientDto, Ingredient> addDishIngredientDtoIngredientPropertyMap = getAddDishIngredientDtoIngredientPropertyMap();
         modelMapper.addMappings(addDishIngredientDtoIngredientPropertyMap);
 
@@ -112,6 +114,23 @@ public class MyModelMapper {
                     // Todo: check if food actually exists for user.
                     return mappingContext.getDestination();
                 });
+    }
+
+    private void addDishIngredientDtoIngredient(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(AddDishIngredientDto.class, Ingredient.class)
+                .setPostConverter(mappingContext -> {
+
+                    if (mappingContext.getSource().getPortion() != null) {
+                        Long portionId = mappingContext.getSource().getPortion().getId();
+                        mappingContext.getDestination().setPortionId(portionId);
+                    }
+
+                    Long foodId = mappingContext.getSource().getFood().getId();
+                    mappingContext.getDestination().setFoodId(foodId);
+
+                    return mappingContext.getDestination();
+                });
+
     }
 
     private void addIngredientIngredientDto(ModelMapper modelMapper) {

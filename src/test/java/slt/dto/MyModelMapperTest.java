@@ -111,8 +111,8 @@ class MyModelMapperTest {
                 .name("dish")
                 .ingredients(Arrays.asList(
                         AddDishIngredientDto.builder()
-                                .foodId(1l)
-                                .portionId(1l)
+                                .food(FoodDto.builder().id(1L).build())
+                                .portion(PortionDto.builder().id(1l).build())
                                 .multiplier(2.0).build()
                 )).build();
 
@@ -123,9 +123,9 @@ class MyModelMapperTest {
         assertThat(mapped.getIngredients()).hasSize(1);
 
         assertThat(mapped.getIngredients().get(0).getDish()).isNotNull();
-        assertThat(mapped.getIngredients().get(0).getFoodId()).isEqualTo(dto.getIngredients().get(0).getFoodId());
+        assertThat(mapped.getIngredients().get(0).getFoodId()).isEqualTo(dto.getIngredients().get(0).getFood().getId());
         assertThat(mapped.getIngredients().get(0).getMultiplier()).isEqualTo(dto.getIngredients().get(0).getMultiplier());
-        assertThat(mapped.getIngredients().get(0).getPortionId()).isEqualTo(dto.getIngredients().get(0).getPortionId());
+        assertThat(mapped.getIngredients().get(0).getPortionId()).isEqualTo(dto.getIngredients().get(0).getPortion().getId());
     }
 
     @Test

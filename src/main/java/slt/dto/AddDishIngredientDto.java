@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class AddDishIngredientDto {
 
-    private Long foodId;
-    private Long portionId;
+    private FoodDto food;
+    private PortionDto portion;
     private Double multiplier;
 }
