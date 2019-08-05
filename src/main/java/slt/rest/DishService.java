@@ -9,11 +9,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.FoodRepository;
-import slt.database.MealRepository;
+import slt.database.DishRepository;
 import slt.database.PortionRepository;
-import slt.database.entities.Meal;
-import slt.dto.AddMealRequest;
-import slt.dto.MealDto;
+import slt.database.entities.Dish;
+import slt.dto.AddDishRequest;
+import slt.dto.DishDto;
 import slt.dto.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/meals")
-@Api(value = "meals")
-public class MealService {
+@RequestMapping("/dishes")
+@Api(value = "dishes")
+public class DishService {
 
     @Autowired
-    private MealRepository mealRepository;
+    private DishRepository dishRepository;
     @Autowired
     private FoodRepository foodRepository;
     @Autowired
@@ -37,40 +37,40 @@ public class MealService {
     @Autowired
     private MyModelMapper myModelMapper;
 
-    @ApiOperation(value = "Retrieve all meals")
+    @ApiOperation(value = "Retrieve all dishes")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<MealDto>> getAllMeals() {
+    public ResponseEntity<List<DishDto>> getAllDishes() {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<Meal> allMeals = mealRepository.getAllMeals(userInfo.getUserId());
+        List<Dish> allDishes = dishRepository.getAllDishes(userInfo.getUserId());
 
-        List<MealDto> allMealsDto = allMeals.stream()
-                .map(meal -> myModelMapper.getConfiguredMapper().map(meal, MealDto.class))
+        List<DishDto> allDishedDto = allDishes.stream()
+                .map(dish -> myModelMapper.getConfiguredMapper().map(dish, DishDto.class))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(allMealsDto);
+        return ResponseEntity.ok(allDishedDto);
     }
 
-    @ApiOperation(value = "Save meal")
+    @ApiOperation(value = "Save dish")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MealDto> storeMeal(@RequestBody AddMealRequest mealDto) {
+    public ResponseEntity<DishDto> storeDish(@RequestBody AddDishRequest dishDto) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Meal map = myModelMapper.getConfiguredMapper().map(mealDto, Meal.class);
+        Dish map = myModelMapper.getConfiguredMapper().map(dishDto, Dish.class);
 
-        if (mealRepository.findByName(userInfo.getUserId(), mealDto.getName()) != null){
+        if (dishRepository.findByName(userInfo.getUserId(), dishDto.getName()) != null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        Meal meal = mealRepository.saveMeal(userInfo.getUserId(), map);
+        Dish dish = dishRepository.saveDish(userInfo.getUserId(), map);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(myModelMapper.getConfiguredMapper().map(meal,MealDto.class));
+        return ResponseEntity.status(HttpStatus.CREATED).body(myModelMapper.getConfiguredMapper().map(dish,DishDto.class));
     }
 
-    @ApiOperation(value = "Delete meal")
+    @ApiOperation(value = "Delete dish")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity deleteMeal(@PathVariable("id") Long mealId) {
+    public ResponseEntity deleteDish(@PathVariable("id") Long dishId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        mealRepository.deleteMeal(userInfo.getUserId(), mealId);
+        dishRepository.deleteDish(userInfo.getUserId(), dishId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

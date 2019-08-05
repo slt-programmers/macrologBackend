@@ -15,10 +15,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MealDto {
+public class DishDto {
 
     private Long id;
-    @ApiModelProperty(notes = "Name of meal", required = true)
+    @ApiModelProperty(notes = "Name of dish", required = true)
     private String name;
     @ApiModelProperty(notes = "List of ingredients", required = true)
     private List<IngredientDto> ingredients = new ArrayList<>();

@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+- changeSet:
+    id: 20190724-addactivitysync
+    author: arjan
+    changes:
+      - renameTable:
+            newTableName: dish
+            oldTableName: meal
+      - renameColumn:
+            newColumnName: dish_id
+            oldColumnName: meal_id
+            tableName: ingredient

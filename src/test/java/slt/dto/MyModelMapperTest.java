@@ -1,7 +1,6 @@
 package slt.dto;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
@@ -107,33 +106,32 @@ class MyModelMapperTest {
     }
 
     @Test
-    @Disabled
-    public void testAddMealRequestMapping() {
-        AddMealRequest dto = AddMealRequest.builder()
-                .name("meal")
+    public void testAddDishRequestMapping() {
+        AddDishRequest dto = AddDishRequest.builder()
+                .name("dish")
                 .ingredients(Arrays.asList(
-                        AddMealIngredientDto.builder()
+                        AddDishIngredientDto.builder()
                                 .foodId(1l)
                                 .portionId(1l)
                                 .multiplier(2.0).build()
                 )).build();
 
-        Meal mapped = mapper.getConfiguredMapper().map(dto, Meal.class);
+        Dish mapped = mapper.getConfiguredMapper().map(dto, Dish.class);
         mapper.getConfiguredMapper().validate();
 
-        assertThat(mapped.getName()).isEqualTo("meal");
+        assertThat(mapped.getName()).isEqualTo("dish");
         assertThat(mapped.getIngredients()).hasSize(1);
 
-        assertThat(mapped.getIngredients().get(0).getMeal()).isNotNull();
+        assertThat(mapped.getIngredients().get(0).getDish()).isNotNull();
         assertThat(mapped.getIngredients().get(0).getFoodId()).isEqualTo(dto.getIngredients().get(0).getFoodId());
         assertThat(mapped.getIngredients().get(0).getMultiplier()).isEqualTo(dto.getIngredients().get(0).getMultiplier());
         assertThat(mapped.getIngredients().get(0).getPortionId()).isEqualTo(dto.getIngredients().get(0).getPortionId());
     }
 
     @Test
-    public void testMealMapping() {
-        MealDto dto = MealDto.builder()
-                .name("nameMeal")
+    public void testDishMapping() {
+        DishDto dto = DishDto.builder()
+                .name("nameDish")
                 .id(1L)
                 .ingredients(Arrays.asList(
                         IngredientDto.builder()
@@ -159,7 +157,7 @@ class MyModelMapperTest {
 
         Food foodEntity = Food.builder().id(2L).build();
         Mockito.when(foodRepository.getFoodById(isNull(), eq(2L))).thenReturn(foodEntity);
-        Meal mapped = mapper.getConfiguredMapper().map(dto, Meal.class);
+        Dish mapped = mapper.getConfiguredMapper().map(dto, Dish.class);
         mapper.getConfiguredMapper().validate();
 
         assertThat(mapped.getName()).isEqualTo(dto.getName());
@@ -169,7 +167,7 @@ class MyModelMapperTest {
         assertThat(ingredientMapped.getPortionId()).isEqualTo(2L);
         assertThat(ingredientMapped.getFoodId()).isEqualTo(30L);
         assertThat(ingredientMapped.getMultiplier()).isEqualTo(3.0);
-        assertThat(ingredientMapped.getMeal()).isEqualTo(mapped);
+        assertThat(ingredientMapped.getDish()).isEqualTo(mapped);
 
         // UserId needs to be set
         mapped.setUserId(2);
@@ -178,7 +176,7 @@ class MyModelMapperTest {
                 Portion.builder().id(2L).build()
         ));
 
-        MealDto mappedBack = mapper.getConfiguredMapper().map(mapped, MealDto.class);
+        DishDto mappedBack = mapper.getConfiguredMapper().map(mapped, DishDto.class);
         mapper.getConfiguredMapper().validate();
 
         assertThat(mappedBack.getName()).isEqualTo(dto.getName());
@@ -188,7 +186,7 @@ class MyModelMapperTest {
         assertThat(ingredientMappedBack.getPortionId()).isEqualTo(2L);
         assertThat(ingredientMappedBack.getFoodId()).isEqualTo(30L);
         assertThat(ingredientMappedBack.getMultiplier()).isEqualTo(3.0);
-        assertThat(ingredientMappedBack.getMeal()).isEqualTo(mapped);
+        assertThat(ingredientMappedBack.getDish()).isEqualTo(mapped);
 
     }
 

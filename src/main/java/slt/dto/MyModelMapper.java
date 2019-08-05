@@ -45,11 +45,13 @@ public class MyModelMapper {
         addLocalDateSqlDate(modelMapper);
 
         // Meals + Ingredients:
-        addAddMealRequestMeal(modelMapper);
-        addMealDtoMeal(modelMapper);
+        addAddDishRequestDish(modelMapper);
+        addDishDtoDish(modelMapper);
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
         addLogEntryLogEntryDto(modelMapper);
+        final PropertyMap<AddDishIngredientDto, Ingredient> addDishIngredientDtoIngredientPropertyMap = getAddDishIngredientDtoIngredientPropertyMap();
+        modelMapper.addMappings(addDishIngredientDtoIngredientPropertyMap);
 
         // Weight
         final PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
@@ -78,24 +80,24 @@ public class MyModelMapper {
         this.configuredMapper = modelMapper;
     }
 
-    private void addAddMealRequestMeal(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(AddMealRequest.class, Meal.class)
+    private void addAddDishRequestDish(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(AddDishRequest.class, Dish.class)
                 .setPostConverter(mappingContext -> {
                     if (mappingContext.getDestination().getIngredients() != null) {
                         for (Ingredient ingredient : mappingContext.getDestination().getIngredients()) {
-                            ingredient.setMeal(mappingContext.getDestination());
+                            ingredient.setDish(mappingContext.getDestination());
                         }
                     }
                     return mappingContext.getDestination();
                 });
     }
 
-    private void addMealDtoMeal(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(MealDto.class, Meal.class)
+    private void addDishDtoDish(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(DishDto.class, Dish.class)
                 .setPostConverter(mappingContext -> {
                     if (mappingContext.getDestination().getIngredients() != null) {
                         for (Ingredient ingredient : mappingContext.getDestination().getIngredients()) {
-                            ingredient.setMeal(mappingContext.getDestination());
+                            ingredient.setDish(mappingContext.getDestination());
                         }
                     }
                     return mappingContext.getDestination();
@@ -116,7 +118,7 @@ public class MyModelMapper {
         modelMapper.createTypeMap(Ingredient.class, IngredientDto.class)
                 .setPostConverter(mappingContext -> {
                     Long foodId = mappingContext.getSource().getFoodId();
-                    Integer userId = mappingContext.getSource().getMeal().getUserId();
+                    Integer userId = mappingContext.getSource().getDish().getUserId();
                     Food foodById = foodRepository.getFoodById(userId, foodId);
                     FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
 
@@ -282,6 +284,16 @@ public class MyModelMapper {
             protected void configure() {
                 skip().setUserId(null);
                 skip().setStatus(null);
+            }
+        };
+    }
+
+    private PropertyMap<AddDishIngredientDto, Ingredient> getAddDishIngredientDtoIngredientPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setId(null);
+                skip().setDish(null);
             }
         };
     }

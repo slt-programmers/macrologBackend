@@ -19,7 +19,7 @@ public class AccountService {
     private LogEntryRepository logEntryRepository;
 
     @Autowired
-    private MealRepository mealRepository;
+    private DishRepository dishRepository;
 
     @Autowired
     private PortionRepository portionRepository;
@@ -41,7 +41,7 @@ public class AccountService {
         weightRepository.deleteAllForUser(userId);
         logEntryRepository.deleteAllForUser(userId);
 
-        mealRepository.deleteAllForUser(userId);
+        dishRepository.deleteAllForUser(userId);
 
         List<Food> allFood = foodRepository.getAllFood(userId);
         List<Integer> foodIds = allFood.stream().map(f->f.getId().intValue()).collect(toList());

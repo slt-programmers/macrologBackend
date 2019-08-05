@@ -73,7 +73,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected ExportService exportService;
 
     @Autowired
-    protected MealService mealService;
+    protected DishService dishService;
 
     @Autowired
     protected AdminService adminService;
