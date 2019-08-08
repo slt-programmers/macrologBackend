@@ -141,9 +141,9 @@ class MyModelMapperTest {
                                 .food(
                                         FoodDto.builder()
                                                 .id(30L)
+                                                .protein(4.0)
                                                 .carbs(2.0)
                                                 .fat(3.0)
-                                                .protein(4.0)
                                                 .portions(Arrays.asList(
                                                         PortionDto.builder()
                                                                 .id(2L)
@@ -171,9 +171,15 @@ class MyModelMapperTest {
 
         // UserId needs to be set
         mapped.setUserId(2);
-        Mockito.when(foodRepository.getFoodById(eq(2), eq(30L))).thenReturn(Food.builder().build());
+        Mockito.when(foodRepository.getFoodById(eq(2), eq(30L)))
+                .thenReturn(Food.builder()
+                        .name("foodrepo")
+                        .fat(3.0)
+                        .protein(1.0)
+                        .carbs(2.0)
+                        .build());
         Mockito.when(portionRepository.getPortions(eq(30L))).thenReturn(Arrays.asList(
-                Portion.builder().id(2L).build()
+                Portion.builder().description("portionrepo").id(2L).grams(10.0).build()
         ));
 
         DishDto mappedBack = mapper.getConfiguredMapper().map(mapped, DishDto.class);
@@ -187,6 +193,13 @@ class MyModelMapperTest {
         assertThat(ingredientMappedBack.getFoodId()).isEqualTo(30L);
         assertThat(ingredientMappedBack.getMultiplier()).isEqualTo(3.0);
         assertThat(ingredientMappedBack.getDish()).isEqualTo(mapped);
+
+        assertThat(mappedBack.getMacrosCalculated()).isNotNull();
+        // 3* 10 gram met 1/2/3
+//        assertThat(mappedBack.getMacrosCalculated().getProtein()).isEqualTo(1.0 * 0.10 * 3);
+//        assertThat(mappedBack.getMacrosCalculated().getFat()).isEqualTo(3.0 * 0.10 * 3);
+//        assertThat(mappedBack.getMacrosCalculated().getCarbs()).isEqualTo(2.0 * 0.10 * 3);
+
 
     }
 

@@ -23,4 +23,6 @@ public class DishDto {
     @ApiModelProperty(notes = "List of ingredients", required = true)
     private List<IngredientDto> ingredients = new ArrayList<>();
 
+    private Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+
 }

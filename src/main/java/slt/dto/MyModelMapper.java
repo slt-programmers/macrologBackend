@@ -47,6 +47,7 @@ public class MyModelMapper {
         // Meals + Ingredients:
         addAddDishRequestDish(modelMapper);
         addDishDtoDish(modelMapper);
+        addDishDishDto(modelMapper);
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
         addLogEntryLogEntryDto(modelMapper);
@@ -102,6 +103,42 @@ public class MyModelMapper {
                             ingredient.setDish(mappingContext.getDestination());
                         }
                     }
+
+                    return mappingContext.getDestination();
+                });
+    }
+    private void addDishDishDto(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(Dish.class, DishDto.class)
+                .setPostConverter(mappingContext -> {
+
+                    if (mappingContext.getSource().getIngredients() == null){
+                        mappingContext.getDestination().setIngredients(new ArrayList<>());
+                    }
+
+                    final Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+                    for (IngredientDto ingredientDto : mappingContext.getDestination().getIngredients()) {
+
+                        Macro macro;
+                        if (ingredientDto.getPortionId()!= null) {
+                            final Optional<PortionDto> matchingPortion = ingredientDto.getFood().getPortions()
+                                    .stream()
+                                    .filter(portion -> portion.getId().equals(ingredientDto.getPortionId()))
+                                    .findFirst();
+
+                            if (matchingPortion.isPresent()){
+                                macro = calculateMacro(ingredientDto.getFood(), matchingPortion.get());
+                            } else {
+                                throw new IllegalArgumentException("Ingredient received with illegal portion");
+                            }
+                        } else {
+                            macro = new Macro(ingredientDto.getFood().getProtein(),ingredientDto.getFood().getFat(),ingredientDto.getFood().getCarbs());
+                        }
+                        macro.multiply(ingredientDto.getMultiplier());
+                        macrosCalculated.combine(macro);
+                    }
+
+                    mappingContext.getDestination().setMacrosCalculated(macrosCalculated);
+
                     return mappingContext.getDestination();
                 });
     }
