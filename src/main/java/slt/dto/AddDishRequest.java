@@ -11,12 +11,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddMealRequest {
+public class AddDishRequest {
 
     private Long id;
-    @ApiModelProperty(notes = "Name of meal", required = true)
+    @ApiModelProperty(notes = "Name of dish", required = true)
     private String name;
     @ApiModelProperty(notes = "List of ingredients", required = true)
-    private List<AddMealIngredientDto> ingredients = new ArrayList<>();
+    private List<AddDishIngredientDto> ingredients = new ArrayList<>();
 
 }
