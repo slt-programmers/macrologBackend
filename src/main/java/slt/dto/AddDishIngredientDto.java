@@ -13,5 +13,6 @@ public class AddDishIngredientDto {
 
     private FoodDto food;
     private PortionDto portion;
+    private Long portionId;
     private Double multiplier;
 }

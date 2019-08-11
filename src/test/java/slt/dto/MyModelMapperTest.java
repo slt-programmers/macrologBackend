@@ -135,7 +135,7 @@ class MyModelMapperTest {
                 .id(1L)
                 .ingredients(Arrays.asList(
                         IngredientDto.builder()
-                                .id(20L)
+//                                .id(20L)
                                 .multiplier(3.0)
                                 .portionId(2L)
                                 .food(

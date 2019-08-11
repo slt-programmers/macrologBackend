@@ -56,14 +56,16 @@ public class DishService {
     public ResponseEntity<DishDto> storeDish(@RequestBody AddDishRequest dishDto) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Dish map = myModelMapper.getConfiguredMapper().map(dishDto, Dish.class);
 
-        if (dishRepository.findByName(userInfo.getUserId(), dishDto.getName()) != null){
+        if (dishDto.getId() != null && dishRepository.findByName(userInfo.getUserId(), dishDto.getName()) != null){
+            log.debug("Dish with name already exists");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        Dish dish = dishRepository.saveDish(userInfo.getUserId(), map);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(myModelMapper.getConfiguredMapper().map(dish,DishDto.class));
+        Dish mappedDish = myModelMapper.getConfiguredMapper().map(dishDto, Dish.class);
+        Dish savedDish = dishRepository.saveDish(userInfo.getUserId(), mappedDish);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(myModelMapper.getConfiguredMapper().map(savedDish,DishDto.class));
     }
 
     @ApiOperation(value = "Delete dish")

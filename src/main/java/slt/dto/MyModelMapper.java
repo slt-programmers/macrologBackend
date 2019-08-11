@@ -180,6 +180,7 @@ public class MyModelMapper {
 
                     for (Portion portion : portionRepository.getPortions(foodId)) {
                         PortionDto mappedPortion = modelMapper.map(portion, PortionDto.class);
+                        mappedPortion.setMacros(calculateMacro(mappedFoodDto, mappedPortion));
                         mappedFoodDto.addPortion(mappedPortion);
                     }
 
