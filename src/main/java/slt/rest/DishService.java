@@ -56,8 +56,10 @@ public class DishService {
     public ResponseEntity<DishDto> storeDish(@RequestBody AddDishRequest dishDto) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final Dish dishWithSameName = dishRepository.findByName(userInfo.getUserId(), dishDto.getName());
+        final boolean updateRequest = dishDto.getId() != null;
 
-        if (dishDto.getId() != null && dishRepository.findByName(userInfo.getUserId(), dishDto.getName()) != null){
+        if (!updateRequest && dishWithSameName != null) {
             log.debug("Dish with name already exists");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
