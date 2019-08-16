@@ -19,6 +19,8 @@ public class StravaConfig {
 
     Integer clientId;
     String clientSecret;
+    String verifytoken;
+    String callbackUrl;
 
 
     @PostConstruct

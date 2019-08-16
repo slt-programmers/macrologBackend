@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import slt.config.StravaConfig;
 import slt.connectivity.strava.dto.ActivityDetailsDto;
 import slt.connectivity.strava.dto.ListedActivityDto;
+import slt.connectivity.strava.dto.SubscriptionInformation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -184,4 +185,95 @@ public class StravaClient {
             return false;
         }
     }
+
+    public SubscriptionInformation startWebhookSubscription(Integer clientId, String clientSecret, String callbackUrl, String subscribeVerifyToken) {
+
+        String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
+        Map reqPayload = new HashMap();
+        reqPayload.put("client_id", clientId);
+        reqPayload.put("client_secret", clientSecret);
+        reqPayload.put("callback_url", callbackUrl);
+        reqPayload.put("verify_token", subscribeVerifyToken);
+        try {
+            final HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
+            ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(subscribeUrl, HttpMethod.POST, entity, SubscriptionInformation.class);
+
+            SubscriptionInformation subscription = responseEntity.getBody();
+            log.debug("Aangemaakte subscription {}", subscription.getId());
+            return subscription;
+
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return null;
+        } catch (RestClientException restClientException) {
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
+            return null;
+        }
+    }
+
+    public SubscriptionInformation viewWebhookSubscription(Integer clientId, String clientSecret) {
+        try {
+            String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
+
+
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(subscribeUrl)
+                    .queryParam("client_id", clientId)
+                    .queryParam("client_secret", clientSecret);
+
+            final HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            final HttpEntity entity = new HttpEntity<>(headers);
+            ParameterizedTypeReference<List<SubscriptionInformation>> parameterizedTypeReference = new ParameterizedTypeReference<List<SubscriptionInformation>>() {
+            };
+
+            ResponseEntity<List<SubscriptionInformation>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
+            final List<SubscriptionInformation> body = responseEntity.getBody();
+            if (body.size()> 0){
+                return body.get(0);
+            }
+            return null;
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return null;
+        } catch (RestClientException restClientException) {
+
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
+            return null;
+        }
+    }
+
+    public boolean deleteWebhookSubscription(Integer clientId, String clientSecret, Integer subscriptionId) {
+        try {
+            String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
+
+
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(subscribeUrl)
+                    .queryParam("id", subscriptionId)
+                    .queryParam("client_id", clientId)
+                    .queryParam("client_secret", clientSecret);
+
+            final HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            final HttpEntity<SubscriptionInformation> entity = new HttpEntity<>(headers);
+            ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, SubscriptionInformation.class);
+            log.debug("Received response for delete subscription : {}", responseEntity.getStatusCodeValue());
+            return HttpStatus.NO_CONTENT.equals(responseEntity.getStatusCode());
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return false;
+        } catch (RestClientException restClientException) {
+
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
+            return false;
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package slt.connectivity.strava;
 
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -236,7 +237,7 @@ class StravaActivityServiceTest {
                 ListedActivityDto.builder().id(1L).build()
         ));
 
-        when(stravaClient.getActivityDetail(eq("A"),eq(1L) )).thenReturn(ActivityDetailsDto.builder().build());
+        when(stravaClient.getActivityDetail(eq("A"),eq(1L) )).thenReturn(ActivityDetailsDto.builder().start_date_local(DateTime.now()).build());
 
 
         List<LogActivity> storedMacroLogActivities = Arrays.asList(LogActivity.builder().build());

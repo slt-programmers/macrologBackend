@@ -36,6 +36,10 @@ mail:
 strava:
   client-id: ${strava.id}
   client-secret: ${strava.secret}
+#  verify-token: ${strava.verifytoken}
+#  callback-url: $(strava.callbackurl}
+  verify-token: teststrava
+  callback-url: https://macrolog-backend-acc.herokuapp.com/webhooks/public/strava
 
 ---
 spring:
@@ -49,6 +53,9 @@ spring:
 strava:
   client-id: 37498
   client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
+  verify-token: uit
+  callback-url: https://macrolog-backend-acc.herokuapp.com/webhooks/public/strava
+
 
 mail:
    username: doethetniet@gmail.com
@@ -65,6 +72,8 @@ spring:
 strava:
   client-id: 37498
   client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
+  verify-token: uit
+  callback-url: http://localhost:9090/webhooks/strava
 
 mail:
    username: doethetniet@gmail.com
@@ -91,6 +100,8 @@ spring:
 strava:
   client-id: 37498
   client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
+  verify-token: uit
+  callback-url: http://localhost:9090/webhooks/strava
 
 mail:
    username: doethetnietp@gmail.com

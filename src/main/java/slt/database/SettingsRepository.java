@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
 
@@ -29,6 +30,7 @@ interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
     @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day >= :day ORDER BY s.day ASC")
     List<Setting> findByUserIdAndNameWithDayAfterDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
 
+    Optional<Setting> findByNameAndValue(String name, String value);
 }
 
 @Repository
@@ -92,6 +94,9 @@ public class SettingsRepository {
     public void saveSetting(Integer userId, Setting settingDomain) {
         settingDomain.setUserId(userId);
         settingsCrudRepository.save(settingDomain);
+    }
+    public Optional<Setting> findByKeyValue(String name, String value) {
+        return settingsCrudRepository.findByNameAndValue(name,value);
     }
 }
 

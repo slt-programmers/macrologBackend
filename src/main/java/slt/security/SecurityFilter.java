@@ -90,7 +90,8 @@ public class SecurityFilter implements Filter {
                 request.getRequestURI().startsWith("/webjars/") ||
                 request.getRequestURI().startsWith("/api/") ||
                 request.getRequestURI().startsWith("/v2/api-docs") ||
-                request.getRequestURI().startsWith("/swagger-ui.html");
+                request.getRequestURI().startsWith("/swagger-ui.html") ||
+                request.getRequestURI().startsWith("/webhooks/public");
     }
 
     @Override
