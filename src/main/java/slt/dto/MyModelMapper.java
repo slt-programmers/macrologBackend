@@ -45,11 +45,16 @@ public class MyModelMapper {
         addLocalDateSqlDate(modelMapper);
 
         // Meals + Ingredients:
-        addAddMealRequestMeal(modelMapper);
-        addMealDtoMeal(modelMapper);
+        addAddDishRequestDish(modelMapper);
+        addDishDtoDish(modelMapper);
+        addDishDishDto(modelMapper);
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
         addLogEntryLogEntryDto(modelMapper);
+        addDishIngredientDtoIngredient(modelMapper);
+
+        final PropertyMap<AddDishIngredientDto, Ingredient> addDishIngredientDtoIngredientPropertyMap = getAddDishIngredientDtoIngredientPropertyMap();
+        modelMapper.addMappings(addDishIngredientDtoIngredientPropertyMap);
 
         // Weight
         final PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
@@ -78,26 +83,62 @@ public class MyModelMapper {
         this.configuredMapper = modelMapper;
     }
 
-    private void addAddMealRequestMeal(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(AddMealRequest.class, Meal.class)
+    private void addAddDishRequestDish(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(AddDishRequest.class, Dish.class)
                 .setPostConverter(mappingContext -> {
                     if (mappingContext.getDestination().getIngredients() != null) {
                         for (Ingredient ingredient : mappingContext.getDestination().getIngredients()) {
-                            ingredient.setMeal(mappingContext.getDestination());
+                            ingredient.setDish(mappingContext.getDestination());
                         }
                     }
                     return mappingContext.getDestination();
                 });
     }
 
-    private void addMealDtoMeal(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(MealDto.class, Meal.class)
+    private void addDishDtoDish(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(DishDto.class, Dish.class)
                 .setPostConverter(mappingContext -> {
                     if (mappingContext.getDestination().getIngredients() != null) {
                         for (Ingredient ingredient : mappingContext.getDestination().getIngredients()) {
-                            ingredient.setMeal(mappingContext.getDestination());
+                            ingredient.setDish(mappingContext.getDestination());
                         }
                     }
+
+                    return mappingContext.getDestination();
+                });
+    }
+    private void addDishDishDto(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(Dish.class, DishDto.class)
+                .setPostConverter(mappingContext -> {
+
+                    if (mappingContext.getSource().getIngredients() == null){
+                        mappingContext.getDestination().setIngredients(new ArrayList<>());
+                    }
+
+                    final Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+                    for (IngredientDto ingredientDto : mappingContext.getDestination().getIngredients()) {
+
+                        Macro macro;
+                        if (ingredientDto.getPortionId()!= null) {
+                            final Optional<PortionDto> matchingPortion = ingredientDto.getFood().getPortions()
+                                    .stream()
+                                    .filter(portion -> portion.getId().equals(ingredientDto.getPortionId()))
+                                    .findFirst();
+
+                            if (matchingPortion.isPresent()){
+                                macro = calculateMacro(ingredientDto.getFood(), matchingPortion.get());
+                            } else {
+                                throw new IllegalArgumentException("Ingredient received with illegal portion");
+                            }
+                        } else {
+                            macro = new Macro(ingredientDto.getFood().getProtein(),ingredientDto.getFood().getFat(),ingredientDto.getFood().getCarbs());
+                        }
+                        macro.multiply(ingredientDto.getMultiplier());
+                        macrosCalculated.combine(macro);
+                    }
+
+                    mappingContext.getDestination().setMacrosCalculated(macrosCalculated);
+
                     return mappingContext.getDestination();
                 });
     }
@@ -112,16 +153,34 @@ public class MyModelMapper {
                 });
     }
 
+    private void addDishIngredientDtoIngredient(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(AddDishIngredientDto.class, Ingredient.class)
+                .setPostConverter(mappingContext -> {
+
+                    if (mappingContext.getSource().getPortion() != null) {
+                        Long portionId = mappingContext.getSource().getPortion().getId();
+                        mappingContext.getDestination().setPortionId(portionId);
+                    }
+
+                    Long foodId = mappingContext.getSource().getFood().getId();
+                    mappingContext.getDestination().setFoodId(foodId);
+
+                    return mappingContext.getDestination();
+                });
+
+    }
+
     private void addIngredientIngredientDto(ModelMapper modelMapper) {
         modelMapper.createTypeMap(Ingredient.class, IngredientDto.class)
                 .setPostConverter(mappingContext -> {
                     Long foodId = mappingContext.getSource().getFoodId();
-                    Integer userId = mappingContext.getSource().getMeal().getUserId();
+                    Integer userId = mappingContext.getSource().getDish().getUserId();
                     Food foodById = foodRepository.getFoodById(userId, foodId);
                     FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
 
                     for (Portion portion : portionRepository.getPortions(foodId)) {
                         PortionDto mappedPortion = modelMapper.map(portion, PortionDto.class);
+                        mappedPortion.setMacros(calculateMacro(mappedFoodDto, mappedPortion));
                         mappedFoodDto.addPortion(mappedPortion);
                     }
 
@@ -282,6 +341,16 @@ public class MyModelMapper {
             protected void configure() {
                 skip().setUserId(null);
                 skip().setStatus(null);
+            }
+        };
+    }
+
+    private PropertyMap<AddDishIngredientDto, Ingredient> getAddDishIngredientDtoIngredientPropertyMap() {
+        return new PropertyMap<>() {
+            @Override
+            protected void configure() {
+                skip().setId(null);
+                skip().setDish(null);
             }
         };
     }
