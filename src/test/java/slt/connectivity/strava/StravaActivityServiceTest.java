@@ -233,17 +233,11 @@ class StravaActivityServiceTest {
         final long toEpochSecond = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
         mockSetting(1,"STRAVA_EXPIRES_AT", ""+toEpochSecond);
 
-        when(stravaClient.getActivitiesForDay(eq("A"),any(LocalDate.class) )).thenReturn(Arrays.asList(
-                ListedActivityDto.builder().id(1L).build()
-        ));
-
-        when(stravaClient.getActivityDetail(eq("A"),eq(1L) )).thenReturn(ActivityDetailsDto.builder().start_date_local(DateTime.now()).build());
-
 
         List<LogActivity> storedMacroLogActivities = Arrays.asList(LogActivity.builder().build());
         final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1, LocalDate.parse("2001-01-01"), false);
 
-        assertThat(responseActivities).hasSize(1);
+        assertThat(responseActivities).hasSize(0);
     }
 
     @Test

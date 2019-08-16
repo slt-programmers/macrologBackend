@@ -234,7 +234,7 @@ public class StravaActivityService {
                                                       LocalDate date,
                                                       boolean forceUpdate) {
         List<LogActivity> newActivities = new ArrayList<>();
-        if (isStravaConnected(userId)) {
+        if (forceUpdate && isStravaConnected(userId)) {
 
             log.debug("Strava is connected. Syncing");
             StravaToken token = getStravaToken(userId);
@@ -299,7 +299,7 @@ public class StravaActivityService {
     }
 
     public void receiveWebHookEvent(WebhookEvent event) {
-        log.debug("'Received webhook event of owner {} for activity {}", event.getOwner_id(),event.getObject_id());
+        log.debug("'Received webhook event of owner {} for activity {} via subscription {}", event.getOwner_id(),event.getObject_id(), event.getSubscription_id());
         if (!this.stravaSubscriptionId.equals(event.getSubscription_id())){
             log.error("Webhook event received from another subscription. Expected {}, but received {}",stravaSubscriptionId,event.getSubscription_id());
             return;
