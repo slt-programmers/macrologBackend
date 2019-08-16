@@ -299,9 +299,9 @@ public class StravaActivityService {
     }
 
     public void receiveWebHookEvent(WebhookEvent event) {
-        log.debug("'Received webhook event of {}", event.getOwner_id());
-        if (this.stravaSubscriptionId != event.getSubscription_id()){
-            log.error("Webhook event received from another subscription. Exceptec {}, but received {}",stravaSubscriptionId,event.getSubscription_id());
+        log.debug("'Received webhook event of owner {} for activity {}", event.getOwner_id(),event.getObject_id());
+        if (!this.stravaSubscriptionId.equals(event.getSubscription_id())){
+            log.error("Webhook event received from another subscription. Expected {}, but received {}",stravaSubscriptionId,event.getSubscription_id());
             return;
         }
         final HashMap<String, String> updates = event.getUpdates();
