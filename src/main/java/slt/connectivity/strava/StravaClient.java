@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -189,14 +191,16 @@ public class StravaClient {
     public SubscriptionInformation startWebhookSubscription(Integer clientId, String clientSecret, String callbackUrl, String subscribeVerifyToken) {
 
         String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
-        Map reqPayload = new HashMap();
-        reqPayload.put("client_id", clientId);
-        reqPayload.put("client_secret", clientSecret);
-        reqPayload.put("callback_url", callbackUrl);
-        reqPayload.put("verify_token", subscribeVerifyToken);
+        MultiValueMap<String, String> reqPayload= new LinkedMultiValueMap<String, String>();
+
+        reqPayload.add("client_id", clientId.toString());
+        reqPayload.add("client_secret", clientSecret);
+        reqPayload.add("callback_url", callbackUrl);
+        reqPayload.add("verify_token", subscribeVerifyToken);
+
         try {
             final HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
             final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
             ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(subscribeUrl, HttpMethod.POST, entity, SubscriptionInformation.class);
@@ -228,7 +232,7 @@ public class StravaClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             final HttpEntity entity = new HttpEntity<>(headers);
-            ParameterizedTypeReference<List<SubscriptionInformation>> parameterizedTypeReference = new ParameterizedTypeReference<List<SubscriptionInformation>>() {
+            ParameterizedTypeReference<List<SubscriptionInformation>> parameterizedTypeReference = new ParameterizedTypeReference<>() {
             };
 
             ResponseEntity<List<SubscriptionInformation>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
@@ -251,18 +255,19 @@ public class StravaClient {
     public boolean deleteWebhookSubscription(Integer clientId, String clientSecret, Integer subscriptionId) {
         try {
             String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(subscribeUrl + "/" + subscriptionId);
 
 
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(subscribeUrl)
-                    .queryParam("id", subscriptionId)
-                    .queryParam("client_id", clientId)
-                    .queryParam("client_secret", clientSecret);
+            MultiValueMap<String, Object> reqPayload= new LinkedMultiValueMap<>();
+            reqPayload.add("client_id", clientId);
+            reqPayload.add("client_secret", clientSecret);
+//              reqPayload.add("id", subscriptionId.toString());
 
             final HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            final HttpEntity<SubscriptionInformation> entity = new HttpEntity<>(headers);
-            ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, SubscriptionInformation.class);
+            final HttpEntity<String> entity = new HttpEntity(reqPayload,headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, String.class);
             log.debug("Received response for delete subscription : {}", responseEntity.getStatusCodeValue());
             return HttpStatus.NO_CONTENT.equals(responseEntity.getStatusCode());
         } catch (HttpClientErrorException httpClientErrorException) {
