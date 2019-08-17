@@ -57,7 +57,7 @@ public class WebHookService {
     }
 
     @ApiOperation(value = "Start a webhook subscription with Strava")
-    @PostMapping(path = "/webhook/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SubscriptionInformation> startWebhook() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
@@ -72,7 +72,7 @@ public class WebHookService {
     }
 
     @ApiOperation(value = "Delete a webhook subscription with Strava")
-    @DeleteMapping(path = "/webhook/STRAVA/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/STRAVA/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity endWebhook(@PathVariable("subscriptionId") Integer subscriptionId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
@@ -88,7 +88,7 @@ public class WebHookService {
     }
 
     @ApiOperation(value = "Retrieve the webhook information with Strava")
-    @GetMapping(path = "/webhook/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SubscriptionInformation> getWebhook() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
