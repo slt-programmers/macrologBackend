@@ -331,6 +331,10 @@ public class StravaActivityService {
     private void processStravaActivityEvent(WebhookEvent event, Optional<Setting> foundStravaUserMatch, StravaToken stravaToken) {
         Long stravaActivityId = event.getObject_id();
 
+        if (!foundStravaUserMatch.isPresent()){
+            log.error("Unable to process Strava Activity Event because the user could not be matched in our database.");
+            return;
+        }
         final Optional<LogActivity> storedStrava = activityRepository.findByUserIdAndSyncIdAndSyncedWith(foundStravaUserMatch.get().getUserId(), STRAVA, stravaActivityId);
 
         if ("create".equals(event.getAspect_type()) ||
@@ -362,7 +366,7 @@ public class StravaActivityService {
         final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
         final String startDateString = activityDetail.getStart_date();
         // To avoid timezone issues we take the date part only and convert it to localdate
-        final LocalDate startDateLocalDate = LocalDateParser.parse(startDateString.substring(0, startDateString.indexOf("T")));
+        final LocalDate startDateLocalDate = LocalDateParser.parse(startDateString.substring(0, startDateString.indexOf('T')));
         return LogActivity.builder()
                 .day(Date.valueOf(startDateLocalDate))
                 .name(makeUTF8(activityDetail.getType() + ": " + activityDetail.getName()))

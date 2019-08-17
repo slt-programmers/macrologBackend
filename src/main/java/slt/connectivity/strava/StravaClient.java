@@ -78,8 +78,7 @@ public class StravaClient {
             final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
             ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
 
-            StravaToken gevondenToken = responseEntity.getBody();
-            return gevondenToken;
+            return responseEntity.getBody();
 
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
