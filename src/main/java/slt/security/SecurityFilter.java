@@ -59,7 +59,6 @@ public class SecurityFilter implements Filter {
             String token = req.getHeader("Authorization");
             if (token != null && token.startsWith("Bearer")) {
                 String jwtToken = token.substring("Bearer".length() + 1);
-                log.debug(jwtToken);
                 Object userId;
                 try {
                     Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);

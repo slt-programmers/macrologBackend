@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 @Getter
 @Slf4j
 @Builder
+@SuppressWarnings("all")
 public class SubscriptionInformation {
 
     Integer id;

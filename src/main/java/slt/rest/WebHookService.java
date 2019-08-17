@@ -3,7 +3,6 @@ package slt.rest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,23 +12,10 @@ import slt.config.StravaConfig;
 import slt.connectivity.strava.StravaActivityService;
 import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.connectivity.strava.dto.WebhookEvent;
-import slt.database.SettingsRepository;
 import slt.database.UserAccountRepository;
-import slt.database.WeightRepository;
-import slt.database.entities.Setting;
 import slt.database.entities.UserAccount;
-import slt.database.entities.Weight;
-import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.util.LocalDateParser;
-
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -37,6 +23,7 @@ import java.util.List;
 @Api(value = "webhooks")
 public class WebHookService {
 
+    public static final String NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE = "Not authorized to alter webhooks";
     @Autowired
     private StravaActivityService stravaActivityService;
 
@@ -76,7 +63,7 @@ public class WebHookService {
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
-            log.error("Not authorized to alter webhooks");
+            log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
             final SubscriptionInformation subscriptionInformation = stravaActivityService.startWebhookSubcription();
@@ -91,7 +78,7 @@ public class WebHookService {
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
-            log.error("Not authorized to alter webhooks");
+            log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
 
@@ -107,7 +94,7 @@ public class WebHookService {
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
-            log.error("Not authorized to alter webhooks");
+            log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
             final SubscriptionInformation subscriptionInformation = stravaActivityService.getWebhookSubscription();

@@ -238,6 +238,7 @@ class StravaClientClientTest {
         ArgumentCaptor<HttpEntity> varArgs = ArgumentCaptor.forClass(HttpEntity.class);
 
         ResponseEntity<String> mockEntitity = mock(ResponseEntity.class);
+        when(mockEntitity.getBody()).thenReturn("jammer");
 
         when(restTemplate.exchange(eq("https://www.strava.com/oauth/deauthorize"), eq(HttpMethod.POST), varArgs.capture(), eq(String.class)))
                 .thenReturn(mockEntitity);
@@ -249,5 +250,4 @@ class StravaClientClientTest {
         assertThat(success).isTrue();
 
     }
-
 }

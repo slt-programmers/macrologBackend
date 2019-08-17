@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
 
 @Data
 @Builder
@@ -16,5 +15,6 @@ public class ActivityDetailsDto {
     String name;
     Double calories;
     String type;
-    DateTime start_date_local;
+    String start_date;  // e.g. "2018-02-16T14:52:54Z"
 }
+

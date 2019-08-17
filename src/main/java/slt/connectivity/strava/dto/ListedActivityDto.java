@@ -15,5 +15,4 @@ public class ListedActivityDto {
     long id;
     String name;
     String type;
-    DateTime start_date_local;
 }

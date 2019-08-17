@@ -9,6 +9,7 @@ import java.util.HashMap;
 @Builder
 @Getter
 @Setter
+@SuppressWarnings("all")
 public class WebhookEvent {
 
     String object_type;

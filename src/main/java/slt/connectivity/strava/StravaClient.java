@@ -36,6 +36,11 @@ import java.util.Map;
 @NoArgsConstructor
 public class StravaClient {
 
+    public static final String CLIENT_ID = "client_id";
+    public static final String CLIENT_SECRET = "client_secret";
+    public static final String CALLBACK_URL = "callback_url";
+    public static final String VERIFY_TOKEN = "verify_token";
+    public static final String GRANT_TYPE = "grant_type";
     @Autowired
     RestTemplate restTemplate;
 
@@ -45,33 +50,35 @@ public class StravaClient {
     private static final String ERROR_MESSAGE = "Fout bij versturen.";
     private static final String BEARER_MESSAGE = "Bearer %s";
 
+    private static final String STRAVA_WEBHOOK_URL = "https://api.strava.com/api/v3/push_subscriptions";
+    private static final String STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/activities";
+    private static final String STRAVA_AUTHENTICATION_URL = "https://www.strava.com/oauth/token";
+
 
     public StravaToken getStravaToken(String authorizationCode) {
         String grantType = "authorization_code";
-        String tokenUrl = "https://www.strava.com/oauth/token";
 
         String clientId = stravaConfig.getClientId().toString();
         String clientSecret = stravaConfig.getClientSecret();
         Map reqPayload = new HashMap();
-        reqPayload.put("client_id", clientId);
-        reqPayload.put("client_secret", clientSecret);
+        reqPayload.put(CLIENT_ID, clientId);
+        reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("code", authorizationCode);
-        reqPayload.put("grant_type", grantType);
+        reqPayload.put(GRANT_TYPE, grantType);
 
-        return getStravaToken(tokenUrl, reqPayload);
+        return getStravaToken(reqPayload);
 
     }
 
-    private StravaToken getStravaToken(String tokenUrl, Map reqPayload) {
+    private StravaToken getStravaToken(Map reqPayload) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
-            ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(tokenUrl, HttpMethod.POST, entity, StravaToken.class);
+            ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
 
             StravaToken gevondenToken = responseEntity.getBody();
-            log.debug("Gevonden token {}", gevondenToken.access_token);
             return gevondenToken;
 
         } catch (HttpClientErrorException httpClientErrorException) {
@@ -85,19 +92,18 @@ public class StravaClient {
     }
 
     public StravaToken refreshToken(String refreshToken) {
-        String tokenUrl = "https://www.strava.com/oauth/token";
         String grantType = "refresh_token";
 
         String clientId = stravaConfig.getClientId().toString();
         String clientSecret = stravaConfig.getClientSecret();
 
         Map reqPayload = new HashMap();
-        reqPayload.put("client_id", clientId);
-        reqPayload.put("client_secret", clientSecret);
+        reqPayload.put(CLIENT_ID, clientId);
+        reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("refresh_token", refreshToken);
-        reqPayload.put("grant_type", grantType);
+        reqPayload.put(GRANT_TYPE, grantType);
 
-        return getStravaToken(tokenUrl, reqPayload);
+        return getStravaToken(reqPayload);
     }
 
     private long getUTCEpoch(LocalDateTime localDateTime) {
@@ -108,12 +114,11 @@ public class StravaClient {
 
     public List<ListedActivityDto> getActivitiesForDay(String token, LocalDate date) {
         try {
-            String url = "https://www.strava.com/api/v3/athlete/activities";
 
             final LocalDateTime localDateTimeStartOfDay = date.atStartOfDay();
             final LocalDateTime localDateTimeEndOfDay = date.atStartOfDay().plusDays(1);
 
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL)
                     .queryParam("before", getUTCEpoch(localDateTimeEndOfDay))
                     .queryParam("after", getUTCEpoch(localDateTimeStartOfDay));
 
@@ -122,7 +127,7 @@ public class StravaClient {
             headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token));
 
             final HttpEntity entity = new HttpEntity<>(headers);
-            ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<List<ListedActivityDto>>() {
+            ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<>() {
             };
             ResponseEntity<List<ListedActivityDto>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
 
@@ -140,8 +145,7 @@ public class StravaClient {
 
     public ActivityDetailsDto getActivityDetail(String token, Long activityDetailId) {
         try {
-            String url = "https://www.strava.com/api/v3/activities";
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url + "/" + activityDetailId);
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL + "/" + activityDetailId);
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -152,7 +156,7 @@ public class StravaClient {
 
             ActivityDetailsDto gevondenActivity = responseEntity.getBody();
 
-            log.debug(gevondenActivity.getStart_date_local() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.getType() + " " + gevondenActivity.getId());
+            log.debug(gevondenActivity.getStart_date() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.getType() + " " + gevondenActivity.getId());
             return gevondenActivity;
 
         } catch (HttpClientErrorException httpClientErrorException) {
@@ -175,8 +179,7 @@ public class StravaClient {
             ResponseEntity<String> responseEntity = restTemplate.exchange("https://www.strava.com/oauth/deauthorize", HttpMethod.POST, entity, String.class);
 
             String gevondenToken = responseEntity.getBody();
-            log.debug("Response {}", gevondenToken);
-            return true;
+            return gevondenToken != null;
 
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
@@ -190,20 +193,19 @@ public class StravaClient {
 
     public SubscriptionInformation startWebhookSubscription(Integer clientId, String clientSecret, String callbackUrl, String subscribeVerifyToken) {
 
-        String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
-        MultiValueMap<String, String> reqPayload= new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> reqPayload= new LinkedMultiValueMap<>();
 
-        reqPayload.add("client_id", clientId.toString());
-        reqPayload.add("client_secret", clientSecret);
-        reqPayload.add("callback_url", callbackUrl);
-        reqPayload.add("verify_token", subscribeVerifyToken);
+        reqPayload.add(CLIENT_ID, clientId.toString());
+        reqPayload.add(CLIENT_SECRET, clientSecret);
+        reqPayload.add(CALLBACK_URL, callbackUrl);
+        reqPayload.add(VERIFY_TOKEN, subscribeVerifyToken);
 
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
             final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
-            ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(subscribeUrl, HttpMethod.POST, entity, SubscriptionInformation.class);
+            ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(STRAVA_WEBHOOK_URL, HttpMethod.POST, entity, SubscriptionInformation.class);
 
             SubscriptionInformation subscription = responseEntity.getBody();
             log.debug("Aangemaakte subscription {}", subscription.getId());
@@ -221,12 +223,10 @@ public class StravaClient {
 
     public SubscriptionInformation viewWebhookSubscription(Integer clientId, String clientSecret) {
         try {
-            String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
 
-
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(subscribeUrl)
-                    .queryParam("client_id", clientId)
-                    .queryParam("client_secret", clientSecret);
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL)
+                    .queryParam(CLIENT_ID, clientId)
+                    .queryParam(CLIENT_SECRET, clientSecret);
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -237,7 +237,7 @@ public class StravaClient {
 
             ResponseEntity<List<SubscriptionInformation>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
             final List<SubscriptionInformation> body = responseEntity.getBody();
-            if (body.size()> 0){
+            if (!body.isEmpty()){
                 return body.get(0);
             }
             return null;
@@ -254,14 +254,11 @@ public class StravaClient {
 
     public boolean deleteWebhookSubscription(Integer clientId, String clientSecret, Integer subscriptionId) {
         try {
-            String subscribeUrl = "https://api.strava.com/api/v3/push_subscriptions";
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(subscribeUrl + "/" + subscriptionId);
-
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL + "/" + subscriptionId);
 
             MultiValueMap<String, Object> reqPayload= new LinkedMultiValueMap<>();
-            reqPayload.add("client_id", clientId);
-            reqPayload.add("client_secret", clientSecret);
-//              reqPayload.add("id", subscriptionId.toString());
+            reqPayload.add(CLIENT_ID, clientId);
+            reqPayload.add(CLIENT_SECRET, clientSecret);
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
