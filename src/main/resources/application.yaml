@@ -49,10 +49,16 @@ spring:
      password: fhjfgj!3ADD
 
 strava:
-  verify-token: uit
-  callback-url: http://localhost:9090/webhooks/strava
-  client-id: 37498
-  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
+#  verify-token: uit
+#  callback-url: http://localhost:9090/webhooks/strava
+#  client-id: 37498
+#  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f80
+
+  verify-token: macrologtoken
+  callback-url: https://macrolog-backend-acc.herokuapp.com/webhooks/public/strava
+  client-id: 37727
+  client-secret: f3c0e0c1298202e1c90343e724cc5de2f80f7c7a
+
 
 mail:
    username: doethetniet@gmail.com

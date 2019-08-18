@@ -1,7 +1,6 @@
 package slt.connectivity.strava;
 
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +13,7 @@ import slt.config.StravaConfig;
 import slt.connectivity.strava.dto.ActivityDetailsDto;
 import slt.connectivity.strava.dto.ListedActivityDto;
 import slt.connectivity.strava.dto.StravaAthleteDto;
+import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
 import slt.database.entities.LogActivity;
@@ -322,5 +322,49 @@ class StravaActivityServiceTest {
 
         verify(settingsRepository,times(3)).saveSetting(eq(1),any(Setting.class));
 
+    }
+
+    @Test
+    public void setupStravaWebhooksubscriptionUit(){
+
+        when(stravaConfig.getClientId()).thenReturn(2);
+        when(stravaConfig.getClientSecret()).thenReturn("a");
+        when(stravaConfig.getVerifytoken()).thenReturn("uit");
+
+        StravaActivityService myStravaActivityService = new StravaActivityService(settingsRepository, activityRepository,stravaConfig , stravaClient);
+
+        verify(stravaConfig,times(3)).getVerifytoken();
+        verifyNoMoreInteractions(stravaClient,settingsRepository,activityRepository,stravaConfig,stravaClient);
+    }
+
+    @Test
+    public void setupStravaWebhooksubscriptionAan(){
+
+        when(stravaConfig.getClientId()).thenReturn(2);
+        when(stravaConfig.getClientSecret()).thenReturn("a");
+        when(stravaConfig.getVerifytoken()).thenReturn("iets");
+        when(stravaClient.viewWebhookSubscription(any(),any() )).thenReturn(SubscriptionInformation.builder().build());
+        StravaActivityService myStravaActivityService = new StravaActivityService(settingsRepository, activityRepository,stravaConfig , stravaClient);
+
+        verify(stravaConfig,times(3)).getVerifytoken();
+        verify(stravaConfig,times(1)).getClientId();
+        verify(stravaConfig,times(1)).getClientSecret();
+        verify(stravaClient).viewWebhookSubscription(any(),any());
+        verifyNoMoreInteractions(stravaClient,settingsRepository,activityRepository,stravaConfig,stravaClient);
+    }
+    @Test
+    public void setupStravaWebhooksubscriptionAanNietGevonden(){
+
+        when(stravaConfig.getClientId()).thenReturn(2);
+        when(stravaConfig.getClientSecret()).thenReturn("a");
+        when(stravaConfig.getVerifytoken()).thenReturn("iets");
+        when(stravaClient.viewWebhookSubscription(any(),any() )).thenReturn(null);
+        StravaActivityService myStravaActivityService = new StravaActivityService(settingsRepository, activityRepository,stravaConfig , stravaClient);
+
+        verify(stravaConfig,times(3)).getVerifytoken();
+        verify(stravaConfig,times(1)).getClientId();
+        verify(stravaConfig,times(1)).getClientSecret();
+        verify(stravaClient).viewWebhookSubscription(any(),any());
+        verifyNoMoreInteractions(stravaClient,settingsRepository,activityRepository,stravaConfig,stravaClient);
     }
 }

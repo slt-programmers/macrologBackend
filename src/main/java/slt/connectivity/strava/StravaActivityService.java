@@ -58,7 +58,9 @@ public class StravaActivityService {
         this.stravaClient = stravaClient;
 
         log.debug("Setting up Strava subscription");
-        if ("uit".equals(stravaConfig.getVerifytoken())) {
+        if (stravaConfig == null ||
+                stravaConfig.getVerifytoken() == null ||
+                "uit".equals(stravaConfig.getVerifytoken())) {
             log.debug("Disable van webhook voor Strava");
         } else {
             setupStravaWebhooksubscription();
@@ -232,7 +234,8 @@ public class StravaActivityService {
                                                       LocalDate date,
                                                       boolean forceUpdate) {
         List<LogActivity> newActivities = new ArrayList<>();
-        if (forceUpdate && isStravaConnected(userId)) {
+        Boolean webHookDisabled = this.stravaSubscriptionId == null;
+        if ((webHookDisabled || forceUpdate) && isStravaConnected(userId)) {
 
             log.debug("Strava is connected. Syncing");
             StravaToken token = getStravaToken(userId);
@@ -249,7 +252,7 @@ public class StravaActivityService {
                     if (matchingMacrologActivity.isPresent()) {
                         final LogActivity matchedMacrologActivity = matchingMacrologActivity.get();
                         log.debug("Activity [{}] already known", matchedMacrologActivity.getName());
-                        if ("DELETED".equals(matchedMacrologActivity.getStatus())) {
+                        if (forceUpdate && "DELETED".equals(matchedMacrologActivity.getStatus())) {
                             log.debug("Setting status to back to null");
                             matchedMacrologActivity.setStatus(null);
                             log.debug("Refreshing the activity details");
@@ -288,10 +291,13 @@ public class StravaActivityService {
     public SubscriptionInformation getWebhookSubscription() {
         final Integer clientId = stravaConfig.getClientId();
         final String clientSecret = stravaConfig.getClientSecret();
-        return stravaClient.viewWebhookSubscription(clientId, clientSecret);
+        final SubscriptionInformation subscriptionInformation = stravaClient.viewWebhookSubscription(clientId, clientSecret);
+        this.stravaSubscriptionId = subscriptionInformation == null ? null : subscriptionInformation.getId();
+        return subscriptionInformation;
     }
 
     public boolean endWebhookSubscription(Integer subscriptionId) {
+        this.stravaSubscriptionId = null;
         final Integer clientId = stravaConfig.getClientId();
         final String clientSecret = stravaConfig.getClientSecret();
         return stravaClient.deleteWebhookSubscription(clientId, clientSecret, subscriptionId);
@@ -331,7 +337,7 @@ public class StravaActivityService {
     private void processStravaActivityEvent(WebhookEvent event, Optional<Setting> foundStravaUserMatch, StravaToken stravaToken) {
         Long stravaActivityId = event.getObject_id();
 
-        if (!foundStravaUserMatch.isPresent()){
+        if (!foundStravaUserMatch.isPresent()) {
             log.error("Unable to process Strava Activity Event because the user could not be matched in our database.");
             return;
         }
