@@ -52,7 +52,7 @@ strava:
   verify-token: uit
   callback-url: http://localhost:9090/webhooks/strava
   client-id: 37498
-  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f8
+  client-secret: 0b2f817309329fb716e368b3dbd3614f922f20f80
 
 mail:
    username: doethetniet@gmail.com
