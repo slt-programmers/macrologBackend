@@ -310,8 +310,10 @@ public class StravaActivityService {
             return;
         }
         final HashMap<String, String> updates = event.getUpdates();
-        for (Map.Entry<String, String> stringStringEntry : updates.entrySet()) {
-            log.debug(stringStringEntry.getKey() + " - " + stringStringEntry.getValue());
+        if (event.getUpdates() != null) {
+            for (Map.Entry<String, String> stringStringEntry : updates.entrySet()) {
+                log.debug(stringStringEntry.getKey() + " - " + stringStringEntry.getValue());
+            }
         }
         final Optional<Setting> foundStravaUserMatch = settingsRepository.findByKeyValue(STRAVA_ATHLETE_ID, event.getOwner_id().toString());
         if (foundStravaUserMatch.isPresent()) {
@@ -348,8 +350,7 @@ public class StravaActivityService {
             // check if not already exists
 
             if (storedStrava.isPresent()) {
-                final LogActivity storedActivity = storedStrava.get();
-                syncActivity(stravaToken, stravaActivityId, storedActivity);
+                LogActivity storedActivity = syncActivity(stravaToken, stravaActivityId, storedStrava.get());
                 activityRepository.saveActivity(foundStravaUserMatch.get().getUserId(), storedActivity);
                 log.debug("Strava activity updated");
             } else {
@@ -394,7 +395,7 @@ public class StravaActivityService {
         }
     }
 
-    private void syncActivity(StravaToken token, Long stravaActivityId, LogActivity storedActivity) {
+    private LogActivity syncActivity(StravaToken token, Long stravaActivityId, LogActivity storedActivity) {
 
         final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
 
@@ -402,6 +403,7 @@ public class StravaActivityService {
 
         storedActivity.setName(makeUTF8(name));
         storedActivity.setCalories(activityDetail.getCalories());
+        return storedActivity;
     }
 
     private boolean isExpired(StravaToken token) {
