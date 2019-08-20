@@ -287,16 +287,58 @@ class StravaActivityServiceTest {
         when(stravaClient.getActivityDetail(eq("A"), eq(1L))).thenReturn(
                 ActivityDetailsDto.builder().id(1L).build());
 
-
         List<LogActivity> storedMacroLogActivities = Arrays.asList(
                 LogActivity.builder().syncedId(1L).status("DELETED").build());
         final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1, LocalDate.parse("2001-01-01"), true);
 
         when(activityRepository.saveActivity(eq(1), any(LogActivity.class))).thenReturn(LogActivity.builder().build());
 
-
         // dirty aanpassing van de parameter lijst naar niet meer gedelete
         assertThat(storedMacroLogActivities.get(0).getStatus()).isNull();
+
+        verify(activityRepository,times(1)).saveActivity(any(), any());
+        verify(stravaClient,times(1)).getActivitiesForDay(any(), any());
+        verify(stravaClient,times(1)).getActivityDetail(any(), any());
+
+        // already in result, not in extra results
+        assertThat(responseActivities).hasSize(0);
+    }
+
+    @Test
+    void testExtraStravaActivitiesStravaConnectedWithNoForceButWebhookEnabledWithStravaResultsAlreadyKnownDeleted() {
+
+        // Voor ingelogd zijn:
+        mockSetting(1, "STRAVA_ATHLETE_ID", "A");
+
+        // Voor token:
+        mockSetting(1, "STRAVA_ATHLETE_ID", "12");
+        mockSetting(1, "STRAVA_ACCESS_TOKEN", "A");
+        mockSetting(1, "STRAVA_REFRESH_TOKEN", "B");
+        final long toEpochSecond = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
+        mockSetting(1, "STRAVA_EXPIRES_AT", "" + toEpochSecond);
+
+        when(stravaClient.getActivitiesForDay(eq("A"), any(LocalDate.class))).thenReturn(Arrays.asList(
+                ListedActivityDto.builder().id(1L).build()
+        ));
+
+        when(stravaClient.getActivityDetail(eq("A"), eq(1L))).thenReturn(
+                ActivityDetailsDto.builder().id(1L).build());
+
+        stravaActivityService.stravaSubscriptionId = 12;
+
+        List<LogActivity> storedMacroLogActivities = Arrays.asList(
+                LogActivity.builder().syncedId(1L).status("DELETED").build());
+        final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1, LocalDate.parse("2001-01-01"), false);
+
+        when(activityRepository.saveActivity(eq(1), any(LogActivity.class))).thenReturn(LogActivity.builder().build());
+
+        // De status is niet aangepast. Geen force geweest namelijk
+        assertThat(storedMacroLogActivities.get(0).getStatus()).isEqualTo("DELETED");
+
+        // Geen conenctie naar strava, want de webhook staat aan. Alleen by force controleren we strava
+        verify(activityRepository,times(0)).saveActivity(any(), any());
+        verify(stravaClient,times(0)).getActivitiesForDay(any(), any());
+        verify(stravaClient,times(0)).getActivityDetail(any(), any());
 
         // already in result, not in extra results
         assertThat(responseActivities).hasSize(0);
@@ -316,11 +358,9 @@ class StravaActivityServiceTest {
 
         when(stravaClient.refreshToken(eq("B"))).thenReturn(StravaToken.builder().expires_at(LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC)).build());
 
-
         stravaActivityService.unRegisterStrava(1);
 
         verify(settingsRepository, times(3)).saveSetting(eq(1), any(Setting.class));
-
     }
 
     @Test
