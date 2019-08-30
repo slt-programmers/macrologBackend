@@ -59,7 +59,6 @@ public class SecurityFilter implements Filter {
             String token = req.getHeader("Authorization");
             if (token != null && token.startsWith("Bearer")) {
                 String jwtToken = token.substring("Bearer".length() + 1);
-                log.debug(jwtToken);
                 Object userId;
                 try {
                     Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
@@ -90,7 +89,8 @@ public class SecurityFilter implements Filter {
                 request.getRequestURI().startsWith("/webjars/") ||
                 request.getRequestURI().startsWith("/api/") ||
                 request.getRequestURI().startsWith("/v2/api-docs") ||
-                request.getRequestURI().startsWith("/swagger-ui.html");
+                request.getRequestURI().startsWith("/swagger-ui.html") ||
+                request.getRequestURI().startsWith("/webhooks/public");
     }
 
     @Override

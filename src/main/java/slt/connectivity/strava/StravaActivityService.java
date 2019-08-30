@@ -1,46 +1,39 @@
 package slt.connectivity.strava;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import slt.config.StravaConfig;
 import slt.connectivity.strava.dto.ActivityDetailsDto;
 import slt.connectivity.strava.dto.ListedActivityDto;
+import slt.connectivity.strava.dto.SubscriptionInformation;
+import slt.connectivity.strava.dto.WebhookEvent;
 import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
 import slt.database.entities.LogActivity;
 import slt.database.entities.Setting;
 import slt.dto.SyncedAccount;
-import slt.rest.ActivityService;
+import slt.util.LocalDateParser;
 
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
 public class StravaActivityService {
 
-    @Autowired
     SettingsRepository settingsRepository;
 
-    @Autowired
-    ActivityService activityService;
-
-    @Autowired
     ActivityRepository activityRepository;
 
-    @Autowired
     StravaConfig stravaConfig;
 
-    @Autowired
     StravaClient stravaClient;
 
     private static final String STRAVA = "STRAVA";
@@ -52,6 +45,38 @@ public class StravaActivityService {
     private static final String STRAVA_LASTNAME = "STRAVA_LASTNAME";
     private static final String STRAVA_FIRSTNAME = "STRAVA_FIRSTNAME";
     private static final String STRAVA_ATHLETE_ID = "STRAVA_ATHLETE_ID";
+
+    Integer stravaSubscriptionId = null;
+
+    public StravaActivityService(SettingsRepository settingsRepository,
+                                 ActivityRepository activityRepository,
+                                 StravaConfig stravaConfig,
+                                 StravaClient stravaClient) {
+        this.settingsRepository = settingsRepository;
+        this.activityRepository = activityRepository;
+        this.stravaConfig = stravaConfig;
+        this.stravaClient = stravaClient;
+
+        log.debug("Setting up Strava subscription");
+        if (stravaConfig == null ||
+                stravaConfig.getVerifytoken() == null ||
+                "uit".equals(stravaConfig.getVerifytoken())) {
+            log.debug("Disable van webhook voor Strava");
+        } else {
+            setupStravaWebhooksubscription();
+        }
+    }
+
+    private void setupStravaWebhooksubscription() {
+        final SubscriptionInformation webhookSubscription = getWebhookSubscription();
+        if (webhookSubscription == null) {
+            log.debug("No subscription found. ");
+            log.warn("Strava webhook not enabled");
+        } else {
+            log.debug("Subcription {} found.", webhookSubscription.getId());
+            stravaSubscriptionId = webhookSubscription.getId();
+        }
+    }
 
     public boolean isStravaConnected(Integer userId) {
         return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID) != null);
@@ -79,14 +104,15 @@ public class StravaActivityService {
     }
 
 
-    private void saveSetting(Integer userId, String name, String value){
+    private void saveSetting(Integer userId, String name, String value) {
 
-        settingsRepository.putSetting(userId,Setting.builder()
+        settingsRepository.putSetting(userId, Setting.builder()
                 .userId(userId)
                 .name(name)
                 .value(value)
                 .day(Date.valueOf(LocalDate.now())).build());
     }
+
     // scope=read -- > alleen private --> geeft errors bij ophalen details
     // scope=read,activity:read_all --> moet
     public SyncedAccount registerStravaConnectivity(Integer userId, String clientAuthorizationCode) {
@@ -208,7 +234,8 @@ public class StravaActivityService {
                                                       LocalDate date,
                                                       boolean forceUpdate) {
         List<LogActivity> newActivities = new ArrayList<>();
-        if (isStravaConnected(userId)) {
+        Boolean webHookDisabled = this.stravaSubscriptionId == null;
+        if ((webHookDisabled || forceUpdate) && isStravaConnected(userId)) {
 
             log.debug("Strava is connected. Syncing");
             StravaToken token = getStravaToken(userId);
@@ -217,9 +244,9 @@ public class StravaActivityService {
 
                 for (ListedActivityDto stravaActivity : stravaActivitiesForDay) {
                     log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
-                    final long id = stravaActivity.getId();
+                    final long stravaActivityId = stravaActivity.getId();
                     final Optional<LogActivity> matchingMacrologActivity = dayActivities.stream()
-                            .filter(a -> a.getSyncedId() != null && a.getSyncedId() == id)
+                            .filter(a -> a.getSyncedId() != null && a.getSyncedId() == stravaActivityId)
                             .findAny();
 
                     if (matchingMacrologActivity.isPresent()) {
@@ -229,12 +256,12 @@ public class StravaActivityService {
                             log.debug("Setting status to back to null");
                             matchedMacrologActivity.setStatus(null);
                             log.debug("Refreshing the activity details");
-                            syncActivity(token, id, matchedMacrologActivity);
+                            syncActivity(token, stravaActivityId, matchedMacrologActivity);
                             activityRepository.saveActivity(userId, matchedMacrologActivity);
                         }
                     } else {
                         log.debug("Activity [{}] not known");
-                        final LogActivity newMacrologActivity = createNewMacrologActivity(date, token, stravaActivity, id);
+                        final LogActivity newMacrologActivity = createNewMacrologActivity(token, stravaActivityId);
                         final LogActivity savedNewActivity = activityRepository.saveActivity(userId, newMacrologActivity);
                         newActivities.add(savedNewActivity);
                     }
@@ -246,29 +273,129 @@ public class StravaActivityService {
         return newActivities;
     }
 
-    private LogActivity createNewMacrologActivity(LocalDate date, StravaToken token, ListedActivityDto stravaActivity, long id) {
-        final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), id);
+    public SubscriptionInformation startWebhookSubcription() {
+        final Integer clientId = stravaConfig.getClientId();
+        final String clientSecret = stravaConfig.getClientSecret();
+        final String subscribeVerifyToken = stravaConfig.getVerifytoken();
+        final String callbackUrl = stravaConfig.getCallbackUrl();
+        final SubscriptionInformation subscriptionInformation = stravaClient.startWebhookSubscription(clientId, clientSecret, callbackUrl, subscribeVerifyToken);
+        if (subscriptionInformation != null) {
+            log.debug("Starting webhook subscription {}", subscriptionInformation.getId());
+            this.stravaSubscriptionId = subscriptionInformation.getId();
+        } else {
+            log.error("Unable to setup Strava Webhook'");
+        }
+        return subscriptionInformation;
+    }
+
+    public SubscriptionInformation getWebhookSubscription() {
+        final Integer clientId = stravaConfig.getClientId();
+        final String clientSecret = stravaConfig.getClientSecret();
+        final SubscriptionInformation subscriptionInformation = stravaClient.viewWebhookSubscription(clientId, clientSecret);
+        this.stravaSubscriptionId = subscriptionInformation == null ? null : subscriptionInformation.getId();
+        return subscriptionInformation;
+    }
+
+    public boolean endWebhookSubscription(Integer subscriptionId) {
+        this.stravaSubscriptionId = null;
+        final Integer clientId = stravaConfig.getClientId();
+        final String clientSecret = stravaConfig.getClientSecret();
+        return stravaClient.deleteWebhookSubscription(clientId, clientSecret, subscriptionId);
+    }
+
+    public void receiveWebHookEvent(WebhookEvent event) {
+        log.debug("'Received webhook event of owner {} for activity {} via subscription {}", event.getOwner_id(), event.getObject_id(), event.getSubscription_id());
+        if (!this.stravaSubscriptionId.equals(event.getSubscription_id())) {
+            log.error("Webhook event received from another subscription. Expected {}, but received {}", stravaSubscriptionId, event.getSubscription_id());
+            return;
+        }
+        final HashMap<String, String> updates = event.getUpdates();
+        if (event.getUpdates() != null) {
+            for (Map.Entry<String, String> stringStringEntry : updates.entrySet()) {
+                log.debug(stringStringEntry.getKey() + " - " + stringStringEntry.getValue());
+            }
+        }
+        final Optional<Setting> foundStravaUserMatch = settingsRepository.findByKeyValue(STRAVA_ATHLETE_ID, event.getOwner_id().toString());
+        if (foundStravaUserMatch.isPresent()) {
+            log.debug("User found " + foundStravaUserMatch.get().getUserId());
+            final StravaToken stravaToken = getStravaToken(foundStravaUserMatch.get().getUserId());
+
+            if (stravaToken == null) {
+                log.error("Unable to get Strava token for {}", foundStravaUserMatch.get().getUserId());
+                return;
+            }
+
+            if ("activity".equals(event.getObject_type())) {
+                processStravaActivityEvent(event, foundStravaUserMatch, stravaToken);
+            } else {
+                log.debug("Athlete events are ignored.");
+            }
+        } else {
+            log.error("Unable to process webhook event from Strava. No user found with Strava id {}", event.getOwner_id());
+        }
+
+    }
+
+    private void processStravaActivityEvent(WebhookEvent event, Optional<Setting> foundStravaUserMatch, StravaToken stravaToken) {
+        Long stravaActivityId = event.getObject_id();
+
+        if (!foundStravaUserMatch.isPresent()) {
+            log.error("Unable to process Strava Activity Event because the user could not be matched in our database.");
+            return;
+        }
+        final Optional<LogActivity> storedStrava = activityRepository.findByUserIdAndSyncIdAndSyncedWith(foundStravaUserMatch.get().getUserId(), STRAVA, stravaActivityId);
+
+        if ("create".equals(event.getAspect_type()) ||
+                "update".equals(event.getAspect_type())) {
+            // check if not already exists
+
+            if (storedStrava.isPresent()) {
+                LogActivity storedActivity = syncActivity(stravaToken, stravaActivityId, storedStrava.get());
+                activityRepository.saveActivity(foundStravaUserMatch.get().getUserId(), storedActivity);
+                log.debug("Strava activity updated");
+            } else {
+                final LogActivity newMacrologActivity = createNewMacrologActivity(stravaToken, stravaActivityId);
+                activityRepository.saveActivity(foundStravaUserMatch.get().getUserId(), newMacrologActivity);
+                log.debug("New activity added via strava {}", stravaActivityId);
+            }
+        } else if ("delete".equals(event.getAspect_type())) {
+            // delete activty
+            if (storedStrava.isPresent()) {
+                log.debug("Delete Activity {}", storedStrava.get().getId());
+                activityRepository.deleteLogActivity(foundStravaUserMatch.get().getUserId(), storedStrava.get().getId());
+            } else {
+                log.debug("Unable to delete Strava Activity {}. It was not synced.", stravaActivityId);
+            }
+        }
+    }
+
+    private LogActivity createNewMacrologActivity(@NotNull StravaToken token, @NotNull Long stravaActivityId) {
+        final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
+        final String startDateString = activityDetail.getStart_date();
+        // To avoid timezone issues we take the date part only and convert it to localdate
+        final LocalDate startDateLocalDate = LocalDateParser.parse(startDateString.substring(0, startDateString.indexOf('T')));
         return LogActivity.builder()
-                .day(Date.valueOf(date))
-                .name(makeUTF8(stravaActivity.getType() + ": " + stravaActivity.getName()))
+                .day(Date.valueOf(startDateLocalDate))
+                .name(makeUTF8(activityDetail.getType() + ": " + activityDetail.getName()))
                 .calories(activityDetail.getCalories())
-                .syncedId(stravaActivity.getId())
+                .syncedId(stravaActivityId)
                 .syncedWith(STRAVA)
                 .build();
     }
 
-    private String makeUTF8(String original){
+    private String makeUTF8(String original) {
         try {
 
             byte[] p = original.getBytes("ISO-8859-1");
-            String ret = new String(p,"UTF-8");
+            String ret = new String(p, "UTF-8");
             return ret;
         } catch (UnsupportedEncodingException e) {
-            log.error("Unable to make text UTF {}",original,e);
+            log.error("Unable to make text UTF {}", original, e);
             return "--";
         }
     }
-    private void syncActivity(StravaToken token, Long stravaActivityId, LogActivity storedActivity) {
+
+    private LogActivity syncActivity(StravaToken token, Long stravaActivityId, LogActivity storedActivity) {
 
         final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
 
@@ -276,6 +403,7 @@ public class StravaActivityService {
 
         storedActivity.setName(makeUTF8(name));
         storedActivity.setCalories(activityDetail.getCalories());
+        return storedActivity;
     }
 
     private boolean isExpired(StravaToken token) {

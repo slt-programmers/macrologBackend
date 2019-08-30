@@ -23,6 +23,8 @@ interface LogActivityCrudRepository extends CrudRepository<LogActivity, Long> {
     List<LogActivity> findByUserIdAndDay(Integer userId, Date date);
 
     Long countByUserIdAndSyncedWith(Integer userId, String strava);
+
+    Optional<LogActivity> findByUserIdAndSyncedWithAndSyncedId(Integer userId, String syncedWith, Long syncedID);
 }
 
 @Repository
@@ -69,4 +71,9 @@ public class ActivityRepository {
     public Long countByUserIdAndSyncedWith(Integer userId, String strava) {
         return logActivityCrudRepository.countByUserIdAndSyncedWith(userId, strava);
     }
+
+    public Optional<LogActivity> findByUserIdAndSyncIdAndSyncedWith(Integer userId, String syncedWith, Long syncedID) {
+        return logActivityCrudRepository.findByUserIdAndSyncedWithAndSyncedId(userId, syncedWith,syncedID);
+    }
+
 }
