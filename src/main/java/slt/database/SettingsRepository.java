@@ -45,6 +45,8 @@ public class SettingsRepository {
         Setting currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
         if (currentSetting == null) { // geen records
             log.debug("Insert");
+            // new settings cant have id's. clear it:
+            setting.setId(null);
             saveSetting(userId, setting);
         } else {
             log.debug("Update");
@@ -93,7 +95,7 @@ public class SettingsRepository {
 
     public void saveSetting(Integer userId, Setting settingDomain) {
         settingDomain.setUserId(userId);
-        settingsCrudRepository.save(settingDomain);
+        final Setting save = settingsCrudRepository.save(settingDomain);
     }
     public Optional<Setting> findByKeyValue(String name, String value) {
         return settingsCrudRepository.findByNameAndValue(name,value);
