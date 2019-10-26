@@ -10,11 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import slt.service.GoogleMailService;
 import slt.database.SettingsRepository;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
 import slt.dto.*;
-import slt.notification.MailService;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.JWTBuilder;
@@ -34,7 +34,7 @@ public class AuthenticationService {
     private SettingsRepository settingsRepository;
 
     @Autowired
-    private MailService mailService;
+    private GoogleMailService mailService;
 
     @Autowired
     private AccountService accountService;
