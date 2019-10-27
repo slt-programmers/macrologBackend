@@ -12,7 +12,6 @@ import slt.database.entities.UserAccount;
 
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -29,6 +29,8 @@ public class GoogleMailService {
     private static final String GMAIL_ACCESS_TOKEN = "GMAIL_ACCESS_TOKEN";
     private static final String GMAIL_EXPIRES_AT = "GMAIL_EXPIRES_AT";
     private static final String GMAIL_REFRESH_TOKEN = "GMAIL_REFRESH_TOKEN";
+    private static final String MACROLOG_FROM_ADDRESS = "macrologwebapp@gmail.com";
+    private static final String MAIL_SEND_TO_DEBUGLINE = "Mail send to";
 
     SettingsRepository settingsRepository;
     Integer adminUserId = -1;
@@ -55,7 +57,7 @@ public class GoogleMailService {
         }
     }
 
-    public HashMap<String, String> getMailStatus() {
+    public Map<String, String> getMailStatus() {
 
         boolean googleConnected = this.connected;
         HashMap<String, String> ret = new HashMap<>();
@@ -87,7 +89,6 @@ public class GoogleMailService {
 
         } else {
             log.error("Unable to get token for gmail");
-            return;
         }
     }
 
@@ -162,12 +163,12 @@ public class GoogleMailService {
 
 
     private boolean isExpired(Oath2Token token) {
-        Long expires_at = token.getExpires_at();
-        if (expires_at == null) {
-            expires_at = getExpiresAtFromExpiresIn(token.getExpires_in());
-            token.setExpires_at(expires_at);
+        Long expiresAt = token.getExpires_at();
+        if (expiresAt == null) {
+            expiresAt = getExpiresAtFromExpiresIn(token.getExpires_in());
+            token.setExpires_at(expiresAt);
         }
-        Instant instant = Instant.ofEpochSecond(expires_at);
+        Instant instant = Instant.ofEpochSecond(expiresAt);
         LocalDateTime timeTokenExpires = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
         LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(10);
         log.debug("Token valid until [{}]", timeTokenExpires);
@@ -175,72 +176,71 @@ public class GoogleMailService {
     }
 
     public void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
-        if (!connected) {
-            log.error("Uable to send mail. Google Mail is not connected.'");
-            return;
-        }
-        try {
-            String from = "macrologwebapp@gmail.com";
-            String subject = "Macrolog Credentials";
-            String body = "<h3>Hello " + account.getUsername() + ", </h3>" +
-                    "<p>A request has been made to reset your password. </p>" +
-                    "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
-                    "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
-                    "<p>If you did not request this password change, you can ignore this messsage. </p>" +
-                    "<p>See you soon! </p>" +
-                    "<p>Carmen and Arjan from Macrolog </p>";
+        if (isConnnectedToGmail()) {
+            try {
+                String subject = "Macrolog Credentials";
+                String body = "<h3>Hello " + account.getUsername() + ", </h3>" +
+                        "<p>A request has been made to reset your password. </p>" +
+                        "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
+                        "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
+                        "<p>If you did not request this password change, you can ignore this messsage. </p>" +
+                        "<p>See you soon! </p>" +
+                        "<p>Carmen and Arjan from Macrolog </p>";
 
-            log.debug("Mail send to" + email);
-            final MimeMessage email1 = googleClient.createEmail(email, from, subject, body);
-            googleClient.sendMail(getOath2Token(adminUserId), email1);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
+                final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
+                googleClient.sendMail(getOath2Token(adminUserId), email1);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
         }
     }
 
     public void sendConfirmationMail(String email, UserAccount account) {
-        if (!connected) {
-            log.error("Uable to send mail. Google Mail is not connected.'");
-            return;
-        }
-        try {
-            String from = "macrologwebapp@gmail.com";
-            String subject = "Welcome to Macrolog!";
-            String body = "<p>Hello " + account.getUsername() + ", </p>" +
-                    "<p>Thank you for using Macrolog!</p>" +
-                    "<p>You are now ready to use both the app and the <a href=\"https://macrolog.herokuapp.com/\"> website</a>. " +
-                    "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
-                    "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
-                    "<p>All the best,</p>" +
-                    "<p>Carmen and Arjan from Macrolog</p>";
+        if (isConnnectedToGmail()) {
+            try {
+                String subject = "Welcome to Macrolog!";
+                String body = "<p>Hello " + account.getUsername() + ", </p>" +
+                        "<p>Thank you for using Macrolog!</p>" +
+                        "<p>You are now ready to use both the app and the <a href=\"https://macrolog.herokuapp.com/\"> website</a>. " +
+                        "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
+                        "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
+                        "<p>All the best,</p>" +
+                        "<p>Carmen and Arjan from Macrolog</p>";
 
-            log.debug("Mail send to" + email);
-            final MimeMessage email1 = googleClient.createEmail(email, from, subject, body);
-            googleClient.sendMail(getOath2Token(adminUserId), email1);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
+                final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
+                googleClient.sendMail(getOath2Token(adminUserId), email1);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
         }
     }
 
-    public void sendTestMail(String email) {
+    private boolean isConnnectedToGmail() {
         if (!connected) {
             log.error("Uable to send mail. Google Mail is not connected.'");
-            return;
+            return true;
         }
-        try {
-            String from = "macrologwebapp@gmail.com";
-            String subject = "Test mail from Macrolog!";
-            String body = "<p>Hello,</p>" +
-                    "<p>This is a testmail for Macrolog!</p>" +
-                    "<p>And it works! Yay! </p>" +
-                    "<p>All the best,</p>" +
-                    "<p>Carmen and Arjan from Macrolog</p>";
+        return false;
+    }
 
-            log.debug("Mail send to" + email);
-            final MimeMessage email1 = googleClient.createEmail(email, from, subject, body);
-            googleClient.sendMail(getOath2Token(adminUserId), email1);
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+    public void sendTestMail(String email) {
+        if (isConnnectedToGmail()) {
+            try {
+                String subject = "Test mail from Macrolog!";
+                String body = "<p>Hello,</p>" +
+                        "<p>This is a testmail for Macrolog!</p>" +
+                        "<p>And it works! Yay! </p>" +
+                        "<p>All the best,</p>" +
+                        "<p>Carmen and Arjan from Macrolog</p>";
+
+                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
+                final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
+                googleClient.sendMail(getOath2Token(adminUserId), email1);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
         }
     }
 

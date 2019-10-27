@@ -69,8 +69,7 @@ public class GoogleClient {
                     .execute();
             log.debug("Mail {} send.",execute.getId());
         } catch (MessagingException e) {
-            log.error("Error during sending mail");
-            e.printStackTrace();
+            log.error("Error during sending mail",e);
         }
     }
 

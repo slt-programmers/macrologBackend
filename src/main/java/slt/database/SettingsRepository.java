@@ -10,7 +10,6 @@ import slt.database.entities.Setting;
 
 import javax.transaction.Transactional;
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,9 +92,9 @@ public class SettingsRepository {
         return settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
-    public void saveSetting(Integer userId, Setting settingDomain) {
+    public Setting saveSetting(Integer userId, Setting settingDomain) {
         settingDomain.setUserId(userId);
-        final Setting save = settingsCrudRepository.save(settingDomain);
+        return settingsCrudRepository.save(settingDomain);
     }
     public Optional<Setting> findByKeyValue(String name, String value) {
         return settingsCrudRepository.findByNameAndValue(name,value);
