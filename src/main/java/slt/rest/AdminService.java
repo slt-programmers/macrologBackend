@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -75,7 +76,7 @@ public class AdminService {
     }
 
     @GetMapping(path = "/mail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HashMap> getMailConfig() {
+    public ResponseEntity<Map> getMailConfig() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
