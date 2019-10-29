@@ -74,7 +74,7 @@ public class GoogleMailService {
                 .build();
         settingsRepository.putSetting(adminUserId, setting);
 
-        Oath2Token token = googleClient.getOath2Token(clientAuthorizationCode);
+        Oath2Token token = googleClient.getAuthorizationToken(clientAuthorizationCode);
 
         if (token != null) {
 

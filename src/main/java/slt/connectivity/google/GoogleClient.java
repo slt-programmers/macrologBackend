@@ -102,7 +102,7 @@ public class GoogleClient {
         return message;
     }
 
-    public Oath2Token getOath2Token(String authorizationCode)  {
+    public Oath2Token getAuthorizationToken(String authorizationCode)  {
 
         String clientId = googleConfig.getClientId();
         String clientSecret = googleConfig.getClientSecret();
@@ -114,10 +114,10 @@ public class GoogleClient {
         reqPayload.put(GRANT_TYPE, "authorization_code");
         reqPayload.put("redirect_uri",googleConfig.getRedirectUri());
 
-        return getOath2Token(reqPayload);
+        return getAuthorizationToken(reqPayload);
     }
 
-    private Oath2Token getOath2Token(Map reqPayload) {
+    private Oath2Token getAuthorizationToken(Map reqPayload) {
 
         try {
             final HttpHeaders headers = new HttpHeaders();
@@ -150,6 +150,6 @@ public class GoogleClient {
         reqPayload.put("refresh_token", refreshToken);
         reqPayload.put(GRANT_TYPE, grantType);
 
-        return getOath2Token(reqPayload);
+        return getAuthorizationToken(reqPayload);
     }
 }

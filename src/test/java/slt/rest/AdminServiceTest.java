@@ -14,14 +14,22 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
+import slt.dto.SettingDto;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.service.GoogleMailService;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -33,6 +41,9 @@ class AdminServiceTest {
 
     @Mock
     AccountService accountService;
+
+    @Mock
+    GoogleMailService googleMailService;
 
     @InjectMocks
     AdminService adminService;
@@ -50,13 +61,13 @@ class AdminServiceTest {
         UserAccount adminUser = new UserAccount();
         adminUser.setId(123);
         adminUser.setAdmin(true);
-        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
         UserAccount someUser = new UserAccount();
         someUser.setId(234);
         List<UserAccount> users = new ArrayList<>();
         users.add(someUser);
         users.add(adminUser);
-        Mockito.when(userRepo.getAllUsers()).thenReturn(users);
+        when(userRepo.getAllUsers()).thenReturn(users);
 
         ResponseEntity response = adminService.getAllUsers();
         Assertions.assertNotNull(response.getBody());
@@ -65,24 +76,24 @@ class AdminServiceTest {
         Assertions.assertEquals(2, userDtos.size());
         Assertions.assertEquals(234, userDtos.get(0).getId().intValue());
         Assertions.assertEquals(123, userDtos.get(1).getId().intValue());
-        Mockito.verify(userRepo).getAllUsers();
+        verify(userRepo).getAllUsers();
     }
 
     @Test
     void getAllUsersUnauthorized() {
         UserAccount nonAdminUser = new UserAccount();
         nonAdminUser.setId(123);
-        Mockito.when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
+        when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
         UserAccount someUser = new UserAccount();
         someUser.setId(234);
         List<UserAccount> users = new ArrayList<>();
         users.add(someUser);
         users.add(nonAdminUser);
-        Mockito.when(userRepo.getAllUsers()).thenReturn(users);
+        when(userRepo.getAllUsers()).thenReturn(users);
 
         ResponseEntity response = adminService.getAllUsers();
         Assertions.assertEquals(401, response.getStatusCodeValue());
-        Mockito.verify(userRepo, times(0)).getAllUsers();
+        verify(userRepo, times(0)).getAllUsers();
     }
 
     @Test
@@ -93,12 +104,12 @@ class AdminServiceTest {
 
         UserAccount toBeDeletedUser = new UserAccount();
         toBeDeletedUser.setId(234);
-        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
-        Mockito.when(userRepo.getUserById(234)).thenReturn(toBeDeletedUser);
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(userRepo.getUserById(234)).thenReturn(toBeDeletedUser);
 
         ResponseEntity response = adminService.deleteAccount(234);
         Assertions.assertEquals(200, response.getStatusCodeValue());
-        Mockito.verify(accountService).deleteAccount(234);
+        verify(accountService).deleteAccount(234);
     }
 
     @Test
@@ -107,8 +118,8 @@ class AdminServiceTest {
         adminUser.setId(123);
         adminUser.setAdmin(true);
 
-        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
-        Mockito.when(userRepo.getUserById(234)).thenReturn(null);
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(userRepo.getUserById(234)).thenReturn(null);
 
         ResponseEntity response = adminService.deleteAccount(234);
         Assertions.assertEquals(404, response.getStatusCodeValue());
@@ -122,8 +133,8 @@ class AdminServiceTest {
         adminUser.setId(123);
         adminUser.setAdmin(true);
 
-        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
-        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
 
         ResponseEntity response = adminService.deleteAccount(123);
         Assertions.assertEquals(400, response.getStatusCodeValue());
@@ -138,11 +149,92 @@ class AdminServiceTest {
 
         UserAccount toBeDeletedUser = new UserAccount();
         adminUser.setId(234);
-        Mockito.when(userRepo.getUserById(123)).thenReturn(adminUser);
-        Mockito.when(userRepo.getUserById(234)).thenReturn(toBeDeletedUser);
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(userRepo.getUserById(234)).thenReturn(toBeDeletedUser);
 
         ResponseEntity response = adminService.deleteAccount(234);
         Assertions.assertEquals(401, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
     }
+
+    @Test
+    void getMailConfigUnauthorized() {
+        UserAccount nonAdminUser = new UserAccount();
+        nonAdminUser.setId(123);
+
+        when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
+
+        ResponseEntity response = adminService.getMailConfig();
+        Assertions.assertEquals(401, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyZeroInteractions(googleMailService);
+    }
+    @Test
+    void storeMailSettingUnauthorized() throws IOException {
+        UserAccount nonAdminUser = new UserAccount();
+        nonAdminUser.setId(123);
+
+        when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
+
+        ResponseEntity response = adminService.storeMailSetting(SettingDto.builder().name("a").build());
+        Assertions.assertEquals(401, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyZeroInteractions(googleMailService);
+    }
+    @Test
+    void sendTestMailUnauthorized() throws IOException {
+        UserAccount nonAdminUser = new UserAccount();
+        nonAdminUser.setId(123);
+
+        when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
+
+        ResponseEntity response = adminService.sendTestMail(SettingDto.builder().build());
+        Assertions.assertEquals(401, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyZeroInteractions(googleMailService);
+    }
+
+    @Test
+    void getMailConfigAuthorized(){
+        UserAccount adminUser = new UserAccount();
+        adminUser.setId(123);
+        adminUser.setAdmin(true);
+
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+        when(googleMailService.getMailStatus()).thenReturn(new HashMap<>());
+
+        ResponseEntity response = adminService.getMailConfig();
+        Assertions.assertEquals(200, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+        verify(googleMailService).getMailStatus();
+
+    }
+
+    @Test
+    void storeMailSettingAuthorized() throws IOException {
+        UserAccount adminUser = new UserAccount();
+        adminUser.setId(123);
+        adminUser.setAdmin(true);
+
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+
+        ResponseEntity response = adminService.storeMailSetting(SettingDto.builder().value("a").build());
+        Assertions.assertEquals(200, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+        verify(googleMailService).registerWithCode(eq("a"));
+    }
+    @Test
+    void sendTestMailSettingAuthorized() throws IOException {
+        UserAccount adminUser = new UserAccount();
+        adminUser.setId(123);
+        adminUser.setAdmin(true);
+
+        when(userRepo.getUserById(123)).thenReturn(adminUser);
+
+        ResponseEntity response = adminService.sendTestMail(SettingDto.builder().value("a").build());
+        Assertions.assertEquals(200, response.getStatusCodeValue());
+        Mockito.verifyZeroInteractions(accountService);
+        verify(googleMailService).sendTestMail(eq("a"));
+    }
+
 }
