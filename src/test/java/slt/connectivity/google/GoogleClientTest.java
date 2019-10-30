@@ -1,6 +1,6 @@
 package slt.connectivity.google;
 
-import org.assertj.core.api.Assertions;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.matchers.CapturesArguments;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -21,14 +20,18 @@ import slt.config.GoogleConfig;
 import slt.connectivity.oath2.Oath2Token;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class GoogleClientTest {
@@ -103,6 +106,31 @@ class GoogleClientTest {
     void sendMailNoToken() throws IOException, GeneralSecurityException {
         Message message = mock(Message.class);
         googleClient.sendMail(null, message);
+        verify(googleConfig, times(0)).getApplicationName();
     }
 
+    @Test
+    void sendMailWithToken() {
+        Message message = mock(Message.class);
+
+
+        assertThrows(GoogleJsonResponseException.class, () -> {
+            googleClient.sendMail(Oath2Token.builder().build(),message);
+        });
+    }
+
+    @Test
+    void createMail() throws MessagingException {
+        final MimeMessage email = googleClient.createEmail("to", "from", "subject", "body");
+        assertThat(email.getFrom().length).isEqualTo(1);
+        assertThat(email.getAllRecipients().length).isEqualTo(1);
+    }
+
+    @Test
+    void createGoogleMail() throws IOException, MessagingException {
+        Message message = mock(MimeMessage.class);
+        final com.google.api.services.gmail.model.Message messageWithEmail = googleClient.createMessageWithEmail(message);
+
+        assertThat(messageWithEmail.getRaw()).isNotNull();
+    }
 }
