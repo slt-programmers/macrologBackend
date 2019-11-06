@@ -15,12 +15,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import slt.Application;
-import slt.service.GoogleMailService;
 import slt.dto.*;
 import slt.rest.*;
 import slt.security.SecurityConstants;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.service.GoogleMailService;
 
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;

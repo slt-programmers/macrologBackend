@@ -63,7 +63,7 @@ strava:
 google:
   client-id: 164533152729-b643nsgk4q03hffifnvd8v8m6rvupk28.apps.googleusercontent.com
   client-secret: uit
-  redirect-uri: http://localhost:4200/admin/mail
+  redirect-uri: https://localhost:4200/admin/mail
   application-name: Macrolog-localhost
 
 

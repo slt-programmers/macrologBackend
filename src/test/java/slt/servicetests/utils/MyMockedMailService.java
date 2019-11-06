@@ -2,9 +2,9 @@ package slt.servicetests.utils;
 
 import slt.config.GoogleConfig;
 import slt.connectivity.google.GoogleClient;
-import slt.service.GoogleMailService;
 import slt.database.SettingsRepository;
 import slt.database.entities.UserAccount;
+import slt.service.GoogleMailService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

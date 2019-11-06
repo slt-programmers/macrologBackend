@@ -14,7 +14,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.*;
+import slt.dto.ConnectivityRequestDto;
+import slt.dto.ConnectivityStatusDto;
+import slt.dto.MailRequestDto;
+import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.service.GoogleMailService;
@@ -24,9 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

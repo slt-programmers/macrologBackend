@@ -9,7 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.*;
+import slt.dto.ConnectivityRequestDto;
+import slt.dto.ConnectivityStatusDto;
+import slt.dto.MailRequestDto;
+import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.service.GoogleMailService;
@@ -86,7 +89,7 @@ public class AdminService {
     }
 
     @PostMapping(path = "/mail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeMailSetting(@RequestBody ConnectivityRequestDto connectivityRequestDto) throws IOException {
+    public ResponseEntity storeMailSetting(@RequestBody ConnectivityRequestDto connectivityRequestDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);

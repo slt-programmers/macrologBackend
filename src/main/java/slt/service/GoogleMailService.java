@@ -217,7 +217,7 @@ public class GoogleMailService {
             log.error("Uable to send mail. Google Mail is not connected.'");
             return true;
         }
-        return false;
+        return true;
     }
 
     public void sendTestMail(String email) {
