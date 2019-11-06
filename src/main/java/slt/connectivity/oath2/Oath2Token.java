@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @SuppressWarnings("all")
 public class Oath2Token {
 
-    Long expires_at;
-    Long expires_in;
-    String refresh_token;
-    String access_token;
+    private Long expires_at;
+    private Long expires_in;
+    private String refresh_token;
+    private String access_token;
 
 }

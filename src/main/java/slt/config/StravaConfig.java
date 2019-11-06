@@ -16,15 +16,13 @@ import javax.annotation.PostConstruct;
 @ConfigurationProperties("strava")
 public class StravaConfig {
 
-
-    Integer clientId;
-    String clientSecret;
-    String verifytoken;
-    String callbackUrl;
-
+    private Integer clientId;
+    private String clientSecret;
+    private String verifytoken;
+    private String callbackUrl;
 
     @PostConstruct
-    public void configGeladen() {
-        log.info("Strava geladen : {}", StringUtils.isNotEmpty(clientSecret));
+    public void configLoaded() {
+        log.info("Strava configured : {}", StringUtils.isNotEmpty(clientSecret));
     }
 }

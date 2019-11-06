@@ -9,8 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.SettingDto;
-import slt.dto.UserAccountDto;
+import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.service.GoogleMailService;
@@ -18,7 +17,6 @@ import slt.service.GoogleMailService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -74,8 +72,8 @@ public class AdminService {
         }
     }
 
-    @GetMapping(path = "/mail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> getMailConfig() {
+    @GetMapping(path = "/mail/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ConnectivityStatusDto> getMailStatus() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
@@ -88,7 +86,7 @@ public class AdminService {
     }
 
     @PostMapping(path = "/mail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeMailSetting(@RequestBody SettingDto code) throws IOException {
+    public ResponseEntity storeMailSetting(@RequestBody ConnectivityRequestDto connectivityRequestDto) throws IOException {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
@@ -96,13 +94,13 @@ public class AdminService {
             log.error("Not authorized to store mail settings");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            log.debug("Storing setting " + code.getName() + " - " + code.getValue());
-            mailService.registerWithCode(code.getValue());
+            log.debug("Handling connectivity request ");
+            mailService.registerWithCode(connectivityRequestDto.getClientAuthorizationCode());
             return new ResponseEntity(HttpStatus.OK);
         }
     }
     @PostMapping(path = "/mail/testmail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity sendTestMail(@RequestBody SettingDto code) throws IOException {
+    public ResponseEntity sendTestMail(@RequestBody MailRequestDto mailRequest) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
@@ -110,8 +108,8 @@ public class AdminService {
             log.error("Not authorized to send testmail");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         } else {
-            log.debug("Sending mail to  " + code.getName() + " - " + code.getValue());
-            mailService.sendTestMail(code.getValue());
+            log.debug("Sending mail to  " + mailRequest.getEmailTo());
+            mailService.sendTestMail(mailRequest.getEmailTo());
             return new ResponseEntity(HttpStatus.OK);
         }
     }

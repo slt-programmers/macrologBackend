@@ -13,6 +13,7 @@ import slt.connectivity.oath2.Oath2Token;
 import slt.database.SettingsRepository;
 import slt.database.entities.Setting;
 import slt.database.entities.UserAccount;
+import slt.dto.ConnectivityStatusDto;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,8 +51,8 @@ class GoogleMailServiceTest {
     void mailStatusStaatUit() {
         when(googleConfig.getClientSecret()).thenReturn("uit");
         GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-        final Map<String, String> mailStatus = mailService.getMailStatus();
-        assertThat(mailStatus.get("connected")).isEqualTo("false");
+        final ConnectivityStatusDto mailStatus = mailService.getMailStatus();
+        assertThat(mailStatus.isConnected()).isEqualTo(false);
     }
 
     @Test
@@ -60,8 +60,8 @@ class GoogleMailServiceTest {
             when(googleConfig.getClientSecret()).thenReturn("a");
             when(settingsRepository.getLatestSetting(any(), any())).thenReturn(null);
             GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-            final Map<String, String> mailStatus = mailService.getMailStatus();
-            assertThat(mailStatus.get("connected")).isEqualTo("false");
+            final ConnectivityStatusDto mailStatus = mailService.getMailStatus();
+            assertThat(mailStatus.isConnected()).isEqualTo(false);
     }
 
     @Test
@@ -69,8 +69,8 @@ class GoogleMailServiceTest {
         when(googleConfig.getClientSecret()).thenReturn("a");
         when(settingsRepository.getLatestSetting(any(), any())).thenReturn(Setting.builder().build());
         GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-        final Map<String, String> mailStatus = mailService.getMailStatus();
-        assertThat(mailStatus.get("connected")).isEqualTo("true");
+        final ConnectivityStatusDto mailStatus = mailService.getMailStatus();
+        assertThat(mailStatus.isConnected()).isEqualTo(true);
     }
 
     @Test
@@ -86,11 +86,11 @@ class GoogleMailServiceTest {
     void registerWithCodeWithSetting() {
 
         when(googleConfig.getClientSecret()).thenReturn("s");
-        assertThat(googleMailService.getMailStatus().get("connected")).isEqualTo("false");
+        assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(false);
 
         when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(Oath2Token.builder().expires_in(200L).build());
         googleMailService.registerWithCode("code");
-        assertThat(googleMailService.getMailStatus().get("connected")).isEqualTo("true");
+        assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(true);
 
         verify(settingsRepository,times(4)).putSetting(eq(-1), any());
     }

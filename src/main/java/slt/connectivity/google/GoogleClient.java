@@ -34,9 +34,9 @@ import java.util.Properties;
 public class GoogleClient {
 
 
-    public static final String CLIENT_ID = "client_id";
-    public static final String CLIENT_SECRET = "client_secret";
-    public static final String GRANT_TYPE = "grant_type";
+    private static final String CLIENT_ID = "client_id";
+    private static final String CLIENT_SECRET = "client_secret";
+    private static final String GRANT_TYPE = "grant_type";
     private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String ERROR_MESSAGE = "Fout bij versturen.";
 
@@ -91,7 +91,7 @@ public class GoogleClient {
         return email;
     }
 
-    com.google.api.services.gmail.model.Message createMessageWithEmail(Message emailContent)
+    protected com.google.api.services.gmail.model.Message createMessageWithEmail(Message emailContent)
             throws MessagingException, IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         emailContent.writeTo(buffer);
@@ -107,7 +107,7 @@ public class GoogleClient {
         String clientId = googleConfig.getClientId();
         String clientSecret = googleConfig.getClientSecret();
 
-        Map reqPayload = new HashMap();
+        Map<String,String> reqPayload = new HashMap();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("code", authorizationCode);
@@ -117,7 +117,7 @@ public class GoogleClient {
         return getAuthorizationToken(reqPayload);
     }
 
-    private Oath2Token getAuthorizationToken(Map reqPayload) {
+    private Oath2Token getAuthorizationToken(Map<String,String> reqPayload) {
 
         try {
             final HttpHeaders headers = new HttpHeaders();
@@ -144,7 +144,7 @@ public class GoogleClient {
         String clientId = googleConfig.getClientId();
         String clientSecret = googleConfig.getClientSecret();
 
-        Map reqPayload = new HashMap();
+        Map<String,String> reqPayload = new HashMap();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("refresh_token", refreshToken);

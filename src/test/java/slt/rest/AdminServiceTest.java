@@ -14,18 +14,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
-import slt.dto.SettingDto;
-import slt.dto.UserAccountDto;
+import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.service.GoogleMailService;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -164,7 +161,7 @@ class AdminServiceTest {
 
         when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
 
-        ResponseEntity response = adminService.getMailConfig();
+        ResponseEntity response = adminService.getMailStatus();
         Assertions.assertEquals(401, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         Mockito.verifyZeroInteractions(googleMailService);
@@ -176,19 +173,19 @@ class AdminServiceTest {
 
         when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
 
-        ResponseEntity response = adminService.storeMailSetting(SettingDto.builder().name("a").build());
+        ResponseEntity response = adminService.storeMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
         Assertions.assertEquals(401, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         Mockito.verifyZeroInteractions(googleMailService);
     }
     @Test
-    void sendTestMailUnauthorized() throws IOException {
+    void sendTestMailUnauthorized() {
         UserAccount nonAdminUser = new UserAccount();
         nonAdminUser.setId(123);
 
         when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
 
-        ResponseEntity response = adminService.sendTestMail(SettingDto.builder().build());
+        ResponseEntity response = adminService.sendTestMail(MailRequestDto.builder().build());
         Assertions.assertEquals(401, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         Mockito.verifyZeroInteractions(googleMailService);
@@ -201,9 +198,9 @@ class AdminServiceTest {
         adminUser.setAdmin(true);
 
         when(userRepo.getUserById(123)).thenReturn(adminUser);
-        when(googleMailService.getMailStatus()).thenReturn(new HashMap<>());
+        when(googleMailService.getMailStatus()).thenReturn(ConnectivityStatusDto.builder().build());
 
-        ResponseEntity response = adminService.getMailConfig();
+        ResponseEntity response = adminService.getMailStatus();
         Assertions.assertEquals(200, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         verify(googleMailService).getMailStatus();
@@ -218,20 +215,20 @@ class AdminServiceTest {
 
         when(userRepo.getUserById(123)).thenReturn(adminUser);
 
-        ResponseEntity response = adminService.storeMailSetting(SettingDto.builder().value("a").build());
+        ResponseEntity response = adminService.storeMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
         Assertions.assertEquals(200, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         verify(googleMailService).registerWithCode(eq("a"));
     }
     @Test
-    void sendTestMailSettingAuthorized() throws IOException {
+    void sendTestMailSettingAuthorized() {
         UserAccount adminUser = new UserAccount();
         adminUser.setId(123);
         adminUser.setAdmin(true);
 
         when(userRepo.getUserById(123)).thenReturn(adminUser);
 
-        ResponseEntity response = adminService.sendTestMail(SettingDto.builder().value("a").build());
+        ResponseEntity response = adminService.sendTestMail(MailRequestDto.builder().emailTo("a").build());
         Assertions.assertEquals(200, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         verify(googleMailService).sendTestMail(eq("a"));

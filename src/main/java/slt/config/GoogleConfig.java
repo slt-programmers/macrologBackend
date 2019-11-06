@@ -16,16 +16,15 @@ import javax.annotation.PostConstruct;
 @ConfigurationProperties("google")
 public class GoogleConfig {
 
-
-    String clientId;
-    String clientSecret;
-    String redirectUri;
-    String applicationName;
+    private String clientId;
+    private String clientSecret;
+    private String redirectUri;
+    private String applicationName;
 
 
     @PostConstruct
-    public void configGeladen() {
-        log.info("{} Google geladen : {}", applicationName, StringUtils.isNotEmpty(clientSecret));
+    public void configLoaded() {
+        log.info("{} Google configured : {}", applicationName, StringUtils.isNotEmpty(clientSecret));
     }
 
 }

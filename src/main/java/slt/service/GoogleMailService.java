@@ -9,6 +9,7 @@ import slt.connectivity.oath2.Oath2Token;
 import slt.database.SettingsRepository;
 import slt.database.entities.Setting;
 import slt.database.entities.UserAccount;
+import slt.dto.ConnectivityStatusDto;
 
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
@@ -18,8 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -31,15 +30,13 @@ public class GoogleMailService {
     private static final String GMAIL_REFRESH_TOKEN = "GMAIL_REFRESH_TOKEN";
     private static final String MACROLOG_FROM_ADDRESS = "macrologwebapp@gmail.com";
     private static final String MAIL_SEND_TO_DEBUGLINE = "Mail send to";
+    private static final Integer adminUserId = -1;
 
-    SettingsRepository settingsRepository;
-    Integer adminUserId = -1;
+    private final SettingsRepository settingsRepository;
+    private final GoogleConfig googleConfig;
+    private final GoogleClient googleClient;
 
-    GoogleConfig googleConfig;
-
-    GoogleClient googleClient;
-
-    Boolean connected = false;
+    private Boolean connected;
 
     public GoogleMailService(SettingsRepository settingsRepository,
                              GoogleConfig googleConfig,
@@ -57,13 +54,11 @@ public class GoogleMailService {
         }
     }
 
-    public Map<String, String> getMailStatus() {
-
-        boolean googleConnected = this.connected;
-        HashMap<String, String> ret = new HashMap<>();
-        ret.put("connected", String.valueOf(googleConnected));
-        ret.put("syncedApplicationId", googleConfig.getClientId());
-        return ret;
+    public ConnectivityStatusDto getMailStatus() {
+        return ConnectivityStatusDto.builder()
+                .connected(this.connected)
+                .syncedApplicationId(googleConfig.getClientId())
+                .build();
     }
 
     public void registerWithCode(String clientAuthorizationCode) {
