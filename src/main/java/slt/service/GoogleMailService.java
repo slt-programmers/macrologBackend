@@ -215,7 +215,7 @@ public class GoogleMailService {
     private boolean isConnnectedToGmail() {
         if (!connected) {
             log.error("Uable to send mail. Google Mail is not connected.'");
-            return true;
+            return false;
         }
         return true;
     }
