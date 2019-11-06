@@ -106,9 +106,10 @@ class GoogleMailServiceTest {
         instant = instant.plus(20, ChronoUnit.MINUTES);
         when(settingsRepository.getLatestSetting(eq(-1), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
 
-        googleMailService.sendPasswordRetrievalMail("mail",null,UserAccount.builder().build());
+        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        mailService.sendPasswordRetrievalMail("mail",null,UserAccount.builder().build());
 
-        verify(settingsRepository,times(4)).getLatestSetting(any(), any());
+        verify(settingsRepository,times(5)).getLatestSetting(any(), any());
 
         verify(googleClient,times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));    }
 
@@ -123,9 +124,10 @@ class GoogleMailServiceTest {
         instant = instant.plus(20, ChronoUnit.MINUTES);
         when(settingsRepository.getLatestSetting(eq(-1), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
 
-        googleMailService.sendConfirmationMail("mail",UserAccount.builder().build());
+        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        mailService.sendConfirmationMail("mail",UserAccount.builder().build());
 
-        verify(settingsRepository,times(4)).getLatestSetting(any(), any());
+        verify(settingsRepository,times(5)).getLatestSetting(any(), any());
 
         verify(googleClient,times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));    }
 
@@ -135,15 +137,15 @@ class GoogleMailServiceTest {
         when(googleConfig.getClientSecret()).thenReturn("secret");
         MimeMessage mimemessage = mock(MimeMessage.class);
         when(googleClient.createEmail(any(), any(), any(), any())).thenReturn(mimemessage);
-
         // Niet expired token:
         Instant instant = Instant.now();
         instant = instant.plus(20, ChronoUnit.MINUTES);
         when(settingsRepository.getLatestSetting(eq(-1), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
 
-        googleMailService.sendTestMail("mail");
+        mailService.sendTestMail("mail");
 
-        verify(settingsRepository,times(4)).getLatestSetting(any(), any());
+        verify(settingsRepository,times(5)).getLatestSetting(any(), any());
 
         verify(googleClient,times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));
     }
