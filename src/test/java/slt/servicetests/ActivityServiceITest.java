@@ -131,27 +131,27 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         assertEquals(1, newResponseEntries.size());
         runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(), "Running");
-        assertEquals(runningResponse.get().getCalories(), 44.0, 0.0, "Calorien bijgewerkt");
+        assertTrue(runningResponse.get().getCalories().equals(44.0), "Calorien bijgewerkt");
 
 
     }
 
-    @Test
-    public void testPostActivities() {
-        List<LogActivityDto> newActivities = Arrays.asList(
-                LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2001-01-01")))
-                        .name("Running")
-                        .calories(20.0)
-                        .build(),
-                LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2001-01-01")))
-                        .name("Cycling")
-                        .calories(30.0)
-                        .build()
-
-        );
-        ResponseEntity<List<LogActivityDto>> responseEntity = activityService.postActivities("2001-01-01", newActivities);
-
-    }
+//    @Test
+//    public void testPostActivities() {
+//        List<LogActivityDto> newActivities = Arrays.asList(
+//                LogActivityDto.builder()
+//                        .day(Date.valueOf(LocalDate.parse("2001-01-01")))
+//                        .name("Running")
+//                        .calories(20.0)
+//                        .build(),
+//                LogActivityDto.builder()
+//                        .day(Date.valueOf(LocalDate.parse("2001-01-01")))
+//                        .name("Cycling")
+//                        .calories(30.0)
+//                        .build()
+//
+//        );
+//        ResponseEntity<List<LogActivityDto>> responseEntity = activityService.postActivities("2001-01-01", newActivities);
+//
+//    }
 }
