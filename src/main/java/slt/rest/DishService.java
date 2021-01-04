@@ -12,7 +12,7 @@ import slt.database.DishRepository;
 import slt.database.FoodRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.Dish;
-import slt.dto.AddDishRequest;
+import slt.dto.DishRequest;
 import slt.dto.DishDto;
 import slt.dto.MyModelMapper;
 import slt.security.ThreadLocalHolder;
@@ -53,7 +53,7 @@ public class DishService {
 
     @ApiOperation(value = "Save dish")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DishDto> storeDish(@RequestBody AddDishRequest dishDto) {
+    public ResponseEntity<DishDto> storeDish(@RequestBody DishRequest dishDto) {
 
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         final Dish dishWithSameName = dishRepository.findByName(userInfo.getUserId(), dishDto.getName());

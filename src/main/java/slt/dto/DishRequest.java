@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddDishRequest {
+public class DishRequest {
 
     private Long id;
     @ApiModelProperty(notes = "Name of dish", required = true)

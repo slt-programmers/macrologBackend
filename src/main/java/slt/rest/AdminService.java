@@ -11,13 +11,12 @@ import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
 import slt.dto.ConnectivityRequestDto;
 import slt.dto.ConnectivityStatusDto;
-import slt.dto.MailRequestDto;
+import slt.dto.MailDto;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.service.GoogleMailService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +102,7 @@ public class AdminService {
         }
     }
     @PostMapping(path = "/mail/testmail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity sendTestMail(@RequestBody MailRequestDto mailRequest) {
+    public ResponseEntity sendTestMail(@RequestBody MailDto mailRequest) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);

@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddFoodRequest {
+public class FoodRequest {
 
     @ApiModelProperty(notes = "ID van food. Indien gevuld is het een update")
     private Long id;

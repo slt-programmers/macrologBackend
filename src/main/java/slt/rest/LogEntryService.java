@@ -3,8 +3,8 @@ package slt.rest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,7 @@ import slt.database.FoodRepository;
 import slt.database.LogEntryRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.LogEntry;
-import slt.dto.DayMacro;
-import slt.dto.LogEntryDto;
-import slt.dto.MyModelMapper;
-import slt.dto.StoreLogEntryRequest;
+import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.LocalDateParser;
@@ -45,24 +42,53 @@ public class LogEntryService {
 
     @ApiOperation(value = "Retrieve all stored logentries for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getLogEntriesForDay(@PathVariable("date") String date) {
-
+    public ResponseEntity<List<LogEntryDto>> getLogEntriesForDay(@PathVariable("date") String date) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("Request for " + userInfo);
         LocalDate parsedDate = LocalDateParser.parse(date);
 
-        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), Date.valueOf(parsedDate));
+        List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedDate);
         List<LogEntryDto> logEntryDtos = mapToDtos(allLogEntries);
 
         return ResponseEntity.ok(logEntryDtos);
     }
 
+    @ApiOperation(value = "Post entries")
+    @PostMapping(path = "/day/{date}",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<LogEntryDto>> postEntries(
+            @PathVariable("date") String date,
+            @RequestBody List<LogEntryRequest> entries) {
+        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
+        List<LogEntry> existingEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
+        ModelMapper mapper = myModelMapper.getConfiguredMapper();
+
+        // Delete old
+        for (LogEntry entry : existingEntries) {
+            if (!entries.stream().map(LogEntryRequest::getId)
+                    .collect(Collectors.toList()).contains(entry.getId())) {
+                logEntryRepository.deleteLogEntry(userInfo.getUserId(), entry.getId());
+            }
+        }
+
+        // Add or update
+        for (LogEntryRequest entry : entries) {
+            LogEntry entity = mapper.map(entry, LogEntry.class);
+            logEntryRepository.saveLogEntry(userInfo.getUserId(), entity);
+        }
+        List<LogEntry> allEntities = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
+        List<LogEntryDto> allEntries = allEntities.stream()
+                .map(entity -> mapper.map(entity, LogEntryDto.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(allEntries);
+    }
+
+    @Deprecated
     @ApiOperation(value = "Store logentries")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeLogEntries(@RequestBody List<StoreLogEntryRequest> logEntries) {
+    public ResponseEntity<List<LogEntryDto>> storeLogEntries(@RequestBody List<LogEntryRequest> logEntries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogEntryDto> newEntries = new ArrayList<>();
-        for (StoreLogEntryRequest logEntry : logEntries) {
+        for (LogEntryRequest logEntry : logEntries) {
             LogEntry entry = new LogEntry();
             entry.setPortionId(logEntry.getPortionId());
             entry.setFoodId(logEntry.getFoodId());
@@ -95,14 +121,14 @@ public class LogEntryService {
 
     @ApiOperation(value = "Delete logentry")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity deleteLogEntry(@PathVariable("id") Long logEntryId) {
+    public void deleteLogEntry(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         logEntryRepository.deleteLogEntry(userInfo.getUserId(), logEntryId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        ResponseEntity.ok().build();
     }
 
     @GetMapping(path = "/macros", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
+    public ResponseEntity<List<DayMacroDto>> getMacrosFromPeriod(@RequestParam("from") String fromDate, @RequestParam("to") String toDate) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
         LocalDate parsedFromDate = LocalDateParser.parse(fromDate);
@@ -119,9 +145,9 @@ public class LogEntryService {
             return logEntryDto;
         })));
 
-        List<DayMacro> retObject = new ArrayList<>();
+        List<DayMacroDto> retObject = new ArrayList<>();
         for (Map.Entry<java.util.Date, Optional<LogEntryDto>> dateOptionalEntry : collect.entrySet()) {
-            DayMacro dm = new DayMacro();
+            DayMacroDto dm = new DayMacroDto();
             dm.setDay(dateOptionalEntry.getKey());
             Optional<LogEntryDto> optionalValue = dateOptionalEntry.getValue();
             if (optionalValue.isPresent()) {
@@ -130,7 +156,7 @@ public class LogEntryService {
             }
             retObject.add(dm);
         }
-        retObject.sort(Comparator.comparing(DayMacro::getDay));
+        retObject.sort(Comparator.comparing(DayMacroDto::getDay));
 
         return ResponseEntity.ok(retObject);
     }

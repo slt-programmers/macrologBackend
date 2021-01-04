@@ -42,8 +42,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "logEntryFood1";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         String day = "2010-01-01";
 
@@ -63,8 +63,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "dubbeleLogEntry";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         String day = "2001-01-01";
 
@@ -84,7 +84,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
     public void testCreateLogEntryWithPortions() {
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestMetPortions = AddFoodRequest.builder()
+        FoodRequest foodRequestMetPortions = FoodRequest.builder()
                 .name("logEntryFood2")
                 .carbs(1.0)
                 .fat(2.0)
@@ -94,7 +94,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
                         PortionDto.builder().grams(2.0).description("p2").build()
                 ))
                 .build();
-        FoodDto savedFood = createFood(addFoodRequestMetPortions);
+        FoodDto savedFood = createFood(foodRequestMetPortions);
         PortionDto portion1= savedFood.getPortions().stream().filter(p->p.getDescription().equals("p1")).findFirst().get();
 
         // Portion 1 3x
@@ -119,8 +119,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String day = "2001-01-03";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
 
@@ -128,8 +128,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(entriesForDay).hasSize(1);
 
         // Create Store Request with update of entry
-        List<StoreLogEntryRequest> updateEntries = Arrays.asList(
-                StoreLogEntryRequest.builder()
+        List<LogEntryRequest> updateEntries = Arrays.asList(
+                LogEntryRequest.builder()
                         .day(Date.valueOf(LocalDate.parse(day)))
                         .meal("BREAKFAST")
                         .portionId(null)
@@ -156,8 +156,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "foodDeleteLogEntry";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
 
@@ -178,8 +178,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "macrostest";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
 
@@ -190,7 +190,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         ResponseEntity macrosFromPeriod = logEntryService.getMacrosFromPeriod("1980-01-05", "1980-01-06");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        List<DayMacro> foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
         assertThat(foundMacros.get(0).getMacro().getProtein()).isEqualTo(savedFood.getProtein());
         assertThat(foundMacros.get(0).getMacro().getFat()).isEqualTo(savedFood.getFat());
@@ -199,13 +199,13 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         macrosFromPeriod = logEntryService.getMacrosFromPeriod("1980-01-01", "1980-01-05");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
 
         macrosFromPeriod = logEntryService.getMacrosFromPeriod("1980-01-01", "1980-01-04");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(0);
 
 
@@ -218,8 +218,8 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "macrostestMultipleAdAY";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto savedFood = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
         createLogEntry(day,savedFood, null, 3.0);
@@ -231,7 +231,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         ResponseEntity macrosFromPeriod = logEntryService.getMacrosFromPeriod("1960-01-05", "1960-01-06");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        List<DayMacro> foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
         assertThat(foundMacros.get(0).getMacro().getProtein()).isEqualTo(savedFood.getProtein()*4);
         assertThat(foundMacros.get(0).getMacro().getFat()).isEqualTo(savedFood.getFat()*4);
@@ -246,13 +246,13 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         macrosFromPeriod = logEntryService.getMacrosFromPeriod("1960-01-01", "1960-01-05");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
 
         macrosFromPeriod = logEntryService.getMacrosFromPeriod("1960-01-01", "1960-01-04");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(0);
 
 
@@ -267,7 +267,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "macrostestwithPortions";
 
         // 1 create a food without portion:
-        AddFoodRequest addFoodRequestMetPortions = AddFoodRequest.builder()
+        FoodRequest foodRequestMetPortions = FoodRequest.builder()
                 .name(nameFood)
                 .carbs(1.0)
                 .fat(2.0)
@@ -277,7 +277,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
                         PortionDto.builder().grams(2.0).description("p2").build()
                 ))
                 .build();
-        FoodDto savedFood = createFood(addFoodRequestMetPortions);
+        FoodDto savedFood = createFood(foodRequestMetPortions);
         PortionDto portion1= savedFood.getPortions().stream().filter(p->p.getDescription().equals("p1")).findFirst().get();
 
         createLogEntry(day,savedFood, portion1.getId(), 1.0);
@@ -289,7 +289,7 @@ public class LogEntryServiceITest extends AbstractApplicationIntegrationTest {
         ResponseEntity macrosFromPeriod = logEntryService.getMacrosFromPeriod("2002-01-01", "2002-01-05");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
-        List<DayMacro> foundMacros = (List<DayMacro>) macrosFromPeriod.getBody();
+        List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
         // potion is 1 gram, dus alles gedeeld door 100
         assertThat(foundMacros.get(0).getMacro().getProtein()).isEqualTo(savedFood.getProtein()/100);

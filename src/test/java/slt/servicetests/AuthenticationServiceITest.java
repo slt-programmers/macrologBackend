@@ -229,11 +229,11 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         setUserContextFromJWTResponseHeader(responseEntity);
 
         // add food zonder portion
-        AddFoodRequest addFoodRequestZonderPortions = AddFoodRequest.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto foodZonderPortion = createFood(addFoodRequestZonderPortions);
+        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodZonderPortion = createFood(foodRequestZonderPortions);
 
         // add food met portion
-        AddFoodRequest addFoodRequestMetPortions = AddFoodRequest.builder()
+        FoodRequest foodRequestMetPortions = FoodRequest.builder()
                 .name("exportFoodWithPortion")
                 .carbs(1.0)
                 .fat(2.0)
@@ -250,7 +250,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                         )
                 )
                 .build();
-        FoodDto savedFood = createFood(addFoodRequestMetPortions);
+        FoodDto savedFood = createFood(foodRequestMetPortions);
         PortionDto portion1= savedFood.getPortions().stream().filter(p->p.getDescription().equals("portion1")).findFirst().get();
 
         // add log entry without portion

@@ -107,7 +107,7 @@ class MyModelMapperTest {
 
     @Test
     public void testAddDishRequestMapping() {
-        AddDishRequest dto = AddDishRequest.builder()
+        DishRequest dto = DishRequest.builder()
                 .name("dish")
                 .ingredients(Arrays.asList(
                         AddDishIngredientDto.builder()

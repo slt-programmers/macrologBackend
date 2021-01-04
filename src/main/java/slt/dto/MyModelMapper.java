@@ -81,7 +81,7 @@ public class MyModelMapper {
     }
 
     private void addAddDishRequestDish(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(AddDishRequest.class, Dish.class)
+        modelMapper.createTypeMap(DishRequest.class, Dish.class)
                 .setPostConverter(mappingContext -> {
                     if (mappingContext.getDestination().getIngredients() != null) {
                         for (Ingredient ingredient : mappingContext.getDestination().getIngredients()) {

@@ -39,7 +39,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
     public void testCreateAndDeleteEmptyDish(){
 
         String dishName = "emptyDish";
-        AddDishRequest newDishRequest = AddDishRequest.builder().name(dishName).build();
+        DishRequest newDishRequest = DishRequest.builder().name(dishName).build();
         ResponseEntity responseEntity = dishService.storeDish(newDishRequest);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
@@ -58,7 +58,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
     public void testCreateSameDish(){
 
         String dishName = "sameDish";
-        AddDishRequest newDish = AddDishRequest.builder().name(dishName).build();
+        DishRequest newDish = DishRequest.builder().name(dishName).build();
         ResponseEntity responseEntity = dishService.storeDish(newDish);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
@@ -69,7 +69,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(emptyDish.get().getId()).isNotNull();
         assertThat(emptyDish.get().getIngredients()).isEmpty();
 
-        AddDishRequest sameDish = AddDishRequest.builder().name(dishName).build();
+        DishRequest sameDish = DishRequest.builder().name(dishName).build();
         responseEntity = dishService.storeDish(sameDish);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
@@ -79,10 +79,10 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
 
         String dishName = "with1Food";
 
-        FoodDto food1 = createFood(AddFoodRequest.builder().name("food1").carbs(1.0).fat(2.0).protein(3.0).build());
-        FoodDto food2 = createFood(AddFoodRequest.builder().name("food2").carbs(4.0).fat(5.0).protein(6.0).build());
+        FoodDto food1 = createFood(FoodRequest.builder().name("food1").carbs(1.0).fat(2.0).protein(3.0).build());
+        FoodDto food2 = createFood(FoodRequest.builder().name("food2").carbs(4.0).fat(5.0).protein(6.0).build());
 
-        AddDishRequest newDish = AddDishRequest.builder()
+        DishRequest newDish = DishRequest.builder()
                 .name(dishName)
                 .ingredients(
                         Arrays.asList(
@@ -121,15 +121,15 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
 
         String dishName = "withPortions";
 
-        FoodDto food1 = createFood(AddFoodRequest.builder().name("food3").carbs(1.0).fat(2.0).protein(3.0).
+        FoodDto food1 = createFood(FoodRequest.builder().name("food3").carbs(1.0).fat(2.0).protein(3.0).
                 portions(Arrays.asList(
                         PortionDto.builder().description("p1").grams(200.0).build(),
                         PortionDto.builder().description("p2").grams(600.0).build()
                 )).build());
-        FoodDto food2 = createFood(AddFoodRequest.builder().name("food4").carbs(4.0).fat(5.0).protein(6.0).build());
+        FoodDto food2 = createFood(FoodRequest.builder().name("food4").carbs(4.0).fat(5.0).protein(6.0).build());
 
         PortionDto food1Portion1 = food1.getPortions().stream().filter(p -> p.getDescription().equals("p1")).findFirst().get();
-        AddDishRequest newDish = AddDishRequest.builder()
+        DishRequest newDish = DishRequest.builder()
                 .name(dishName)
                 .ingredients(
                         Arrays.asList(

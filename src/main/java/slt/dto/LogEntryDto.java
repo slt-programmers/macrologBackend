@@ -17,14 +17,20 @@ import java.util.Date;
 public class LogEntryDto {
 
     private Long id;
+
     private FoodDto food;
+
     @ApiModelProperty(notes = "PortionDto used.")
     private PortionDto portion;
+
     private Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+
     @ApiModelProperty(notes = "Multiplier of the measurement", required = true, example = "1.7")
     private Double multiplier;
+
     @ApiModelProperty(notes = "Day of log", required = true)
     private Date day;
+
     @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK", required = true, example = "BREAKFAST")
     private String meal;
 
