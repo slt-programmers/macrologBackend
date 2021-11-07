@@ -66,33 +66,33 @@ public class FoodService {
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity addFood(@RequestBody AddFoodRequest addFoodRequest) {
+    public ResponseEntity addFood(@RequestBody FoodRequest foodRequest) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (addFoodRequest.getId() != null) {
+        if (foodRequest.getId() != null) {
             // Update request
-            updateFoodRequest(addFoodRequest, userInfo);
+            updateFoodRequest(foodRequest, userInfo);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
-            Food food = foodRepository.getFood(userInfo.getUserId(), addFoodRequest.getName());
+            Food food = foodRepository.getFood(userInfo.getUserId(), foodRequest.getName());
             if (food != null) {
                 String errorMessage = "This food is already in your database";
                 return ResponseEntity.badRequest().body(errorMessage);
             } else {
-                return createNewFood(addFoodRequest, userInfo);
+                return createNewFood(foodRequest, userInfo);
             }
         }
     }
 
-    private ResponseEntity createNewFood(@RequestBody AddFoodRequest addFoodRequest, UserInfo userInfo) {
+    private ResponseEntity createNewFood(@RequestBody FoodRequest foodRequest, UserInfo userInfo) {
         Food newFood = new Food();
-        newFood.setName(addFoodRequest.getName());
-        newFood.setCarbs(addFoodRequest.getCarbs());
-        newFood.setFat(addFoodRequest.getFat());
-        newFood.setProtein(addFoodRequest.getProtein());
+        newFood.setName(foodRequest.getName());
+        newFood.setCarbs(foodRequest.getCarbs());
+        newFood.setFat(foodRequest.getFat());
+        newFood.setProtein(foodRequest.getProtein());
 
         Food insertedFood = foodRepository.saveFood(userInfo.getUserId(), newFood);
-        if (addFoodRequest.getPortions() != null && !addFoodRequest.getPortions().isEmpty()) {
-            for (PortionDto portionDto : addFoodRequest.getPortions()) {
+        if (foodRequest.getPortions() != null && !foodRequest.getPortions().isEmpty()) {
+            for (PortionDto portionDto : foodRequest.getPortions()) {
                 Portion newPortion = new Portion();
                 newPortion.setDescription(portionDto.getDescription());
                 newPortion.setGrams(portionDto.getGrams());
@@ -103,18 +103,18 @@ public class FoodService {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    private void updateFoodRequest(@RequestBody AddFoodRequest addFoodRequest, UserInfo userInfo) {
+    private void updateFoodRequest(@RequestBody FoodRequest foodRequest, UserInfo userInfo) {
         Food newFood = new Food();
-        newFood.setId(addFoodRequest.getId());
-        newFood.setName(addFoodRequest.getName());
-        newFood.setCarbs(addFoodRequest.getCarbs());
-        newFood.setFat(addFoodRequest.getFat());
-        newFood.setProtein(addFoodRequest.getProtein());
+        newFood.setId(foodRequest.getId());
+        newFood.setName(foodRequest.getName());
+        newFood.setCarbs(foodRequest.getCarbs());
+        newFood.setFat(foodRequest.getFat());
+        newFood.setProtein(foodRequest.getProtein());
 
         foodRepository.saveFood(userInfo.getUserId(), newFood);
 
         // remove portions not supported yet.
-        for (PortionDto portionDto : addFoodRequest.getPortions()) {
+        for (PortionDto portionDto : foodRequest.getPortions()) {
             Long id = portionDto.getId();
             if (id != null) {
                 // update portion

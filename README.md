@@ -1,11 +1,11 @@
-README
+## Macrolog Backend
 
 application.yaml defines port for localhost
 
-To start app:
-> mvnw.cmd spring-boot:run
-or if you have Maven installed:
->mvn spring-boot:run
+## Database local setup
+Make sure there's a version of mysql db running on your OS. 
+DBeaver is a helpful tool for this (https://dbeaver.io/download/).
+The datasource configuration in application.yml contains the user and password for the database.
 
 > Setup database
  in windows ODBC aanmaken met user zoals in application.properties
@@ -24,34 +24,46 @@ or if you have Maven installed:
 Hier wordt wel de oude jar gebruikt, maar pak de versie 8 jar ipv 5.1 (Hij zit al in je maven als het goed is)\
 C:\Users\arjan\.m2\repository\mysql\mysql-connector-java\8.0.11
 
-Swagger is te bereiken via:\
+
+## Starting the app
+Commandline maven
+- mvn spring-boot:run
+
+If you haven't maven installed
+- mvnw.cmd spring-boot:run
+
+
+## Swagger
 http://localhost:8090/swagger-ui.html
+https://macrolog-backend.herokuapp.com/swagger-ui.html
+To use swagger you can authenticate yourself in the top right corner.
 
-Interfaces:
-Opslaan van voedsel:
-POST /foodDto/<Naam voedsel> <-- HIERNAAR TOE REQUEST MET MACRO PER 100
-
-Database export:
-CMD prompt openen , maar doe dit RUN ALS AMINISTRATOR (rechtermuisknop)
-dan naar 
-C:\Program Files\MySQL\MySQL Server 8.0\bin>
-mysqldump --user=root --password=? test >testdump.sql
+Use the authentication-service login call to retrieve a token with your macrolog credentials.
+Authorize yourself by fillin in "Bearer " and then your token in the api_key value. 
 
 
-Heroku:
+## Database export
+Open cmd as admin
+Navigate to the mysql bin folder (C:\Program Files\MySQL\MySQL Server 8.0\bin on windows)
+To generate a backup
+- mysqldump -u [user name] –p [password] [database name] > [dumpfilename.sql]
+To restore a dumped db
+- mysqldump -u [user name] -p [password] [database name] < [dumpfilename.sql]
+
+
+## Heroku
 https://dashboard.heroku.com/apps
 
-Zie https://dashboard.heroku.com/apps/macrolog-backend/deploy/heroku-git voor een manual om te git repo te connecten.
+To connect a git repo to heroku, 
+see https://dashboard.heroku.com/apps/macrolog-backend/deploy/heroku-git 
 
-De app is nu ingesteld om automatisch te deployen als je naar de heroku git master pushed
 
-Swagger UI met authorization
+## Automatic deployment
+The backend is configured to automatically deploy to heroku. 
+This is configured on the heroku dashboard. 
+Pushing to master results in deployment to ACC.
+Pushing to release results in deployment to PRD.
 
-Swagger is te gebruiken dmv Authorize, de knop rechtsboven.
 
-Log hier in door in de teksts balk de key te zetten, voorafgaand aan de tekst Bearer.
-Voorbeeld:
-Bearer 2r8y489574fksdbjfkh
-De key kun je krijgen door in te loggen via de authenication service.
-Deze geeft te token terug die je hierboven kunt gebruiken.
+
 

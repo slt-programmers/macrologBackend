@@ -122,18 +122,18 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
 
-    protected FoodDto createFood(AddFoodRequest addFoodRequestZonderPortions) {
-        ResponseEntity responseEntity = foodService.addFood(addFoodRequestZonderPortions);
+    protected FoodDto createFood(FoodRequest foodRequestZonderPortions) {
+        ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
         ResponseEntity allFoodEntity = foodService.getAllFood();
         assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
         List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
-        return foodDtos.stream().filter(f -> f.getName().equals(addFoodRequestZonderPortions.getName())).findFirst().get();
+        return foodDtos.stream().filter(f -> f.getName().equals(foodRequestZonderPortions.getName())).findFirst().get();
     }
 
     protected void createLogEntry(String day, FoodDto savedFood, Long portionId, double multiplier) {
-        List<StoreLogEntryRequest> newLogEntries = Arrays.asList(
-                StoreLogEntryRequest.builder()
+        List<LogEntryRequest> newLogEntries = Arrays.asList(
+                LogEntryRequest.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
                         .meal("BREAKFAST")
                         .portionId(portionId)

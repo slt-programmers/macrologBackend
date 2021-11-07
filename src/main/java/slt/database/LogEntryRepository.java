@@ -11,6 +11,7 @@ import slt.database.entities.LogEntry;
 import javax.transaction.Transactional;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 
 interface LogEntryCrudRepository extends CrudRepository<LogEntry, Long> {
@@ -60,9 +61,9 @@ public class LogEntryRepository {
         return logEntryCrudRepository.findByUserId(userId);
     }
 
-    public List<LogEntry> getAllLogEntries(Integer userId, Date date) {
+    public List<LogEntry> getAllLogEntries(Integer userId, LocalDate date) {
         log.debug("Getting entries for " + date);
-        return logEntryCrudRepository.findByUserIdAndDay(userId,date);
+        return logEntryCrudRepository.findByUserIdAndDay(userId, Date.valueOf(date));
     }
 
     public List<LogEntry> getAllLogEntries(Integer userId, Date begin, Date end) {

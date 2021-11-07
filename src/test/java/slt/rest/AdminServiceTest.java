@@ -16,7 +16,7 @@ import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
 import slt.dto.ConnectivityRequestDto;
 import slt.dto.ConnectivityStatusDto;
-import slt.dto.MailRequestDto;
+import slt.dto.MailDto;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -186,7 +186,7 @@ class AdminServiceTest {
 
         when(userRepo.getUserById(123)).thenReturn(nonAdminUser);
 
-        ResponseEntity response = adminService.sendTestMail(MailRequestDto.builder().build());
+        ResponseEntity response = adminService.sendTestMail(MailDto.builder().build());
         Assertions.assertEquals(401, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         Mockito.verifyZeroInteractions(googleMailService);
@@ -229,7 +229,7 @@ class AdminServiceTest {
 
         when(userRepo.getUserById(123)).thenReturn(adminUser);
 
-        ResponseEntity response = adminService.sendTestMail(MailRequestDto.builder().emailTo("a").build());
+        ResponseEntity response = adminService.sendTestMail(MailDto.builder().emailTo("a").build());
         Assertions.assertEquals(200, response.getStatusCodeValue());
         Mockito.verifyZeroInteractions(accountService);
         verify(googleMailService).sendTestMail(eq("a"));
