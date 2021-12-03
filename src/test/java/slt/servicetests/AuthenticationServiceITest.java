@@ -216,7 +216,6 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     void deleteFilledAccount() {
-
         String userName = "filledUserToDelete";
         String userEmail = "filledUserToDelete@test.example";
         String password = "password1";
@@ -274,7 +273,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                         .build()
 
         );
-        responseEntity = activityService.storeActivities(newActivities);
+        responseEntity = activityService.postActivities("2003-01-01", newActivities);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // add weight

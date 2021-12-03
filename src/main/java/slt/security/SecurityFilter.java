@@ -25,17 +25,16 @@ public class SecurityFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
-
         if (allowOrigin == null) {
             String allowOriginEnv = getFromEnvironment();
-            allowOrigin= StringUtils.isEmpty(allowOriginEnv)?"http://localhost:4200":allowOriginEnv;
+            allowOrigin = StringUtils.isEmpty(allowOriginEnv) ? "http://localhost:4200" : allowOriginEnv;
         }
         log.debug("Security filter init");
         log.debug("Only accepting requests form " + allowOrigin);
     }
 
     protected String getFromEnvironment() {
-        return System.getenv("allow.crossorigin");//NOSONAR
+        return System.getenv("allow.crossorigin"); //NOSONAR
     }
 
     @Override
@@ -47,12 +46,10 @@ public class SecurityFilter implements Filter {
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Authorization,Access-Control-Allow-Headers,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Content-Type,Authorization");
             chain.doFilter(request, response);
         } else {
-
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getAllowOrigin());
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
             ((HttpServletResponse) response).setHeader("Access-Control-Max-Age", "3600");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
-
 
             HttpServletRequest req = (HttpServletRequest) request;
             log.debug("Starting req : {}", req.getRequestURI());
@@ -94,7 +91,7 @@ public class SecurityFilter implements Filter {
 
     @Override
     public void destroy() {
-      // Do nothing
+        // Do nothing
     }
 
 }

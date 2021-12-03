@@ -19,8 +19,6 @@ import slt.security.UserInfo;
 import slt.util.LocalDateParser;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,37 +90,6 @@ public class ActivityService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(allActs);
     }
-
-    @Deprecated // Remove when frontend uses postActivities
-    @ApiOperation(value = "Store activities")
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LogActivityDto>> storeActivities(@RequestBody List<LogActivityDto> logActivities) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<LogActivityDto> newEntries = new ArrayList<>();
-
-        for (LogActivityDto logEntry : logActivities) {
-            LogActivity entry = myModelMapper.getConfiguredMapper().map(logEntry, LogActivity.class);
-            if (logEntry.getId() == null) {
-                logActivityRepository.saveActivity(userInfo.getUserId(), entry);
-                List<LogActivity> addedEntryMatches = logActivityRepository.getAllLogActivities(userInfo.getUserId(), entry.getDay().toLocalDate());
-                if (addedEntryMatches.size() > 1) {
-                    LogActivity newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogActivity::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
-                    addedEntryMatches = new ArrayList<>();
-                    addedEntryMatches.add(newestEntry);
-                }
-                if (addedEntryMatches.size() != 1) {
-                    log.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getName() + " - " + entry.getDay());
-                }
-                newEntries.add(myModelMapper.getConfiguredMapper().map(addedEntryMatches.get(0), LogActivityDto.class));
-            } else {
-                logActivityRepository.saveActivity(userInfo.getUserId(), entry);
-                newEntries.add(myModelMapper.getConfiguredMapper().map(entry, LogActivityDto.class));
-            }
-        }
-
-        return ResponseEntity.ok(newEntries);
-    }
-
 
     @ApiOperation(value = "Delete activity")
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

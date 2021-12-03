@@ -86,7 +86,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
                         .build()
 
         );
-        ResponseEntity responseEntity = activityService.storeActivities(newActivities);
+        ResponseEntity responseEntity = activityService.postActivities("2003-01-01" , newActivities);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // add weight

@@ -54,10 +54,10 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
                         .build()
 
         );
-        ResponseEntity responseEntity = activityService.storeActivities(newActivities);
+        ResponseEntity<List<LogActivityDto>> responseEntity = activityService.postActivities("2001-01-01", newActivities);
 
         // Check response object from store call
-        List<LogActivityDto> newEntries = (List<LogActivityDto>) responseEntity.getBody();
+        List<LogActivityDto> newEntries = responseEntity.getBody();
         assert newEntries != null;
         assertEquals(2, newEntries.size());
 
@@ -78,10 +78,10 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Assertions.assertNotNull(cycling.get().getId());
 
         // Check response object from get activities for day
-        ResponseEntity activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
+        ResponseEntity<List<LogActivityDto>> activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
         Assert.isTrue(200 == activitiesForDay.getStatusCodeValue(), "message");
 
-        List<LogActivityDto> newResponseEntries = (List<LogActivityDto>) activitiesForDay.getBody();
+        List<LogActivityDto> newResponseEntries = activitiesForDay.getBody();
         assert newResponseEntries != null;
         assertEquals(2, newResponseEntries.size());
 
@@ -102,14 +102,14 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         Assertions.assertNotNull(cyclingResponse.get().getId());
 
         // delete 1 activity. remove cycling
-        ResponseEntity responseEntity1 = activityService.deleteActivity(cyclingResponse.get().getId());
+        activityService.deleteActivity(cyclingResponse.get().getId());
         Assert.isTrue(200 == activitiesForDay.getStatusCodeValue(), "message");
 
         // Check response object from get activities for day.
         activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
         Assert.isTrue(200 == activitiesForDay.getStatusCodeValue(), "message");
 
-        newResponseEntries = (List<LogActivityDto>) activitiesForDay.getBody();
+        newResponseEntries = activitiesForDay.getBody();
         assert newResponseEntries != null;
         assertEquals(1, newResponseEntries.size());
 
@@ -118,40 +118,20 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
 
         // Update Running
         runningResponse.get().setCalories(44.0);
-        responseEntity = activityService.storeActivities(Collections.singletonList(runningResponse.get()));
-        Assert.isTrue(200 == responseEntity.getStatusCodeValue());
-        newResponseEntries = (List<LogActivityDto>) responseEntity.getBody();
+        responseEntity = activityService.postActivities("2001-01-01", Collections.singletonList(runningResponse.get()));
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        newResponseEntries = responseEntity.getBody();
         assert newResponseEntries != null;
         assertEquals(1, newResponseEntries.size());
 
         activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
-        Assert.isTrue(200 == activitiesForDay.getStatusCodeValue());
-        newResponseEntries = (List<LogActivityDto>) activitiesForDay.getBody();
+        assertEquals(200, activitiesForDay.getStatusCodeValue());
+        newResponseEntries = activitiesForDay.getBody();
         assert newResponseEntries != null;
         assertEquals(1, newResponseEntries.size());
         runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(), "Running");
-        assertTrue(runningResponse.get().getCalories().equals(44.0), "Calorien bijgewerkt");
-
+        assertEquals(runningResponse.get().getCalories().doubleValue(),44.0);
 
     }
-
-//    @Test
-//    public void testPostActivities() {
-//        List<LogActivityDto> newActivities = Arrays.asList(
-//                LogActivityDto.builder()
-//                        .day(Date.valueOf(LocalDate.parse("2001-01-01")))
-//                        .name("Running")
-//                        .calories(20.0)
-//                        .build(),
-//                LogActivityDto.builder()
-//                        .day(Date.valueOf(LocalDate.parse("2001-01-01")))
-//                        .name("Cycling")
-//                        .calories(30.0)
-//                        .build()
-//
-//        );
-//        ResponseEntity<List<LogActivityDto>> responseEntity = activityService.postActivities("2001-01-01", newActivities);
-//
-//    }
 }
