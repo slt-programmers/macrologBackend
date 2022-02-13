@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/logs")
 @Api(value = "logs")
 @Slf4j
-public class LogEntryService {
+public class EntriesService {
 
     @Autowired
     private FoodRepository foodRepository;
@@ -42,42 +42,42 @@ public class LogEntryService {
 
     @ApiOperation(value = "Retrieve all stored logentries for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LogEntryDto>> getLogEntriesForDay(@PathVariable("date") String date) {
+    public ResponseEntity<List<EntryDto>> getLogEntriesForDay(@PathVariable("date") String date) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("Request for " + userInfo);
         LocalDate parsedDate = LocalDateParser.parse(date);
 
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), parsedDate);
-        List<LogEntryDto> logEntryDtos = mapToDtos(allLogEntries);
+        List<EntryDto> entryDtos = mapToDtos(allLogEntries);
 
-        return ResponseEntity.ok(logEntryDtos);
+        return ResponseEntity.ok(entryDtos);
     }
 
     @ApiOperation(value = "Post entries")
     @PostMapping(path = "/day/{date}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LogEntryDto>> postEntries(
+    public ResponseEntity<List<EntryDto>> postEntries(
             @PathVariable("date") String date,
-            @RequestBody List<LogEntryRequest> entries) {
+            @RequestBody List<EntryDto> entries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<LogEntry> existingEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
         ModelMapper mapper = myModelMapper.getConfiguredMapper();
 
         // Delete old
         for (LogEntry entry : existingEntries) {
-            if (!entries.stream().map(LogEntryRequest::getId)
+            if (!entries.stream().map(e -> e.getFood().getId())
                     .collect(Collectors.toList()).contains(entry.getId())) {
                 logEntryRepository.deleteLogEntry(userInfo.getUserId(), entry.getId());
             }
         }
 
         // Add or update
-        for (LogEntryRequest entry : entries) {
+        for (EntryDto entry : entries) {
             LogEntry entity = mapper.map(entry, LogEntry.class);
             logEntryRepository.saveLogEntry(userInfo.getUserId(), entity);
         }
         List<LogEntry> allEntities = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
-        List<LogEntryDto> allEntries = allEntities.stream()
-                .map(entity -> mapper.map(entity, LogEntryDto.class))
+        List<EntryDto> allEntries = allEntities.stream()
+                .map(entity -> mapper.map(entity, EntryDto.class))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(allEntries);
     }
@@ -85,9 +85,9 @@ public class LogEntryService {
     @Deprecated
     @ApiOperation(value = "Store logentries")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LogEntryDto>> storeLogEntries(@RequestBody List<LogEntryRequest> logEntries) {
+    public ResponseEntity<List<EntryDto>> storeLogEntries(@RequestBody List<LogEntryRequest> logEntries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<LogEntryDto> newEntries = new ArrayList<>();
+        List<EntryDto> newEntries = new ArrayList<>();
         for (LogEntryRequest logEntry : logEntries) {
             LogEntry entry = new LogEntry();
             entry.setPortionId(logEntry.getPortionId());
@@ -108,11 +108,11 @@ public class LogEntryService {
                     log.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getFoodId() + " - " + entry.getDay());
                 }
                 // Waarom 0???
-                LogEntryDto map = myModelMapper.getConfiguredMapper().map(addedEntryMatches.get(0), LogEntryDto.class);
+                EntryDto map = myModelMapper.getConfiguredMapper().map(addedEntryMatches.get(0), EntryDto.class);
                 newEntries.add(map);
             } else {
                 logEntryRepository.saveLogEntry(userInfo.getUserId(), entry);
-                LogEntryDto map = myModelMapper.getConfiguredMapper().map(entry, LogEntryDto.class);
+                EntryDto map = myModelMapper.getConfiguredMapper().map(entry, EntryDto.class);
                 newEntries.add(map);
             }
         }
@@ -135,24 +135,24 @@ public class LogEntryService {
         LocalDate parsedToDate = LocalDateParser.parse(toDate);
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), Date.valueOf(parsedFromDate), Date.valueOf(parsedToDate));
 
-        List<LogEntryDto> logEntryDtos = mapToDtos(allLogEntries);
-        log.debug("Aantal dtos: " + logEntryDtos.size());
+        List<EntryDto> entryDtos = mapToDtos(allLogEntries);
+        log.debug("Aantal dtos: " + entryDtos.size());
 
-        Map<java.util.Date, Optional<LogEntryDto>> collect = logEntryDtos.stream().collect(Collectors.groupingBy(LogEntryDto::getDay, Collectors.reducing((LogEntryDto d1, LogEntryDto d2) -> {
-            LogEntryDto logEntryDto = new LogEntryDto();
-            logEntryDto.setMacrosCalculated(d1.getMacrosCalculated());
-            logEntryDto.getMacrosCalculated().combine(d2.getMacrosCalculated());
-            return logEntryDto;
+        Map<java.util.Date, Optional<EntryDto>> collect = entryDtos.stream().collect(Collectors.groupingBy(EntryDto::getDay, Collectors.reducing((EntryDto d1, EntryDto d2) -> {
+            EntryDto entryDto = new EntryDto();
+            entryDto.setMacrosCalculated(d1.getMacrosCalculated());
+            entryDto.getMacrosCalculated().combine(d2.getMacrosCalculated());
+            return entryDto;
         })));
 
         List<DayMacroDto> retObject = new ArrayList<>();
-        for (Map.Entry<java.util.Date, Optional<LogEntryDto>> dateOptionalEntry : collect.entrySet()) {
+        for (Map.Entry<java.util.Date, Optional<EntryDto>> dateOptionalEntry : collect.entrySet()) {
             DayMacroDto dm = new DayMacroDto();
             dm.setDay(dateOptionalEntry.getKey());
-            Optional<LogEntryDto> optionalValue = dateOptionalEntry.getValue();
+            Optional<EntryDto> optionalValue = dateOptionalEntry.getValue();
             if (optionalValue.isPresent()) {
-                LogEntryDto logEntryDto = optionalValue.get();
-                dm.setMacro(logEntryDto.getMacrosCalculated());
+                EntryDto entryDto = optionalValue.get();
+                dm.setMacro(entryDto.getMacrosCalculated());
             }
             retObject.add(dm);
         }
@@ -161,9 +161,9 @@ public class LogEntryService {
         return ResponseEntity.ok(retObject);
     }
 
-    private List<LogEntryDto> mapToDtos(List<LogEntry> allLogEntries) {
+    private List<EntryDto> mapToDtos(List<LogEntry> allLogEntries) {
         return allLogEntries.stream().map(
-                l -> myModelMapper.getConfiguredMapper().map(l, LogEntryDto.class))
+                l -> myModelMapper.getConfiguredMapper().map(l, EntryDto.class))
                 .collect(Collectors.toList());
     }
 

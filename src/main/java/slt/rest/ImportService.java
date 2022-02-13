@@ -65,14 +65,14 @@ public class ImportService {
         // To get the food_id's
         List<Food> allFoodDB = foodRepository.getAllFood(userInfo.getUserId());
 
-        List<LogEntryDto> logEntryDtos = export.getAllLogEntries();
-        for (LogEntryDto logEntryDto : logEntryDtos) {
-            LogEntry logEntry = mapLogEntryDtoToLogEntry(logEntryDto);
+        List<EntryDto> entryDtos = export.getAllLogEntries();
+        for (EntryDto entryDto : entryDtos) {
+            LogEntry logEntry = mapLogEntryDtoToLogEntry(entryDto);
 
-            Food foodDB = getFoodFromListByName(logEntryDto.getFood().getName(), allFoodDB);
+            Food foodDB = getFoodFromListByName(entryDto.getFood().getName(), allFoodDB);
             logEntry.setFoodId(foodDB.getId());
-            if (logEntryDto.getPortion() != null) {
-                Portion portionDB = portionRepository.getPortion(foodDB.getId(), logEntryDto.getPortion().getDescription());
+            if (entryDto.getPortion() != null) {
+                Portion portionDB = portionRepository.getPortion(foodDB.getId(), entryDto.getPortion().getDescription());
                 logEntry.setPortionId(portionDB.getId());
             }
             logEntryRepository.saveLogEntry(userInfo.getUserId(), logEntry);
@@ -126,16 +126,16 @@ public class ImportService {
         return foundFood;
     }
 
-    private static LogEntry mapLogEntryDtoToLogEntry(LogEntryDto logEntryDto) {
+    private static LogEntry mapLogEntryDtoToLogEntry(EntryDto entryDto) {
         LogEntry logEntry = new LogEntry();
         logEntry.setId(null);
-        java.sql.Date newDate = new java.sql.Date(logEntryDto.getDay().getTime());
+        java.sql.Date newDate = new java.sql.Date(entryDto.getDay().getTime());
         logEntry.setDay(newDate);
-        logEntry.setFoodId(logEntryDto.getFood().getId());
-        logEntry.setMeal(logEntryDto.getMeal());
-        logEntry.setMultiplier(logEntryDto.getMultiplier());
-        if (logEntryDto.getPortion() != null) {
-            logEntry.setPortionId(logEntryDto.getPortion().getId());
+        logEntry.setFoodId(entryDto.getFood().getId());
+        logEntry.setMeal(entryDto.getMeal());
+        logEntry.setMultiplier(entryDto.getMultiplier());
+        if (entryDto.getPortion() != null) {
+            logEntry.setPortionId(entryDto.getPortion().getId());
         }
         return logEntry;
     }

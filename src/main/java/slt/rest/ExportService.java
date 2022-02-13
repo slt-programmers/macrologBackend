@@ -61,11 +61,11 @@ public class ExportService {
 
         List<LogEntry> allLogEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId());
 
-        List<LogEntryDto> allDtos = new ArrayList<>();
+        List<EntryDto> allDtos = new ArrayList<>();
         for (LogEntry logEntry : allLogEntries) {
 
-            LogEntryDto logEntryDto = new LogEntryDto();
-            logEntryDto.setId(logEntry.getId());
+            EntryDto entryDto = new EntryDto();
+            entryDto.setId(logEntry.getId());
             log.info("Export: logEntryDto ID " + logEntry.getFoodId());
 
             FoodDto foodDto = allFoodDtos.stream().filter(f -> {
@@ -77,7 +77,7 @@ public class ExportService {
                     }
             );
 
-            logEntryDto.setFood(foodDto);
+            entryDto.setFood(foodDto);
 
             PortionDto portionDto = null;
             if (logEntry.getPortionId() != null && logEntry.getPortionId() != 0) {
@@ -87,16 +87,16 @@ public class ExportService {
                     Macro calculatedMacros = FoodService.calculateMacro(foodDto, portionDto);
                     portionDto.setMacros(calculatedMacros);
                 }
-                logEntryDto.setPortion(portionDto);
+                entryDto.setPortion(portionDto);
             }
             Double multiplier = logEntry.getMultiplier();
-            logEntryDto.setMultiplier(multiplier);
-            logEntryDto.setDay(logEntry.getDay());
-            logEntryDto.setMeal(logEntry.getMeal());
+            entryDto.setMultiplier(multiplier);
+            entryDto.setDay(logEntry.getDay());
+            entryDto.setMeal(logEntry.getMeal());
 
             Macro macrosCalculated = new Macro();
             if (portionDto != null) {
-                macrosCalculated = logEntryDto.getPortion().getMacros().createCopy();
+                macrosCalculated = entryDto.getPortion().getMacros().createCopy();
                 macrosCalculated.multiply(multiplier);
 
             } else {
@@ -104,9 +104,9 @@ public class ExportService {
                 macrosCalculated.setFat(multiplier * foodDto.getFat());
                 macrosCalculated.setProtein(multiplier * foodDto.getProtein());
             }
-            logEntryDto.setMacrosCalculated(macrosCalculated);
+            entryDto.setMacrosCalculated(macrosCalculated);
 
-            allDtos.add(logEntryDto);
+            allDtos.add(entryDto);
         }
 
         export.setAllLogEntries(allDtos);

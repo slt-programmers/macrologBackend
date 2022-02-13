@@ -342,7 +342,7 @@ class MyModelMapperTest {
         List<Portion> portionList = Arrays.asList(food1Portion, food1Portion2);
         Mockito.when(portionRepository.getPortions(eq(food1.getId()))).thenReturn(portionList);
 
-        LogEntryDto mapped = mapper.getConfiguredMapper().map(logEntry, LogEntryDto.class);
+        EntryDto mapped = mapper.getConfiguredMapper().map(logEntry, EntryDto.class);
         mapper.getConfiguredMapper().validate();
 
         assertThat(mapped.getId()).isEqualTo(logEntry.getId());

@@ -48,6 +48,7 @@ public class MyModelMapper {
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
         addLogEntryLogEntryDto(modelMapper);
+        addEntryDtoEntry(modelMapper);
         addDishIngredientDtoIngredient(modelMapper);
 
         final PropertyMap<AddDishIngredientDto, Ingredient> addDishIngredientDtoIngredientPropertyMap = getAddDishIngredientDtoIngredientPropertyMap();
@@ -198,7 +199,7 @@ public class MyModelMapper {
     }
 
     private void addLogEntryLogEntryDto(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(LogEntry.class, LogEntryDto.class)
+        modelMapper.createTypeMap(LogEntry.class, EntryDto.class)
                 .setPostConverter(mappingContext -> {
 
                     Long foodId = mappingContext.getSource().getFoodId();
@@ -236,6 +237,22 @@ public class MyModelMapper {
                         macrosCalculated.setProtein(multiplier * mappedFoodDto.getProtein());
                     }
                     mappingContext.getDestination().setMacrosCalculated(macrosCalculated);
+
+                    return mappingContext.getDestination();
+                });
+    }
+
+    private void addEntryDtoEntry(ModelMapper modelMapper) {
+
+        modelMapper.createTypeMap(EntryDto.class, LogEntry.class)
+                .setPostConverter(mappingContext -> {
+                    EntryDto dto = mappingContext.getSource();
+                    mappingContext.getDestination().setId(dto.getId());
+                    mappingContext.getDestination().setFoodId(dto.getFood().getId());
+                    mappingContext.getDestination().setPortionId(dto.getPortion() != null ? dto.getPortion().getId() : null);
+                    mappingContext.getDestination().setMeal(dto.getMeal());
+                    mappingContext.getDestination().setMultiplier(dto.getMultiplier());
+                    mappingContext.getDestination().setDay(modelMapper.map(dto.getDay(), Date.class));
 
                     return mappingContext.getDestination();
                 });

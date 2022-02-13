@@ -14,7 +14,7 @@ import java.util.List;
 public class Export {
 
     private List<FoodDto> allFood;
-    private List<LogEntryDto> allLogEntries;
+    private List<EntryDto> allLogEntries;
     private List<SettingDto> allSettingDtos;
     private List<WeightDto> allWeights;
     private List<LogActivityDto> allActivities;

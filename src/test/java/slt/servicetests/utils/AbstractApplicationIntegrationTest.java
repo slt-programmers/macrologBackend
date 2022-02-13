@@ -52,7 +52,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected ActivityService activityService;
 
     @Autowired
-    protected LogEntryService logEntryService;
+    protected EntriesService entriesService;
 
     @Autowired
     protected FoodService foodService;
@@ -141,7 +141,7 @@ public abstract class AbstractApplicationIntegrationTest {
                         .multiplier(multiplier)
                         .build()
         );
-        ResponseEntity responseEntity = logEntryService.storeLogEntries(newLogEntries);
+        ResponseEntity responseEntity = entriesService.storeLogEntries(newLogEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
     }
 
