@@ -46,50 +46,50 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
         // Store same setting with over a week
         LocalDate aWeekFromNow = LocalDate.now().plusDays(7);
         SettingDto settingDtoWeekFromNow = SettingDto.builder().name("n1").value("v2").day(fromLocalDateToSQLDate(aWeekFromNow)).build();
-        ResponseEntity responseEntityWeekFromNow = settingsService.storeSetting(settingDtoWeekFromNow);
+        ResponseEntity<Void> responseEntityWeekFromNow = settingsService.storeSetting(settingDtoWeekFromNow);
         assertThat(responseEntityWeekFromNow.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // Store same setting with over a month
         LocalDate aMonthFromNow = LocalDate.now().plusMonths(1);
         SettingDto settingDtoMonthFromNow = SettingDto.builder().name("n1").value("v3").day(fromLocalDateToSQLDate(aMonthFromNow)).build();
-        ResponseEntity responseEntityMonthFromNow = settingsService.storeSetting(settingDtoMonthFromNow);
+        ResponseEntity<Void> responseEntityMonthFromNow = settingsService.storeSetting(settingDtoMonthFromNow);
         assertThat(responseEntityMonthFromNow.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // SettingDto today exists
-        ResponseEntity savedSetting = settingsService.getSetting("n1", null);
+        ResponseEntity<String> savedSetting = settingsService.getSetting("n1", null);
         assertThat(savedSetting.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        assertThat(savedSetting.getBody().toString().equals("v1"));
+        assertThat(savedSetting.getBody()).isEqualTo("v3");
 
         // SettingDto yesterday refer to next valid setting
         LocalDate yesterDay = LocalDate.now().minusDays(1);
-        ResponseEntity yesterDayEntity = settingsService.getSetting("n1", yesterDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        ResponseEntity<String> yesterDayEntity = settingsService.getSetting("n1", yesterDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         assertThat(yesterDayEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        assertThat(yesterDayEntity.getBody().toString().equals("v1"));
+        assertThat(savedSetting.getBody()).isEqualTo("v3");
 
         // SettingDto tomorrow refer to previously valid setting
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        ResponseEntity tomorrowEntity = settingsService.getSetting("n1", tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        ResponseEntity<String> tomorrowEntity = settingsService.getSetting("n1", tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         assertThat(tomorrowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        assertThat(tomorrowEntity.getBody().toString().equals("v1"));
+        assertThat(savedSetting.getBody()).isEqualTo("v3");
 
         // SettingDto week from now is new value
         LocalDate weekFromNow = LocalDate.now().plusDays(7);
-        ResponseEntity weekFromNowEntity = settingsService.getSetting("n1", weekFromNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        ResponseEntity<String> weekFromNowEntity = settingsService.getSetting("n1", weekFromNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         assertThat(weekFromNowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        assertThat(weekFromNowEntity.getBody().toString().equals("v2"));
+        assertThat(weekFromNowEntity.getBody()).isEqualTo("v2");
 
         // SettingDto year from now is month value
         LocalDate yearFromNow = LocalDate.now().plusYears(1);
-        ResponseEntity yearFromNowEntity = settingsService.getSetting("n1", yearFromNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        ResponseEntity<String> yearFromNowEntity = settingsService.getSetting("n1", yearFromNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         assertThat(yearFromNowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        assertThat(yearFromNowEntity.getBody().toString().equals("v3"));
+        assertThat(yearFromNowEntity.getBody()).isEqualTo("v3");
 
         // request unsupported date format
-        ResponseEntity unsupportedEntity = settingsService.getSetting("n1", "01-01-2020");
+        ResponseEntity<String> unsupportedEntity = settingsService.getSetting("n1", "01-01-2020");
         assertThat(unsupportedEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 
         // request strange date format
-        ResponseEntity strangeEntity = settingsService.getSetting("n1", "20-20-2020");
+        ResponseEntity<String> strangeEntity = settingsService.getSetting("n1", "20-20-2020");
         assertThat(strangeEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
@@ -134,9 +134,9 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     private UserSettingsDto getUserSettingsDto() {
-        ResponseEntity userSettingEntity = settingsService.getUserSetting();
+        ResponseEntity<UserSettingsDto> userSettingEntity = settingsService.getUserSetting();
         assertThat(userSettingEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        return (UserSettingsDto) userSettingEntity.getBody();
+        return userSettingEntity.getBody();
     }
 
     private java.sql.Date fromLocalDateToSQLDate(LocalDate localDate) {

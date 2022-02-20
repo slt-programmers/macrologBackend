@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import slt.database.FoodRepository;
 import slt.database.LogEntryRepository;
-import slt.database.PortionRepository;
 import slt.database.entities.LogEntry;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
@@ -27,12 +25,6 @@ import java.util.stream.Collectors;
 @Api(value = "logs")
 @Slf4j
 public class EntriesService {
-
-    @Autowired
-    private FoodRepository foodRepository;
-
-    @Autowired
-    private PortionRepository portionRepository;
 
     @Autowired
     private LogEntryRepository logEntryRepository;
@@ -80,43 +72,6 @@ public class EntriesService {
                 .map(entity -> mapper.map(entity, EntryDto.class))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(allEntries);
-    }
-
-    @Deprecated
-    @ApiOperation(value = "Store logentries")
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<EntryDto>> storeLogEntries(@RequestBody List<LogEntryRequest> logEntries) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<EntryDto> newEntries = new ArrayList<>();
-        for (LogEntryRequest logEntry : logEntries) {
-            LogEntry entry = new LogEntry();
-            entry.setPortionId(logEntry.getPortionId());
-            entry.setFoodId(logEntry.getFoodId());
-            entry.setMultiplier(logEntry.getMultiplier());
-            entry.setDay(new Date(logEntry.getDay().getTime()));
-            entry.setMeal(logEntry.getMeal());
-            entry.setId(logEntry.getId());
-            if (logEntry.getId() == null) {
-                logEntryRepository.saveLogEntry(userInfo.getUserId(), entry);
-                List<LogEntry> addedEntryMatches = logEntryRepository.getLogEntry(userInfo.getUserId(), entry.getFoodId(), entry.getDay(), entry.getMeal());
-                if (addedEntryMatches.size() > 1) { // same food, but logged twice with maybe different portions
-                    LogEntry newestEntry = addedEntryMatches.stream().max(Comparator.comparing(LogEntry::getId)).orElse(addedEntryMatches.get(addedEntryMatches.size() - 1));
-                    addedEntryMatches = new ArrayList<>();
-                    addedEntryMatches.add(newestEntry);
-                }
-                if (addedEntryMatches.size() != 1) {
-                    log.error("SAVE OF ENTRY NOT SUCCEEDED " + userInfo.getUserId() + " - " + entry.getFoodId() + " - " + entry.getDay());
-                }
-                // Waarom 0???
-                EntryDto map = myModelMapper.getConfiguredMapper().map(addedEntryMatches.get(0), EntryDto.class);
-                newEntries.add(map);
-            } else {
-                logEntryRepository.saveLogEntry(userInfo.getUserId(), entry);
-                EntryDto map = myModelMapper.getConfiguredMapper().map(entry, EntryDto.class);
-                newEntries.add(map);
-            }
-        }
-        return ResponseEntity.ok(newEntries);
     }
 
     @ApiOperation(value = "Delete logentry")

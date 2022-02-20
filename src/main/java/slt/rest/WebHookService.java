@@ -73,15 +73,14 @@ public class WebHookService {
 
     @ApiOperation(value = "Delete a webhook subscription with Strava")
     @DeleteMapping(path = "/STRAVA/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity endWebhook(@PathVariable("subscriptionId") Integer subscriptionId) {
+    public ResponseEntity<Void> endWebhook(@PathVariable("subscriptionId") Integer subscriptionId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
-
             stravaActivityService.endWebhookSubscription(subscriptionId);
             return ResponseEntity.ok().build();
         }

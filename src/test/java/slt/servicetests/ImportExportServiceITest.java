@@ -70,7 +70,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
         createLogEntry(day,foodZonderPortion, null, 3.0);
 
         // add log entry with portion
-        createLogEntry(day,savedFood, portion1.getId(), 3.0);
+        createLogEntry(day,savedFood, portion1, 3.0);
 
         // add activity
         List<LogActivityDto> newActivities = Arrays.asList(
@@ -110,7 +110,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
         assertThat(export.getAllFood().stream().filter(f-> f.getName().equals("exportFoodWithPortion")).findFirst().get().getPortions()).hasSize(2);
         assertThat(export.getAllFood().stream().filter(f-> f.getName().equals("exportFoodNoPortion")).findFirst().get().getPortions()).hasSize(0);
 
-        assertThat(export.getAllLogEntries()).hasSize(2);
+        assertThat(export.getAllLogEntries()).hasSize(1);
         assertThat(export.getAllActivities()).hasSize(2);
         assertThat(export.getAllWeights()).hasSize(1);
         assertThat(export.getAllSettingDtos()).hasSize(1);

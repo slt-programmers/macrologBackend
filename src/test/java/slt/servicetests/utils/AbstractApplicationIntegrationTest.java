@@ -131,17 +131,17 @@ public abstract class AbstractApplicationIntegrationTest {
         return foodDtos.stream().filter(f -> f.getName().equals(foodRequestZonderPortions.getName())).findFirst().get();
     }
 
-    protected void createLogEntry(String day, FoodDto savedFood, Long portionId, double multiplier) {
-        List<LogEntryRequest> newLogEntries = Arrays.asList(
-                LogEntryRequest.builder()
+    protected void createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
+        List<EntryDto> newLogEntries = Arrays.asList(
+                EntryDto.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
                         .meal("BREAKFAST")
-                        .portionId(portionId)
-                        .foodId(savedFood.getId())
+                        .portion(portion)
+                        .food(savedFood)
                         .multiplier(multiplier)
                         .build()
         );
-        ResponseEntity responseEntity = entriesService.storeLogEntries(newLogEntries);
+        ResponseEntity responseEntity = entriesService.postEntries(day, newLogEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
     }
 

@@ -60,7 +60,7 @@ public class StravaClient {
 
         String clientId = stravaConfig.getClientId().toString();
         String clientSecret = stravaConfig.getClientSecret();
-        Map<String,String> reqPayload = new HashMap();
+        Map<String, String> reqPayload = new HashMap<>();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("code", authorizationCode);
@@ -70,12 +70,12 @@ public class StravaClient {
 
     }
 
-    private StravaToken getStravaToken(Map<String,String> reqPayload) {
+    private StravaToken getStravaToken(Map<String, String> reqPayload) {
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
+            final HttpEntity<Map<String, String>> entity = new HttpEntity<>(reqPayload, headers);
             ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
 
             return responseEntity.getBody();
@@ -96,7 +96,7 @@ public class StravaClient {
         String clientId = stravaConfig.getClientId().toString();
         String clientSecret = stravaConfig.getClientSecret();
 
-        Map<String,String> reqPayload = new HashMap();
+        Map<String, String> reqPayload = new HashMap<>();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("refresh_token", refreshToken);
@@ -125,7 +125,7 @@ public class StravaClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token));
 
-            final HttpEntity entity = new HttpEntity<>(headers);
+            final HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
             ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<>() {
             };
             ResponseEntity<List<ListedActivityDto>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
@@ -154,8 +154,12 @@ public class StravaClient {
             ResponseEntity<ActivityDetailsDto> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, ActivityDetailsDto.class);
 
             ActivityDetailsDto gevondenActivity = responseEntity.getBody();
+            if (gevondenActivity != null) {
+                log.debug(gevondenActivity.getStart_date() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.getType() + " " + gevondenActivity.getId());
+            } else {
+                log.debug("Gevonden activity: " + null);
+            }
 
-            log.debug(gevondenActivity.getStart_date() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.getType() + " " + gevondenActivity.getId());
             return gevondenActivity;
 
         } catch (HttpClientErrorException httpClientErrorException) {
@@ -192,7 +196,7 @@ public class StravaClient {
 
     public SubscriptionInformation startWebhookSubscription(Integer clientId, String clientSecret, String callbackUrl, String subscribeVerifyToken) {
 
-        MultiValueMap<String, String> reqPayload= new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> reqPayload = new LinkedMultiValueMap<>();
 
         reqPayload.add(CLIENT_ID, clientId.toString());
         reqPayload.add(CLIENT_SECRET, clientSecret);
@@ -203,11 +207,15 @@ public class StravaClient {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-            final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
+            final HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(reqPayload, headers);
             ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(STRAVA_WEBHOOK_URL, HttpMethod.POST, entity, SubscriptionInformation.class);
 
             SubscriptionInformation subscription = responseEntity.getBody();
-            log.debug("Aangemaakte subscription {}", subscription.getId());
+            if (subscription != null){
+                log.debug("Aangemaakte subscription {}", subscription.getId());
+            } else {
+                log.debug("Subscription: " + null);
+            }
             return subscription;
 
         } catch (HttpClientErrorException httpClientErrorException) {
@@ -230,13 +238,13 @@ public class StravaClient {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            final HttpEntity entity = new HttpEntity<>(headers);
+            final HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
             ParameterizedTypeReference<List<SubscriptionInformation>> parameterizedTypeReference = new ParameterizedTypeReference<>() {
             };
 
             ResponseEntity<List<SubscriptionInformation>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
             final List<SubscriptionInformation> body = responseEntity.getBody();
-            if (!body.isEmpty()){
+            if (body != null && !body.isEmpty()) {
                 return body.get(0);
             }
             return null;
@@ -255,14 +263,14 @@ public class StravaClient {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL + "/" + subscriptionId);
 
-            MultiValueMap<String, Object> reqPayload= new LinkedMultiValueMap<>();
+            MultiValueMap<String, Object> reqPayload = new LinkedMultiValueMap<>();
             reqPayload.add(CLIENT_ID, clientId);
             reqPayload.add(CLIENT_SECRET, clientSecret);
 
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            final HttpEntity<String> entity = new HttpEntity(reqPayload,headers);
+            final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(reqPayload, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, String.class);
             log.debug("Received response for delete subscription : {}", responseEntity.getStatusCodeValue());
             return HttpStatus.NO_CONTENT.equals(responseEntity.getStatusCode());

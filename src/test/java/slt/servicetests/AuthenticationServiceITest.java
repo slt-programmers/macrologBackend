@@ -257,7 +257,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         createLogEntry(day,foodZonderPortion, null, 3.0);
 
         // add log entry with portion
-        createLogEntry(day,savedFood, portion1.getId(), 3.0);
+        createLogEntry(day,savedFood, portion1, 3.0);
 
         // add activity
         List<LogActivityDto> newActivities = Arrays.asList(

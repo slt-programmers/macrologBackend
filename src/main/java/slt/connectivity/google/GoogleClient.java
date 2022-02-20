@@ -33,7 +33,6 @@ import java.util.Properties;
 @Component
 public class GoogleClient {
 
-
     private static final String CLIENT_ID = "client_id";
     private static final String CLIENT_SECRET = "client_secret";
     private static final String GRANT_TYPE = "grant_type";
@@ -46,9 +45,9 @@ public class GoogleClient {
     @Autowired
     GoogleConfig googleConfig;
 
-    public void sendMail(Oath2Token oath2Token, Message message) throws IOException, GeneralSecurityException {
-
-        if (oath2Token == null){
+    public void sendMail(Oath2Token oath2Token, Message message)
+            throws IOException, GeneralSecurityException {
+        if (oath2Token == null) {
             log.error("Unable to send mail. No token available");
             return;
         }
@@ -60,23 +59,23 @@ public class GoogleClient {
         try {
             com.google.api.services.gmail.model.Message googleMessage = createMessageWithEmail(message);
             final Gmail service = new Gmail.Builder(httpTransport, jsonFactory, credential)
-                    .setApplicationName( googleConfig.getApplicationName())
+                    .setApplicationName(googleConfig.getApplicationName())
                     .build();
             final com.google.api.services.gmail.model.Message execute = service
                     .users()
                     .messages()
                     .send("me", googleMessage)
                     .execute();
-            log.debug("Mail {} send.",execute.getId());
+            log.debug("Mail {} send.", execute.getId());
         } catch (MessagingException e) {
-            log.error("Error during sending mail",e);
+            log.error("Error during sending mail", e);
         }
     }
 
     public MimeMessage createEmail(String to,
-                                          String from,
-                                          String subject,
-                                          String bodyText)
+                                   String from,
+                                   String subject,
+                                   String bodyText)
             throws MessagingException {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
@@ -102,28 +101,28 @@ public class GoogleClient {
         return message;
     }
 
-    public Oath2Token getAuthorizationToken(String authorizationCode)  {
+    public Oath2Token getAuthorizationToken(String authorizationCode) {
 
         String clientId = googleConfig.getClientId();
         String clientSecret = googleConfig.getClientSecret();
 
-        Map<String,String> reqPayload = new HashMap();
+        Map<String, String> reqPayload = new HashMap<>();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("code", authorizationCode);
         reqPayload.put(GRANT_TYPE, "authorization_code");
-        reqPayload.put("redirect_uri",googleConfig.getRedirectUri());
+        reqPayload.put("redirect_uri", googleConfig.getRedirectUri());
 
         return getAuthorizationToken(reqPayload);
     }
 
-    private Oath2Token getAuthorizationToken(Map<String,String> reqPayload) {
+    private Oath2Token getAuthorizationToken(Map<String, String> reqPayload) {
 
         try {
             final HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            final HttpEntity<HashMap> entity = new HttpEntity(reqPayload, headers);
+            final HttpEntity<Map<String, String>> entity = new HttpEntity<>(reqPayload, headers);
             ResponseEntity<Oath2Token> responseEntity = restTemplate.exchange(TOKEN_URL, HttpMethod.POST, entity, Oath2Token.class);
 
             return responseEntity.getBody();
@@ -144,7 +143,7 @@ public class GoogleClient {
         String clientId = googleConfig.getClientId();
         String clientSecret = googleConfig.getClientSecret();
 
-        Map<String,String> reqPayload = new HashMap();
+        Map<String, String> reqPayload = new HashMap<>();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("refresh_token", refreshToken);

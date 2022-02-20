@@ -30,7 +30,7 @@ public class GoogleMailService {
     private static final String GMAIL_REFRESH_TOKEN = "GMAIL_REFRESH_TOKEN";
     private static final String MACROLOG_FROM_ADDRESS = "macrologwebapp@gmail.com";
     private static final String MAIL_SEND_TO_DEBUGLINE = "Mail send to";
-    private static final Integer adminUserId = -1;
+    private static final Integer ADMIN_USER_ID = -1;
 
     private final SettingsRepository settingsRepository;
     private final GoogleConfig googleConfig;
@@ -49,7 +49,7 @@ public class GoogleMailService {
             this.connected = false;
         } else {
             log.debug("Setting up Mail");
-            this.connected = (settingsRepository.getLatestSetting(adminUserId, GMAIL_ACCESS_TOKEN) != null);
+            this.connected = (settingsRepository.getLatestSetting(ADMIN_USER_ID, GMAIL_ACCESS_TOKEN) != null);
             log.debug("Status Google Mail {}", this.connected);
         }
     }
@@ -67,7 +67,7 @@ public class GoogleMailService {
                 .value(clientAuthorizationCode)
                 .day(Date.valueOf(LocalDate.now()))
                 .build();
-        settingsRepository.putSetting(adminUserId, setting);
+        settingsRepository.putSetting(ADMIN_USER_ID, setting);
 
         Oath2Token token = googleClient.getAuthorizationToken(clientAuthorizationCode);
 
@@ -76,9 +76,9 @@ public class GoogleMailService {
             Long expiresIn = Long.valueOf(token.getExpires_in().toString());
             final long expiresAt = getExpiresAtFromExpiresIn(expiresIn);
 
-            saveSetting(adminUserId, GMAIL_ACCESS_TOKEN, token.getAccess_token());
-            saveSetting(adminUserId, GMAIL_REFRESH_TOKEN, token.getRefresh_token());
-            saveSetting(adminUserId, GMAIL_EXPIRES_AT, String.valueOf(expiresAt));
+            saveSetting(ADMIN_USER_ID, GMAIL_ACCESS_TOKEN, token.getAccess_token());
+            saveSetting(ADMIN_USER_ID, GMAIL_REFRESH_TOKEN, token.getRefresh_token());
+            saveSetting(ADMIN_USER_ID, GMAIL_EXPIRES_AT, String.valueOf(expiresAt));
             connected = true;
             log.info("Connected to Google!");
 
@@ -184,7 +184,7 @@ public class GoogleMailService {
 
                 log.debug(MAIL_SEND_TO_DEBUGLINE + email);
                 final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(adminUserId), email1);
+                googleClient.sendMail(getOath2Token(ADMIN_USER_ID), email1);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }
@@ -205,7 +205,7 @@ public class GoogleMailService {
 
                 log.debug(MAIL_SEND_TO_DEBUGLINE + email);
                 final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(adminUserId), email1);
+                googleClient.sendMail(getOath2Token(ADMIN_USER_ID), email1);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }
@@ -232,7 +232,7 @@ public class GoogleMailService {
 
                 log.debug(MAIL_SEND_TO_DEBUGLINE + email);
                 final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(adminUserId), email1);
+                googleClient.sendMail(getOath2Token(ADMIN_USER_ID), email1);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }

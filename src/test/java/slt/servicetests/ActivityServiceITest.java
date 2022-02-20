@@ -131,7 +131,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         assertEquals(1, newResponseEntries.size());
         runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(), "Running");
-        assertEquals(runningResponse.get().getCalories().doubleValue(),44.0);
+        assertEquals(44.0, runningResponse.get().getCalories().doubleValue());
 
     }
 }

@@ -47,7 +47,7 @@ public class SettingsService {
 
     @ApiOperation(value = "Store new settingDto or change existing one")
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeSetting(@RequestBody SettingDto settingDto) {
+    public ResponseEntity<Void> storeSetting(@RequestBody SettingDto settingDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if ("weight".equals(settingDto.getName())) {
             weightService.storeWeightEntry(
@@ -63,16 +63,6 @@ public class SettingsService {
         settingsRepo.putSetting(userInfo.getUserId(), setting);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-//    @ApiOperation(value = "Store new UserSettingsDto or change existing values")
-//    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity storeUserSettings(@RequestBody UserSettingsDto userSettingsDto) {
-//        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-//
-//        //TODO make put method with UserSettingsDto (don't forget weight handling)
-//
-//        return ResponseEntity.status(HttpStatus.OK).build();
-//    }
 
     @ApiOperation(value = "Get connectivity settings")
     @GetMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
