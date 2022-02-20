@@ -42,7 +42,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "logEntryFood1";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         String day = "2010-01-01";
@@ -63,7 +63,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "dubbeleLogEntry";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         String day = "2001-01-01";
@@ -84,7 +84,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
     public void testCreateLogEntryWithPortions() {
 
         // 1 create a food without portion:
-        FoodRequest foodRequestMetPortions = FoodRequest.builder()
+        FoodDto foodRequestMetPortions = FoodDto.builder()
                 .name("logEntryFood2")
                 .carbs(1.0)
                 .fat(2.0)
@@ -119,7 +119,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String day = "2001-01-03";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
@@ -156,7 +156,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "foodDeleteLogEntry";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
@@ -178,7 +178,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "macrostest";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
@@ -218,7 +218,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "macrostestMultipleAdAY";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name(nameFood).carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto savedFood = createFood(foodRequestZonderPortions);
 
         createLogEntry(day,savedFood, null, 1.0);
@@ -267,7 +267,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String nameFood = "macrostestwithPortions";
 
         // 1 create a food without portion:
-        FoodRequest foodRequestMetPortions = FoodRequest.builder()
+        FoodDto foodRequestMetPortions = FoodDto.builder()
                 .name(nameFood)
                 .carbs(1.0)
                 .fat(2.0)

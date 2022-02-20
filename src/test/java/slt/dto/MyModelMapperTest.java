@@ -106,11 +106,11 @@ class MyModelMapperTest {
     }
 
     @Test
-    public void testAddDishRequestMapping() {
-        DishRequest dto = DishRequest.builder()
+    public void testDishDtoMapping() {
+        DishDto dto = DishDto.builder()
                 .name("dish")
                 .ingredients(Arrays.asList(
-                        AddDishIngredientDto.builder()
+                        IngredientDto.builder()
                                 .food(FoodDto.builder().id(1L).build())
                                 .portion(PortionDto.builder().id(1l).build())
                                 .multiplier(2.0).build()
@@ -137,7 +137,12 @@ class MyModelMapperTest {
                         IngredientDto.builder()
 //                                .id(20L)
                                 .multiplier(3.0)
-                                .portionId(2L)
+                                .portion(
+                                        PortionDto.builder()
+                                                .id(2L)
+                                                .grams(30.0)
+                                                .description("portion")
+                                                .build())
                                 .food(
                                         FoodDto.builder()
                                                 .id(30L)

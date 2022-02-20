@@ -36,10 +36,10 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    public void testCreateAndDeleteEmptyDish(){
+    public void testCreateAndDeleteEmptyDish() {
 
         String dishName = "emptyDish";
-        DishRequest newDishRequest = DishRequest.builder().name(dishName).build();
+        DishDto newDishRequest = DishDto.builder().name(dishName).build();
         ResponseEntity responseEntity = dishService.storeDish(newDishRequest);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
@@ -55,10 +55,10 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    public void testCreateSameDish(){
+    public void testCreateSameDish() {
 
         String dishName = "sameDish";
-        DishRequest newDish = DishRequest.builder().name(dishName).build();
+        DishDto newDish = DishDto.builder().name(dishName).build();
         ResponseEntity responseEntity = dishService.storeDish(newDish);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
@@ -69,25 +69,25 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(emptyDish.get().getId()).isNotNull();
         assertThat(emptyDish.get().getIngredients()).isEmpty();
 
-        DishRequest sameDish = DishRequest.builder().name(dishName).build();
+        DishDto sameDish = DishDto.builder().name(dishName).build();
         responseEntity = dishService.storeDish(sameDish);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
-    public void testCreateDishWithMultipleFood(){
+    public void testCreateDishWithMultipleFood() {
 
         String dishName = "with1Food";
 
-        FoodDto food1 = createFood(FoodRequest.builder().name("food1").carbs(1.0).fat(2.0).protein(3.0).build());
-        FoodDto food2 = createFood(FoodRequest.builder().name("food2").carbs(4.0).fat(5.0).protein(6.0).build());
+        FoodDto food1 = createFood(FoodDto.builder().name("food1").carbs(1.0).fat(2.0).protein(3.0).build());
+        FoodDto food2 = createFood(FoodDto.builder().name("food2").carbs(4.0).fat(5.0).protein(6.0).build());
 
-        DishRequest newDish = DishRequest.builder()
+        DishDto newDish = DishDto.builder()
                 .name(dishName)
                 .ingredients(
                         Arrays.asList(
-                                AddDishIngredientDto.builder().food(food1).multiplier(1.0).build(),
-                                AddDishIngredientDto.builder().food(food2).multiplier(3.0).build()
+                                IngredientDto.builder().food(food1).multiplier(1.0).build(),
+                                IngredientDto.builder().food(food2).multiplier(3.0).build()
                         )
                 )
                 .build();
@@ -117,28 +117,28 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    public void testCreateDishFoodWithPortion(){
+    public void testCreateDishFoodWithPortion() {
 
         String dishName = "withPortions";
 
-        FoodDto food1 = createFood(FoodRequest.builder().name("food3").carbs(1.0).fat(2.0).protein(3.0).
+        FoodDto food1 = createFood(FoodDto.builder().name("food3").carbs(1.0).fat(2.0).protein(3.0).
                 portions(Arrays.asList(
                         PortionDto.builder().description("p1").grams(200.0).build(),
                         PortionDto.builder().description("p2").grams(600.0).build()
                 )).build());
-        FoodDto food2 = createFood(FoodRequest.builder().name("food4").carbs(4.0).fat(5.0).protein(6.0).build());
+        FoodDto food2 = createFood(FoodDto.builder().name("food4").carbs(4.0).fat(5.0).protein(6.0).build());
 
         PortionDto food1Portion1 = food1.getPortions().stream().filter(p -> p.getDescription().equals("p1")).findFirst().get();
-        DishRequest newDish = DishRequest.builder()
+        DishDto newDish = DishDto.builder()
                 .name(dishName)
                 .ingredients(
                         Arrays.asList(
-                                AddDishIngredientDto.builder()
+                                IngredientDto.builder()
                                         .food(food1)
                                         .portion(food1Portion1)
                                         .multiplier(1.0)
                                         .build(),
-                                AddDishIngredientDto.builder().food(food2).multiplier(3.0).build()
+                                IngredientDto.builder().food(food2).multiplier(3.0).build()
                         )
                 )
                 .build();
@@ -160,9 +160,11 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(ingredient1Food1.isPresent()).isTrue();
 
         assertThat(ingredient1Food1.get().getMultiplier()).isEqualTo(1.0);
-        assertThat(ingredient1Food1.get().getPortionId()).isEqualTo(food1Portion1.getId());
+        assertThat(ingredient1Food1.get().getPortion().getId()).isEqualTo(food1Portion1.getId());
         // check portion exists with food:
-        assertThat(ingredient1Food1.get().getFood().getPortions().stream().filter(p->p.getId().equals(ingredient1Food1.get().getPortionId())).findFirst().isPresent()).isTrue();
+        assertThat(ingredient1Food1.get().getFood().getPortions().stream()
+                .filter(p -> p.getId().equals(ingredient1Food1.get().getPortion().getId()))
+                .findFirst().isPresent()).isTrue();
 
         responseEntity = dishService.deleteDish(matchedDish.get().getId());
 

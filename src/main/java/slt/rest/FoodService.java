@@ -38,61 +38,59 @@ public class FoodService {
 
     @ApiOperation(value = "Retrieve all stored foods")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAllFood() {
-
+    public ResponseEntity<List<FoodDto>> getAllFood() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
-            allFoodDtos.add(createFoodDto(food, true));
+            allFoodDtos.add(createFoodDto(food));
         }
-
         allFoodDtos.sort(Comparator.comparing(FoodDto::getName));
         return ResponseEntity.ok(allFoodDtos);
     }
 
     @ApiOperation(value = "Retrieve information about specific food")
-    @GetMapping(path = "{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getFoodInformation(@PathVariable("id") Long id) {
+    @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FoodDto> getFoodById(@PathVariable("id") Long id) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Food food = foodRepository.getFoodById(userInfo.getUserId(), id);
         if (food == null) {
             return ResponseEntity.noContent().build();
         } else {
-            FoodDto foodDto = createFoodDto(food, true);
+            FoodDto foodDto = createFoodDto(food);
             return ResponseEntity.ok(foodDto);
         }
     }
 
     @ApiOperation(value = "Store new food with supplied macro per 100 grams")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity addFood(@RequestBody FoodRequest foodRequest) {
+    public ResponseEntity addFood(@RequestBody FoodDto foodDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (foodRequest.getId() != null) {
+        if (foodDto.getId() != null) {
             // Update request
-            updateFoodRequest(foodRequest, userInfo);
+            updateFoodRequest(foodDto, userInfo);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
-            Food food = foodRepository.getFood(userInfo.getUserId(), foodRequest.getName());
+            Food food = foodRepository.getFood(userInfo.getUserId(), foodDto.getName());
             if (food != null) {
                 String errorMessage = "This food is already in your database";
                 return ResponseEntity.badRequest().body(errorMessage);
             } else {
-                return createNewFood(foodRequest, userInfo);
+                return createNewFood(foodDto, userInfo);
             }
         }
     }
 
-    private ResponseEntity createNewFood(@RequestBody FoodRequest foodRequest, UserInfo userInfo) {
+    private ResponseEntity createNewFood(@RequestBody FoodDto foodDto, UserInfo userInfo) {
         Food newFood = new Food();
-        newFood.setName(foodRequest.getName());
-        newFood.setCarbs(foodRequest.getCarbs());
-        newFood.setFat(foodRequest.getFat());
-        newFood.setProtein(foodRequest.getProtein());
+        newFood.setName(foodDto.getName());
+        newFood.setCarbs(foodDto.getCarbs());
+        newFood.setFat(foodDto.getFat());
+        newFood.setProtein(foodDto.getProtein());
 
         Food insertedFood = foodRepository.saveFood(userInfo.getUserId(), newFood);
-        if (foodRequest.getPortions() != null && !foodRequest.getPortions().isEmpty()) {
-            for (PortionDto portionDto : foodRequest.getPortions()) {
+        if (foodDto.getPortions() != null && !foodDto.getPortions().isEmpty()) {
+            for (PortionDto portionDto : foodDto.getPortions()) {
                 Portion newPortion = new Portion();
                 newPortion.setDescription(portionDto.getDescription());
                 newPortion.setGrams(portionDto.getGrams());
@@ -103,18 +101,18 @@ public class FoodService {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    private void updateFoodRequest(@RequestBody FoodRequest foodRequest, UserInfo userInfo) {
+    private void updateFoodRequest(@RequestBody FoodDto foodDto, UserInfo userInfo) {
         Food newFood = new Food();
-        newFood.setId(foodRequest.getId());
-        newFood.setName(foodRequest.getName());
-        newFood.setCarbs(foodRequest.getCarbs());
-        newFood.setFat(foodRequest.getFat());
-        newFood.setProtein(foodRequest.getProtein());
+        newFood.setId(foodDto.getId());
+        newFood.setName(foodDto.getName());
+        newFood.setCarbs(foodDto.getCarbs());
+        newFood.setFat(foodDto.getFat());
+        newFood.setProtein(foodDto.getProtein());
 
         foodRepository.saveFood(userInfo.getUserId(), newFood);
 
         // remove portions not supported yet.
-        for (PortionDto portionDto : foodRequest.getPortions()) {
+        for (PortionDto portionDto : foodDto.getPortions()) {
             Long id = portionDto.getId();
             if (id != null) {
                 // update portion
@@ -134,20 +132,18 @@ public class FoodService {
         }
     }
 
-    private FoodDto createFoodDto(Food food, boolean withPortions) {
-        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food,FoodDto.class );
-        if (withPortions) {
-            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (Portion portion : foodPortions) {
-                PortionDto portionDto = mapPortionToPortionDto(portion, food);
-                foodDto.addPortion(portionDto);
-            }
+    private FoodDto createFoodDto(Food food) {
+        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food, FoodDto.class);
+        List<Portion> foodPortions = portionRepository.getPortions(food.getId());
+        for (Portion portion : foodPortions) {
+            PortionDto portionDto = mapPortionToPortionDto(portion, food);
+            foodDto.addPortion(portionDto);
         }
         return foodDto;
     }
 
     private PortionDto mapPortionToPortionDto(Portion portion, Food food) {
-        PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
+        PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion, PortionDto.class);
         Macro calculatedMacros = calculateMacro(food, portion);
         currDto.setMacros(calculatedMacros);
         return currDto;

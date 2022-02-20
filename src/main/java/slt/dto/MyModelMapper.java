@@ -42,17 +42,13 @@ public class MyModelMapper {
         addLocalDateSqlDate(modelMapper);
 
         // Meals + Ingredients:
-        addAddDishRequestDish(modelMapper);
         addDishDtoDish(modelMapper);
         addDishDishDto(modelMapper);
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
         addLogEntryLogEntryDto(modelMapper);
         addEntryDtoEntry(modelMapper);
-        addDishIngredientDtoIngredient(modelMapper);
 
-        final PropertyMap<AddDishIngredientDto, Ingredient> addDishIngredientDtoIngredientPropertyMap = getAddDishIngredientDtoIngredientPropertyMap();
-        modelMapper.addMappings(addDishIngredientDtoIngredientPropertyMap);
 
         // Weight
         final PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
@@ -81,18 +77,6 @@ public class MyModelMapper {
         this.configuredMapper = modelMapper;
     }
 
-    private void addAddDishRequestDish(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(DishRequest.class, Dish.class)
-                .setPostConverter(mappingContext -> {
-                    if (mappingContext.getDestination().getIngredients() != null) {
-                        for (Ingredient ingredient : mappingContext.getDestination().getIngredients()) {
-                            ingredient.setDish(mappingContext.getDestination());
-                        }
-                    }
-                    return mappingContext.getDestination();
-                });
-    }
-
     private void addDishDtoDish(ModelMapper modelMapper) {
         modelMapper.createTypeMap(DishDto.class, Dish.class)
                 .setPostConverter(mappingContext -> {
@@ -101,14 +85,12 @@ public class MyModelMapper {
                             ingredient.setDish(mappingContext.getDestination());
                         }
                     }
-
                     return mappingContext.getDestination();
                 });
     }
     private void addDishDishDto(ModelMapper modelMapper) {
         modelMapper.createTypeMap(Dish.class, DishDto.class)
                 .setPostConverter(mappingContext -> {
-
                     if (mappingContext.getSource().getIngredients() == null){
                         mappingContext.getDestination().setIngredients(new ArrayList<>());
                     }
@@ -117,10 +99,10 @@ public class MyModelMapper {
                     for (IngredientDto ingredientDto : mappingContext.getDestination().getIngredients()) {
 
                         Macro macro;
-                        if (ingredientDto.getPortionId()!= null) {
+                        if (ingredientDto.getPortion()!= null) {
                             final Optional<PortionDto> matchingPortion = ingredientDto.getFood().getPortions()
                                     .stream()
-                                    .filter(portion -> portion.getId().equals(ingredientDto.getPortionId()))
+                                    .filter(portion -> portion.getId().equals(ingredientDto.getPortion().getId()))
                                     .findFirst();
 
                             if (matchingPortion.isPresent()){
@@ -144,6 +126,11 @@ public class MyModelMapper {
     private void addIngredientDtoIngredient(ModelMapper modelMapper) {
         modelMapper.createTypeMap(IngredientDto.class, Ingredient.class)
                 .setPostConverter(mappingContext -> {
+                    if (mappingContext.getSource().getPortion() != null) {
+                        Long portionId = mappingContext.getSource().getPortion().getId();
+                        mappingContext.getDestination().setPortionId(portionId);
+                    }
+
                     FoodDto food = mappingContext.getSource().getFood();
                     mappingContext.getDestination().setFoodId(food.getId());
                     // Todo: check if food actually exists for user.
@@ -151,26 +138,10 @@ public class MyModelMapper {
                 });
     }
 
-    private void addDishIngredientDtoIngredient(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(AddDishIngredientDto.class, Ingredient.class)
-                .setPostConverter(mappingContext -> {
-
-                    if (mappingContext.getSource().getPortion() != null) {
-                        Long portionId = mappingContext.getSource().getPortion().getId();
-                        mappingContext.getDestination().setPortionId(portionId);
-                    }
-
-                    Long foodId = mappingContext.getSource().getFood().getId();
-                    mappingContext.getDestination().setFoodId(foodId);
-
-                    return mappingContext.getDestination();
-                });
-
-    }
-
     private void addIngredientIngredientDto(ModelMapper modelMapper) {
         modelMapper.createTypeMap(Ingredient.class, IngredientDto.class)
                 .setPostConverter(mappingContext -> {
+                    mappingContext.getDestination().setId(mappingContext.getSource().getId());
                     Long foodId = mappingContext.getSource().getFoodId();
                     Integer userId = mappingContext.getSource().getDish().getUserId();
                     Food foodById = foodRepository.getFoodById(userId, foodId);
@@ -181,6 +152,12 @@ public class MyModelMapper {
                         mappedPortion.setMacros(calculateMacro(mappedFoodDto, mappedPortion));
                         mappedFoodDto.addPortion(mappedPortion);
                     }
+                    mappingContext.getDestination().setPortion(mappedFoodDto.getPortions()
+                            .stream()
+                            .filter(p -> p.getId().equals(mappingContext.getSource().getPortionId()))
+                            .findFirst()
+                            .orElse(null));
+
 
                     mappingContext.getDestination().setFood(mappedFoodDto);
 
@@ -359,13 +336,4 @@ public class MyModelMapper {
         };
     }
 
-    private PropertyMap<AddDishIngredientDto, Ingredient> getAddDishIngredientDtoIngredientPropertyMap() {
-        return new PropertyMap<>() {
-            @Override
-            protected void configure() {
-                skip().setId(null);
-                skip().setDish(null);
-            }
-        };
-    }
 }

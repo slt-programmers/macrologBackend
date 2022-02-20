@@ -228,11 +228,11 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         setUserContextFromJWTResponseHeader(responseEntity);
 
         // add food zonder portion
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
         FoodDto foodZonderPortion = createFood(foodRequestZonderPortions);
 
         // add food met portion
-        FoodRequest foodRequestMetPortions = FoodRequest.builder()
+        FoodDto foodRequestMetPortions = FoodDto.builder()
                 .name("exportFoodWithPortion")
                 .carbs(1.0)
                 .fat(2.0)

@@ -122,7 +122,7 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
 
-    protected FoodDto createFood(FoodRequest foodRequestZonderPortions) {
+    protected FoodDto createFood(FoodDto foodRequestZonderPortions) {
         ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
         ResponseEntity allFoodEntity = foodService.getAllFood();

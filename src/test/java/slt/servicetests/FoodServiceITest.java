@@ -41,8 +41,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testFoodNoPortion() {
-
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name("foodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name("foodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
         ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
@@ -62,19 +61,18 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
     @Test
     public void testFoodAlreadyExists() {
 
-        FoodRequest foodOriginal = FoodRequest.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodOriginal = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
         ResponseEntity responseEntity = foodService.addFood(foodOriginal);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
-        FoodRequest foodDuplicate = FoodRequest.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodDuplicate = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
         responseEntity = foodService.addFood(foodDuplicate);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     public void testFoodMultiplePortion() {
-
-        FoodRequest foodRequestMetPortions = FoodRequest.builder()
+        FoodDto foodRequestMetPortions = FoodDto.builder()
                 .name("foodMultiplePortion")
                 .carbs(1.0)
                 .fat(2.0)
@@ -120,8 +118,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testFoodGetById() {
-
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder()
+        FoodDto foodRequestZonderPortions = FoodDto.builder()
                 .name("foodById")
                 .carbs(1.0)
                 .fat(2.0)
@@ -148,10 +145,10 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
 
         FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodById")).findFirst().get();
 
-        ResponseEntity foodByIDEntityNotFound = foodService.getFoodInformation(666l);
+        ResponseEntity foodByIDEntityNotFound = foodService.getFoodById(666l);
         assertThat(foodByIDEntityNotFound.getStatusCodeValue()).isEqualTo(HttpStatus.NO_CONTENT.value());
 
-        ResponseEntity foodByIDEntity = foodService.getFoodInformation(savedFood.getId());
+        ResponseEntity foodByIDEntity = foodService.getFoodById(savedFood.getId());
         savedFood = (FoodDto) foodByIDEntity.getBody();
 
         assertThat(savedFood.getName()).isEqualTo("foodById");
@@ -174,8 +171,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testFoodAddPortion() {
-
-        FoodRequest foodRequestZonderPortions = FoodRequest.builder().name("foodAddPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        FoodDto foodRequestZonderPortions = FoodDto.builder().name("foodAddPortion").carbs(1.0).fat(2.0).protein(3.0).build();
         ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
 
@@ -185,7 +181,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
         List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
         FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodAddPortion")).findFirst().get();
 
-        FoodRequest foodWithAddedPortionRequest = FoodRequest.builder()
+        FoodDto foodWithAddedPortionRequest = FoodDto.builder()
                 .id(savedFood.getId())
                 .carbs(20.0)
                 .fat(30.0)
@@ -217,7 +213,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(portion2.getMacros()).isNotNull();
 
         // Alter the portion
-        FoodRequest foodWithAlteredPortionRequest = FoodRequest.builder()
+        FoodDto foodWithAlteredPortionRequest = FoodDto.builder()
                 .id(savedFood.getId())
                 .carbs(20.0)
                 .fat(30.0)
