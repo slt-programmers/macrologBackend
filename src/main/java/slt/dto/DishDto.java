@@ -18,11 +18,13 @@ import java.util.List;
 public class DishDto {
 
     private Long id;
+
     @ApiModelProperty(notes = "Name of dish", required = true)
     private String name;
+
     @ApiModelProperty(notes = "List of ingredients", required = true)
     private List<IngredientDto> ingredients = new ArrayList<>();
 
-    private Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+    private MacroDto macrosCalculated = new MacroDto(0.0, 0.0, 0.0, 0);
 
 }

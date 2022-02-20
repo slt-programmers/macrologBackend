@@ -144,14 +144,14 @@ public class FoodService {
 
     private PortionDto mapPortionToPortionDto(Portion portion, Food food) {
         PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion, PortionDto.class);
-        Macro calculatedMacros = calculateMacro(food, portion);
+        MacroDto calculatedMacros = calculateMacro(food, portion);
         currDto.setMacros(calculatedMacros);
         return currDto;
     }
 
     //TODO Naar een util brengen
-    private static Macro calculateMacro(Food food, Portion portion) {
-        Macro calculatedMacros = new Macro();
+    private static MacroDto calculateMacro(Food food, Portion portion) {
+        MacroDto calculatedMacros = new MacroDto();
         // FoodDto has been entered for 100g
         calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
         calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
@@ -160,8 +160,8 @@ public class FoodService {
         return calculatedMacros;
     }
 
-    static Macro calculateMacro(FoodDto food, PortionDto portion) {
-        Macro calculatedMacros = new Macro();
+    static MacroDto calculateMacro(FoodDto food, PortionDto portion) {
+        MacroDto calculatedMacros = new MacroDto();
         // FoodDto has been entered for 100g
         calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
         calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import slt.database.FoodRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.*;
+import slt.util.MacroUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -31,7 +32,7 @@ public class MyModelMapper {
         return configuredMapper;
     }
 
-    public MyModelMapper(){
+    public MyModelMapper() {
 
         log.debug("Creating Macrolog ModelMapper");
         org.modelmapper.ModelMapper modelMapper = new org.modelmapper.ModelMapper();
@@ -88,37 +89,41 @@ public class MyModelMapper {
                     return mappingContext.getDestination();
                 });
     }
+
     private void addDishDishDto(ModelMapper modelMapper) {
         modelMapper.createTypeMap(Dish.class, DishDto.class)
                 .setPostConverter(mappingContext -> {
-                    if (mappingContext.getSource().getIngredients() == null){
+                    if (mappingContext.getSource().getIngredients() == null) {
                         mappingContext.getDestination().setIngredients(new ArrayList<>());
                     }
 
-                    final Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+                    MacroDto macrosCalculated = new MacroDto(0.0, 0.0, 0.0, 0);
                     for (IngredientDto ingredientDto : mappingContext.getDestination().getIngredients()) {
 
-                        Macro macro;
-                        if (ingredientDto.getPortion()!= null) {
+                        MacroDto macroDto;
+                        if (ingredientDto.getPortion() != null) {
                             final Optional<PortionDto> matchingPortion = ingredientDto.getFood().getPortions()
                                     .stream()
                                     .filter(portion -> portion.getId().equals(ingredientDto.getPortion().getId()))
                                     .findFirst();
 
-                            if (matchingPortion.isPresent()){
-                                macro = calculateMacro(ingredientDto.getFood(), matchingPortion.get());
+                            if (matchingPortion.isPresent()) {
+                                macroDto = calculateMacro(ingredientDto.getFood(), matchingPortion.get());
                             } else {
                                 throw new IllegalArgumentException("Ingredient received with illegal portion");
                             }
                         } else {
-                            macro = new Macro(ingredientDto.getFood().getProtein(),ingredientDto.getFood().getFat(),ingredientDto.getFood().getCarbs());
+                            macroDto = new MacroDto(ingredientDto.getFood().getProtein(),
+                                    ingredientDto.getFood().getFat(),
+                                    ingredientDto.getFood().getCarbs(),
+                                    MacroUtils.calculateCalories(ingredientDto.getFood())
+                                    );
                         }
-                        macro.multiply(ingredientDto.getMultiplier());
-                        macrosCalculated.combine(macro);
+                        macroDto = MacroUtils.multiply(macroDto, ingredientDto.getMultiplier());
+                        macrosCalculated = MacroUtils.add(macrosCalculated, macroDto);
                     }
 
                     mappingContext.getDestination().setMacrosCalculated(macrosCalculated);
-
                     return mappingContext.getDestination();
                 });
     }
@@ -165,8 +170,8 @@ public class MyModelMapper {
                 });
     }
 
-    private static Macro calculateMacro(FoodDto food, PortionDto portion) {
-        Macro calculatedMacros = new Macro();
+    private static MacroDto calculateMacro(FoodDto food, PortionDto portion) {
+        MacroDto calculatedMacros = new MacroDto();
         // FoodDto has been entered for 100g
         calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
         calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
@@ -202,11 +207,11 @@ public class MyModelMapper {
                         }
                     }
 
-                    Macro macrosCalculated = new Macro();
+                    MacroDto macrosCalculated = new MacroDto();
                     Double multiplier = mappingContext.getSource().getMultiplier();
                     if (selectedPortionId != null) {
                         macrosCalculated = mappingContext.getDestination().getPortion().getMacros().createCopy();
-                        macrosCalculated.multiply(multiplier);
+                        macrosCalculated = MacroUtils.multiply(macrosCalculated, multiplier);
 
                     } else {
                         macrosCalculated.setCarbs(multiplier * mappedFoodDto.getCarbs());
@@ -317,6 +322,7 @@ public class MyModelMapper {
             }
         };
     }
+
     private PropertyMap<Food, FoodDto> getFoodFoodDtoPropertyMap() {
         return new PropertyMap<>() {
             @Override

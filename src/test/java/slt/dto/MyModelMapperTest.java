@@ -222,7 +222,7 @@ class MyModelMapperTest {
                                 PortionDto.builder()
                                         .grams(5.0)
                                         .description("portion")
-                                        .macros(Macro.builder()
+                                        .macros(MacroDto.builder()
                                                 .carbs(3.0)
                                                 .fat(45.0)
                                                 .protein(13.0)
@@ -268,7 +268,7 @@ class MyModelMapperTest {
         assertThat(map.getGrams()).isEqualTo(portion.getGrams());
         assertThat(map.getMacros()).isNull();
 
-        map.setMacros(Macro.builder().protein(1.0).fat(2.0).carbs(3.0).build());
+        map.setMacros(MacroDto.builder().protein(1.0).fat(2.0).carbs(3.0).build());
 
         final PortionDto mappedBack = mapper.getConfiguredMapper().map(map, PortionDto.class);
         mapper.getConfiguredMapper().validate();
@@ -359,7 +359,7 @@ class MyModelMapperTest {
         assertThat(mapped.getPortion().getId()).isEqualTo(food1Portion.getId());
         assertThat(mapped.getPortion().getDescription()).isEqualTo(food1Portion.getDescription());
         assertThat(mapped.getPortion().getMacros()).isNotNull();
-        assertThat(mapped.getPortion().getMacros().getCalories()).isGreaterThan(1.0);
+        assertThat(mapped.getPortion().getMacros().getCalories()).isGreaterThan(1);
 
         assertThat(mapped.getFood()).isNotNull();
         assertThat(mapped.getFood().getId()).isEqualTo(food1.getId());

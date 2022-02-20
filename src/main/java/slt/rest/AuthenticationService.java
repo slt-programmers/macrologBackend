@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import slt.database.SettingsRepository;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
 import slt.dto.*;
@@ -31,16 +30,13 @@ public class AuthenticationService {
     private UserAccountRepository userAccountRepository;
 
     @Autowired
-    private SettingsRepository settingsRepository;
-
-    @Autowired
     private GoogleMailService mailService;
 
     @Autowired
     private AccountService accountService;
 
     @PostMapping(path = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity authenticateUser(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<UserAccountDto> authenticateUser(@RequestBody AuthenticationRequest request) {
         String username = request.getUsername();
         String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
         log.info("Login attempt {} ", username);
@@ -52,10 +48,10 @@ public class AuthenticationService {
         }
         if (userAccount == null) {
             log.error("Not found");
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else if (!checkValidPassword(hashedPassword, userAccount)) {
             log.error("Unautorized");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
             JWTBuilder builder = new JWTBuilder();
             String jwt = builder.generateJWT(userAccount.getUsername(), userAccount.getId());
@@ -74,7 +70,7 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity signUp(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<UserAccountDto> signUp(@RequestBody RegistrationRequest request) {
         log.info(request.getEmail());
         String username = request.getUsername();
         String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
@@ -84,12 +80,12 @@ public class AuthenticationService {
         UserAccount account = userAccountRepository.getUser(username);
         if (account != null) {
             log.debug("Username of email already in use 1");
-            return ResponseEntity.status(401).body("Username or email already in use");
+            return ResponseEntity.status(401).build();
         } else {
             UserAccount userByEmail = userAccountRepository.getUserByEmail(email);
             if (userByEmail != null) {
                 log.debug("Username or email already in use 2");
-                return ResponseEntity.status(401).body("Username or email already in use");
+                return ResponseEntity.status(401).build();
             } else {
                 account = userAccountRepository.insertUser(username, hashedPassword, email);
             }
@@ -117,7 +113,7 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/resetPassword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
         log.info("Reset email");
         String email = request.getEmail();
         UserAccount account = userAccountRepository.getUserByEmail(email);
@@ -137,7 +133,7 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/changePassword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
         String oldPasswordHashed = PasswordUtils.hashPassword(request.getOldPassword());
         String newPasswordHashed = PasswordUtils.hashPassword(request.getNewPassword());
         String confirmPasswordHashed = PasswordUtils.hashPassword(request.getConfirmPassword());
@@ -148,10 +144,10 @@ public class AuthenticationService {
         UserAccount userAccount = userAccountRepository.getUserById(userInfo.getUserId());
         if (userAccount == null) {
             log.error("Not found");
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else if (!userAccount.getPassword().equals(oldPasswordHashed)) {
             log.error("Old password incorrect");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
             if (!newPasswordHashed.equals(confirmPasswordHashed)) {
                 log.error("Passwords do not match");
@@ -168,20 +164,20 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity deleteAccount(@RequestParam("password") String password) {
+    public ResponseEntity<Void> deleteAccount(@RequestParam("password") String password) {
         String passwordHashed = PasswordUtils.hashPassword(password);
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Integer userId = userInfo.getUserId();
         UserAccount userAccount = userAccountRepository.getUserById(userId);
         if (userAccount == null) {
             log.error("Account not found for userId: {}", userInfo.getUserId());
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else if (!userAccount.getPassword().equals(passwordHashed)) {
             log.error("Could not delete account: password incorrect");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
             accountService.deleteAccount(userId);
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
     }
 

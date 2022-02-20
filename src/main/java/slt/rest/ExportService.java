@@ -13,7 +13,9 @@ import slt.database.entities.*;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.util.MacroUtils;
 
+import javax.crypto.Mac;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,7 +86,7 @@ public class ExportService {
                 portionDto = foodDto.getPortions().stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst()
                         .orElse(null);
                 if (portionDto != null) {
-                    Macro calculatedMacros = FoodService.calculateMacro(foodDto, portionDto);
+                    MacroDto calculatedMacros = FoodService.calculateMacro(foodDto, portionDto);
                     portionDto.setMacros(calculatedMacros);
                 }
                 entryDto.setPortion(portionDto);
@@ -94,11 +96,10 @@ public class ExportService {
             entryDto.setDay(logEntry.getDay());
             entryDto.setMeal(logEntry.getMeal());
 
-            Macro macrosCalculated = new Macro();
+            MacroDto macrosCalculated = new MacroDto();
             if (portionDto != null) {
                 macrosCalculated = entryDto.getPortion().getMacros().createCopy();
-                macrosCalculated.multiply(multiplier);
-
+                macrosCalculated = MacroUtils.multiply(macrosCalculated, multiplier);
             } else {
                 macrosCalculated.setCarbs(multiplier * foodDto.getCarbs());
                 macrosCalculated.setFat(multiplier * foodDto.getFat());

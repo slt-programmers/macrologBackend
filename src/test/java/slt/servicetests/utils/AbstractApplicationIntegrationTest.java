@@ -22,15 +22,16 @@ import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.service.GoogleMailService;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 
 @Slf4j
@@ -80,13 +81,13 @@ public abstract class AbstractApplicationIntegrationTest {
 
     protected Integer createUser(String userEmail) {
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
-        Assert.isTrue(202 == responseEntity.getStatusCodeValue());
+        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        assertEquals(202, responseEntity.getStatusCodeValue());
         return getUserIdFromResponseHeaderJWT(responseEntity);
     }
 
-    protected Integer getUserIdFromResponseHeaderJWT(ResponseEntity responseEntity) {
-        String jwtToken = responseEntity.getHeaders().get("token").get(0);
+    protected Integer getUserIdFromResponseHeaderJWT(ResponseEntity<UserAccountDto> responseEntity) {
+        String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).get(0);
         Jws<Claims> claims = getClaimsJws(jwtToken);
         Integer userId = (Integer) claims.getBody().get("userId");
         log.debug("User id = " + userId);
@@ -94,26 +95,21 @@ public abstract class AbstractApplicationIntegrationTest {
         return userId;
     }
 
-    protected void setUserContextFromJWTResponseHeader(ResponseEntity responseEntity) {
+    protected void setUserContextFromJWTResponseHeader(ResponseEntity<UserAccountDto> responseEntity) {
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(Integer.valueOf(getUserIdFromResponseHeaderJWT(responseEntity)));
+        userInfo.setUserId(getUserIdFromResponseHeaderJWT(responseEntity));
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
     protected void deleteAccount(String password) {
-        ResponseEntity responseEntity;
-        responseEntity = authenticationService.deleteAccount(password);
+        ResponseEntity<Void> responseEntity = authenticationService.deleteAccount(password);
         Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
     }
 
     protected Jws<Claims> getClaimsJws(String jwtToken) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(SecurityConstants.SECRET.getBytes("UTF-8"))
-                    .parseClaimsJws(jwtToken);
-        } catch (UnsupportedEncodingException uoe) {
-            throw new RuntimeException("Unabled to read token");
-        }
+        return Jwts.parser()
+                .setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8))
+                .parseClaimsJws(jwtToken);
     }
 
     protected boolean isEqualDate(Date date, LocalDate localDate) {
@@ -132,7 +128,7 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
     protected void createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
-        List<EntryDto> newLogEntries = Arrays.asList(
+        List<EntryDto> newLogEntries = List.of(
                 EntryDto.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
                         .meal("BREAKFAST")
@@ -141,13 +137,13 @@ public abstract class AbstractApplicationIntegrationTest {
                         .multiplier(multiplier)
                         .build()
         );
-        ResponseEntity responseEntity = entriesService.postEntries(day, newLogEntries);
+        ResponseEntity<List<EntryDto>> responseEntity = entriesService.postEntries(day, "BREAKFAST", newLogEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
     }
 
     protected void storeSetting(String name, String value) {
         SettingDto settingDto = SettingDto.builder().name(name).value(value).build();
-        ResponseEntity responseEntity = settingsService.storeSetting(settingDto);
+        ResponseEntity<Void> responseEntity = settingsService.storeSetting(settingDto);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
 }

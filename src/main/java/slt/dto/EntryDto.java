@@ -23,7 +23,7 @@ public class EntryDto {
     @ApiModelProperty(notes = "PortionDto used.")
     private PortionDto portion;
 
-    private Macro macrosCalculated = new Macro(0.0, 0.0, 0.0);
+    private MacroDto macrosCalculated = new MacroDto(0.0, 0.0, 0.0, 0);
 
     @ApiModelProperty(notes = "Multiplier of the measurement", required = true, example = "1.7")
     private Double multiplier;

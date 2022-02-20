@@ -127,7 +127,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(entriesForDay).hasSize(1);
 
         // Create Store Request with update of entry
-        List<EntryDto> updateEntries = Arrays.asList(
+        List<EntryDto> updateEntries = List.of(
                 EntryDto.builder()
                         .day(Date.valueOf(LocalDate.parse(day)))
                         .meal("BREAKFAST")
@@ -137,7 +137,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
                         .id(entriesForDay.get(0).getId())
                         .build()
         );
-        ResponseEntity responseEntity = entriesService.postEntries(day, updateEntries);
+        ResponseEntity<List<EntryDto>> responseEntity = entriesService.postEntries(day, "BREAKFAST", updateEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
 
         // Check log entry has been updated
@@ -190,9 +190,9 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
 
         List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
-        assertThat(foundMacros.get(0).getMacro().getProtein()).isEqualTo(savedFood.getProtein());
-        assertThat(foundMacros.get(0).getMacro().getFat()).isEqualTo(savedFood.getFat());
-        assertThat(foundMacros.get(0).getMacro().getCarbs()).isEqualTo(savedFood.getCarbs());
+        assertThat(foundMacros.get(0).getMacroDto().getProtein()).isEqualTo(savedFood.getProtein());
+        assertThat(foundMacros.get(0).getMacroDto().getFat()).isEqualTo(savedFood.getFat());
+        assertThat(foundMacros.get(0).getMacroDto().getCarbs()).isEqualTo(savedFood.getCarbs());
 
         macrosFromPeriod = entriesService.getMacrosFromPeriod("1980-01-01", "1980-01-05");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -289,9 +289,9 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
         // potion is 1 gram, dus alles gedeeld door 100
-        assertThat(foundMacros.get(0).getMacro().getProtein()).isEqualTo(savedFood.getProtein() / 100);
-        assertThat(foundMacros.get(0).getMacro().getFat()).isEqualTo(savedFood.getFat() / 100);
-        assertThat(foundMacros.get(0).getMacro().getCarbs()).isEqualTo(savedFood.getCarbs() / 100);
+        assertThat(foundMacros.get(0).getMacroDto().getProtein()).isEqualTo(savedFood.getProtein() / 100);
+        assertThat(foundMacros.get(0).getMacroDto().getFat()).isEqualTo(savedFood.getFat() / 100);
+        assertThat(foundMacros.get(0).getMacroDto().getCarbs()).isEqualTo(savedFood.getCarbs() / 100);
 
 
     }

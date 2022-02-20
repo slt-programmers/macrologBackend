@@ -14,6 +14,7 @@ import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.LocalDateParser;
+import slt.util.MacroUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -46,16 +47,20 @@ public class EntriesService {
     }
 
     @ApiOperation(value = "Post entries")
-    @PostMapping(path = "/day/{date}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/day/{date}/{meal}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<EntryDto>> postEntries(
             @PathVariable("date") String date,
+            @PathVariable("meal") String meal,
             @RequestBody List<EntryDto> entries) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        List<LogEntry> existingEntries = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
+        List<LogEntry> existingEntriesForMeal = logEntryRepository.getAllLogEntries(
+                userInfo.getUserId(),
+                LocalDateParser.parse(date),
+                meal);
         ModelMapper mapper = myModelMapper.getConfiguredMapper();
 
         // Delete old
-        for (LogEntry entry : existingEntries) {
+        for (LogEntry entry : existingEntriesForMeal) {
             if (!entries.stream().map(e -> e.getFood().getId())
                     .collect(Collectors.toList()).contains(entry.getId())) {
                 logEntryRepository.deleteLogEntry(userInfo.getUserId(), entry.getId());
@@ -96,7 +101,7 @@ public class EntriesService {
         Map<java.util.Date, Optional<EntryDto>> collect = entryDtos.stream().collect(Collectors.groupingBy(EntryDto::getDay, Collectors.reducing((EntryDto d1, EntryDto d2) -> {
             EntryDto entryDto = new EntryDto();
             entryDto.setMacrosCalculated(d1.getMacrosCalculated());
-            entryDto.getMacrosCalculated().combine(d2.getMacrosCalculated());
+            entryDto.setMacrosCalculated(MacroUtils.add(entryDto.getMacrosCalculated(), d2.getMacrosCalculated()));
             return entryDto;
         })));
 
@@ -107,7 +112,7 @@ public class EntriesService {
             Optional<EntryDto> optionalValue = dateOptionalEntry.getValue();
             if (optionalValue.isPresent()) {
                 EntryDto entryDto = optionalValue.get();
-                dm.setMacro(entryDto.getMacrosCalculated());
+                dm.setMacroDto(entryDto.getMacrosCalculated());
             }
             retObject.add(dm);
         }

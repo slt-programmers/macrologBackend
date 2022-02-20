@@ -2,9 +2,11 @@ package slt.servicetests;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.swagger.models.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.engine.reporting.ReportEntry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import slt.dto.*;
@@ -125,7 +127,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
 
         setUserContextFromJWTResponseHeader(responseEntity);
@@ -137,8 +139,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // wachtwoord veranderen
         ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.builder().oldPassword(password).newPassword(newPassword).confirmPassword(newPassword).build();
-        responseEntity = authenticationService.changePassword(changePasswordRequest);
-        Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
+        ResponseEntity<String> result = authenticationService.changePassword(changePasswordRequest);
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCodeValue());
 
         // inloggen met oude kan niet meer:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -160,7 +162,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
 
         setUserContextFromJWTResponseHeader(responseEntity);
@@ -171,8 +173,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
 
         // verwijder met verkeerd wachtwoord afkeuren
-        responseEntity = authenticationService.deleteAccount("verkeerd");
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+        ResponseEntity<Void> result = authenticationService.deleteAccount("verkeerd");
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), result.getStatusCodeValue());
 
         // verwijder met correct wachtwoord uitvoeren
         deleteAccount(password);
@@ -193,7 +195,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
 
         setUserContextFromJWTResponseHeader(responseEntity);
@@ -208,8 +210,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         deleteAccount(password);
 
         // verwijder nomaals
-        responseEntity = authenticationService.deleteAccount(password);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
+        ResponseEntity<Void> result = authenticationService.deleteAccount(password);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCodeValue());
 
     }
 
@@ -222,7 +224,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
 
         setUserContextFromJWTResponseHeader(responseEntity);
@@ -273,8 +275,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                         .build()
 
         );
-        responseEntity = activityService.postActivities("2003-01-01", newActivities);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        ResponseEntity<List<LogActivityDto>> result = activityService.postActivities("2003-01-01", newActivities);
+        assertThat(result.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // add weight
         // store weight:
@@ -282,8 +284,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                 .weight(10.0)
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
-        responseEntity = weightService.storeWeightEntry(newWeight);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        ResponseEntity<Void> result2 = weightService.storeWeightEntry(newWeight);
+        assertThat(result2.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // add settings:
         storeSetting("export1", "export1value");

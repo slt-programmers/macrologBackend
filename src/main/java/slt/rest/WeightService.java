@@ -42,7 +42,7 @@ public class WeightService {
 
     @ApiOperation(value = "Store weight entry")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeWeightEntry(@RequestBody WeightDto weightEntry) {
+    public ResponseEntity<Void> storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
 
         Weight entry = myModelMapper.getConfiguredMapper().map(weightEntry, Weight.class);
