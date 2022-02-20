@@ -33,7 +33,6 @@ public class MyModelMapper {
     }
 
     public MyModelMapper() {
-
         log.debug("Creating Macrolog ModelMapper");
         org.modelmapper.ModelMapper modelMapper = new org.modelmapper.ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -47,9 +46,8 @@ public class MyModelMapper {
         addDishDishDto(modelMapper);
         addIngredientIngredientDto(modelMapper);
         addIngredientDtoIngredient(modelMapper);
-        addLogEntryLogEntryDto(modelMapper);
+        addLogEntryEntryDto(modelMapper);
         addEntryDtoEntry(modelMapper);
-
 
         // Weight
         final PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
@@ -180,10 +178,9 @@ public class MyModelMapper {
         return calculatedMacros;
     }
 
-    private void addLogEntryLogEntryDto(ModelMapper modelMapper) {
+    private void addLogEntryEntryDto(ModelMapper modelMapper) {
         modelMapper.createTypeMap(LogEntry.class, EntryDto.class)
                 .setPostConverter(mappingContext -> {
-
                     Long foodId = mappingContext.getSource().getFoodId();
                     Integer userId = mappingContext.getSource().getUserId();
                     Food foodById = foodRepository.getFoodById(userId, foodId);
@@ -217,6 +214,7 @@ public class MyModelMapper {
                         macrosCalculated.setCarbs(multiplier * mappedFoodDto.getCarbs());
                         macrosCalculated.setFat(multiplier * mappedFoodDto.getFat());
                         macrosCalculated.setProtein(multiplier * mappedFoodDto.getProtein());
+                        macrosCalculated.setCalories(MacroUtils.calculateCalories(macrosCalculated));
                     }
                     mappingContext.getDestination().setMacrosCalculated(macrosCalculated);
 
