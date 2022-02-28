@@ -69,12 +69,13 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String day = "2001-01-01";
 
         createLogEntry(day, savedFood, null, 1.0);
+
         createLogEntry(day, savedFood, null, 3.0);
 
         // check correctly added:
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
 
-        assertThat(entriesForDay).hasSize(1);
+        assertThat(entriesForDay).hasSize(2);
         assertThat(entriesForDay.get(0).getMeal()).isEqualTo("BREAKFAST");
         assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
     }

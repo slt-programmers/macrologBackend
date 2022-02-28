@@ -29,6 +29,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -127,7 +128,7 @@ public abstract class AbstractApplicationIntegrationTest {
         return foodDtos.stream().filter(f -> f.getName().equals(foodRequestZonderPortions.getName())).findFirst().get();
     }
 
-    protected void createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
+    protected EntryDto createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
         List<EntryDto> newLogEntries = List.of(
                 EntryDto.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
@@ -139,6 +140,18 @@ public abstract class AbstractApplicationIntegrationTest {
         );
         ResponseEntity<List<EntryDto>> responseEntity = entriesService.postEntries(day, "BREAKFAST", newLogEntries);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
+        return getMatch(responseEntity.getBody(), day,savedFood,portion,multiplier);
+    }
+
+    private EntryDto getMatch(List<EntryDto> all, String day, FoodDto foodDto, PortionDto portionDto, double multiplier) {
+        List<EntryDto> matches =  all.stream()
+                .filter(entryDto -> entryDto.getMultiplier().equals(multiplier) &&
+                        (portionDto == null || entryDto.getPortion().getId().equals(portionDto.getId())) &&
+                        entryDto.getFood().getId().equals(foodDto.getId())
+                )
+                .collect(Collectors.toList());
+        assertThat(matches).hasSize(1);
+        return matches.get(0);
     }
 
     protected void storeSetting(String name, String value) {

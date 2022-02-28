@@ -74,6 +74,7 @@ public class EntriesService {
         }
         List<LogEntry> allEntities = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
         List<EntryDto> allEntries = allEntities.stream()
+                .filter(entity -> entity.getMeal().equals(meal))
                 .map(entity -> mapper.map(entity, EntryDto.class))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(allEntries);
