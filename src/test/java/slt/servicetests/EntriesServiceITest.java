@@ -75,7 +75,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         // check correctly added:
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
 
-        assertThat(entriesForDay).hasSize(1);
+        assertThat(entriesForDay).hasSize(2);
         assertThat(entriesForDay.get(0).getMeal()).isEqualTo("BREAKFAST");
         assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
     }
