@@ -24,6 +24,9 @@ public class MacroDto {
     @ApiModelProperty(notes = "Number of calories")
     private Integer calories;
 
+    public Double getCalories() {
+        return fat * 9 + carbs * 4 + protein * 4;
+    }
 
     public MacroDto createCopy() {
         MacroDto clone = new MacroDto();
