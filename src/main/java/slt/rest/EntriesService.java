@@ -61,7 +61,7 @@ public class EntriesService {
 
         // Delete old
         for (LogEntry existingEntry : existingEntriesForMeal) {
-            List<Long> idsUitRequest = entries.stream().map(e -> e.getId())
+            List<Long> idsUitRequest = entries.stream().map(EntryDto::getId)
                     .collect(Collectors.toList());
             boolean entryVerwijderd = !idsUitRequest.contains(existingEntry.getId());
             if (entryVerwijderd) {
