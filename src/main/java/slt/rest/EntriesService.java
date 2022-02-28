@@ -60,10 +60,13 @@ public class EntriesService {
         ModelMapper mapper = myModelMapper.getConfiguredMapper();
 
         // Delete old
-        for (LogEntry entry : existingEntriesForMeal) {
-            if (!entries.stream().map(e -> e.getFood().getId())
-                    .collect(Collectors.toList()).contains(entry.getId())) {
-                logEntryRepository.deleteLogEntry(userInfo.getUserId(), entry.getId());
+        for (LogEntry existingEntry : existingEntriesForMeal) {
+            List<Long> idsUitRequest = entries.stream().map(e -> e.getId())
+                    .collect(Collectors.toList());
+            boolean entryVerwijderd = !idsUitRequest.contains(existingEntry.getId());
+            if (entryVerwijderd) {
+                logEntryRepository.deleteLogEntry(userInfo.getUserId(), existingEntry.getId());
+                log.info("Deleting old existingEntry {}", existingEntry.getFoodId());
             }
         }
 
