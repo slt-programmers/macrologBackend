@@ -5,6 +5,8 @@ import slt.dto.MacroDto;
 
 public class MacroUtils {
 
+    private MacroUtils(){}
+
     public static Integer calculateCalories(MacroDto macro) {
         return Math.toIntExact(
                 Math.round(

@@ -69,6 +69,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         String day = "2001-01-01";
 
         createLogEntry(day, savedFood, null, 1.0);
+
         createLogEntry(day, savedFood, null, 3.0);
 
         // check correctly added:
