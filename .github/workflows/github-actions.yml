@@ -15,3 +15,7 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: action-maven
+        uses: comchangs/action-maven@v0.4-beta |
+              clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=slt-programmers_macrologBackend
+        
