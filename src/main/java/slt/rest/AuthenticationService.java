@@ -79,7 +79,7 @@ public class AuthenticationService {
 
         UserAccount account = userAccountRepository.getUser(username);
         if (account != null) {
-            log.debug("Username of email already in use 1");
+            log.debug("Username or email already in use 1");
             return ResponseEntity.status(401).build();
         } else {
             UserAccount userByEmail = userAccountRepository.getUserByEmail(email);

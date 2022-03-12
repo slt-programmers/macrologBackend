@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.LogEntryRepository;
 import slt.database.entities.LogEntry;
 import slt.dto.*;
+import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.LocalDateParser;
@@ -77,7 +78,6 @@ public class EntriesService {
         }
         List<LogEntry> allEntities = logEntryRepository.getAllLogEntries(userInfo.getUserId(), LocalDateParser.parse(date));
         List<EntryDto> allEntries = allEntities.stream()
-                .filter(entity -> entity.getMeal().equals(meal))
                 .map(entity -> mapper.map(entity, EntryDto.class))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(allEntries);

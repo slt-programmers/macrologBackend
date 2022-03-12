@@ -130,9 +130,11 @@ public class SettingsService {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<slt.database.entities.Setting> settings = settingsRepo.getAllSettings(userInfo.getUserId());
         List<Weight> weight = weightRepo.getAllWeightEntries(userInfo.getUserId());
-        Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(new Weight());
+        Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(null);
         UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
-        userSettingsDto.setCurrentWeight(currentWeight.getValue());
+        if (currentWeight != null) {
+            userSettingsDto.setCurrentWeight(currentWeight.getValue());
+        }
         return userSettingsDto;
     }
 
