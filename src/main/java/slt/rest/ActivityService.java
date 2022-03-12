@@ -13,7 +13,7 @@ import slt.connectivity.strava.StravaActivityService;
 import slt.database.ActivityRepository;
 import slt.database.entities.LogActivity;
 import slt.dto.LogActivityDto;
-import slt.dto.MyModelMapper;
+import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.LocalDateParser;

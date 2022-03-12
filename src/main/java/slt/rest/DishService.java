@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.DishRepository;
 import slt.database.entities.Dish;
 import slt.dto.DishDto;
-import slt.dto.MyModelMapper;
+import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 

@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.WeightRepository;
 import slt.database.entities.Weight;
-import slt.dto.MyModelMapper;
+import slt.mapper.MyModelMapper;
 import slt.dto.WeightDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;

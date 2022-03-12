@@ -13,6 +13,7 @@ import slt.database.PortionRepository;
 import slt.database.entities.Food;
 import slt.database.entities.Portion;
 import slt.dto.*;
+import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 

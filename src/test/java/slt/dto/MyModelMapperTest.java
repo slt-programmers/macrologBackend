@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import slt.database.FoodRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.*;
+import slt.mapper.MyModelMapper;
 
 import java.sql.Date;
 import java.time.LocalDate;

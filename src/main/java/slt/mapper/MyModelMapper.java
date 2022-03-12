@@ -1,4 +1,4 @@
-package slt.dto;
+package slt.mapper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.*;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import slt.database.FoodRepository;
 import slt.database.PortionRepository;
 import slt.database.entities.*;
+import slt.dto.*;
 import slt.util.MacroUtils;
 
 import java.sql.Date;
@@ -223,14 +224,13 @@ public class MyModelMapper {
     }
 
     private void addEntryDtoEntry(ModelMapper modelMapper) {
-
         modelMapper.createTypeMap(EntryDto.class, LogEntry.class)
                 .setPostConverter(mappingContext -> {
                     EntryDto dto = mappingContext.getSource();
                     mappingContext.getDestination().setId(dto.getId());
                     mappingContext.getDestination().setFoodId(dto.getFood().getId());
                     mappingContext.getDestination().setPortionId(dto.getPortion() != null ? dto.getPortion().getId() : null);
-                    mappingContext.getDestination().setMeal(dto.getMeal());
+                    mappingContext.getDestination().setMeal(dto.getMeal().toString());
                     mappingContext.getDestination().setMultiplier(dto.getMultiplier());
                     mappingContext.getDestination().setDay(modelMapper.map(dto.getDay(), Date.class));
 

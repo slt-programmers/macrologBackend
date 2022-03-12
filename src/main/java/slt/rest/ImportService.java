@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
 import slt.database.entities.*;
 import slt.dto.*;
+import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
@@ -132,7 +133,7 @@ public class ImportService {
         java.sql.Date newDate = new java.sql.Date(entryDto.getDay().getTime());
         logEntry.setDay(newDate);
         logEntry.setFoodId(entryDto.getFood().getId());
-        logEntry.setMeal(entryDto.getMeal());
+        logEntry.setMeal(entryDto.getMeal().toString());
         logEntry.setMultiplier(entryDto.getMultiplier());
         if (entryDto.getPortion() != null) {
             logEntry.setPortionId(entryDto.getPortion().getId());

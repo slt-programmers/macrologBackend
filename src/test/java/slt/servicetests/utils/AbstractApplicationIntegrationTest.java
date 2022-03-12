@@ -132,7 +132,7 @@ public abstract class AbstractApplicationIntegrationTest {
         List<EntryDto> newLogEntries = List.of(
                 EntryDto.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
-                        .meal("BREAKFAST")
+                        .meal(Meal.valueOf("BREAKFAST"))
                         .portion(portion)
                         .food(savedFood)
                         .multiplier(multiplier)

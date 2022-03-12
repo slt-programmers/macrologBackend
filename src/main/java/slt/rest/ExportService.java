@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
 import slt.database.entities.*;
 import slt.dto.*;
+import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.util.MacroUtils;
 
-import javax.crypto.Mac;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,7 +94,7 @@ public class ExportService {
             Double multiplier = logEntry.getMultiplier();
             entryDto.setMultiplier(multiplier);
             entryDto.setDay(logEntry.getDay());
-            entryDto.setMeal(logEntry.getMeal());
+            entryDto.setMeal(Meal.valueOf(logEntry.getMeal().toLowerCase()));
 
             MacroDto macrosCalculated = new MacroDto();
             if (portionDto != null) {

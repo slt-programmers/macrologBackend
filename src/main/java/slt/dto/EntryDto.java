@@ -32,6 +32,6 @@ public class EntryDto {
     private Date day;
 
     @ApiModelProperty(notes = "Meal. BREAKFAST, LUNCH, DINNER, SNACK", required = true, example = "BREAKFAST")
-    private String meal;
+    private Meal meal;
 
 }

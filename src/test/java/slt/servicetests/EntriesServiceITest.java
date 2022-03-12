@@ -105,7 +105,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         // check correctly added:
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
         assertThat(entriesForDay).hasSize(1);
-        assertThat(entriesForDay.get(0).getMeal()).isEqualTo("BREAKFAST");
+        assertThat(entriesForDay.get(0).getMeal()).isEqualTo(Meal.BREAKFAST);
         assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
         assertThat(entriesForDay.get(0).getFood().getId()).isEqualTo(savedFood.getId());
         assertThat(entriesForDay.get(0).getPortion().getId()).isEqualTo(portion1.getId());
@@ -131,7 +131,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<EntryDto> updateEntries = List.of(
                 EntryDto.builder()
                         .day(Date.valueOf(LocalDate.parse(day)))
-                        .meal("BREAKFAST")
+                        .meal(Meal.valueOf("BREAKFAST"))
                         .portion(null)
                         .food(savedFood)
                         .multiplier(3.0)
