@@ -352,7 +352,7 @@ class MyModelMapperTest {
         mapper.getConfiguredMapper().validate();
 
         assertThat(mapped.getId()).isEqualTo(logEntry.getId());
-        assertThat(mapped.getMeal()).isEqualTo(logEntry.getMeal());
+        assertThat(mapped.getMeal()).isEqualTo(Meal.valueOf(logEntry.getMeal()));
         assertThat(mapped.getMultiplier()).isEqualTo(logEntry.getMultiplier());
         assertThat(mapped.getDay()).isInSameDayAs(Date.valueOf(localDate));
 

@@ -53,7 +53,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
 
         assertThat(entriesForDay).hasSize(1);
-        assertThat(entriesForDay.get(0).getMeal()).isEqualTo("BREAKFAST");
+        assertThat(entriesForDay.get(0).getMeal()).isEqualTo(Meal.BREAKFAST);
         assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
     }
 
@@ -76,7 +76,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
 
         assertThat(entriesForDay).hasSize(1);
-        assertThat(entriesForDay.get(0).getMeal()).isEqualTo("BREAKFAST");
+        assertThat(entriesForDay.get(0).getMeal()).isEqualTo(Meal.BREAKFAST);
         assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
     }
 

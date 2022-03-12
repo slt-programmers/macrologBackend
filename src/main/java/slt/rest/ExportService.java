@@ -94,7 +94,7 @@ public class ExportService {
             Double multiplier = logEntry.getMultiplier();
             entryDto.setMultiplier(multiplier);
             entryDto.setDay(logEntry.getDay());
-            entryDto.setMeal(Meal.valueOf(logEntry.getMeal().toLowerCase()));
+            entryDto.setMeal(Meal.valueOf(logEntry.getMeal()));
 
             MacroDto macrosCalculated = new MacroDto();
             if (portionDto != null) {
