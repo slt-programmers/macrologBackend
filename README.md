@@ -32,6 +32,9 @@ Commandline maven
 If you haven't maven installed
 - mvnw.cmd spring-boot:run
 
+If you get a connection exception the first time you start the app, open de database in DBeaver first.
+This magically fixes it.
+
 
 ## Swagger
 http://localhost:8090/swagger-ui.html
