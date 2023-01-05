@@ -64,8 +64,8 @@ see https://dashboard.heroku.com/apps/macrolog-backend/deploy/heroku-git
 ## Automatic deployment
 The backend is configured to automatically deploy to heroku. 
 This is configured on the heroku dashboard. 
-Pushing to master results in deployment to ACC.
-Pushing to release results in deployment to PRD.
+Pushing to develop results in deployment to ACC.
+Pushing to main results in deployment to PRD.
 
 
 
