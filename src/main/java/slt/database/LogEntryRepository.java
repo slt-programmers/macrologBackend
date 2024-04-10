@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import slt.database.entities.LogEntry;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;

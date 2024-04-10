@@ -15,8 +15,9 @@ spring:
   jpa:
      properties:
        hibernate:
-         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
-#    properties.hibernate.jdbc.time_zone : UTC
+         dialect: org.hibernate.dialect.MySQLDialect
+         globally_quoted_identifiers: true
+  #    properties.hibernate.jdbc.time_zone : UTC
 #    show-sql: true
 #    hibernate:
 #       ddl-auto: validate
@@ -49,7 +50,9 @@ google:
 
 ---
 spring:
-  profiles: arjan
+  config:
+    activate:
+      on-profile: arjan
 
   datasource:
      url: jdbc:mysql://localhost:3306/test?autoReconnect=true&useSSL=false&serverTimezone=CET
@@ -74,7 +77,9 @@ mail:
    password: 'doethetniet'
 ---
 spring:
-  profiles: carmen
+  config:
+    activate:
+      on-profile: carmen
 
   datasource:
      url: jdbc:mysql://localhost:3306/macrolog_dev?autoReconnect=true&useSSL=false&serverTimezone=CET
@@ -99,7 +104,9 @@ mail:
 
 ---
 spring:
-  profiles: test
+  config:
+    activate:
+      on-profile: test
   datasource:
      url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
      username: sa

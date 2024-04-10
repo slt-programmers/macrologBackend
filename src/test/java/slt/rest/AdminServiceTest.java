@@ -1,10 +1,7 @@
 package slt.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,12 +43,13 @@ class AdminServiceTest {
     @InjectMocks
     AdminService adminService;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(123);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
+        reset(accountService,googleMailService,userRepo);
     }
 
     @Test
@@ -121,7 +119,7 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.deleteAccount(234);
         Assertions.assertEquals(404, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyNoInteractions(accountService);
     }
 
 
@@ -136,7 +134,7 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.deleteAccount(123);
         Assertions.assertEquals(400, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyNoInteractions(accountService);
     }
 
 
@@ -152,7 +150,7 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.deleteAccount(234);
         Assertions.assertEquals(401, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyNoInteractions(accountService);
     }
 
     @Test
@@ -164,8 +162,8 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.getMailStatus();
         Assertions.assertEquals(401, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
-        Mockito.verifyZeroInteractions(googleMailService);
+        Mockito.verifyNoInteractions(accountService);
+        Mockito.verifyNoInteractions(googleMailService);
     }
     @Test
     void storeMailSettingUnauthorized() throws IOException {
@@ -176,8 +174,8 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.storeMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
         Assertions.assertEquals(401, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
-        Mockito.verifyZeroInteractions(googleMailService);
+        Mockito.verifyNoInteractions(accountService);
+        Mockito.verifyNoInteractions(googleMailService);
     }
     @Test
     void sendTestMailUnauthorized() {
@@ -188,8 +186,8 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.sendTestMail(MailDto.builder().build());
         Assertions.assertEquals(401, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
-        Mockito.verifyZeroInteractions(googleMailService);
+        Mockito.verifyNoInteractions(accountService);
+        Mockito.verifyNoInteractions(googleMailService);
     }
 
     @Test
@@ -203,7 +201,7 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.getMailStatus();
         Assertions.assertEquals(200, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyNoInteractions(accountService);
         verify(googleMailService).getMailStatus();
 
     }
@@ -218,7 +216,7 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.storeMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
         Assertions.assertEquals(200, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyNoInteractions(accountService);
         verify(googleMailService).registerWithCode(eq("a"));
     }
     @Test
@@ -231,7 +229,7 @@ class AdminServiceTest {
 
         ResponseEntity response = adminService.sendTestMail(MailDto.builder().emailTo("a").build());
         Assertions.assertEquals(200, response.getStatusCodeValue());
-        Mockito.verifyZeroInteractions(accountService);
+        Mockito.verifyNoInteractions(accountService);
         verify(googleMailService).sendTestMail(eq("a"));
     }
 

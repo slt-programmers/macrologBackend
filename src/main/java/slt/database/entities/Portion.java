@@ -3,7 +3,7 @@ package slt.database.entities;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Getter
 @Setter

@@ -12,13 +12,12 @@ import slt.database.entities.UserAccount;
 import slt.dto.ConnectivityStatusDto;
 
 import javax.mail.internet.MimeMessage;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 
 @Service
 @Slf4j
@@ -89,7 +88,7 @@ public class GoogleMailService {
 
     private long getExpiresAtFromExpiresIn(Long expiresIn) {
         Instant instant = Instant.now();
-        return instant.plus(expiresIn, ChronoUnit.SECONDS).getEpochSecond();
+        return instant.plusSeconds(expiresIn).getEpochSecond();
     }
 
     private void saveSetting(Integer userId, String name, String value) {
