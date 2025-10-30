@@ -14,5 +14,5 @@ import java.util.Date;
 public class DayMacroDto {
 
     private Date day;
-    private MacroDto macroDto;
+    private MacroDto macros;
 }

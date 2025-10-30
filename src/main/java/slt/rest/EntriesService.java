@@ -116,7 +116,7 @@ public class EntriesService {
             Optional<EntryDto> optionalValue = dateOptionalEntry.getValue();
             if (optionalValue.isPresent()) {
                 EntryDto entryDto = optionalValue.get();
-                dm.setMacroDto(entryDto.getMacrosCalculated());
+                dm.setMacros(entryDto.getMacrosCalculated());
             }
             retObject.add(dm);
         }
