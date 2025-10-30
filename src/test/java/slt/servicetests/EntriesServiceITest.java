@@ -191,9 +191,9 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
 
         List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
-        assertThat(foundMacros.get(0).getMacroDto().getProtein()).isEqualTo(savedFood.getProtein());
-        assertThat(foundMacros.get(0).getMacroDto().getFat()).isEqualTo(savedFood.getFat());
-        assertThat(foundMacros.get(0).getMacroDto().getCarbs()).isEqualTo(savedFood.getCarbs());
+        assertThat(foundMacros.get(0).getMacros().getProtein()).isEqualTo(savedFood.getProtein());
+        assertThat(foundMacros.get(0).getMacros().getFat()).isEqualTo(savedFood.getFat());
+        assertThat(foundMacros.get(0).getMacros().getCarbs()).isEqualTo(savedFood.getCarbs());
 
         macrosFromPeriod = entriesService.getMacrosFromPeriod("1980-01-01", "1980-01-05");
         assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
@@ -290,9 +290,9 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
         // potion is 1 gram, dus alles gedeeld door 100
-        assertThat(foundMacros.get(0).getMacroDto().getProtein()).isEqualTo(savedFood.getProtein() / 100);
-        assertThat(foundMacros.get(0).getMacroDto().getFat()).isEqualTo(savedFood.getFat() / 100);
-        assertThat(foundMacros.get(0).getMacroDto().getCarbs()).isEqualTo(savedFood.getCarbs() / 100);
+        assertThat(foundMacros.get(0).getMacros().getProtein()).isEqualTo(savedFood.getProtein() / 100);
+        assertThat(foundMacros.get(0).getMacros().getFat()).isEqualTo(savedFood.getFat() / 100);
+        assertThat(foundMacros.get(0).getMacros().getCarbs()).isEqualTo(savedFood.getCarbs() / 100);
 
 
     }
