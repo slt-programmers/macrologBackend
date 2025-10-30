@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import slt.database.entities.Food;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 interface FoodCrudRepository extends CrudRepository<Food, Integer> {

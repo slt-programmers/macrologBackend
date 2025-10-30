@@ -2,7 +2,7 @@ package slt.database.entities;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.Date;
 import java.time.LocalDate;
 

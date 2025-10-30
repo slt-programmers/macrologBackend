@@ -6,9 +6,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -84,6 +84,7 @@ public class SecurityFilter implements Filter {
         return request.getRequestURI().startsWith("/swagger-resources") ||
                 request.getRequestURI().startsWith("/webjars/") ||
                 request.getRequestURI().startsWith("/api/") ||
+                request.getRequestURI().startsWith("/healthcheck") ||
                 request.getRequestURI().startsWith("/v2/api-docs") ||
                 request.getRequestURI().startsWith("/swagger-ui.html") ||
                 request.getRequestURI().startsWith("/webhooks/public");

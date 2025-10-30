@@ -14,8 +14,7 @@ import slt.database.entities.Setting;
 import slt.dto.SyncedAccount;
 import slt.util.LocalDateParser;
 
-import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
+import jakarta.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.time.Instant;
@@ -378,7 +377,7 @@ public class StravaActivityService {
         }
     }
 
-    private LogActivity createNewMacrologActivity(@NotNull StravaToken token, @NotNull Long stravaActivityId) {
+    private LogActivity createNewMacrologActivity(StravaToken token, Long stravaActivityId) {
         final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
         final String startDateString = activityDetail.getStart_date();
         // To avoid timezone issues we take the date part only and convert it to localdate
