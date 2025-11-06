@@ -50,7 +50,7 @@ public class StravaClient {
     private static final String ERROR_MESSAGE = "Fout bij versturen.";
     private static final String BEARER_MESSAGE = "Bearer %s";
 
-    private static final String STRAVA_WEBHOOK_URL = "https://api.strava.com/api/v3/push_subscriptions";
+    private static final String STRAVA_WEBHOOK_URL = "https://www.strava.com/api/v3/push_subscriptions";
     private static final String STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/activities";
     private static final String STRAVA_AUTHENTICATION_URL = "https://www.strava.com/oauth/token";
 
