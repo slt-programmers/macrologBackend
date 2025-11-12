@@ -80,12 +80,12 @@ public class AuthenticationService {
         UserAccount account = userAccountRepository.getUser(username);
         if (account != null) {
             log.debug("Username or email already in use 1");
-            return ResponseEntity.status(401).build();
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
             UserAccount userByEmail = userAccountRepository.getUserByEmail(email);
             if (userByEmail != null) {
                 log.debug("Username or email already in use 2");
-                return ResponseEntity.status(401).build();
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             } else {
                 account = userAccountRepository.insertUser(username, hashedPassword, email);
             }
@@ -113,7 +113,7 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/resetPassword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
         log.info("Reset email");
         String email = request.getEmail();
         UserAccount account = userAccountRepository.getUserByEmail(email);
@@ -125,15 +125,15 @@ public class AuthenticationService {
             userAccountRepository.saveAccount(account);
             mailService.sendPasswordRetrievalMail(email, randomPassword, account);
 
-            return ResponseEntity.ok("Email matches");
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
             log.error("Account is null");
-            return ResponseEntity.status(404).body("Email not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping(path = "/changePassword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
         String oldPasswordHashed = PasswordUtils.hashPassword(request.getOldPassword());
         String newPasswordHashed = PasswordUtils.hashPassword(request.getNewPassword());
         String confirmPasswordHashed = PasswordUtils.hashPassword(request.getConfirmPassword());
@@ -151,14 +151,14 @@ public class AuthenticationService {
         } else {
             if (!newPasswordHashed.equals(confirmPasswordHashed)) {
                 log.error("Passwords do not match");
-                return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             } else {
                 log.info("Passwords match");
                 userAccount.setPassword(newPasswordHashed);
                 userAccount.setResetDate(null);
                 userAccount.setResetPassword(null);
                 userAccountRepository.saveAccount(userAccount);
-                return new ResponseEntity<>("OK", HttpStatus.OK);
+                return new ResponseEntity<>(HttpStatus.OK);
             }
         }
     }
