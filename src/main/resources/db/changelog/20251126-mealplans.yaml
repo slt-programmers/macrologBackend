@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20251126-mealplans
+      author: carmen
+      changes:
+        - createTable:
+            tableName: mealplan
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: title
+                  type: TEXT
+        - createTable:
+            tableName: mealtime
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: mealplan_id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: meal
+                  type: TEXT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: weekday
+                  type: TEXT
+        - addColumn:
+            tableName: ingredient
+            columns:
+              - column:
+                  name: mealplan_id
+                  type: INT
