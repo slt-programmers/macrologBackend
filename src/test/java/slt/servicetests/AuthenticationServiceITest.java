@@ -31,8 +31,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         String userEmail = "newuser@test.example";
 
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        Assertions.assertEquals(202, responseEntity.getStatusCode().value());
         String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).get(0);
         log.debug(jwtToken);
         Jws<Claims> claimsJws = getClaimsJws(jwtToken);
@@ -139,8 +139,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // wachtwoord veranderen
         ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.builder().oldPassword(password).newPassword(newPassword).confirmPassword(newPassword).build();
-        ResponseEntity<String> result = authenticationService.changePassword(changePasswordRequest);
-        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCodeValue());
+        ResponseEntity<Void> result = authenticationService.changePassword(changePasswordRequest);
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
         // inloggen met oude kan niet meer:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
