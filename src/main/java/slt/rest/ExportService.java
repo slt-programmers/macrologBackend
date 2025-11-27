@@ -1,6 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -46,7 +45,6 @@ public class ExportService {
     @Autowired
     private WeightRepository weightRepository;
 
-    @ApiOperation(value = "Retrieve all stored information")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAll() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

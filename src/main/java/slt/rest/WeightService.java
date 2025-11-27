@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +17,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/weight")
-@Api(value = "weight")
 public class WeightService {
 
     @Autowired
@@ -28,9 +25,8 @@ public class WeightService {
     @Autowired
     MyModelMapper myModelMapper;
 
-    @ApiOperation(value = "Retrieve all tracked weights")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAllWeightEntries() {
+    public ResponseEntity<List<WeightDto>> getAllWeightEntries() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
         List<WeightDto> collectedDtos = allWeightEntries
@@ -40,7 +36,6 @@ public class WeightService {
         return ResponseEntity.ok(collectedDtos);
     }
 
-    @ApiOperation(value = "Store weight entry")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> storeWeightEntry(@RequestBody WeightDto weightEntry) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -76,9 +71,8 @@ public class WeightService {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Delete weight entry")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity deleteWeightEntry(@PathVariable("id") Long weightEntryId) {
+    public ResponseEntity<Void> deleteWeightEntry(@PathVariable("id") Long weightEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         weightRepository.deleteWeightByIdAndUserId(weightEntryId, userInfo.getUserId());
         return ResponseEntity.status(HttpStatus.OK).build();

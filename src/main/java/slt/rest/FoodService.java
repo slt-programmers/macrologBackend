@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,11 +19,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
 @RestController
 @AllArgsConstructor
 @RequestMapping("/food")
-@Api(value = "food")
 public class FoodService {
 
     @Autowired
@@ -37,7 +33,6 @@ public class FoodService {
     @Autowired
     private MyModelMapper myModelMapper;
 
-    @ApiOperation(value = "Retrieve all stored foods")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<FoodDto>> getAllFood() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -50,7 +45,6 @@ public class FoodService {
         return ResponseEntity.ok(allFoodDtos);
     }
 
-    @ApiOperation(value = "Retrieve information about specific food")
     @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FoodDto> getFoodById(@PathVariable("id") Long id) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -63,7 +57,6 @@ public class FoodService {
         }
     }
 
-    @ApiOperation(value = "Store new food with supplied macro per 100 grams")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity addFood(@RequestBody FoodDto foodDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

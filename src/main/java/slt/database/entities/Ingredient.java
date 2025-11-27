@@ -23,9 +23,9 @@ public class Ingredient {
     @JoinColumn(name = "dish_id")
     private Dish dish;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mealtime_id")
-    private Mealtime mealtime;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "mealtime_id")
+//    private Mealtime mealtime;
 
     @Column(name = "food_id")
     private Long foodId;

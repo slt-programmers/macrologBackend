@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/dishes")
-@Api(value = "dishes")
 public class DishService {
 
     @Autowired
@@ -30,7 +27,6 @@ public class DishService {
     @Autowired
     private MyModelMapper myModelMapper;
 
-    @ApiOperation(value = "Retrieve all dishes")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<DishDto>> getAllDishes() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -42,7 +38,6 @@ public class DishService {
         return ResponseEntity.ok(allDishedDto);
     }
 
-    @ApiOperation(value = "Save dish")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DishDto> storeDish(@RequestBody DishDto dishDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -58,7 +53,6 @@ public class DishService {
         return ResponseEntity.status(HttpStatus.CREATED).body(myModelMapper.getConfiguredMapper().map(savedDish, DishDto.class));
     }
 
-    @ApiOperation(value = "Delete dish")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> deleteDish(@PathVariable("id") Long dishId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

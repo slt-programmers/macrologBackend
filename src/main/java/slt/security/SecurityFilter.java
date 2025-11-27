@@ -30,7 +30,7 @@ public class SecurityFilter implements Filter {
             allowOrigin = StringUtils.isEmpty(allowOriginEnv) ? "http://localhost:4200" : allowOriginEnv;
         }
         log.debug("Security filter init");
-        log.debug("Only accepting requests form " + allowOrigin);
+        log.debug("Only accepting requests form {}", allowOrigin);
     }
 
     protected String getFromEnvironment() {
@@ -81,13 +81,10 @@ public class SecurityFilter implements Filter {
     }
 
     protected boolean isPublicResourceURL(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/swagger-resources") ||
-                request.getRequestURI().startsWith("/webjars/") ||
-                request.getRequestURI().startsWith("/api/") ||
-                request.getRequestURI().startsWith("/healthcheck") ||
-                request.getRequestURI().startsWith("/v2/api-docs") ||
-                request.getRequestURI().startsWith("/swagger-ui.html") ||
-                request.getRequestURI().startsWith("/webhooks/public");
+        return request.getRequestURI().contains("/healthcheck") ||
+                request.getRequestURI().contains("/swagger-ui/") ||
+                request.getRequestURI().contains("/v3/api-docs") ||
+                request.getRequestURI().contains("/webhooks/public");
     }
 
     @Override

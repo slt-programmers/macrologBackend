@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,6 @@ import slt.security.UserInfo;
 @Slf4j
 @RestController
 @RequestMapping("/webhooks")
-@Api(value = "webhooks")
 public class WebHookService {
 
     public static final String NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE = "Not authorized to alter webhooks";
@@ -33,7 +30,6 @@ public class WebHookService {
     @Autowired
     private StravaConfig stravaConfig;
 
-    @ApiOperation(value = "Handle a webhook event from Strava")
     @PostMapping(path = "public/strava", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity syncStrava(@RequestBody WebhookEvent event) {
 
@@ -41,7 +37,6 @@ public class WebHookService {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Handle a challenge request from Strava")
     @GetMapping(path = "public/strava", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity syncStravaCallback(@RequestParam(name = "hub.mode") String hubMode,
                                              @RequestParam(name = "hub.challenge") String hubChallenge,
@@ -56,7 +51,6 @@ public class WebHookService {
         }
     }
 
-    @ApiOperation(value = "Start a webhook subscription with Strava")
     @PostMapping(path = "/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SubscriptionInformation> startWebhook() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -71,7 +65,6 @@ public class WebHookService {
         }
     }
 
-    @ApiOperation(value = "Delete a webhook subscription with Strava")
     @DeleteMapping(path = "/STRAVA/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> endWebhook(@PathVariable("subscriptionId") Integer subscriptionId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -86,7 +79,6 @@ public class WebHookService {
         }
     }
 
-    @ApiOperation(value = "Retrieve the webhook information with Strava")
     @GetMapping(path = "/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SubscriptionInformation> getWebhook() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

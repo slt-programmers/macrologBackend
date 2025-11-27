@@ -1,7 +1,6 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/activities")
-@Api(value = "logs")
 public class ActivityService {
 
     @Autowired
@@ -37,7 +35,6 @@ public class ActivityService {
     @Autowired
     private StravaActivityService stravaActivityService;
 
-    @ApiOperation(value = "Retrieve all stored activities for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LogActivityDto>> getActivitiesForDay(@PathVariable("date") String date,
                                               @RequestParam(value = "forceSync", defaultValue = "false") boolean forceSync) {
@@ -59,7 +56,6 @@ public class ActivityService {
         return ResponseEntity.ok(logEntryDtos);
     }
 
-    @ApiOperation(value = "Post activities")
     @PostMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LogActivityDto>> postActivities(
             @PathVariable("date") String date,
@@ -91,7 +87,6 @@ public class ActivityService {
         return ResponseEntity.ok(allActs);
     }
 
-    @ApiOperation(value = "Delete activity")
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> deleteActivity(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

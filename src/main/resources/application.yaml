@@ -3,7 +3,7 @@ https.protocols: TLSv1.2
 server:
   port: 8090
   application:
-     name: demoservice
+     name: macrolog-backend
 
 spring:
   jackson:

@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,7 +26,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/settings")
-@Api(value = "settings")
 public class SettingsService {
 
     @Autowired
@@ -46,7 +43,6 @@ public class SettingsService {
     @Autowired
     private StravaActivityService stravaActivityService;
 
-    @ApiOperation(value = "Store new settingDto or change existing one")
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> storeSetting(@RequestBody SettingDto settingDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -65,7 +61,6 @@ public class SettingsService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @ApiOperation(value = "Get connectivity settings")
     @GetMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SyncedAccount> getConnectivitySetting(@PathVariable("name") String name) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -77,7 +72,7 @@ public class SettingsService {
             return ResponseEntity.ok(syncedAccount);
         }
     }
-    @ApiOperation(value = "Store connectivity settings")
+
     @PostMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SyncedAccount> storeConnectivitySetting(@RequestBody SettingDto code) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -85,8 +80,6 @@ public class SettingsService {
         return ResponseEntity.ok(syncedAccount);
     }
 
-
-    @ApiOperation(value = "Disconnect from platform")
     @DeleteMapping(path = "/connectivity/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SyncedAccount> disConnectConnectivitySetting(@PathVariable("name") String name) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -94,14 +87,12 @@ public class SettingsService {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Get user settings")
     @GetMapping(path = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserSettingsDto> getUserSetting() {
         UserSettingsDto userSettingsDto = getUserSettingsDto();
         return ResponseEntity.ok(userSettingsDto);
     }
 
-    @ApiOperation(value = "Get setting")
     @GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getSetting(@PathVariable("name") String name,
                                              @RequestParam(value = "date", required = false) String toDate) {

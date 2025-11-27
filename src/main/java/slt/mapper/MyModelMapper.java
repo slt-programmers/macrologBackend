@@ -1,5 +1,6 @@
 package slt.mapper;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.*;
 import org.modelmapper.convention.MatchingStrategies;
@@ -27,11 +28,8 @@ public class MyModelMapper {
     @Autowired
     PortionRepository portionRepository;
 
+    @Getter
     private final ModelMapper configuredMapper;
-
-    public org.modelmapper.ModelMapper getConfiguredMapper() {
-        return configuredMapper;
-    }
 
     public MyModelMapper() {
         log.debug("Creating Macrolog ModelMapper");
@@ -49,6 +47,12 @@ public class MyModelMapper {
         addIngredientDtoIngredient(modelMapper);
         addLogEntryEntryDto(modelMapper);
         addEntryDtoEntry(modelMapper);
+
+        // Mealplans
+        addMealplanToMealplanDto(modelMapper);
+//        addMealplanDtoToMealplan(modelMapper);
+//        addMealtimeToMealtimeDto(modelMapper);
+//        addMealtimeDtoToMealtime(modelMapper);
 
         // Weight
         final PropertyMap<WeightDto, Weight> weightDtoMapper = getWeightDtoWeightPropertyMap();
@@ -75,6 +79,11 @@ public class MyModelMapper {
         modelMapper.addMappings(logActivityDtoLogActivityPropertyMap);
 
         this.configuredMapper = modelMapper;
+    }
+
+    private void addMealplanToMealplanDto(final ModelMapper modelMapper) {
+//        modelMapper.createTypeMap(Mealplan.class, MealplanDto.class)
+//                .setPostConverter()
     }
 
     private void addDishDtoDish(ModelMapper modelMapper) {

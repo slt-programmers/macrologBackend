@@ -26,6 +26,6 @@ public class Mealtime {
     @JoinColumn(name = "mealplan_id")
     private Mealplan mealplan;
 
-    @OneToMany(mappedBy = "mealtime", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ingredient> ingredients;
 }
