@@ -2,11 +2,9 @@ package slt.servicetests;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.swagger.models.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.engine.reporting.ReportEntry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import slt.dto.*;
