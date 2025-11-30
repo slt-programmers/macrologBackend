@@ -25,5 +25,4 @@ public class Portion {
     @Column(name = "food_id")
     private Integer foodId;
 
-
 }

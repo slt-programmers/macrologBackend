@@ -13,7 +13,7 @@ public enum Weekday {
     SATURDAY("Saturday"),
     SUNDAY("Sunday");
 
-    private final String label;
+    final String label;
 
     Weekday(final String label) {
         this.label = label;

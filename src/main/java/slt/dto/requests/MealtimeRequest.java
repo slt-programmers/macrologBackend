@@ -1,13 +1,15 @@
-package slt.dto;
+package slt.dto.requests;
 
 import lombok.Builder;
 import lombok.Getter;
+import slt.dto.Meal;
+import slt.dto.Weekday;
 
 import java.util.List;
 
-@Getter
 @Builder
-public class MealtimeDto {
+@Getter
+public class MealtimeRequest {
 
     private Long id;
 
@@ -15,5 +17,5 @@ public class MealtimeDto {
 
     private Weekday weekday;
 
-    private List<IngredientDto> ingredients;
+    private List<IngredientRequest> ingredients;
 }

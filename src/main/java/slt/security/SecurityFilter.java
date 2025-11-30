@@ -82,6 +82,7 @@ public class SecurityFilter implements Filter {
 
     protected boolean isPublicResourceURL(HttpServletRequest request) {
         return request.getRequestURI().contains("/healthcheck") ||
+                request.getRequestURI().contains("/api/authenticate") ||
                 request.getRequestURI().contains("/swagger-ui/") ||
                 request.getRequestURI().contains("/v3/api-docs") ||
                 request.getRequestURI().contains("/webhooks/public");

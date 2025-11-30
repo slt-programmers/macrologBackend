@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Builder
+@Table(name = "mealplan")
 public class Mealplan {
 
     @Id
@@ -24,7 +25,16 @@ public class Mealplan {
     @Column(name = "user_id")
     private Integer userId;
 
-    @OneToMany(mappedBy = "mealplan", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "mealplan", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Mealtime> mealtimes = new ArrayList<>();
 
+    public void addMealtime(final Mealtime mealtime) {
+        mealtimes.add(mealtime);
+        mealtime.setMealplan(this);
+    }
+
+    public void removeMealtime(final Mealtime mealtime) {
+        mealtimes.remove(mealtime);
+        mealtime.setMealplan(null);
+    }
 }

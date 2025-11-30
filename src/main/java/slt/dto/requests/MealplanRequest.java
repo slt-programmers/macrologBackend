@@ -1,4 +1,4 @@
-package slt.dto;
+package slt.dto.requests;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -7,12 +7,12 @@ import java.util.List;
 
 @Builder
 @Getter
-public class MealplanDto {
+public class MealplanRequest {
 
     private Long id;
 
     private String title;
 
-    private List<MealtimeDto> mealtimes;
+    private List<MealtimeRequest> mealtimes;
 
 }

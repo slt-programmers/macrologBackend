@@ -43,8 +43,8 @@ public class MyModelMapper {
         // Meals + Ingredients:
         addDishDtoDish(modelMapper);
         addDishDishDto(modelMapper);
-        addIngredientIngredientDto(modelMapper);
-        addIngredientDtoIngredient(modelMapper);
+//        addIngredientIngredientDto(modelMapper);
+//        addIngredientDtoIngredient(modelMapper);
         addLogEntryEntryDto(modelMapper);
         addEntryDtoEntry(modelMapper);
 
@@ -110,16 +110,7 @@ public class MyModelMapper {
 
                         MacroDto macroDto;
                         if (ingredientDto.getPortion() != null) {
-                            final Optional<PortionDto> matchingPortion = ingredientDto.getFood().getPortions()
-                                    .stream()
-                                    .filter(portion -> portion.getId().equals(ingredientDto.getPortion().getId()))
-                                    .findFirst();
-
-                            if (matchingPortion.isPresent()) {
-                                macroDto = calculateMacro(ingredientDto.getFood(), matchingPortion.get());
-                            } else {
-                                throw new IllegalArgumentException("Ingredient received with illegal portion");
-                            }
+                            macroDto = calculateMacro(ingredientDto.getFood(), ingredientDto.getPortion());
                         } else {
                             macroDto = new MacroDto(ingredientDto.getFood().getProtein(),
                                     ingredientDto.getFood().getFat(),
@@ -141,11 +132,11 @@ public class MyModelMapper {
                 .setPostConverter(mappingContext -> {
                     if (mappingContext.getSource().getPortion() != null) {
                         Long portionId = mappingContext.getSource().getPortion().getId();
-                        mappingContext.getDestination().setPortionId(portionId);
+//                        mappingContext.getDestination().setPortionId(portionId);
                     }
 
                     FoodDto food = mappingContext.getSource().getFood();
-                    mappingContext.getDestination().setFoodId(food.getId());
+//                    mappingContext.getDestination().setFoodId(food.getId());
                     // Todo: check if food actually exists for user.
                     return mappingContext.getDestination();
                 });
@@ -155,24 +146,24 @@ public class MyModelMapper {
         modelMapper.createTypeMap(Ingredient.class, IngredientDto.class)
                 .setPostConverter(mappingContext -> {
                     mappingContext.getDestination().setId(mappingContext.getSource().getId());
-                    Long foodId = mappingContext.getSource().getFoodId();
+//                    Long foodId = mappingContext.getSource().getFoodId();
                     Integer userId = mappingContext.getSource().getDish().getUserId();
-                    Food foodById = foodRepository.getFoodById(userId, foodId);
-                    FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
-
-                    for (Portion portion : portionRepository.getPortions(foodId)) {
-                        PortionDto mappedPortion = modelMapper.map(portion, PortionDto.class);
-                        mappedPortion.setMacros(calculateMacro(mappedFoodDto, mappedPortion));
-                        mappedFoodDto.addPortion(mappedPortion);
-                    }
-                    mappingContext.getDestination().setPortion(mappedFoodDto.getPortions()
-                            .stream()
-                            .filter(p -> p.getId().equals(mappingContext.getSource().getPortionId()))
-                            .findFirst()
-                            .orElse(null));
-
-
-                    mappingContext.getDestination().setFood(mappedFoodDto);
+//                    Food foodById = foodRepository.getFoodById(userId, foodId);
+//                    FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
+//
+//                    for (Portion portion : portionRepository.getPortions(foodId)) {
+//                        PortionDto mappedPortion = modelMapper.map(portion, PortionDto.class);
+//                        mappedPortion.setMacros(calculateMacro(mappedFoodDto, mappedPortion));
+//                        mappedFoodDto.addPortion(mappedPortion);
+//                    }
+//                    mappingContext.getDestination().setPortion(mappedFoodDto.getPortions()
+//                            .stream()
+//                            .filter(p -> p.getId().equals(mappingContext.getSource().getPortionId()))
+//                            .findFirst()
+//                            .orElse(null));
+//
+//
+//                    mappingContext.getDestination().setFood(mappedFoodDto);
 
                     return mappingContext.getDestination();
                 });

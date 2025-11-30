@@ -52,3 +52,35 @@ databaseChangeLog:
               - column:
                   name: mealplan_id
                   type: INT
+
+  - changeSet:
+      id: 20251127-renamecolumnwithtypo
+      author: carmen
+      changes:
+        - renameColumn:
+            newColumnName: mealtime_id
+            oldColumnName: mealplan_id
+            columnDataType: INT
+            tableName: ingredient
+
+  - changeSet:
+      id: 20251130-foreignkey-mealtimeid
+      author: carmen
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: mealtime_id
+            indexName: mealtime_id
+            tableName: ingredient
+        - addForeignKeyConstraint:
+            constraintName: ingredient_ibfk_4
+            baseColumnNames: mealtime_id
+            baseTableName: ingredient
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: mealtime
+            validate: true

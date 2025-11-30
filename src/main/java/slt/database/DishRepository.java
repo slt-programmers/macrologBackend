@@ -27,7 +27,7 @@ public class DishRepository {
 
     public Dish saveDish(Integer userId, Dish dish) {
         dish.setUserId(userId);
-        return  dishCrudRepository.save(dish);
+        return dishCrudRepository.save(dish);
     }
 
     public Dish findByName(Integer userId, String name) {

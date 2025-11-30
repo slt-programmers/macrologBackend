@@ -24,22 +24,21 @@ public class MealplanRepository {
     @Autowired
     MealplanCrudRepository mealplanCrudRepository;
 
-    public Mealplan saveMealplan(Integer userId, Mealplan mealplan) {
-        mealplan.setUserId(userId);
+    public Mealplan saveMealplan(final Mealplan mealplan) {
         return mealplanCrudRepository.save(mealplan);
     }
 
     @Transactional
-    public void deleteMealplan(Integer userId, Long mealplanId) {
+    public void deleteMealplan(final Integer userId, final Long mealplanId) {
         mealplanCrudRepository.deleteByUserIdAndId(userId, mealplanId);
     }
 
-    public List<Mealplan> getAllMealplans(Integer userId) {
+    public List<Mealplan> getAllMealplans(final Integer userId) {
         return mealplanCrudRepository.findByUserId(userId);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
+    public void deleteAllForUser(final Integer userId) {
         mealplanCrudRepository.deleteByUserId(userId);
     }
 }
