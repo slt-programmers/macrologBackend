@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import slt.database.MealplanRepository;
 import slt.database.entities.Mealplan;
 import slt.dto.MealplanDto;
-import slt.dto.requests.MealplanRequest;
 import slt.mapper.MealplanMapper;
 import slt.security.ThreadLocalHolder;
 
@@ -33,19 +32,19 @@ public class MealplanController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Mealplan> postMealplan(@RequestBody MealplanRequest request) {
+    public ResponseEntity<Mealplan> postMealplan(@RequestBody MealplanDto mealplanDto) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         // TODO controles
-        final var mealplan = mealplanMapper.map(request, userInfo.getUserId());
+        final var mealplan = mealplanMapper.map(mealplanDto, userInfo.getUserId());
         final var savedPlan = mealplanRepository.saveMealplan(mealplan);
         return ResponseEntity.ok(savedPlan);
     }
 
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MealplanDto> putMealplan(@RequestBody MealplanRequest request) {
+    public ResponseEntity<MealplanDto> putMealplan(@RequestBody MealplanDto mealplanDto) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         // TODO controles
-        final var mealplan = mealplanMapper.map(request, userInfo.getUserId());
+        final var mealplan = mealplanMapper.map(mealplanDto, userInfo.getUserId());
         final var savedPlan = mealplanRepository.saveMealplan(mealplan);
         return ResponseEntity.ok(mealplanMapper.map(savedPlan));
     }

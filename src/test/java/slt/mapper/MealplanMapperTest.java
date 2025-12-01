@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import slt.dto.requests.MealplanRequest;
-import slt.dto.requests.MealtimeRequest;
+import slt.dto.MealplanDto;
+import slt.dto.MealtimeDto;
 
 import java.util.List;
 
@@ -18,9 +18,9 @@ class MealplanMapperTest {
 
     @Test
     void map() {
-        final var mealtimeDto = MealtimeRequest.builder().build();
+        final var mealtimeDto = MealtimeDto.builder().build();
         final var mealplanId = 1L;
-        final var mealplanDto = MealplanRequest.builder().id(mealplanId).mealtimes(List.of(mealtimeDto)).build();
+        final var mealplanDto = MealplanDto.builder().id(mealplanId).mealtimes(List.of(mealtimeDto)).build();
         final var userId = 123;
         final var result = mapper.map(mealplanDto, userId);
         assertEquals(userId, result.getUserId());
