@@ -3,6 +3,7 @@ package slt.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -15,5 +16,6 @@ public class MealtimeDto {
 
     private Weekday weekday;
 
-    private List<IngredientDto> ingredients;
+    @Builder.Default
+    private List<IngredientDto> ingredients = new ArrayList<>();
 }

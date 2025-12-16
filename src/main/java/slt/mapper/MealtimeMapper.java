@@ -1,15 +1,13 @@
 package slt.mapper;
 
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import slt.database.entities.Ingredient;
 import slt.database.entities.Mealtime;
 import slt.dto.MealtimeDto;
 
-@Mapper(uses = IngredientMapper.class)
+@Mapper(uses = IngredientMapper.class,
+        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface MealtimeMapper {
 
     MealtimeMapper INSTANCE = Mappers.getMapper(MealtimeMapper.class);

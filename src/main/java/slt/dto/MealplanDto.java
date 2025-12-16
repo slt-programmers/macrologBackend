@@ -3,6 +3,7 @@ package slt.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -13,6 +14,7 @@ public class MealplanDto {
 
     private String title;
 
-    private List<MealtimeDto> mealtimes;
+    @Builder.Default
+    private List<MealtimeDto> mealtimes = new ArrayList<>();
 
 }

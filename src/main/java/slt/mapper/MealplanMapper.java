@@ -4,12 +4,14 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValueMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import slt.database.entities.Mealplan;
 import slt.database.entities.Mealtime;
 import slt.dto.MealplanDto;
 
-@Mapper(uses = MealtimeMapper.class)
+@Mapper(uses = MealtimeMapper.class,
+        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface MealplanMapper {
 
     MealplanMapper INSTANCE = Mappers.getMapper(MealplanMapper.class);

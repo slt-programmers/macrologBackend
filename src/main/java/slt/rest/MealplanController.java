@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.database.MealplanRepository;
-import slt.database.entities.Mealplan;
 import slt.dto.MealplanDto;
 import slt.mapper.MealplanMapper;
 import slt.security.ThreadLocalHolder;
@@ -29,25 +28,26 @@ public class MealplanController {
     }
 
     @PostMapping
-    public ResponseEntity<Mealplan> postMealplan(@RequestBody MealplanDto mealplanDto) {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var mealplan = mealplanMapper.map(mealplanDto, userInfo.getUserId());
-        final var savedPlan = mealplanRepository.saveMealplan(mealplan);
-        return ResponseEntity.ok(savedPlan);
+    public ResponseEntity<MealplanDto> postMealplan(@RequestBody final MealplanDto mealplanDto) {
+        return postOrPutMealplan(mealplanDto);
     }
 
     @PutMapping
-    public ResponseEntity<MealplanDto> putMealplan(@RequestBody MealplanDto mealplanDto) {
+    public ResponseEntity<MealplanDto> putMealplan(@RequestBody final MealplanDto mealplanDto) {
+        return postOrPutMealplan(mealplanDto);
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Void> deleteMealplan(@PathVariable("id") final Long mealplanId) {
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        mealplanRepository.deleteMealplan(userInfo.getUserId(), mealplanId);
+        return ResponseEntity.ok().build();
+    }
+
+    private ResponseEntity<MealplanDto> postOrPutMealplan(final MealplanDto mealplanDto) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var mealplan = mealplanMapper.map(mealplanDto, userInfo.getUserId());
         final var savedPlan = mealplanRepository.saveMealplan(mealplan);
         return ResponseEntity.ok(mealplanMapper.map(savedPlan));
-    }
-
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Void> deleteMealplan(@PathVariable("id") Long mealplanId) {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        mealplanRepository.deleteMealplan(userInfo.getUserId(), mealplanId);
-        return ResponseEntity.ok().build();
     }
 }
