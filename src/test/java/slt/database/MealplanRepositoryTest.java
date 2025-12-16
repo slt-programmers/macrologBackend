@@ -65,8 +65,22 @@ class MealplanRepositoryTest {
         mealplan.setMealtimes(List.of(mealtime));
 
         final var savedPlan = repository.saveMealplan(mealplan);
-        final var foundPlans = repository.getAllMealplans(1);
-//        assertEquals(savedPlan, foundPlans.getFirst());
+        final var foundPlan = repository.getAllMealplans(1).getFirst();
+        assertEquals(savedPlan.getId(), foundPlan.getId());
+        assertEquals(savedPlan.getTitle(), foundPlan.getTitle());
+        assertEquals(savedPlan.getUserId(), foundPlan.getUserId());
+        assertEquals(savedPlan.getMealtimes().size(), foundPlan.getMealtimes().size());
+        final var savedMealtime = savedPlan.getMealtimes().getFirst();
+        final var foundMealtime = foundPlan.getMealtimes().getFirst();
+        assertEquals(savedMealtime.getId(), foundMealtime.getId());
+        assertEquals(savedMealtime.getMeal(), foundMealtime.getMeal());
+        assertEquals(savedMealtime.getWeekday(), foundMealtime.getWeekday());
+        assertEquals(savedMealtime.getIngredients().size(), foundMealtime.getIngredients().size());
+        final var savedIngredient = savedMealtime.getIngredients().getFirst();
+        final var foundIngredient = foundMealtime.getIngredients().getFirst();
+        assertEquals(savedIngredient.getId(), foundIngredient.getId());
+        assertEquals(savedIngredient.getFood().getId(), foundIngredient.getFood().getId());
+        assertEquals(savedIngredient.getMultiplier(), foundIngredient.getMultiplier());
     }
 
     @Test
