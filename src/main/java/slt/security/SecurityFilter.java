@@ -85,6 +85,7 @@ public class SecurityFilter implements Filter {
                 request.getRequestURI().contains("/api/authenticate") ||
                 request.getRequestURI().contains("/swagger-ui/") ||
                 request.getRequestURI().contains("/v3/api-docs") ||
+                request.getRequestURI().contains("/h2-console") ||
                 request.getRequestURI().contains("/webhooks/public");
     }
 

@@ -84,3 +84,11 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: mealtime
             validate: true
+  - changeSet:
+      id: 20251201-dropnullcontraintdishid
+      author: carmen
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: int
+            columnName: dish_id
+            tableName: ingredient

@@ -1,9 +1,9 @@
 package slt.database;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import slt.database.entities.Mealplan;
 
 import java.util.List;
@@ -18,11 +18,11 @@ interface MealplanCrudRepository extends CrudRepository<Mealplan, Long> {
 
 }
 
-@Repository
+@Service
+@AllArgsConstructor
 public class MealplanRepository {
 
-    @Autowired
-    MealplanCrudRepository mealplanCrudRepository;
+    private MealplanCrudRepository mealplanCrudRepository;
 
     public Mealplan saveMealplan(final Mealplan mealplan) {
         return mealplanCrudRepository.save(mealplan);
