@@ -46,7 +46,7 @@ class MealplanRepositoryTest {
 
     @Test
     void saveMealplan() {
-        final var food = Food.builder().id(1L).build();
+        final var food = foodRepository.getAllFood(1).getFirst();
         final var mealplan = Mealplan.builder()
                 .userId(1)
                 .title("my plan").build();
