@@ -21,7 +21,7 @@ public interface MealplanMapper {
     Mealplan map(final MealplanDto dto, final Integer userId);
 
     @AfterMapping
-    default void setParentInChildren(final MealplanDto dto, @MappingTarget Mealplan mealplan) {
+    default void setParentInChildren(@MappingTarget Mealplan mealplan) {
         if (mealplan.getMealtimes() != null) {
             for (Mealtime mealtime : mealplan.getMealtimes()) {
                 mealtime.setMealplan(mealplan);
