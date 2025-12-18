@@ -1,6 +1,5 @@
 package slt.rest;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,12 +7,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/healthcheck")
-public class HealthcheckService {
+public class HealthcheckController {
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public ResponseEntity<Boolean> isHealthy() {
-        final var healthy = true;
-        return ResponseEntity.ok(healthy);
+        return ResponseEntity.ok(true);
     }
 
 }
