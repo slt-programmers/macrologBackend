@@ -1,6 +1,5 @@
 package slt.dto;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.List;
 @Builder
 public class FoodRequest {
 
-    @ApiModelProperty(notes = "ID van food. Indien gevuld is het een update")
     private Long id;
     private String name;
     private Double protein;

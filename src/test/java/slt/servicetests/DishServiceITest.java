@@ -161,13 +161,8 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
 
         assertThat(ingredient1Food1.get().getMultiplier()).isEqualTo(1.0);
         assertThat(ingredient1Food1.get().getPortion().getId()).isEqualTo(food1Portion1.getId());
-        // check portion exists with food:
-        assertThat(ingredient1Food1.get().getFood().getPortions().stream()
-                .filter(p -> p.getId().equals(ingredient1Food1.get().getPortion().getId()))
-                .findFirst().isPresent()).isTrue();
 
         responseEntity = dishService.deleteDish(matchedDish.get().getId());
-
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
     }
 

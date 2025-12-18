@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +18,7 @@ public class Food {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition="bigint")
+    @Column(columnDefinition = "bigint")
     private Long id;
 
     private String name;
@@ -26,5 +28,8 @@ public class Food {
 
     @Column(name = "user_id")
     private Integer userId;
+
+    @OneToMany(mappedBy = "foodId", fetch = FetchType.EAGER)
+    private List<Portion> portions;
 
 }

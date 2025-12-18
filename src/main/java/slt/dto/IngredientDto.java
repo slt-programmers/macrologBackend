@@ -15,4 +15,5 @@ public class IngredientDto {
     private Double multiplier;
     private FoodDto food;
     private PortionDto portion;
+
 }

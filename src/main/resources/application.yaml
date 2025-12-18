@@ -3,7 +3,7 @@ https.protocols: TLSv1.2
 server:
   port: 8090
   application:
-     name: demoservice
+     name: macrolog-backend
 
 spring:
   jackson:
@@ -119,8 +119,8 @@ spring:
   h2:
     console:
       enabled: true
-#  jpa:
-#    show-sql: true
+  jpa:
+    show-sql: true
 
 strava:
   client-id: 37498

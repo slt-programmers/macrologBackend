@@ -27,3 +27,6 @@ databaseChangeLog:
 
    - include:
        file: db/changelog/20191021-systemuser.yaml
+
+   - include:
+       file: db/changelog/20251126-mealplans.yaml

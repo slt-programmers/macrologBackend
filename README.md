@@ -37,13 +37,11 @@ This magically fixes it. As of 31-10-2025 it still does.
 
 
 ## Swagger
-http://localhost:8090/swagger-ui.html
-https://macrolog-backend.herokuapp.com/swagger-ui.html
-To use swagger you can authenticate yourself in the top right corner.
-
-Use the authentication-service login call to retrieve a token with your macrolog credentials.
-Authorize yourself by fillin in "Bearer " and then your token in the api_key value. 
-
+http://localhost:8080/swagger-ui/index.html
+https://macrolog-backend.herokuapp.com/swagger-ui/index.html
+To use swagger you can authenticate yourself with the green 'Authorize' button on the right side.
+Authorize yourself by filling in the JWT token, not including the word 'Bearer'.
+This should authorize you for every API call all at once.
 
 ## Database export
 Open cmd as admin

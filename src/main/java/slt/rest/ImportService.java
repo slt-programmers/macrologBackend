@@ -1,6 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +40,6 @@ public class ImportService {
     @Autowired
     private MyModelMapper myModelMapper;
 
-    @ApiOperation(value = "Import exported json")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity setAll(@RequestBody Export export) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

@@ -22,6 +22,9 @@ public class AccountService {
     private DishRepository dishRepository;
 
     @Autowired
+    private MealplanRepository mealplanRepository;
+
+    @Autowired
     private PortionRepository portionRepository;
 
     @Autowired
@@ -41,8 +44,11 @@ public class AccountService {
         weightRepository.deleteAllForUser(userId);
         logEntryRepository.deleteAllForUser(userId);
 
+        // TODO test if ingredients are properly being deleted
         dishRepository.deleteAllForUser(userId);
+        mealplanRepository.deleteAllForUser(userId);
 
+        // TODO test if portions can be deleted like ingredients, without this hastle
         List<Food> allFood = foodRepository.getAllFood(userId);
         List<Integer> foodIds = allFood.stream().map(f->f.getId().intValue()).collect(toList());
         portionRepository.deleteAllForUser(foodIds);

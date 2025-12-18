@@ -1,7 +1,5 @@
 package slt.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/logs")
-@Api(value = "logs")
 @Slf4j
 public class EntriesService {
 
@@ -34,7 +31,6 @@ public class EntriesService {
     @Autowired
     private MyModelMapper myModelMapper;
 
-    @ApiOperation(value = "Retrieve all stored logentries for date")
     @GetMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<EntryDto>> getLogEntriesForDay(@PathVariable("date") String date) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
@@ -47,7 +43,6 @@ public class EntriesService {
         return ResponseEntity.ok(entryDtos);
     }
 
-    @ApiOperation(value = "Post entries")
     @PostMapping(path = "/day/{date}/{meal}",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<EntryDto>> postEntries(
             @PathVariable("date") String date,
@@ -83,7 +78,6 @@ public class EntriesService {
         return ResponseEntity.ok(allEntries);
     }
 
-    @ApiOperation(value = "Delete logentry")
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public void deleteLogEntry(@PathVariable("id") Long logEntryId) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();

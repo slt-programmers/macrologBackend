@@ -1,9 +1,6 @@
 package slt.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import jakarta.persistence.*;
 
@@ -12,22 +9,30 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
+@Table(name = "ingredient")
 public class Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition="bigint")
+    @Column(columnDefinition = "bigint")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dish_id")
     private Dish dish;
 
-    @Column(name = "food_id")
-    private Long foodId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mealtime_id")
+    private Mealtime mealtime;
 
-    @Column(name = "portion_id")
-    private Long portionId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "food_id")
+    private Food food;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "portion_id")
+    private Portion portion;
 
     private Double multiplier;
 
