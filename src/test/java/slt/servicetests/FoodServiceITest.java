@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import slt.dto.FoodRequest;
 import slt.dto.FoodDto;
 import slt.dto.PortionDto;
 import slt.security.ThreadLocalHolder;
@@ -23,11 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FoodServiceITest extends AbstractApplicationIntegrationTest {
 
-    private Integer userId;
+    private Long userId;
 
     @BeforeAll
     public synchronized void setUserContext() {
-
         log.debug("Starting with userId" + this.userId);
         if (this.userId == null) {
             log.debug("Creating test user for test " + this.getClass().getName());
@@ -35,7 +33,7 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
         }
         log.debug("Ending with userId" + this.userId);
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(Integer.valueOf(this.userId));
+        userInfo.setUserId(this.userId);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
@@ -43,10 +41,10 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
     public void testFoodNoPortion() {
         FoodDto foodRequestZonderPortions = FoodDto.builder().name("foodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
         ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity allFoodEntity = foodService.getAllFood();
-        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
         FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodNoPortion")).findFirst().get();
@@ -63,11 +61,11 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
 
         FoodDto foodOriginal = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
         ResponseEntity responseEntity = foodService.addFood(foodOriginal);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         FoodDto foodDuplicate = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
         responseEntity = foodService.addFood(foodDuplicate);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -90,10 +88,10 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
                 )
                 .build();
         ResponseEntity responseEntity = foodService.addFood(foodRequestMetPortions);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity allFoodEntity = foodService.getAllFood();
-        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
 
@@ -136,17 +134,17 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
                 )
                 .build();
         ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity allFoodEntity = foodService.getAllFood();
-        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
 
         FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodById")).findFirst().get();
 
         ResponseEntity foodByIDEntityNotFound = foodService.getFoodById(666l);
-        assertThat(foodByIDEntityNotFound.getStatusCodeValue()).isEqualTo(HttpStatus.NO_CONTENT.value());
+        assertThat(foodByIDEntityNotFound.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         ResponseEntity foodByIDEntity = foodService.getFoodById(savedFood.getId());
         savedFood = (FoodDto) foodByIDEntity.getBody();
@@ -173,10 +171,10 @@ public class FoodServiceITest extends AbstractApplicationIntegrationTest {
     public void testFoodAddPortion() {
         FoodDto foodRequestZonderPortions = FoodDto.builder().name("foodAddPortion").carbs(1.0).fat(2.0).protein(3.0).build();
         ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity allFoodEntity = foodService.getAllFood();
-        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
         FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodAddPortion")).findFirst().get();

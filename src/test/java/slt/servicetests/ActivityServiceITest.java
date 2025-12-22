@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
 
-    private Integer userId;
+    private Long userId;
 
     @BeforeEach
     public void setUserContext() {

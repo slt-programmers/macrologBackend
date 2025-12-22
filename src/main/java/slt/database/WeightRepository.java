@@ -1,64 +1,51 @@
 package slt.database;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import slt.database.entities.Weight;
 
 import jakarta.transaction.Transactional;
+
 import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 
-interface WeightCrudRepository extends CrudRepository<Weight, Integer> {
+interface WeightCrudRepository extends CrudRepository<Weight, Long> {
 
-    List<Weight> findByUserId(Integer userId);
-    List<Weight> findByUserIdAndDay(Integer userId, Date day);
+    List<Weight> findByUserId(final Long userId);
 
-    void deleteByUserId(Integer userId);
-    void deleteByIdAndUserId(Integer weightId, Integer userId);
+    List<Weight> findByUserIdAndDay(final Long userId, final Date day);
+
+    void deleteByUserId(final Long userId);
+
+    void deleteByIdAndUserId(final Long weightId, final Long userId);
 }
 
-
 @Repository
+@AllArgsConstructor
 public class WeightRepository {
 
-    @Autowired
     private WeightCrudRepository weightCrudRepository;
 
-    public Weight insertWeight(Integer userId, Weight newEntry) {
-        newEntry.setUserId(userId);
-        return weightCrudRepository.save(newEntry);
-    }
-
-    public Weight updateWeight(Integer userId, Weight entry) {
-        Optional<Weight> byId = weightCrudRepository.findById(entry.getId());
-        if (!byId.isPresent()){
-            throw new IllegalArgumentException("Update on non existing entry");
-        }
-        Weight weight = byId.get();
-        weight.setValue(entry.getValue());
-        weight.setRemark(entry.getRemark());
-        weight.setDay(entry.getDay());
-        entry.setUserId(userId);
+    public Weight saveWeight(final Weight weight) {
         return weightCrudRepository.save(weight);
     }
 
     @Transactional
-    public void deleteWeightByIdAndUserId(Long entry, Integer userId) {
-        weightCrudRepository.deleteByIdAndUserId(entry.intValue(), userId);
+    public void deleteWeightByIdAndUserId(final Long entry, final Long userId) {
+        weightCrudRepository.deleteByIdAndUserId(entry, userId);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
+    public void deleteAllForUser(final Long userId) {
         weightCrudRepository.deleteByUserId(userId);
     }
 
-    public List<Weight> getWeightEntryForDay(Integer userId, Date day) {
+    public List<Weight> getWeightEntryForDay(final Long userId, final Date day) {
         return weightCrudRepository.findByUserIdAndDay(userId, day);
     }
 
-    public List<Weight> getAllWeightEntries(Integer userId) {
+    public List<Weight> getAllWeightEntries(final Long userId) {
         return weightCrudRepository.findByUserId(userId);
     }
 

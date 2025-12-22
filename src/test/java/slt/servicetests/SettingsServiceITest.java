@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
 
-    private Integer userId;
+    private Long userId;
 
     @BeforeAll
     public void setUserContext() {

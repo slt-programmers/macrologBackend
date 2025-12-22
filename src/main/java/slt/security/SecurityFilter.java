@@ -61,7 +61,7 @@ public class SecurityFilter implements Filter {
                     Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
                     userId = claimsJws.getBody().get("userId");
                     UserInfo userInfo = new UserInfo();
-                    userInfo.setUserId(Integer.valueOf(userId.toString()));
+                    userInfo.setUserId(Long.valueOf(userId.toString()));
                     ThreadLocalHolder.getThreadLocal().set(userInfo);
                     chain.doFilter(request, response);
                 } catch (ExpiredJwtException expiredEx) {

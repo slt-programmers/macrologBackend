@@ -77,11 +77,11 @@ public class StravaActivityService {
         }
     }
 
-    public boolean isStravaConnected(Integer userId) {
+    public boolean isStravaConnected(final Long userId) {
         return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID) != null);
     }
 
-    public SyncedAccount getStravaConnectivity(Integer userId) {
+    public SyncedAccount getStravaConnectivity(final Long userId) {
         if (isStravaConnected(userId)) {
 
             final Setting firstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
@@ -103,8 +103,7 @@ public class StravaActivityService {
     }
 
 
-    private void saveSetting(Integer userId, String name, String value) {
-
+    private void saveSetting(final Long userId, final String name, final String value) {
         settingsRepository.putSetting(userId, Setting.builder()
                 .userId(userId)
                 .name(name)
@@ -114,7 +113,7 @@ public class StravaActivityService {
 
     // scope=read -- > alleen private --> geeft errors bij ophalen details
     // scope=read,activity:read_all --> moet
-    public SyncedAccount registerStravaConnectivity(Integer userId, String clientAuthorizationCode) {
+    public SyncedAccount registerStravaConnectivity(final Long userId, final String clientAuthorizationCode) {
         // store user settings for this user:
 
         Setting setting = Setting.builder()
@@ -151,7 +150,7 @@ public class StravaActivityService {
         }
     }
 
-    public void unRegisterStrava(Integer userId) {
+    public void unRegisterStrava(final Long userId) {
         if (!isStravaConnected(userId)) {
             log.error("Strava has not been setup for this user");
             return;
@@ -177,7 +176,7 @@ public class StravaActivityService {
     }
 
     @Transactional
-    private void storeTokenSettings(Integer userId, StravaToken stravaToken) {
+    private void storeTokenSettings(final Long userId, final StravaToken stravaToken) {
         log.debug("Storing token update");
 
         final Setting accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
@@ -198,7 +197,7 @@ public class StravaActivityService {
 
     }
 
-    private StravaToken getStravaToken(Integer userId) {
+    private StravaToken getStravaToken(final Long userId) {
         final Setting accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
         final Setting refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
         final Setting expiresAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
@@ -230,9 +229,9 @@ public class StravaActivityService {
         return token;
     }
 
-    public List<LogActivity> getExtraStravaActivities(List<LogActivity> dayActivities,
-                                                      Integer userId,
-                                                      LocalDate date,
+    public List<LogActivity> getExtraStravaActivities(final List<LogActivity> dayActivities,
+                                                      final Long userId,
+                                                      final LocalDate date,
                                                       boolean forceUpdate) {
         List<LogActivity> newActivities = new ArrayList<>();
         boolean webHookDisabled = this.stravaSubscriptionId == null;
@@ -251,11 +250,11 @@ public class StravaActivityService {
         return newActivities;
     }
 
-    private void checkMatchingActivities(ListedActivityDto stravaActivity,
-                                         List<LogActivity> dayActivities,
-                                         List<LogActivity> newActivities,
-                                         Integer userId,
-                                         StravaToken token,
+    private void checkMatchingActivities(final ListedActivityDto stravaActivity,
+                                         final List<LogActivity> dayActivities,
+                                         final List<LogActivity> newActivities,
+                                         final Long userId,
+                                         final StravaToken token,
                                          boolean forceUpdate) {
         log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
         final long stravaActivityId = stravaActivity.getId();

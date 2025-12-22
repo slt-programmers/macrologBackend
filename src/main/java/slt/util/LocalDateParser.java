@@ -9,10 +9,10 @@ import java.time.format.DateTimeParseException;
 @Slf4j
 public class LocalDateParser {
 
-    private static DateTimeFormatter standardFormat = DateTimeFormatter.ISO_LOCAL_DATE;
-    private static DateTimeFormatter shortFormat = DateTimeFormatter.ofPattern("yyyy-M-d");
-    private static DateTimeFormatter reversedFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-    private static DateTimeFormatter reversedShortFormat = DateTimeFormatter.ofPattern("d-M-yyyy");
+    private static final DateTimeFormatter standardFormat = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter shortFormat = DateTimeFormatter.ofPattern("yyyy-M-d");
+    private static final DateTimeFormatter reversedFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter reversedShortFormat = DateTimeFormatter.ofPattern("d-M-yyyy");
 
     private LocalDateParser() {}
 

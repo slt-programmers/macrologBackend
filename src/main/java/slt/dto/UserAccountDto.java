@@ -14,7 +14,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserAccountDto {
 
-    private Integer id;
+    private Long id;
     private String token;
     private String userName;
     private String email;

@@ -13,23 +13,23 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
-interface SettingsCrudRepository extends CrudRepository<Setting, Integer> {
+interface SettingsCrudRepository extends CrudRepository<Setting, Long> {
 
-    List<Setting> findByUserIdOrderByDayDesc(Integer userId);
+    List<Setting> findByUserIdOrderByDayDesc(final Long userId);
 
-    List<Setting> findByUserIdAndNameOrderByDayDesc(Integer userId, String name);
+    List<Setting> findByUserIdAndNameOrderByDayDesc(final Long userId, final String name);
 
-    void deleteByUserId(Integer userId);
+    void deleteByUserId(final Long userId);
 
-    void deleteAllByUserIdAndName(Integer userId, String name);
+    void deleteAllByUserIdAndName(final Long userId, final String name);
 
     @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day <= :day ORDER BY s.day DESC")
-    List<Setting> findByUserIdAndNameWithDayBeforeDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
+    List<Setting> findByUserIdAndNameWithDayBeforeDay(@Param("userId") final Long userId, @Param("name") final String name, @Param("day") final java.util.Date day);
 
     @Query("SELECT s FROM Setting s WHERE s.userId = :userId AND s.name = :name AND s.day >= :day ORDER BY s.day ASC")
-    List<Setting> findByUserIdAndNameWithDayAfterDay(@Param("userId") Integer userId, @Param("name") String name, @Param("day") java.util.Date day);
+    List<Setting> findByUserIdAndNameWithDayAfterDay(@Param("userId") final Long userId, @Param("name") final String name, @Param("day") final java.util.Date day);
 
-    Optional<Setting> findByNameAndValue(String name, String value);
+    Optional<Setting> findByNameAndValue(final String name, final String value);
 }
 
 @Repository
@@ -39,9 +39,9 @@ public class SettingsRepository {
     @Autowired
     private SettingsCrudRepository settingsCrudRepository;
 
-    public void putSetting(Integer userId, Setting setting) {
+    public void putSetting(final Long userId, final Setting setting) {
         setting.setUserId(userId);
-        Setting currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
+        final var currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
         if (currentSetting == null) { // geen records
             log.debug("Insert");
             // new settings cant have id's. clear it:
@@ -60,44 +60,44 @@ public class SettingsRepository {
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
+    public void deleteAllForUser(final Long userId) {
         settingsCrudRepository.deleteByUserId(userId);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId, String name) {
+    public void deleteAllForUser(final Long userId, String name) {
         settingsCrudRepository.deleteAllByUserIdAndName(userId, name);
     }
 
-    public Setting getLatestSetting(Integer userId, String setting) {
-        List<Setting> byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
+    public Setting getLatestSetting(final Long userId, final String setting) {
+        final var byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
         log.debug("Number of hits for setting {}: {}", setting, byUserIdAndName.size());
-        return byUserIdAndName.isEmpty() ? null : byUserIdAndName.get(0);
+        return byUserIdAndName.isEmpty() ? null : byUserIdAndName.getFirst();
     }
 
-    public Setting getValidSetting(Integer userId, String setting, Date date) {
-        List<Setting> byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
+    public Setting getValidSetting(final Long userId, final String setting, final Date date) {
+        final var byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
         log.debug("Number of hits for setting on or before date {}: {}", setting, byUserIdAndNameWithDayBeforeDay.size());
 
         if (byUserIdAndNameWithDayBeforeDay.isEmpty()) {
-            List<Setting> byUserIdAndNameWithDayAfterDay = settingsCrudRepository.findByUserIdAndNameWithDayAfterDay(userId, setting, date);
+            final var byUserIdAndNameWithDayAfterDay = settingsCrudRepository.findByUserIdAndNameWithDayAfterDay(userId, setting, date);
             log.debug("Number of hits for setting on or after date {}: {}", setting, byUserIdAndNameWithDayAfterDay.size());
-            return byUserIdAndNameWithDayAfterDay.isEmpty() ? null : byUserIdAndNameWithDayAfterDay.get(0);
+            return byUserIdAndNameWithDayAfterDay.isEmpty() ? null : byUserIdAndNameWithDayAfterDay.getFirst();
         } else {
-            return byUserIdAndNameWithDayBeforeDay.get(0);
+            return byUserIdAndNameWithDayBeforeDay.getFirst();
         }
     }
 
-    public List<Setting> getAllSettings(Integer userId) {
+    public List<Setting> getAllSettings(final Long userId) {
         return settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
-    public Setting saveSetting(Integer userId, Setting settingDomain) {
+    public Setting saveSetting(final Long userId, final Setting settingDomain) {
         settingDomain.setUserId(userId);
         return settingsCrudRepository.save(settingDomain);
     }
 
-    public Optional<Setting> findByKeyValue(String name, String value) {
+    public Optional<Setting> findByKeyValue(final String name, final String value) {
         return settingsCrudRepository.findByNameAndValue(name, value);
     }
 }

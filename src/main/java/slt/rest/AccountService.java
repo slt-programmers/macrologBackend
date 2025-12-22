@@ -39,7 +39,7 @@ public class AccountService {
     @Autowired
     private FoodRepository foodRepository;
 
-    void deleteAccount(Integer userId) {
+    void deleteAccount(final Long userId) {
         activityRepository.deleteAllForUser(userId);
         weightRepository.deleteAllForUser(userId);
         logEntryRepository.deleteAllForUser(userId);
@@ -50,7 +50,7 @@ public class AccountService {
 
         // TODO test if portions can be deleted like ingredients, without this hastle
         List<Food> allFood = foodRepository.getAllFood(userId);
-        List<Integer> foodIds = allFood.stream().map(f->f.getId().intValue()).collect(toList());
+        List<Long> foodIds = allFood.stream().map(Food::getId).collect(toList());
         portionRepository.deleteAllForUser(foodIds);
         foodRepository.deleteAllForUser(userId);
 

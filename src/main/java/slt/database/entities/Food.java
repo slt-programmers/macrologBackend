@@ -27,7 +27,7 @@ public class Food {
     private Double carbs;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @OneToMany(mappedBy = "foodId", fetch = FetchType.EAGER)
     private List<Portion> portions;

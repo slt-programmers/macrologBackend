@@ -143,7 +143,7 @@ class SecurityFilterTest {
         JWTBuilder jwtBuilder = new JWTBuilder();
         LocalDate gisteren = LocalDate.now().minusDays(1);
 
-        String expiredJWT = jwtBuilder.generateJWT("junit", 1, Date.from(gisteren.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        String expiredJWT = jwtBuilder.generateJWT("junit", 1L, Date.from(gisteren.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         when(requestMock.getHeader("Authorization")).thenReturn("Bearer " + expiredJWT);
 
         doReturn(true).when(sf).isPublicResourceURL(any());
@@ -173,7 +173,7 @@ class SecurityFilterTest {
         JWTBuilder jwtBuilder = new JWTBuilder();
         LocalDate morgen = LocalDate.now().plusDays(1);
 
-        String expiredJWT = jwtBuilder.generateJWT("junit", 1, Date.from(morgen.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        String expiredJWT = jwtBuilder.generateJWT("junit", 1L, Date.from(morgen.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         when(requestMock.getHeader("Authorization")).thenReturn("Bearer " + expiredJWT);
 
         doReturn(true).when(sf).isPublicResourceURL(any());

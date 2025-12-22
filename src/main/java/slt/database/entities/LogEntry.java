@@ -32,5 +32,5 @@ public class LogEntry {
     private String meal;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 }

@@ -1,11 +1,9 @@
 package slt.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import jakarta.persistence.*;
+
 import java.sql.Date;
 import java.time.LocalDate;
 
@@ -14,23 +12,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 public class Weight {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition="bigint")
-    private Integer id;
+    @Column(columnDefinition = "bigint")
+    private Long id;
 
     @Column(name = "weight")
-    private Double value = 0.0;
+    private Double weight = 0.0;
 
     @Column(name = "day")
     private Date day = Date.valueOf(LocalDate.now());
 
-    @Column(length = 65535, columnDefinition="TEXT")
+    @Column(length = 65535, columnDefinition = "TEXT")
     private String remark;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
 }

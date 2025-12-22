@@ -18,7 +18,7 @@ public interface MealplanMapper {
 
     MealplanDto map(final Mealplan mealplan);
 
-    Mealplan map(final MealplanDto dto, final Integer userId);
+    Mealplan map(final MealplanDto dto, final Long userId);
 
     @AfterMapping
     default void setParentInChildren(@MappingTarget Mealplan mealplan) {

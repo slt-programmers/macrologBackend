@@ -1,6 +1,7 @@
 package slt.rest;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @RestController
 @AllArgsConstructor
 @RequestMapping("/food")
@@ -58,7 +60,7 @@ public class FoodService {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity addFood(@RequestBody FoodDto foodDto) {
+    public ResponseEntity<Void> addFood(@RequestBody FoodDto foodDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if (foodDto.getId() != null) {
             // Update request
@@ -67,15 +69,15 @@ public class FoodService {
         } else {
             Food food = foodRepository.getFood(userInfo.getUserId(), foodDto.getName());
             if (food != null) {
-                String errorMessage = "This food is already in your database";
-                return ResponseEntity.badRequest().body(errorMessage);
+                log.error("This food is already in your database");
+                return ResponseEntity.badRequest().build();
             } else {
                 return createNewFood(foodDto, userInfo);
             }
         }
     }
 
-    private ResponseEntity createNewFood(@RequestBody FoodDto foodDto, UserInfo userInfo) {
+    private ResponseEntity<Void> createNewFood(@RequestBody final FoodDto foodDto, final UserInfo userInfo) {
         Food newFood = new Food();
         newFood.setName(foodDto.getName());
         newFood.setCarbs(foodDto.getCarbs());

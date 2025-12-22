@@ -164,11 +164,11 @@ public class AuthenticationService {
     }
 
     @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> deleteAccount(@RequestParam("password") String password) {
-        String passwordHashed = PasswordUtils.hashPassword(password);
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+    public ResponseEntity<Void> deleteAccount(@RequestParam("password") final String password) {
+        final var passwordHashed = PasswordUtils.hashPassword(password);
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (userAccount == null) {
             log.error("Account not found for userId: {}", userInfo.getUserId());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -181,7 +181,7 @@ public class AuthenticationService {
         }
     }
 
-    private boolean checkValidPassword(String hashedPassword, UserAccount account) {
+    private boolean checkValidPassword(final String hashedPassword, final UserAccount account) {
         boolean activePasswordOK = account.getPassword().equals(hashedPassword);
         if (!activePasswordOK) {
             boolean resettedPasswordOK = account.getResetPassword() != null &&

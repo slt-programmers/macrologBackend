@@ -1,8 +1,6 @@
 package slt.rest;
 
-
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -58,19 +56,18 @@ public class ActivityService {
 
     @PostMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LogActivityDto>> postActivities(
-            @PathVariable("date") String date,
-            @RequestBody List<LogActivityDto> activities) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        ModelMapper mapper = myModelMapper.getConfiguredMapper();
+            @PathVariable("date") final String date,
+            @RequestBody final List<LogActivityDto> activities) {
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var mapper = myModelMapper.getConfiguredMapper();
 
         List<LogActivity> existingActs = logActivityRepository
                 .getAllLogActivities(userId, LocalDateParser.parse(date));
 
         // Delete old
         for (LogActivity act : existingActs) {
-            if (!activities.stream().map(LogActivityDto::getId)
-                    .collect(Collectors.toList()).contains(act.getId())) {
+            if (!activities.stream().map(LogActivityDto::getId).toList().contains(act.getId())) {
                 logActivityRepository.deleteLogActivity(userId, act.getId());
             }
         }

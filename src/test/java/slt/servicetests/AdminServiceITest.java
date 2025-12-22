@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdminServiceITest extends AbstractApplicationIntegrationTest {
 
-    private Integer userId;
+    private Long userId;
 
     @BeforeEach
     public void setUserContext() {

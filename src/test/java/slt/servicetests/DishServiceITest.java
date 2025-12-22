@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DishServiceITest extends AbstractApplicationIntegrationTest {
 
-    private Integer userId;
+    private Long userId;
 
     @BeforeAll
     public void setUserContext() {
@@ -31,7 +31,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
             this.userId = createUser(this.getClass().getName());
         }
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(Integer.valueOf(this.userId));
+        userInfo.setUserId(this.userId);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

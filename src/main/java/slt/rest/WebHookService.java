@@ -11,9 +11,7 @@ import slt.connectivity.strava.StravaActivityService;
 import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.connectivity.strava.dto.WebhookEvent;
 import slt.database.UserAccountRepository;
-import slt.database.entities.UserAccount;
 import slt.security.ThreadLocalHolder;
-import slt.security.UserInfo;
 
 @Slf4j
 @RestController
@@ -31,19 +29,17 @@ public class WebHookService {
     private StravaConfig stravaConfig;
 
     @PostMapping(path = "public/strava", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity syncStrava(@RequestBody WebhookEvent event) {
-
+    public ResponseEntity<Void> syncStrava(@RequestBody WebhookEvent event) {
         stravaActivityService.receiveWebHookEvent(event);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(path = "public/strava", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity syncStravaCallback(@RequestParam(name = "hub.mode") String hubMode,
-                                             @RequestParam(name = "hub.challenge") String hubChallenge,
-                                             @RequestParam(name = "hub.verify_token") String hubVerifyToken) {
-
+    public ResponseEntity<String> syncStravaCallback(@RequestParam(name = "hub.mode") String hubMode,
+                                                   @RequestParam(name = "hub.challenge") String hubChallenge,
+                                                   @RequestParam(name = "hub.verify_token") String hubVerifyToken) {
         log.debug("Received strava callback {} {} {}", hubMode, hubChallenge, hubVerifyToken);
-        if (!"subscribe".equals(hubMode)|| !stravaConfig.getVerifytoken().equals(hubVerifyToken)) {
+        if (!"subscribe".equals(hubMode) || !stravaConfig.getVerifytoken().equals(hubVerifyToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             String ret = "{\"hub.challenge\":\"" + hubChallenge + "\"}";
@@ -53,12 +49,12 @@ public class WebHookService {
 
     @PostMapping(path = "/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SubscriptionInformation> startWebhook() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             final SubscriptionInformation subscriptionInformation = stravaActivityService.startWebhookSubcription();
             return ResponseEntity.ok(subscriptionInformation);
@@ -67,9 +63,9 @@ public class WebHookService {
 
     @DeleteMapping(path = "/STRAVA/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> endWebhook(@PathVariable("subscriptionId") Integer subscriptionId) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -81,12 +77,12 @@ public class WebHookService {
 
     @GetMapping(path = "/STRAVA", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SubscriptionInformation> getWebhook() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             final SubscriptionInformation subscriptionInformation = stravaActivityService.getWebhookSubscription();
             return ResponseEntity.ok(subscriptionInformation);

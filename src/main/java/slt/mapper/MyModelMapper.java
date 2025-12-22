@@ -147,7 +147,7 @@ public class MyModelMapper {
                 .setPostConverter(mappingContext -> {
                     mappingContext.getDestination().setId(mappingContext.getSource().getId());
 //                    Long foodId = mappingContext.getSource().getFoodId();
-                    Integer userId = mappingContext.getSource().getDish().getUserId();
+                    Long userId = mappingContext.getSource().getDish().getUserId();
 //                    Food foodById = foodRepository.getFoodById(userId, foodId);
 //                    FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
 //
@@ -183,7 +183,7 @@ public class MyModelMapper {
         modelMapper.createTypeMap(LogEntry.class, EntryDto.class)
                 .setPostConverter(mappingContext -> {
                     Long foodId = mappingContext.getSource().getFoodId();
-                    Integer userId = mappingContext.getSource().getUserId();
+                    Long userId = mappingContext.getSource().getUserId();
                     Food foodById = foodRepository.getFoodById(userId, foodId);
                     FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
 
@@ -279,7 +279,7 @@ public class MyModelMapper {
         return new PropertyMap<>() {
             @Override
             protected void configure() {
-                map().setValue(source.getWeight());
+                map().setWeight(source.getWeight());
                 skip().setUserId(null);
             }
         };
@@ -289,7 +289,7 @@ public class MyModelMapper {
         return new PropertyMap<>() {
             @Override
             protected void configure() {
-                map().setWeight(source.getValue());
+                map().setWeight(source.getWeight());
             }
         };
     }

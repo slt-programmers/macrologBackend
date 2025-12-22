@@ -24,7 +24,7 @@ public class LogActivity {
     private Date day;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "synced_with")
     private String syncedWith;

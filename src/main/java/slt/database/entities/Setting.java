@@ -18,7 +18,7 @@ public class Setting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition="bigint")
-    private Integer id;
+    private Long id;
 
     @Column(name = "setting")
     private String name;
@@ -30,6 +30,6 @@ public class Setting {
     private Date day = Date.valueOf(LocalDate.now());
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
 }

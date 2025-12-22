@@ -15,20 +15,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 interface LogEntryCrudRepository extends CrudRepository<LogEntry, Long> {
-    void deleteByUserIdAndId(Integer userId, Long logEntryId);
+    void deleteByUserIdAndId(final Long userId, Long logEntryId);
 
-    void deleteByUserId(Integer userId);
+    void deleteByUserId(final Long userId);
 
-    List<LogEntry> findByUserId(Integer userId);
+    List<LogEntry> findByUserId(final Long userId);
 
-    List<LogEntry> findByUserIdAndDay(Integer userId, Date date);
+    List<LogEntry> findByUserIdAndDay(final Long userId, Date date);
 
-    List<LogEntry> findByUserIdAndDayAndMeal(Integer userId, Date date, String meal);
+    List<LogEntry> findByUserIdAndDayAndMeal(final Long userId, Date date, String meal);
 
     @Query("select l from LogEntry l where l.userId = :userId and l.day >= :begin and l.day <= :end")
-    List<LogEntry> findByUserIdWithDayAfterAndDayBefore(@Param("userId") Integer userId, @Param("begin") Date begin, @Param("end") Date end);
+    List<LogEntry> findByUserIdWithDayAfterAndDayBefore(@Param("userId") final Long userId, @Param("begin") Date begin, @Param("end") Date end);
 }
-
 
 @Repository
 @Slf4j
@@ -38,35 +37,35 @@ public class LogEntryRepository {
     private LogEntryCrudRepository logEntryCrudRepository;
 
     @Transactional
-    public void saveLogEntry(Integer userId, LogEntry entry) {
+    public void saveLogEntry(final Long userId, final LogEntry entry) {
         entry.setUserId(userId);
         logEntryCrudRepository.save(entry);
     }
     
     @Transactional
-    public void deleteLogEntry(Integer userId, Long logEntryId) {
+    public void deleteLogEntry(final Long userId, final Long logEntryId) {
         logEntryCrudRepository.deleteByUserIdAndId(userId, logEntryId);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
+    public void deleteAllForUser(final Long userId) {
         logEntryCrudRepository.deleteByUserId(userId);
     }
 
-    public List<LogEntry> getAllLogEntries(Integer userId) {
+    public List<LogEntry> getAllLogEntries(final Long userId) {
         return logEntryCrudRepository.findByUserId(userId);
     }
 
-    public List<LogEntry> getAllLogEntries(Integer userId, LocalDate date) {
+    public List<LogEntry> getAllLogEntries(final Long userId, final LocalDate date) {
         log.debug("Getting entries for " + date);
         return logEntryCrudRepository.findByUserIdAndDay(userId, Date.valueOf(date));
     }
 
-    public List<LogEntry> getAllLogEntries(Integer userId, LocalDate date, String meal) {
+    public List<LogEntry> getAllLogEntries(final Long userId, final LocalDate date, final String meal) {
         log.debug("Getting entries for " + date + " and " + meal);
         return logEntryCrudRepository.findByUserIdAndDayAndMeal(userId, Date.valueOf(date), meal);
     }
-    public List<LogEntry> getAllLogEntries(Integer userId, Date begin, Date end) {
+    public List<LogEntry> getAllLogEntries(final Long userId, final Date begin, final Date end) {
         log.debug("Getting entries for period " + begin + " - " + end);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         log.debug("BETWEEN " + sdf.format(begin) + " AND " + sdf.format(end));

@@ -14,7 +14,6 @@ import slt.dto.ConnectivityStatusDto;
 import slt.dto.MailDto;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
-import slt.security.UserInfo;
 import slt.service.GoogleMailService;
 
 import java.util.ArrayList;
@@ -40,12 +39,12 @@ public class AdminService {
 
     @GetMapping(path = "/getAllUsers", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<UserAccountDto>> getAllUsers() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error("Not authorized to get all users");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             List<UserAccount> userAccounts = userAccountRepository.getAllUsers();
             List<UserAccountDto> userAccountDtos = mapToDtos(userAccounts);
@@ -54,70 +53,70 @@ public class AdminService {
     }
 
     @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity deleteAccount(@RequestParam("userId") Integer deleteUserId) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
-        UserAccount toBeDeletedAccount = userAccountRepository.getUserById(deleteUserId);
+    public ResponseEntity<Void> deleteAccount(@RequestParam("userId") Long deleteUserId) {
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
+        final var toBeDeletedAccount = userAccountRepository.getUserById(deleteUserId);
         if (!userAccount.isAdmin()) {
             log.error("Not authorized to delete account");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else if (toBeDeletedAccount == null) {
             log.error("Account not found for userId: {}", userInfo.getUserId());
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else if (toBeDeletedAccount.isAdmin()){
             log.error("Cannot delete admin account");
-            return new ResponseEntity((HttpStatus.BAD_REQUEST));
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
             accountService.deleteAccount(deleteUserId);
-            return new ResponseEntity(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).build();
         }
     }
 
     @GetMapping(path = "/mail/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ConnectivityStatusDto> getMailStatus() {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error("Not authorized to get mail config");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             return ResponseEntity.ok(mailService.getMailStatus());
         }
     }
 
     @PostMapping(path = "/mail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity storeMailSetting(@RequestBody ConnectivityRequestDto connectivityRequestDto) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+    public ResponseEntity<Void> storeMailSetting(@RequestBody ConnectivityRequestDto connectivityRequestDto) {
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error("Not authorized to store mail settings");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             log.debug("Handling connectivity request ");
             mailService.registerWithCode(connectivityRequestDto.getClientAuthorizationCode());
-            return new ResponseEntity(HttpStatus.OK);
+            return ResponseEntity.ok().build();
         }
     }
     @PostMapping(path = "/mail/testmail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity sendTestMail(@RequestBody MailDto mailRequest) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        Integer userId = userInfo.getUserId();
-        UserAccount userAccount = userAccountRepository.getUserById(userId);
+    public ResponseEntity<Void> sendTestMail(@RequestBody MailDto mailRequest) {
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var userId = userInfo.getUserId();
+        final var userAccount = userAccountRepository.getUserById(userId);
         if (!userAccount.isAdmin()) {
             log.error("Not authorized to send testmail");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            log.debug("Sending mail to  " + mailRequest.getEmailTo());
+            log.debug("Sending mail to  {}", mailRequest.getEmailTo());
             mailService.sendTestMail(mailRequest.getEmailTo());
-            return new ResponseEntity(HttpStatus.OK);
+            return ResponseEntity.ok().build();
         }
     }
 
     private List<UserAccountDto> mapToDtos(List<UserAccount> accounts) {
-        List<UserAccountDto> dtos = new ArrayList<>();
+        final var dtos = new ArrayList<UserAccountDto>();
         for (UserAccount account : accounts) {
             dtos.add(mapToDto(account));
         }

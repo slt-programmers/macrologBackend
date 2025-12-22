@@ -66,7 +66,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected SettingsService settingsService;
 
     @Autowired
-    protected WeightService weightService;
+    protected WeightController weightController;
 
     @Autowired
     protected ImportService importService;
@@ -80,20 +80,20 @@ public abstract class AbstractApplicationIntegrationTest {
     @Autowired
     protected AdminService adminService;
 
-    protected Integer createUser(String userEmail) {
+    protected Long createUser(String userEmail) {
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         assertEquals(202, responseEntity.getStatusCodeValue());
         return getUserIdFromResponseHeaderJWT(responseEntity);
     }
 
-    protected Integer getUserIdFromResponseHeaderJWT(ResponseEntity<UserAccountDto> responseEntity) {
-        String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).get(0);
-        Jws<Claims> claims = getClaimsJws(jwtToken);
-        Integer userId = (Integer) claims.getBody().get("userId");
+    protected Long getUserIdFromResponseHeaderJWT(ResponseEntity<UserAccountDto> responseEntity) {
+        final var jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).getFirst();
+        final var claims = getClaimsJws(jwtToken);
+        final var userId = claims.getBody().get("userId");
         log.debug("User id = " + userId);
         Assert.notNull(userId, "Geen UserID te herleiden");
-        return userId;
+        return Long.valueOf(userId.toString());
     }
 
     protected void setUserContextFromJWTResponseHeader(ResponseEntity<UserAccountDto> responseEntity) {

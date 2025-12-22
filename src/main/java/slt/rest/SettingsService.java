@@ -35,7 +35,7 @@ public class SettingsService {
     private WeightRepository weightRepo;
 
     @Autowired
-    private WeightService weightService;
+    private WeightController weightController;
 
     @Autowired
     private MyModelMapper myModelMapper;
@@ -47,7 +47,7 @@ public class SettingsService {
     public ResponseEntity<Void> storeSetting(@RequestBody SettingDto settingDto) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         if ("weight".equals(settingDto.getName())) {
-            weightService.storeWeightEntry(
+            weightController.postWeight(
                     new WeightDto(null,
                             Double.valueOf(settingDto.getValue()),
                             settingDto.getDay() == null ? LocalDate.now() : settingDto.getDay().toLocalDate(),
@@ -124,7 +124,7 @@ public class SettingsService {
         Weight currentWeight = weight.stream().max(Comparator.comparing(Weight::getDay)).orElse(null);
         UserSettingsDto userSettingsDto = mapToUserSettingsDto(settings);
         if (currentWeight != null) {
-            userSettingsDto.setCurrentWeight(currentWeight.getValue());
+            userSettingsDto.setCurrentWeight(currentWeight.getWeight());
         }
         return userSettingsDto;
     }

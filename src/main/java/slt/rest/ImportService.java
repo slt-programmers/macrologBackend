@@ -18,8 +18,6 @@ import slt.security.UserInfo;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @RestController
 @Slf4j
 @RequestMapping("/import")
@@ -41,12 +39,9 @@ public class ImportService {
     private MyModelMapper myModelMapper;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity setAll(@RequestBody Export export) {
+    public ResponseEntity<Void> setAll(@RequestBody final Export export) {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("export = " + export);
-
-
-
         List<FoodDto> allFoodDto = export.getAllFood();
         for (FoodDto foodDto : allFoodDto) {
             Food food = myModelMapper.getConfiguredMapper().map(foodDto,Food.class);
@@ -95,8 +90,9 @@ public class ImportService {
         allWeights.stream()
                 .map(w -> myModelMapper.getConfiguredMapper().map(w, Weight.class))
                 .forEach(weightDomain -> {
-                    weightDomain.setId(null); // force add new entry
-                    weightRepository.insertWeight(userInfo.getUserId(), weightDomain);
+                    weightDomain.setId(null);
+                    weightDomain.setUserId(userInfo.getUserId());// force add new entry
+                    weightRepository.saveWeight( weightDomain);
                 });
 
         List<LogActivityDto> allActivities = export.getAllActivities();
@@ -110,22 +106,22 @@ public class ImportService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private Food getFoodFromListByName(String foodName, List<Food> foodList) {
+    private Food getFoodFromListByName(final String foodName, final List<Food> foodList) {
         Food foundFood;
         List<Food> matches = foodList.stream()
                 .filter(food -> food.getName().equals(foodName))
-                .collect(toList());
+                .toList();
         if (matches.size() == 1) {
-            foundFood = matches.get(0);
+            foundFood = matches.getFirst();
         } else {
             log.error("Multiple Food with name " + foodName + " found");
             log.error("Selecting first from list");
-            foundFood = matches.get(0);
+            foundFood = matches.getFirst();
         }
         return foundFood;
     }
 
-    private static LogEntry mapLogEntryDtoToLogEntry(EntryDto entryDto) {
+    private static LogEntry mapLogEntryDtoToLogEntry(final EntryDto entryDto) {
         LogEntry logEntry = new LogEntry();
         logEntry.setId(null);
         java.sql.Date newDate = new java.sql.Date(entryDto.getDay().getTime());
@@ -139,7 +135,7 @@ public class ImportService {
         return logEntry;
     }
 
-    private static Portion mapPortionDtoToPortion(PortionDto portionDto) {
+    private static Portion mapPortionDtoToPortion(final PortionDto portionDto) {
         Portion portion = new Portion();
         portion.setId(null);
         portion.setGrams(portionDto.getGrams());

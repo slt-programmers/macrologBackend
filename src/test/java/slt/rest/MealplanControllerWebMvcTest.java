@@ -32,8 +32,8 @@ class MealplanControllerWebMvcTest {
     @Test
     void getAllMealplans() throws Exception {
         final var mealplans = List.of(Mealplan.builder().id(1L).title("title").mealtimes(new ArrayList<>()).build());
-        Mockito.when(repository.getAllMealplans(any(Integer.class))).thenReturn(mealplans);
-        mockMvc.perform(get("/mealplans").header("Authorization", "Bearer " + jwtBuilder.generateJWT("test", 1)))
+        Mockito.when(repository.getAllMealplans(any(Long.class))).thenReturn(mealplans);
+        mockMvc.perform(get("/mealplans").header("Authorization", "Bearer " + jwtBuilder.generateJWT("test", 1L)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("[{\"id\":1,\"title\":\"title\",\"mealtimes\":[]}]"));
     }

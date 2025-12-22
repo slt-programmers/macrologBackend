@@ -12,7 +12,9 @@ import slt.database.entities.UserAccount;
 import slt.dto.ConnectivityStatusDto;
 
 import javax.mail.internet.MimeMessage;
+
 import jakarta.transaction.Transactional;
+
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,7 +31,7 @@ public class GoogleMailService {
     private static final String GMAIL_REFRESH_TOKEN = "GMAIL_REFRESH_TOKEN";
     private static final String MACROLOG_FROM_ADDRESS = "macrologwebapp@gmail.com";
     private static final String MAIL_SEND_TO_DEBUGLINE = "Mail send to";
-    private static final Integer ADMIN_USER_ID = -1;
+    private static final Long ADMIN_USER_ID = -1L;
 
     private final SettingsRepository settingsRepository;
     private final GoogleConfig googleConfig;
@@ -75,9 +77,9 @@ public class GoogleMailService {
             Long expiresIn = Long.valueOf(token.getExpires_in().toString());
             final long expiresAt = getExpiresAtFromExpiresIn(expiresIn);
 
-            saveSetting(ADMIN_USER_ID, GMAIL_ACCESS_TOKEN, token.getAccess_token());
-            saveSetting(ADMIN_USER_ID, GMAIL_REFRESH_TOKEN, token.getRefresh_token());
-            saveSetting(ADMIN_USER_ID, GMAIL_EXPIRES_AT, String.valueOf(expiresAt));
+            saveSetting(GMAIL_ACCESS_TOKEN, token.getAccess_token());
+            saveSetting(GMAIL_REFRESH_TOKEN, token.getRefresh_token());
+            saveSetting(GMAIL_EXPIRES_AT, String.valueOf(expiresAt));
             connected = true;
             log.info("Connected to Google!");
 
@@ -91,19 +93,18 @@ public class GoogleMailService {
         return instant.plusSeconds(expiresIn).getEpochSecond();
     }
 
-    private void saveSetting(Integer userId, String name, String value) {
-
-        settingsRepository.putSetting(userId, Setting.builder()
-                .userId(userId)
+    private void saveSetting(final String name, final String value) {
+        settingsRepository.putSetting(GoogleMailService.ADMIN_USER_ID, Setting.builder()
+                .userId(GoogleMailService.ADMIN_USER_ID)
                 .name(name)
                 .value(value)
                 .day(Date.valueOf(LocalDate.now())).build());
     }
 
-    private Oath2Token getOath2Token(Integer userId) {
-        final Setting accessToken = settingsRepository.getLatestSetting(userId, GMAIL_ACCESS_TOKEN);
-        final Setting refreshToken = settingsRepository.getLatestSetting(userId, GMAIL_REFRESH_TOKEN);
-        final Setting expiresAt = settingsRepository.getLatestSetting(userId, GMAIL_EXPIRES_AT);
+    private Oath2Token getOath2Token() {
+        final Setting accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
+        final Setting refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
+        final Setting expiresAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
 
         if (accessToken == null ||
                 refreshToken == null ||
@@ -128,18 +129,18 @@ public class GoogleMailService {
                 log.error("New token also expired. wtf...");
                 return null;
             }
-            storeTokenSettings(userId, token);
+            storeTokenSettings(token);
         }
         return token;
     }
 
     @Transactional
-    private void storeTokenSettings(Integer userId, Oath2Token oath2Token) {
+    private void storeTokenSettings(final Oath2Token oath2Token) {
         log.debug("Storing token update");
 
-        final Setting accessToken = settingsRepository.getLatestSetting(userId, GMAIL_ACCESS_TOKEN);
-        final Setting refreshToken = settingsRepository.getLatestSetting(userId, GMAIL_REFRESH_TOKEN);
-        final Setting expireAt = settingsRepository.getLatestSetting(userId, GMAIL_EXPIRES_AT);
+        final Setting accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
+        final Setting refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
+        final Setting expireAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
 
         accessToken.setValue(oath2Token.getAccess_token());
         if (StringUtils.isNotEmpty(oath2Token.getRefresh_token())) {
@@ -150,9 +151,9 @@ public class GoogleMailService {
         }
         expireAt.setValue(oath2Token.getExpires_at().toString());
 
-        settingsRepository.saveSetting(userId, accessToken);
-        settingsRepository.saveSetting(userId, refreshToken);
-        settingsRepository.saveSetting(userId, expireAt);
+        settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, accessToken);
+        settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, refreshToken);
+        settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, expireAt);
     }
 
 
@@ -169,7 +170,7 @@ public class GoogleMailService {
         return timeTokenExpires.isBefore(currentTime);
     }
 
-    public void sendPasswordRetrievalMail(String email, String unhashedTemporaryPassword, UserAccount account) {
+    public void sendPasswordRetrievalMail(final String email, final String unhashedTemporaryPassword, final UserAccount account) {
         if (isConnnectedToGmail()) {
             try {
                 String subject = "Macrolog Credentials";
@@ -183,14 +184,14 @@ public class GoogleMailService {
 
                 log.debug(MAIL_SEND_TO_DEBUGLINE + email);
                 final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(ADMIN_USER_ID), email1);
+                googleClient.sendMail(getOath2Token(), email1);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }
         }
     }
 
-    public void sendConfirmationMail(String email, UserAccount account) {
+    public void sendConfirmationMail(final String email, final UserAccount account) {
         if (isConnnectedToGmail()) {
             try {
                 String subject = "Welcome to Macrolog!";
@@ -204,7 +205,7 @@ public class GoogleMailService {
 
                 log.debug(MAIL_SEND_TO_DEBUGLINE + email);
                 final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(ADMIN_USER_ID), email1);
+                googleClient.sendMail(getOath2Token(), email1);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }
@@ -219,7 +220,7 @@ public class GoogleMailService {
         return true;
     }
 
-    public void sendTestMail(String email) {
+    public void sendTestMail(final String email) {
         if (isConnnectedToGmail()) {
             try {
                 String subject = "Test mail from Macrolog!";
@@ -231,7 +232,7 @@ public class GoogleMailService {
 
                 log.debug(MAIL_SEND_TO_DEBUGLINE + email);
                 final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(ADMIN_USER_ID), email1);
+                googleClient.sendMail(getOath2Token(), email1);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
             }

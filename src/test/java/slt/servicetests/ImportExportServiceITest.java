@@ -22,18 +22,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class ImportExportServiceITest extends AbstractApplicationIntegrationTest {
 
-    private Integer userId;
+    private Long userId;
 
     @BeforeEach
     public void setUserContext() {
 
         if (this.userId == null) {
             log.debug("Creating test user for test " + this.getClass());
-            Integer activityUser = createUser("logEntryUser");
-            this.userId = activityUser;
+            this.userId = createUser("logEntryUser");
         }
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(Integer.valueOf(this.userId));
+        userInfo.setUserId(this.userId);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
@@ -95,7 +94,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
                 .weight(10.0)
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
-        responseEntity = weightService.storeWeightEntry(newWeight);
+        responseEntity = weightController.postWeight(newWeight);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
 
         // add settings:

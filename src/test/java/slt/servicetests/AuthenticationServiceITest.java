@@ -24,13 +24,12 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     void testSignupNewUser() {
-
         String userName = "newuser";
         String userEmail = "newuser@test.example";
 
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCode().value());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
         String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).get(0);
         log.debug(jwtToken);
         Jws<Claims> claimsJws = getClaimsJws(jwtToken);
@@ -48,7 +47,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         boolean mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertTrue(mailSend, "Mail has been send");
@@ -56,14 +55,14 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 2e: keer afgekeurd op username
         registrationRequest = RegistrationRequest.builder().email("diffemail@email.com").password("testpassword").username(userName).build();
         responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertFalse(mailSend, "Mail should not be send");
 
         // 3e: keer afgekeurd op email
         registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
         responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(401, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertFalse(mailSend, "Mail should not be send");
 
@@ -79,24 +78,24 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
         ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity);
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // wachtwoord resetten
         ResetPasswordRequest resetPasswordRequest = ResetPasswordRequest.builder().email(userEmail).build();
         responseEntity = authenticationService.resetPassword(resetPasswordRequest);
-        Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         // inloggen met oude kan nog:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         String resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
         Assertions.assertNotNull(resettedPassword, "Mail has been send");
@@ -106,12 +105,12 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // inloggen met nieuw wachtwoord
         authRequest = AuthenticationRequest.builder().username(userEmail).password(resettedPassword).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // inloggen met oude kan niet meer :
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
 
     }
 
@@ -126,14 +125,14 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity);
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // wachtwoord veranderen
         ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.builder().oldPassword(password).newPassword(newPassword).confirmPassword(newPassword).build();
@@ -143,12 +142,12 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // inloggen met oude kan niet meer:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
 
         // inloggen met nieuwe kan wel:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(newPassword).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
     }
 
     @Test
@@ -161,18 +160,18 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity);
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // verwijder met verkeerd wachtwoord afkeuren
         ResponseEntity<Void> result = authenticationService.deleteAccount("verkeerd");
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), result.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
 
         // verwijder met correct wachtwoord uitvoeren
         deleteAccount(password);
@@ -180,7 +179,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // inloggen kan niet meer:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
 
     }
 
@@ -194,14 +193,14 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity);
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationService.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
 
         // verwijder met correct wachtwoord uitvoeren
@@ -209,7 +208,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // verwijder nomaals
         ResponseEntity<Void> result = authenticationService.deleteAccount(password);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
 
     }
 
@@ -223,7 +222,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
-        Assertions.assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity);
 
@@ -238,43 +237,44 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                 .fat(2.0)
                 .protein(3.0)
                 .portions(Arrays.asList(
-                        PortionDto.builder()
-                                .description("portion1")
-                                .grams(200.0)
-                                .build(),
-                        PortionDto.builder()
-                                .description("portion2")
-                                .grams(300.0)
-                                .build()
+                                PortionDto.builder()
+                                        .description("portion1")
+                                        .grams(200.0)
+                                        .build(),
+                                PortionDto.builder()
+                                        .description("portion2")
+                                        .grams(300.0)
+                                        .build()
                         )
                 )
                 .build();
         FoodDto savedFood = createFood(foodRequestMetPortions);
-        PortionDto portion1= savedFood.getPortions().stream().filter(p->p.getDescription().equals("portion1")).findFirst().get();
+        PortionDto portion1 = savedFood.getPortions().stream().filter(p ->
+                p.getDescription().equals("portion1")).findFirst().get();
 
         // add log entry without portion
         String day = "2001-01-02";
-        createLogEntry(day,foodZonderPortion, null, 3.0);
+        createLogEntry(day, foodZonderPortion, null, 3.0);
 
         // add log entry with portion
-        createLogEntry(day,savedFood, portion1, 3.0);
+        createLogEntry(day, savedFood, portion1, 3.0);
 
         // add activity
         List<LogActivityDto> newActivities = Arrays.asList(
                 LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2003-01-01" )))
+                        .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Running")
                         .calories(20.0)
                         .build(),
                 LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2003-01-01" )))
+                        .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Cycling")
                         .calories(30.0)
                         .build()
 
         );
         ResponseEntity<List<LogActivityDto>> result = activityService.postActivities("2003-01-01", newActivities);
-        assertThat(result.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add weight
         // store weight:
@@ -282,8 +282,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                 .weight(10.0)
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
-        ResponseEntity<Void> result2 = weightService.storeWeightEntry(newWeight);
-        assertThat(result2.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        ResponseEntity<WeightDto> result2 = weightController.postWeight(newWeight);
+        assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add settings:
         storeSetting("export1", "export1value");

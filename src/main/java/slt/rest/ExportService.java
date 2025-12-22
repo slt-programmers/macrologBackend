@@ -46,7 +46,7 @@ public class ExportService {
     private WeightRepository weightRepository;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAll() {
+    public ResponseEntity<Export> getAll() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
         List<Food> allFood = foodRepository.getAllFood(userInfo.getUserId());
@@ -54,7 +54,7 @@ public class ExportService {
 
         List<FoodDto> allFoodDtos = new ArrayList<>();
         for (Food food : allFood) {
-            allFoodDtos.add(createFoodDto(food, true));
+            allFoodDtos.add(createFoodDto(food));
         }
         log.info("Export: allFoodDtos size = " + allFoodDtos.size());
         export.setAllFood(allFoodDtos);
@@ -118,28 +118,27 @@ public class ExportService {
 
         List<LogActivity> activities = activityRepository.getAllLogActivities(userInfo.getUserId());
         List<LogActivityDto> collectedActivityDtos = activities.stream()
-                .map(a -> myModelMapper.getConfiguredMapper().map(a,LogActivityDto.class ))
+                .map(a -> myModelMapper.getConfiguredMapper().map(a, LogActivityDto.class))
                 .collect(Collectors.toList());
         export.setAllActivities(collectedActivityDtos);
 
         List<Weight> allWeightEntries = weightRepository.getAllWeightEntries(userInfo.getUserId());
         List<WeightDto> collectedWeightDtos = allWeightEntries.stream()
-                .map(w -> myModelMapper.getConfiguredMapper().map(w,WeightDto.class ))
+                .map(w -> myModelMapper.getConfiguredMapper().map(w, WeightDto.class))
                 .collect(Collectors.toList());
         export.setAllWeights(collectedWeightDtos);
 
         return ResponseEntity.ok(export);
     }
 
-    private FoodDto createFoodDto(Food food, boolean withPortions) {
+    private FoodDto createFoodDto(final Food food) {
         FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food, FoodDto.class);
-        if (withPortions) {
-            List<Portion> foodPortions = portionRepository.getPortions(food.getId());
-            for (Portion portion : foodPortions) {
-                PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion,PortionDto.class);
-                foodDto.addPortion(currDto);
-            }
+        List<Portion> foodPortions = portionRepository.getPortions(food.getId());
+        for (Portion portion : foodPortions) {
+            PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion, PortionDto.class);
+            foodDto.addPortion(currDto);
         }
+
         return foodDto;
     }
 }

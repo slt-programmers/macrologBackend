@@ -6,17 +6,18 @@ import org.springframework.stereotype.Repository;
 import slt.database.entities.Dish;
 
 import jakarta.transaction.Transactional;
+
 import java.util.List;
 
 interface DishCrudRepository extends CrudRepository<Dish, Long> {
 
-    void deleteByUserIdAndId(Integer userId, Long dishId);
+    void deleteByUserIdAndId(final Long userId, final Long dishId);
 
-    void deleteByUserId(Integer userId);
+    void deleteByUserId(final Long userId);
 
-    List<Dish> findByUserId(Integer userId);
+    List<Dish> findByUserId(final Long userId);
 
-    Dish findByUserIdAndName(Integer userId, String name);
+    Dish findByUserIdAndName(final Long userId, final String name);
 }
 
 @Repository
@@ -25,26 +26,26 @@ public class DishRepository {
     @Autowired
     DishCrudRepository dishCrudRepository;
 
-    public Dish saveDish(Integer userId, Dish dish) {
+    public Dish saveDish(final Long userId, final Dish dish) {
         dish.setUserId(userId);
         return dishCrudRepository.save(dish);
     }
 
-    public Dish findByName(Integer userId, String name) {
-        return dishCrudRepository.findByUserIdAndName(userId,name);
+    public Dish findByName(final Long userId, final String name) {
+        return dishCrudRepository.findByUserIdAndName(userId, name);
     }
 
     @Transactional
-    public void deleteDish(Integer userId, Long dishId) {
+    public void deleteDish(final Long userId, final Long dishId) {
         dishCrudRepository.deleteByUserIdAndId(userId, dishId);
     }
 
-    public List<Dish> getAllDishes(Integer userId) {
+    public List<Dish> getAllDishes(final Long userId) {
         return dishCrudRepository.findByUserId(userId);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
+    public void deleteAllForUser(final Long userId) {
         dishCrudRepository.deleteByUserId(userId);
     }
 
