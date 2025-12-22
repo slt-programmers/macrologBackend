@@ -53,8 +53,8 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
 
         assertThat(entriesForDay).hasSize(1);
-        assertThat(entriesForDay.get(0).getMeal()).isEqualTo(Meal.BREAKFAST);
-        assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
+        assertThat(entriesForDay.getFirst().getMeal()).isEqualTo(Meal.BREAKFAST);
+        assertThat(entriesForDay.getFirst().getMacrosCalculated()).isNotNull();
     }
 
     @Test
@@ -76,8 +76,8 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
 
         assertThat(entriesForDay).hasSize(1);
-        assertThat(entriesForDay.get(0).getMeal()).isEqualTo(Meal.BREAKFAST);
-        assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
+        assertThat(entriesForDay.getFirst().getMeal()).isEqualTo(Meal.BREAKFAST);
+        assertThat(entriesForDay.getFirst().getMacrosCalculated()).isNotNull();
     }
 
 
@@ -105,12 +105,12 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         // check correctly added:
         List<EntryDto> entriesForDay = getLogEntriesForDay(day);
         assertThat(entriesForDay).hasSize(1);
-        assertThat(entriesForDay.get(0).getMeal()).isEqualTo(Meal.BREAKFAST);
-        assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
-        assertThat(entriesForDay.get(0).getFood().getId()).isEqualTo(savedFood.getId());
-        assertThat(entriesForDay.get(0).getPortion().getId()).isEqualTo(portion1.getId());
-        assertThat(entriesForDay.get(0).getMultiplier()).isEqualTo(3.0);
-        assertThat(entriesForDay.get(0).getMacrosCalculated()).isNotNull();
+        assertThat(entriesForDay.getFirst().getMeal()).isEqualTo(Meal.BREAKFAST);
+        assertThat(entriesForDay.getFirst().getMacrosCalculated()).isNotNull();
+        assertThat(entriesForDay.getFirst().getFood().getId()).isEqualTo(savedFood.getId());
+        assertThat(entriesForDay.getFirst().getPortion().getId()).isEqualTo(portion1.getId());
+        assertThat(entriesForDay.getFirst().getMultiplier()).isEqualTo(3.0);
+        assertThat(entriesForDay.getFirst().getMacrosCalculated()).isNotNull();
     }
 
     @Test
@@ -135,17 +135,17 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
                         .portion(null)
                         .food(savedFood)
                         .multiplier(3.0)
-                        .id(entriesForDay.get(0).getId())
+                        .id(entriesForDay.getFirst().getId())
                         .build()
         );
         ResponseEntity<List<EntryDto>> responseEntity = entriesService.postEntries(day, "BREAKFAST", updateEntries);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK); // why not CREATED?
 
         // Check log entry has been updated
         List<EntryDto> updatedForDay = getLogEntriesForDay(day);
         assertThat(updatedForDay).hasSize(1);
         assertThat(updatedForDay.size()).isEqualTo(1);
-        assertThat(updatedForDay.get(0).getMultiplier()).isEqualTo(3.0);
+        assertThat(updatedForDay.getFirst().getMultiplier()).isEqualTo(3.0);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(entriesForDay).hasSize(1);
 
         // delete the entry
-        entriesService.deleteLogEntry(entriesForDay.get(0).getId());
+        entriesService.deleteLogEntry(entriesForDay.getFirst().getId());
         List<EntryDto> afterDeleteForDay = getLogEntriesForDay(day);
         assertThat(afterDeleteForDay).hasSize(0);
     }
@@ -187,22 +187,22 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(entriesForDay).hasSize(1);
 
         ResponseEntity macrosFromPeriod = entriesService.getMacrosFromPeriod("1980-01-05", "1980-01-06");
-        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
-        assertThat(foundMacros.get(0).getMacros().getProtein()).isEqualTo(savedFood.getProtein());
-        assertThat(foundMacros.get(0).getMacros().getFat()).isEqualTo(savedFood.getFat());
-        assertThat(foundMacros.get(0).getMacros().getCarbs()).isEqualTo(savedFood.getCarbs());
+        assertThat(foundMacros.getFirst().getMacros().getProtein()).isEqualTo(savedFood.getProtein());
+        assertThat(foundMacros.getFirst().getMacros().getFat()).isEqualTo(savedFood.getFat());
+        assertThat(foundMacros.getFirst().getMacros().getCarbs()).isEqualTo(savedFood.getCarbs());
 
         macrosFromPeriod = entriesService.getMacrosFromPeriod("1980-01-01", "1980-01-05");
-        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
 
         macrosFromPeriod = entriesService.getMacrosFromPeriod("1980-01-01", "1980-01-04");
-        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(0);
@@ -228,7 +228,7 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
 //        assertThat(entriesForDay).hasSize(1);
 //
 //        ResponseEntity macrosFromPeriod = entriesService.getMacrosFromPeriod("1960-01-05", "1960-01-06");
-//        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+//        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 //
 //        List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
 //        assertThat(foundMacros).hasSize(1);
@@ -243,13 +243,13 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
 //
 //
 //        macrosFromPeriod = entriesService.getMacrosFromPeriod("1960-01-01", "1960-01-05");
-//        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+//        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 //
 //        foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
 //        assertThat(foundMacros).hasSize(1);
 //
 //        macrosFromPeriod = entriesService.getMacrosFromPeriod("1960-01-01", "1960-01-04");
-//        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+//        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 //
 //        foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
 //        assertThat(foundMacros).hasSize(0);
@@ -285,21 +285,21 @@ public class EntriesServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(entriesForDay).hasSize(1);
 
         ResponseEntity macrosFromPeriod = entriesService.getMacrosFromPeriod("2002-01-01", "2002-01-05");
-        assertThat(macrosFromPeriod.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(macrosFromPeriod.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         List<DayMacroDto> foundMacros = (List<DayMacroDto>) macrosFromPeriod.getBody();
         assertThat(foundMacros).hasSize(1);
         // potion is 1 gram, dus alles gedeeld door 100
-        assertThat(foundMacros.get(0).getMacros().getProtein()).isEqualTo(savedFood.getProtein() / 100);
-        assertThat(foundMacros.get(0).getMacros().getFat()).isEqualTo(savedFood.getFat() / 100);
-        assertThat(foundMacros.get(0).getMacros().getCarbs()).isEqualTo(savedFood.getCarbs() / 100);
+        assertThat(foundMacros.getFirst().getMacros().getProtein()).isEqualTo(savedFood.getProtein() / 100);
+        assertThat(foundMacros.getFirst().getMacros().getFat()).isEqualTo(savedFood.getFat() / 100);
+        assertThat(foundMacros.getFirst().getMacros().getCarbs()).isEqualTo(savedFood.getCarbs() / 100);
 
 
     }
 
     private List<EntryDto> getLogEntriesForDay(String day) {
         ResponseEntity logEntriesForDay = entriesService.getLogEntriesForDay(day);
-        assertThat(logEntriesForDay.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(logEntriesForDay.getStatusCode()).isEqualTo(HttpStatus.OK);
         return (List<EntryDto>) logEntriesForDay.getBody();
     }
 }

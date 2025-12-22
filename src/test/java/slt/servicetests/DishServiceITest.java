@@ -41,7 +41,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         String dishName = "emptyDish";
         DishDto newDishRequest = DishDto.builder().name(dishName).build();
         ResponseEntity responseEntity = dishService.storeDish(newDishRequest);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity<List<DishDto>> allDishes = dishService.getAllDishes();
         List<DishDto> foundDishes = allDishes.getBody();
@@ -51,7 +51,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(emptyDish.get().getIngredients()).isEmpty();
 
         responseEntity = dishService.deleteDish(emptyDish.get().getId());
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         String dishName = "sameDish";
         DishDto newDish = DishDto.builder().name(dishName).build();
         ResponseEntity responseEntity = dishService.storeDish(newDish);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity<List<DishDto>> allDishes = dishService.getAllDishes();
         List<DishDto> foundDishes = allDishes.getBody();
@@ -71,7 +71,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
 
         DishDto sameDish = DishDto.builder().name(dishName).build();
         responseEntity = dishService.storeDish(sameDish);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
                 .build();
 
         ResponseEntity responseEntity = dishService.storeDish(newDish);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity<List<DishDto>> allDishes = dishService.getAllDishes();
         List<DishDto> foundDishes = allDishes.getBody();
@@ -113,7 +113,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
 
         responseEntity = dishService.deleteDish(matchedDish.get().getId());
 
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
                 .build();
 
         ResponseEntity responseEntity = dishService.storeDish(newDish);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity<List<DishDto>> allDishes = dishService.getAllDishes();
         List<DishDto> foundDishes = allDishes.getBody();
@@ -163,7 +163,7 @@ public class DishServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(ingredient1Food1.get().getPortion().getId()).isEqualTo(food1Portion1.getId());
 
         responseEntity = dishService.deleteDish(matchedDish.get().getId());
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
 

@@ -47,50 +47,50 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
         LocalDate aWeekFromNow = LocalDate.now().plusDays(7);
         SettingDto settingDtoWeekFromNow = SettingDto.builder().name("n1").value("v2").day(fromLocalDateToSQLDate(aWeekFromNow)).build();
         ResponseEntity<Void> responseEntityWeekFromNow = settingsService.storeSetting(settingDtoWeekFromNow);
-        assertThat(responseEntityWeekFromNow.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntityWeekFromNow.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // Store same setting with over a month
         LocalDate aMonthFromNow = LocalDate.now().plusMonths(1);
         SettingDto settingDtoMonthFromNow = SettingDto.builder().name("n1").value("v3").day(fromLocalDateToSQLDate(aMonthFromNow)).build();
         ResponseEntity<Void> responseEntityMonthFromNow = settingsService.storeSetting(settingDtoMonthFromNow);
-        assertThat(responseEntityMonthFromNow.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntityMonthFromNow.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // SettingDto today exists
         ResponseEntity<String> savedSetting = settingsService.getSetting("n1", null);
-        assertThat(savedSetting.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(savedSetting.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(savedSetting.getBody()).isEqualTo("v3");
 
         // SettingDto yesterday refer to next valid setting
         LocalDate yesterDay = LocalDate.now().minusDays(1);
         ResponseEntity<String> yesterDayEntity = settingsService.getSetting("n1", yesterDay.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        assertThat(yesterDayEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(yesterDayEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(savedSetting.getBody()).isEqualTo("v3");
 
         // SettingDto tomorrow refer to previously valid setting
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         ResponseEntity<String> tomorrowEntity = settingsService.getSetting("n1", tomorrow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        assertThat(tomorrowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(tomorrowEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(savedSetting.getBody()).isEqualTo("v3");
 
         // SettingDto week from now is new value
         LocalDate weekFromNow = LocalDate.now().plusDays(7);
         ResponseEntity<String> weekFromNowEntity = settingsService.getSetting("n1", weekFromNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        assertThat(weekFromNowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(weekFromNowEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(weekFromNowEntity.getBody()).isEqualTo("v2");
 
         // SettingDto year from now is month value
         LocalDate yearFromNow = LocalDate.now().plusYears(1);
         ResponseEntity<String> yearFromNowEntity = settingsService.getSetting("n1", yearFromNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        assertThat(yearFromNowEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(yearFromNowEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(yearFromNowEntity.getBody()).isEqualTo("v3");
 
         // request unsupported date format
         ResponseEntity<String> unsupportedEntity = settingsService.getSetting("n1", "01-01-2020");
-        assertThat(unsupportedEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(unsupportedEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         // request strange date format
         ResponseEntity<String> strangeEntity = settingsService.getSetting("n1", "20-20-2020");
-        assertThat(strangeEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(strangeEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
 
     private UserSettingsDto getUserSettingsDto() {
         ResponseEntity<UserSettingsDto> userSettingEntity = settingsService.getUserSetting();
-        assertThat(userSettingEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(userSettingEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return userSettingEntity.getBody();
     }
 

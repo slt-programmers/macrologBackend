@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
+
 import slt.dto.LogActivityDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -66,7 +67,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
 
         assertEquals(20.0, running.get().getCalories().doubleValue());
         assertEquals("Running", running.get().getName());
-        isEqualDate(running.get().getDay(), LocalDate.parse("2001-01-01"));
+        assertTrue(isEqualDate(running.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(running.get().getId());
 
         Optional<LogActivityDto> cycling = newEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
@@ -74,12 +75,12 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
 
         assertEquals(30.0, cycling.get().getCalories().doubleValue());
         assertEquals("Cycling", cycling.get().getName());
-        isEqualDate(cycling.get().getDay(), LocalDate.parse("2001-01-01"));
+        assertTrue(isEqualDate(cycling.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(cycling.get().getId());
 
         // Check response object from get activities for day
         ResponseEntity<List<LogActivityDto>> activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
-        Assert.isTrue(200 == activitiesForDay.getStatusCodeValue(), "message");
+        assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
 
         List<LogActivityDto> newResponseEntries = activitiesForDay.getBody();
         assert newResponseEntries != null;
@@ -90,7 +91,7 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
 
         assertEquals(20.0, runningResponse.get().getCalories().doubleValue());
         assertEquals("Running", runningResponse.get().getName());
-        isEqualDate(runningResponse.get().getDay(), LocalDate.parse("2001-01-01"));
+        assertTrue(isEqualDate(runningResponse.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(runningResponse.get().getId());
 
         Optional<LogActivityDto> cyclingResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
@@ -98,16 +99,16 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
 
         assertEquals(30.0, cyclingResponse.get().getCalories().doubleValue());
         assertEquals("Cycling", cyclingResponse.get().getName());
-        isEqualDate(cyclingResponse.get().getDay(), LocalDate.parse("2001-01-01"));
+        assertTrue(isEqualDate(cyclingResponse.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(cyclingResponse.get().getId());
 
         // delete 1 activity. remove cycling
         activityService.deleteActivity(cyclingResponse.get().getId());
-        Assert.isTrue(200 == activitiesForDay.getStatusCodeValue(), "message");
+        assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
 
         // Check response object from get activities for day.
         activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
-        Assert.isTrue(200 == activitiesForDay.getStatusCodeValue(), "message");
+        assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
 
         newResponseEntries = activitiesForDay.getBody();
         assert newResponseEntries != null;
@@ -119,13 +120,13 @@ public class ActivityServiceITest extends AbstractApplicationIntegrationTest {
         // Update Running
         runningResponse.get().setCalories(44.0);
         responseEntity = activityService.postActivities("2001-01-01", Collections.singletonList(runningResponse.get()));
-        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         newResponseEntries = responseEntity.getBody();
         assert newResponseEntries != null;
         assertEquals(1, newResponseEntries.size());
 
         activitiesForDay = activityService.getActivitiesForDay("2001-01-01", false);
-        assertEquals(200, activitiesForDay.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
         newResponseEntries = activitiesForDay.getBody();
         assert newResponseEntries != null;
         assertEquals(1, newResponseEntries.size());

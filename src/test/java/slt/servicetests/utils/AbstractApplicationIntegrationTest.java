@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 
 @Slf4j
@@ -83,7 +82,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected Long createUser(String userEmail) {
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
-        assertEquals(202, responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
         return getUserIdFromResponseHeaderJWT(responseEntity);
     }
 
@@ -104,7 +103,7 @@ public abstract class AbstractApplicationIntegrationTest {
 
     protected void deleteAccount(String password) {
         ResponseEntity<Void> responseEntity = authenticationService.deleteAccount(password);
-        Assertions.assertEquals(HttpStatus.OK.value(), responseEntity.getStatusCodeValue());
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     protected Jws<Claims> getClaimsJws(String jwtToken) {
@@ -118,17 +117,17 @@ public abstract class AbstractApplicationIntegrationTest {
                 .atZone(ZoneId.systemDefault()).toLocalDate().equals(localDate);
     }
 
-
     protected FoodDto createFood(FoodDto foodRequestZonderPortions) {
-        ResponseEntity responseEntity = foodService.addFood(foodRequestZonderPortions);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.CREATED.value());
-        ResponseEntity allFoodEntity = foodService.getAllFood();
-        assertThat(allFoodEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
-        List<FoodDto> foodDtos = (List<FoodDto>) allFoodEntity.getBody();
+        ResponseEntity<Void> responseEntity = foodService.addFood(foodRequestZonderPortions);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        ResponseEntity<List<FoodDto>> allFoodEntity = foodService.getAllFood();
+        assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        List<FoodDto> foodDtos = allFoodEntity.getBody();
+        Assertions.assertNotNull(foodDtos);
         return foodDtos.stream().filter(f -> f.getName().equals(foodRequestZonderPortions.getName())).findFirst().get();
     }
 
-    protected EntryDto createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
+    protected void createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
         List<EntryDto> newLogEntries = List.of(
                 EntryDto.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
@@ -139,24 +138,25 @@ public abstract class AbstractApplicationIntegrationTest {
                         .build()
         );
         ResponseEntity<List<EntryDto>> responseEntity = entriesService.postEntries(day, "BREAKFAST", newLogEntries);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
-        return getMatch(responseEntity.getBody(), day,savedFood,portion,multiplier);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK); // why not CREATED?
+        Assertions.assertNotNull(responseEntity.getBody());
+        getMatch(responseEntity.getBody(), savedFood, portion, multiplier);
     }
 
-    private EntryDto getMatch(List<EntryDto> all, String day, FoodDto foodDto, PortionDto portionDto, double multiplier) {
-        List<EntryDto> matches =  all.stream()
+    private void getMatch(List<EntryDto> all, FoodDto foodDto, PortionDto portionDto, double multiplier) {
+        List<EntryDto> matches = all.stream()
                 .filter(entryDto -> entryDto.getMultiplier().equals(multiplier) &&
                         (portionDto == null || entryDto.getPortion().getId().equals(portionDto.getId())) &&
                         entryDto.getFood().getId().equals(foodDto.getId())
                 )
                 .collect(Collectors.toList());
         assertThat(matches).hasSize(1);
-        return matches.get(0);
+        matches.getFirst();
     }
 
     protected void storeSetting(String name, String value) {
         SettingDto settingDto = SettingDto.builder().name(name).value(value).build();
         ResponseEntity<Void> responseEntity = settingsService.storeSetting(settingDto);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

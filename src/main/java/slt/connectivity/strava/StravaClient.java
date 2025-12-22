@@ -245,7 +245,7 @@ public class StravaClient {
             ResponseEntity<List<SubscriptionInformation>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
             final List<SubscriptionInformation> body = responseEntity.getBody();
             if (body != null && !body.isEmpty()) {
-                return body.get(0);
+                return body.getFirst();
             }
             return null;
         } catch (HttpClientErrorException httpClientErrorException) {
@@ -259,7 +259,7 @@ public class StravaClient {
         }
     }
 
-    public boolean deleteWebhookSubscription(Integer clientId, String clientSecret, Integer subscriptionId) {
+    public void deleteWebhookSubscription(Integer clientId, String clientSecret, Integer subscriptionId) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL + "/" + subscriptionId);
 
@@ -272,16 +272,13 @@ public class StravaClient {
 
             final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(reqPayload, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, String.class);
-            log.debug("Received response for delete subscription : {}", responseEntity.getStatusCodeValue());
-            return HttpStatus.NO_CONTENT.equals(responseEntity.getStatusCode());
+            log.debug("Received response for delete subscription : {}", responseEntity.getStatusCode());
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return false;
         } catch (RestClientException restClientException) {
 
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return false;
         }
     }
 

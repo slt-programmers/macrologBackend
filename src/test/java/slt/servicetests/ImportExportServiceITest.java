@@ -86,7 +86,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
 
         );
         ResponseEntity responseEntity = activityService.postActivities("2003-01-01" , newActivities);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add weight
         // store weight:
@@ -95,14 +95,14 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
         responseEntity = weightController.postWeight(newWeight);
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add settings:
         storeSetting("export1", "export1value");
 
 
         ResponseEntity exportEntity = exportService.getAll();
-        assertThat(exportEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(exportEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         Export export = (Export) exportEntity.getBody();
 
         assertThat(export.getAllFood()).hasSize(2);
@@ -115,7 +115,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
         assertThat(export.getAllSettingDtos()).hasSize(1);
 
         ResponseEntity importEntity = importService.setAll(export);
-        assertThat(importEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value()); // why not CREATED?
+        assertThat(importEntity.getStatusCode()).isEqualTo(HttpStatus.OK); // why not CREATED?
 
     }
 
