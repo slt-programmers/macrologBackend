@@ -46,13 +46,13 @@ public class SettingsServiceITest extends AbstractApplicationIntegrationTest {
         // Store same setting with over a week
         LocalDate aWeekFromNow = LocalDate.now().plusDays(7);
         SettingDto settingDtoWeekFromNow = SettingDto.builder().name("n1").value("v2").day(fromLocalDateToSQLDate(aWeekFromNow)).build();
-        ResponseEntity<Void> responseEntityWeekFromNow = settingsService.storeSetting(settingDtoWeekFromNow);
+        ResponseEntity<Void> responseEntityWeekFromNow = settingsService.putSetting(settingDtoWeekFromNow);
         assertThat(responseEntityWeekFromNow.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // Store same setting with over a month
         LocalDate aMonthFromNow = LocalDate.now().plusMonths(1);
         SettingDto settingDtoMonthFromNow = SettingDto.builder().name("n1").value("v3").day(fromLocalDateToSQLDate(aMonthFromNow)).build();
-        ResponseEntity<Void> responseEntityMonthFromNow = settingsService.storeSetting(settingDtoMonthFromNow);
+        ResponseEntity<Void> responseEntityMonthFromNow = settingsService.putSetting(settingDtoMonthFromNow);
         assertThat(responseEntityMonthFromNow.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // SettingDto today exists

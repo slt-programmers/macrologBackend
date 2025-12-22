@@ -156,7 +156,7 @@ public abstract class AbstractApplicationIntegrationTest {
 
     protected void storeSetting(String name, String value) {
         SettingDto settingDto = SettingDto.builder().name(name).value(value).build();
-        ResponseEntity<Void> responseEntity = settingsService.storeSetting(settingDto);
+        ResponseEntity<Void> responseEntity = settingsService.putSetting(settingDto);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

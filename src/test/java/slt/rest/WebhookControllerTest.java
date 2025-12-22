@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
-class WebHookServiceTest {
+class WebhookControllerTest {
 
     @Mock
     StravaConfig stravaConfig;
@@ -31,7 +31,7 @@ class WebHookServiceTest {
     UserAccountRepository userAccountRepository;
 
     @InjectMocks
-    WebHookService webHookService;
+    WebhookController webhookController;
 
     @BeforeEach
     void setUp() {
@@ -40,7 +40,7 @@ class WebHookServiceTest {
 
     @Test
     void syncStrava() {
-        final var responseEntity = webHookService.syncStrava(WebhookEvent.builder().build());
+        final var responseEntity = webhookController.syncStrava(WebhookEvent.builder().build());
         verify(stravaActivityService).receiveWebHookEvent(isA(WebhookEvent.class));
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
@@ -49,7 +49,7 @@ class WebHookServiceTest {
 
     @Test
     void syncStravaCallbackWrongHubmode() {
-        final var responseEntity = webHookService.syncStravaCallback("hubmode", "challenge", "token");
+        final var responseEntity = webhookController.syncStravaCallback("hubmode", "challenge", "token");
 
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
 
@@ -60,7 +60,7 @@ class WebHookServiceTest {
     @Test
     void syncStravaCallbackWrongVerifyToken() {
         when(stravaConfig.getVerifytoken()).thenReturn("token");
-        final var responseEntity = webHookService.syncStravaCallback("subscribe", "challenge", "verkeerd");
+        final var responseEntity = webhookController.syncStravaCallback("subscribe", "challenge", "verkeerd");
 
         verify(stravaConfig).getVerifytoken();
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
@@ -71,7 +71,7 @@ class WebHookServiceTest {
     @Test
     void syncStravaCallback() {
         when(stravaConfig.getVerifytoken()).thenReturn("token");
-        final var responseEntity = webHookService.syncStravaCallback("subscribe", "challenge", "token");
+        final var responseEntity = webhookController.syncStravaCallback("subscribe", "challenge", "token");
 
         verify(stravaConfig).getVerifytoken();
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
@@ -85,7 +85,7 @@ class WebHookServiceTest {
     void startWebhookNotAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
         when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).build());
-        final var responseEntity = webHookService.startWebhook();
+        final var responseEntity = webhookController.startWebhook();
 
         verify(userAccountRepository).getUserById(any());
         verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
@@ -97,7 +97,7 @@ class WebHookServiceTest {
     void startWebhookAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
         when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).isAdmin(true).build());
-        final var responseEntity = webHookService.startWebhook();
+        final var responseEntity = webhookController.startWebhook();
 
         verify(userAccountRepository).getUserById(any());
         verify(stravaActivityService).startWebhookSubcription();
@@ -111,7 +111,7 @@ class WebHookServiceTest {
     void endWebhookNotAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
         when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).build());
-        final var responseEntity = webHookService.endWebhook(2);
+        final var responseEntity = webhookController.endWebhook(2);
 
         verify(userAccountRepository).getUserById(any());
         verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
@@ -123,7 +123,7 @@ class WebHookServiceTest {
     void endWebhookAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
         when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).isAdmin(true).build());
-        final var responseEntity = webHookService.endWebhook(2);
+        final var responseEntity = webhookController.endWebhook(2);
 
         verify(userAccountRepository).getUserById(any());
         verify(stravaActivityService).endWebhookSubscription(eq(2));
@@ -137,7 +137,7 @@ class WebHookServiceTest {
     void getWebhookNotAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
         when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).build());
-        final var responseEntity = webHookService.getWebhook();
+        final var responseEntity = webhookController.getWebhook();
 
         verify(userAccountRepository).getUserById(any());
         verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
@@ -150,7 +150,7 @@ class WebHookServiceTest {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
         when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).isAdmin(true).build());
         when(stravaActivityService.getWebhookSubscription()).thenReturn(SubscriptionInformation.builder().build());
-        final var responseEntity = webHookService.getWebhook();
+        final var responseEntity = webhookController.getWebhook();
 
         verify(userAccountRepository).getUserById(any());
         verify(stravaActivityService).getWebhookSubscription();
