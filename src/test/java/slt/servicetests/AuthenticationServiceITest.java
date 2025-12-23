@@ -30,7 +30,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
-        String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).get(0);
+        String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).getFirst();
         log.debug(jwtToken);
         Jws<Claims> claimsJws = getClaimsJws(jwtToken);
         Integer userId = (Integer) claimsJws.getBody().get("userId");
@@ -39,14 +39,14 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    void testSignupUserOrEmailAlreadyKnown() throws InterruptedException {
+    void testSignupUserOrEmailAlreadyKnown() {
 
         String userName = "userknown";
         String userEmail = "emailknown@test.example";
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        var responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         boolean mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
@@ -69,7 +69,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    void testResetPassword() throws InterruptedException {
+    void testResetPassword() {
 
         String userName = "userResetPassword";
         String userEmail = "userResetPassword@test.example";
@@ -77,7 +77,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity responseEntity = authenticationService.signUp(registrationRequest);
+        var responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity);
@@ -89,8 +89,8 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // wachtwoord resetten
         ResetPasswordRequest resetPasswordRequest = ResetPasswordRequest.builder().email(userEmail).build();
-        responseEntity = authenticationService.resetPassword(resetPasswordRequest);
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        final var responseEntity1 = authenticationService.resetPassword(resetPasswordRequest);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
 
         // inloggen met oude kan nog:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -286,7 +286,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add settings:
-        storeSetting("export1", "export1value");
+        saveSetting("export1", "export1value");
 
         deleteAccount(password);
 

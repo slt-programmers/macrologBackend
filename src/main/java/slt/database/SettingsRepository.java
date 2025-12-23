@@ -1,7 +1,7 @@
 package slt.database;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -32,21 +32,20 @@ interface SettingsCrudRepository extends CrudRepository<Setting, Long> {
     Optional<Setting> findByNameAndValue(final String name, final String value);
 }
 
-@Repository
 @Slf4j
+@Repository
+@AllArgsConstructor
 public class SettingsRepository {
 
-    @Autowired
     private SettingsCrudRepository settingsCrudRepository;
 
-    public void putSetting(final Long userId, final Setting setting) {
-        setting.setUserId(userId);
-        final var currentSetting = getValidSetting(userId, setting.getName(), setting.getDay());
+    public void putSetting(final Setting setting) {
+        final var currentSetting = getValidSetting(setting.getUserId(), setting.getName(), setting.getDay());
         if (currentSetting == null) { // geen records
             log.debug("Insert");
             // new settings cant have id's. clear it:
             setting.setId(null);
-            saveSetting(userId, setting);
+            saveSetting(setting.getUserId(), setting);
         } else {
             log.debug("Update");
             boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(setting.getDay().toLocalDate());
@@ -54,7 +53,7 @@ public class SettingsRepository {
                 currentSetting.setValue(setting.getValue());
                 settingsCrudRepository.save(currentSetting);
             } else {
-                saveSetting(userId, setting);
+                saveSetting(setting.getUserId(), setting);
             }
         }
     }
@@ -68,6 +67,10 @@ public class SettingsRepository {
     public void deleteAllForUser(final Long userId, String name) {
         settingsCrudRepository.deleteAllByUserIdAndName(userId, name);
     }
+
+//    public Optional<Setting> getLatestSetting(final Long userId, final String setting) {
+//        return settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting).stream().findFirst();
+//    }
 
     public Setting getLatestSetting(final Long userId, final String setting) {
         final var byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
@@ -92,9 +95,9 @@ public class SettingsRepository {
         return settingsCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
-    public Setting saveSetting(final Long userId, final Setting settingDomain) {
+    public void saveSetting(final Long userId, final Setting settingDomain) {
         settingDomain.setUserId(userId);
-        return settingsCrudRepository.save(settingDomain);
+        settingsCrudRepository.save(settingDomain);
     }
 
     public Optional<Setting> findByKeyValue(final String name, final String value) {

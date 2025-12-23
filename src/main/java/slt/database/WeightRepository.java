@@ -9,16 +9,18 @@ import jakarta.transaction.Transactional;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 interface WeightCrudRepository extends CrudRepository<Weight, Long> {
 
-    List<Weight> findByUserId(final Long userId);
+    List<Weight> findByUserIdOrderByDayDesc(final Long userId);
 
     List<Weight> findByUserIdAndDay(final Long userId, final Date day);
 
     void deleteByUserId(final Long userId);
 
     void deleteByIdAndUserId(final Long weightId, final Long userId);
+
 }
 
 @Repository
@@ -46,7 +48,10 @@ public class WeightRepository {
     }
 
     public List<Weight> getAllWeightEntries(final Long userId) {
-        return weightCrudRepository.findByUserId(userId);
+        return weightCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 
+    public Optional<Weight> getLatestWeight(final Long userId) {
+        return weightCrudRepository.findByUserIdOrderByDayDesc(userId).stream().findFirst();
+    }
 }

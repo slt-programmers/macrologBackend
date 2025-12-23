@@ -62,7 +62,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected AuthenticationService authenticationService;
 
     @Autowired
-    protected SettingsService settingsService;
+    protected SettingsController settingsController;
 
     @Autowired
     protected WeightController weightController;
@@ -154,9 +154,14 @@ public abstract class AbstractApplicationIntegrationTest {
         matches.getFirst();
     }
 
-    protected void storeSetting(String name, String value) {
+    protected void saveSetting(final String name, final String value) {
         SettingDto settingDto = SettingDto.builder().name(name).value(value).build();
-        ResponseEntity<Void> responseEntity = settingsService.putSetting(settingDto);
+        ResponseEntity<Void> responseEntity = settingsController.putSetting(settingDto);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+    protected void saveSetting(final String name, final String value, final LocalDate day) {
+        final var settingDto = SettingDto.builder().name(name).value(value).day(day).build();
+        final var responseEntity = settingsController.putSetting(settingDto);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

@@ -83,16 +83,16 @@ public class StravaActivityService {
 
     public SyncedAccount getStravaConnectivity(final Long userId) {
         if (isStravaConnected(userId)) {
-
-            final Setting firstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
-            final Setting lastname = settingsRepository.getLatestSetting(userId, STRAVA_LASTNAME);
-            final Setting athletId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
-            final Setting image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
+            final var firstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
+            final var lastname = settingsRepository.getLatestSetting(userId, STRAVA_LASTNAME);
+            final var athleteId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
+            final var image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
 
             final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
+            // TODO proper optional checks
             return SyncedAccount.builder()
-                    .syncedAccountId(Long.valueOf(athletId.getValue()))
+                    .syncedAccountId(Long.valueOf(athleteId.getValue()))
                     .image(image.getValue())
                     .name(firstname.getValue() + " " + lastname.getValue())
                     .numberActivitiesSynced(stravaCount)
@@ -104,7 +104,7 @@ public class StravaActivityService {
 
 
     private void saveSetting(final Long userId, final String name, final String value) {
-        settingsRepository.putSetting(userId, Setting.builder()
+        settingsRepository.putSetting(Setting.builder()
                 .userId(userId)
                 .name(name)
                 .value(value)
@@ -117,11 +117,12 @@ public class StravaActivityService {
         // store user settings for this user:
 
         Setting setting = Setting.builder()
+                .userId(userId)
                 .name(STRAVA_CLIENT_AUTHORIZATION_CODE)
                 .value(clientAuthorizationCode)
                 .day(Date.valueOf(LocalDate.now()))
                 .build();
-        settingsRepository.putSetting(userId, setting);
+        settingsRepository.putSetting(setting);
 
         StravaToken stravaToken = stravaClient.getStravaToken(clientAuthorizationCode);
 
@@ -179,6 +180,7 @@ public class StravaActivityService {
     private void storeTokenSettings(final Long userId, final StravaToken stravaToken) {
         log.debug("Storing token update");
 
+        // TODO fix nullpointer
         final Setting accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
         final Setting refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
         final Setting expireAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);

@@ -98,7 +98,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add settings:
-        storeSetting("export1", "export1value");
+        saveSetting("export1", "export1value");
 
 
         ResponseEntity exportEntity = exportService.getAll();
