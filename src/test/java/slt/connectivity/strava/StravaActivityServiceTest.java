@@ -120,9 +120,8 @@ class StravaActivityServiceTest {
 
     @Test
     void registerStravaConnectivityTokenOK() {
-
-        settingsRepository.putSetting(eq(1L), any(Setting.class));
-        settingsRepository.putSetting(eq(1L), any(Setting.class));
+        settingsRepository.putSetting(any(Setting.class));
+        settingsRepository.putSetting(any(Setting.class));
 
         Mockito.times(8);
         final StravaToken stravaToken = StravaToken.builder()
@@ -143,8 +142,7 @@ class StravaActivityServiceTest {
 
     @Test
     void registerStravaConnectivityTokenNietOk() {
-
-        settingsRepository.putSetting(eq(1L), any(Setting.class));
+        settingsRepository.putSetting(any(Setting.class));
 
         Mockito.times(8);
         when(stravaClient.getStravaToken(eq("appelflap"))).thenReturn(null);

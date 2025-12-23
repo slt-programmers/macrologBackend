@@ -64,11 +64,12 @@ public class GoogleMailService {
 
     public void registerWithCode(String clientAuthorizationCode) {
         Setting setting = Setting.builder()
+                .userId(ADMIN_USER_ID)
                 .name(GMAIL_CLIENT_AUTHORIZATION_CODE)
                 .value(clientAuthorizationCode)
                 .day(Date.valueOf(LocalDate.now()))
                 .build();
-        settingsRepository.putSetting(ADMIN_USER_ID, setting);
+        settingsRepository.putSetting(setting);
 
         Oath2Token token = googleClient.getAuthorizationToken(clientAuthorizationCode);
 
@@ -94,7 +95,7 @@ public class GoogleMailService {
     }
 
     private void saveSetting(final String name, final String value) {
-        settingsRepository.putSetting(GoogleMailService.ADMIN_USER_ID, Setting.builder()
+        settingsRepository.putSetting(Setting.builder()
                 .userId(GoogleMailService.ADMIN_USER_ID)
                 .name(name)
                 .value(value)

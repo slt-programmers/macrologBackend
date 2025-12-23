@@ -76,14 +76,16 @@ public class ImportService {
         settingDtos.stream()
                 .map(s -> myModelMapper.getConfiguredMapper().map(s, Setting.class))
                 .forEach(settingDomain -> {
+                    settingDomain.setUserId(userInfo.getUserId());
                     settingDomain.setId(null); // force add new entry
-                    settingsRepo.putSetting(userInfo.getUserId(),settingDomain);
+                    settingsRepo.putSetting(settingDomain);
                 });
 
         for (SettingDto settingDto : settingDtos) {
             Setting setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
             setting.setId(null);
-            settingsRepo.putSetting(userInfo.getUserId(), setting);
+            setting.setUserId(userInfo.getUserId());
+            settingsRepo.putSetting(setting);
         }
 
         List<WeightDto> allWeights = export.getAllWeights();

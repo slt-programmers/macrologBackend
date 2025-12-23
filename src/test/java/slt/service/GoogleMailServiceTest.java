@@ -79,7 +79,7 @@ class GoogleMailServiceTest {
         when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(null);
         googleMailService.registerWithCode("code");
 
-        verify(settingsRepository,times(1)).putSetting(eq(-1L), any());
+        verify(settingsRepository,times(1)).putSetting(any());
     }
 
     @Test
@@ -92,7 +92,7 @@ class GoogleMailServiceTest {
         googleMailService.registerWithCode("code");
         assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(true);
 
-        verify(settingsRepository,times(4)).putSetting(eq(-1L), any());
+        verify(settingsRepository,times(4)).putSetting(any());
     }
 
     @Test
