@@ -15,7 +15,7 @@ import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
 import slt.database.entities.LogActivity;
 import slt.database.entities.Setting;
-import slt.dto.SyncedAccount;
+import slt.dto.StravaSyncedAccountDto;
 import slt.rest.ActivityService;
 
 import java.time.LocalDate;
@@ -84,7 +84,7 @@ class StravaActivityServiceTest {
 
         when(activityRepository.countByUserIdAndSyncedWith(eq(1L), eq("STRAVA"))).thenReturn(1L);
 
-        final SyncedAccount stravaConnectivity = stravaActivityService.getStravaConnectivity(1L);
+        final StravaSyncedAccountDto stravaConnectivity = stravaActivityService.getStravaConnectivity(1L);
         assertThat(stravaConnectivity.getSyncedAccountId()).isEqualTo(101);
         assertThat(stravaConnectivity.getName()).isEqualTo("B C");
         assertThat(stravaConnectivity.getImage()).isEqualTo("D");
@@ -100,7 +100,7 @@ class StravaActivityServiceTest {
         when(activityRepository.countByUserIdAndSyncedWith(eq(1L), eq("STRAVA"))).thenReturn(1L);
         when(stravaConfig.getClientId()).thenReturn(201);
 
-        final SyncedAccount stravaConnectivity = stravaActivityService.getStravaConnectivity(1L);
+        final StravaSyncedAccountDto stravaConnectivity = stravaActivityService.getStravaConnectivity(1L);
         assertThat(stravaConnectivity.getSyncedAccountId()).isNull();
         assertThat(stravaConnectivity.getName()).isNull();
         assertThat(stravaConnectivity.getImage()).isNull();
@@ -133,10 +133,10 @@ class StravaActivityServiceTest {
         when(stravaClient.getStravaToken(eq("appelflap"))).thenReturn(stravaToken);
         when(activityRepository.countByUserIdAndSyncedWith(eq(1L), eq("STRAVA"))).thenReturn(1L);
 
-        final SyncedAccount syncedAccount = stravaActivityService.registerStravaConnectivity(1L, "appelflap");
-        assertThat(syncedAccount.getNumberActivitiesSynced()).isEqualTo(1L);
-        assertThat(syncedAccount.getSyncedAccountId()).isEqualTo(20L);
-        assertThat(syncedAccount.getName()).isEqualTo("jan patat");
+        final StravaSyncedAccountDto stravaSyncedAccountDto = stravaActivityService.registerStravaConnectivity(1L, "appelflap");
+        assertThat(stravaSyncedAccountDto.getNumberActivitiesSynced()).isEqualTo(1L);
+        assertThat(stravaSyncedAccountDto.getSyncedAccountId()).isEqualTo(20L);
+        assertThat(stravaSyncedAccountDto.getName()).isEqualTo("jan patat");
     }
 
 
@@ -148,8 +148,8 @@ class StravaActivityServiceTest {
         when(stravaClient.getStravaToken(eq("appelflap"))).thenReturn(null);
         when(activityRepository.countByUserIdAndSyncedWith(eq(1L), eq("STRAVA"))).thenReturn(1L);
 
-        final SyncedAccount syncedAccount = stravaActivityService.registerStravaConnectivity(1L, "appelflap");
-        assertThat(syncedAccount).isNull();
+        final StravaSyncedAccountDto stravaSyncedAccountDto = stravaActivityService.registerStravaConnectivity(1L, "appelflap");
+        assertThat(stravaSyncedAccountDto).isNull();
 
     }
 

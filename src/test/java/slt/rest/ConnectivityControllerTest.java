@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import slt.connectivity.strava.StravaActivityService;
 import slt.dto.SettingDto;
-import slt.dto.SyncedAccount;
+import slt.dto.StravaSyncedAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import static org.mockito.Mockito.*;
@@ -28,7 +28,7 @@ class ConnectivityControllerTest {
 
     @Test
     void getConnectivitySettingStrava() {
-        final var syncedAccount = SyncedAccount.builder().build();
+        final var syncedAccount = StravaSyncedAccountDto.builder().build();
         when(stravaActivityService.getStravaConnectivity(-1L)).thenReturn(syncedAccount);
         final var result = controller.getConnectivitySetting("STRAVA");
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -48,7 +48,7 @@ class ConnectivityControllerTest {
                 .name("code")
                 .value("somevalue")
                 .build();
-        final var syncedAccount = SyncedAccount.builder().build();
+        final var syncedAccount = StravaSyncedAccountDto.builder().build();
         when(stravaActivityService.registerStravaConnectivity(-1L, "somevalue")).thenReturn(syncedAccount);
         final var result = controller.postConnectivitySetting("STRAVA",dto);
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());

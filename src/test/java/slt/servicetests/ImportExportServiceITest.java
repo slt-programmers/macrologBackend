@@ -37,7 +37,7 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
     }
 
     @Test
-    public void testItAll(){
+    public void testItAll() {
 
         // add food zonder portion
         FoodDto foodRequestZonderPortions = FoodDto.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
@@ -50,42 +50,42 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
                 .fat(2.0)
                 .protein(3.0)
                 .portions(Arrays.asList(
-                        PortionDto.builder()
-                                .description("portion1")
-                                .grams(200.0)
-                                .build(),
-                        PortionDto.builder()
-                                .description("portion2")
-                                .grams(300.0)
-                                .build()
+                                PortionDto.builder()
+                                        .description("portion1")
+                                        .grams(200.0)
+                                        .build(),
+                                PortionDto.builder()
+                                        .description("portion2")
+                                        .grams(300.0)
+                                        .build()
                         )
                 )
                 .build();
         FoodDto savedFood = createFood(foodRequestMetPortions);
-        PortionDto portion1= savedFood.getPortions().stream().filter(p->p.getDescription().equals("portion1")).findFirst().get();
+        PortionDto portion1 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion1")).findFirst().get();
 
         // add log entry without portion
         String day = "2001-01-02";
-        createLogEntry(day,foodZonderPortion, null, 3.0);
+        createLogEntry(day, foodZonderPortion, null, 3.0);
 
         // add log entry with portion
-        createLogEntry(day,savedFood, portion1, 3.0);
+        createLogEntry(day, savedFood, portion1, 3.0);
 
         // add activity
         List<LogActivityDto> newActivities = Arrays.asList(
                 LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2003-01-01" )))
+                        .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Running")
                         .calories(20.0)
                         .build(),
                 LogActivityDto.builder()
-                        .day(Date.valueOf(LocalDate.parse("2003-01-01" )))
+                        .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Cycling")
                         .calories(30.0)
                         .build()
 
         );
-        ResponseEntity responseEntity = activityService.postActivities("2003-01-01" , newActivities);
+        ResponseEntity responseEntity = activityService.postActivities("2003-01-01", newActivities);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add weight
@@ -106,15 +106,15 @@ public class ImportExportServiceITest extends AbstractApplicationIntegrationTest
         Export export = (Export) exportEntity.getBody();
 
         assertThat(export.getAllFood()).hasSize(2);
-        assertThat(export.getAllFood().stream().filter(f-> f.getName().equals("exportFoodWithPortion")).findFirst().get().getPortions()).hasSize(2);
-        assertThat(export.getAllFood().stream().filter(f-> f.getName().equals("exportFoodNoPortion")).findFirst().get().getPortions()).hasSize(0);
+        assertThat(export.getAllFood().stream().filter(f -> f.getName().equals("exportFoodWithPortion")).findFirst().get().getPortions()).hasSize(2);
+        assertThat(export.getAllFood().stream().filter(f -> f.getName().equals("exportFoodNoPortion")).findFirst().get().getPortions()).hasSize(0);
 
         assertThat(export.getAllLogEntries()).hasSize(1);
         assertThat(export.getAllActivities()).hasSize(2);
         assertThat(export.getAllWeights()).hasSize(1);
         assertThat(export.getAllSettingDtos()).hasSize(1);
 
-        ResponseEntity importEntity = importService.setAll(export);
+        ResponseEntity importEntity = importController.setAll(export);
         assertThat(importEntity.getStatusCode()).isEqualTo(HttpStatus.OK); // why not CREATED?
 
     }

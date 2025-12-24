@@ -1,9 +1,8 @@
 package slt.rest;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,45 +13,39 @@ import slt.database.entities.*;
 import slt.dto.*;
 import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
-import slt.security.UserInfo;
+import slt.service.ImportService;
 
 import java.util.List;
 
-@RestController
 @Slf4j
+@RestController
 @RequestMapping("/import")
-public class ImportService {
+@AllArgsConstructor
+public class ImportController {
 
-    @Autowired
     private FoodRepository foodRepository;
-    @Autowired
     private PortionRepository portionRepository;
-    @Autowired
     private LogEntryRepository logEntryRepository;
-    @Autowired
     private SettingsRepository settingsRepo;
-    @Autowired
     private ActivityRepository activityRepository;
-    @Autowired
     private WeightRepository weightRepository;
-    @Autowired
     private MyModelMapper myModelMapper;
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    private ImportService importService;
+
+    @PostMapping
     public ResponseEntity<Void> setAll(@RequestBody final Export export) {
-        UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
-        log.debug("export = " + export);
-        List<FoodDto> allFoodDto = export.getAllFood();
-        for (FoodDto foodDto : allFoodDto) {
-            Food food = myModelMapper.getConfiguredMapper().map(foodDto,Food.class);
-            food.setId(null);// force a new entry
-            Food foodDB = foodRepository.saveFood(userInfo.getUserId(), food);
-
-            List<PortionDto> portionDtos = foodDto.getPortions();
-
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        log.debug("export = {}", export);
+        final var allFoodDtos = export.getAllFood();
+        for (FoodDto foodDto : allFoodDtos) {
+            final var food = myModelMapper.getConfiguredMapper().map(foodDto,Food.class);
+            food.setId(null); // force a new entry
+            final var savedFood = foodRepository.saveFood(userInfo.getUserId(), food);
+            final var portionDtos = foodDto.getPortions();
             for (PortionDto portionDto : portionDtos) {
-                Portion portion = mapPortionDtoToPortion(portionDto);
-                portionRepository.savePortion(foodDB.getId(), portion);
+                Portion portion = importService.mapPortionDtoToPortion(portionDto);
+                portionRepository.savePortion(savedFood.getId(), portion);
             }
         }
 
@@ -61,9 +54,9 @@ public class ImportService {
 
         List<EntryDto> entryDtos = export.getAllLogEntries();
         for (EntryDto entryDto : entryDtos) {
-            LogEntry logEntry = mapLogEntryDtoToLogEntry(entryDto);
+            LogEntry logEntry = importService.mapLogEntryDtoToLogEntry(entryDto);
 
-            Food foodDB = getFoodFromListByName(entryDto.getFood().getName(), allFoodDB);
+            Food foodDB = importService.getFoodFromListByName(entryDto.getFood().getName(), allFoodDB);
             logEntry.setFoodId(foodDB.getId());
             if (entryDto.getPortion() != null) {
                 Portion portionDB = portionRepository.getPortion(foodDB.getId(), entryDto.getPortion().getDescription());
@@ -107,43 +100,5 @@ public class ImportService {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-    private Food getFoodFromListByName(final String foodName, final List<Food> foodList) {
-        Food foundFood;
-        List<Food> matches = foodList.stream()
-                .filter(food -> food.getName().equals(foodName))
-                .toList();
-        if (matches.size() == 1) {
-            foundFood = matches.getFirst();
-        } else {
-            log.error("Multiple Food with name " + foodName + " found");
-            log.error("Selecting first from list");
-            foundFood = matches.getFirst();
-        }
-        return foundFood;
-    }
-
-    private static LogEntry mapLogEntryDtoToLogEntry(final EntryDto entryDto) {
-        LogEntry logEntry = new LogEntry();
-        logEntry.setId(null);
-        java.sql.Date newDate = new java.sql.Date(entryDto.getDay().getTime());
-        logEntry.setDay(newDate);
-        logEntry.setFoodId(entryDto.getFood().getId());
-        logEntry.setMeal(entryDto.getMeal().toString());
-        logEntry.setMultiplier(entryDto.getMultiplier());
-        if (entryDto.getPortion() != null) {
-            logEntry.setPortionId(entryDto.getPortion().getId());
-        }
-        return logEntry;
-    }
-
-    private static Portion mapPortionDtoToPortion(final PortionDto portionDto) {
-        Portion portion = new Portion();
-        portion.setId(null);
-        portion.setGrams(portionDto.getGrams());
-        portion.setDescription(portionDto.getDescription());
-        return portion;
-    }
-
 
 }

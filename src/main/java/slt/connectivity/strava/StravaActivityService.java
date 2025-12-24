@@ -11,7 +11,7 @@ import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
 import slt.database.entities.LogActivity;
 import slt.database.entities.Setting;
-import slt.dto.SyncedAccount;
+import slt.dto.StravaSyncedAccountDto;
 import slt.util.LocalDateParser;
 
 import jakarta.transaction.Transactional;
@@ -81,7 +81,7 @@ public class StravaActivityService {
         return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID) != null);
     }
 
-    public SyncedAccount getStravaConnectivity(final Long userId) {
+    public StravaSyncedAccountDto getStravaConnectivity(final Long userId) {
         if (isStravaConnected(userId)) {
             final var firstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
             final var lastname = settingsRepository.getLatestSetting(userId, STRAVA_LASTNAME);
@@ -91,14 +91,14 @@ public class StravaActivityService {
             final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
             // TODO proper optional checks
-            return SyncedAccount.builder()
+            return StravaSyncedAccountDto.builder()
                     .syncedAccountId(Long.valueOf(athleteId.getValue()))
                     .image(image.getValue())
                     .name(firstname.getValue() + " " + lastname.getValue())
                     .numberActivitiesSynced(stravaCount)
                     .build();
         } else {
-            return SyncedAccount.builder().syncedApplicationId(stravaConfig.getClientId()).build();
+            return StravaSyncedAccountDto.builder().syncedApplicationId(stravaConfig.getClientId()).build();
         }
     }
 
@@ -113,7 +113,7 @@ public class StravaActivityService {
 
     // scope=read -- > alleen private --> geeft errors bij ophalen details
     // scope=read,activity:read_all --> moet
-    public SyncedAccount registerStravaConnectivity(final Long userId, final String clientAuthorizationCode) {
+    public StravaSyncedAccountDto registerStravaConnectivity(final Long userId, final String clientAuthorizationCode) {
         // store user settings for this user:
 
         Setting setting = Setting.builder()
@@ -140,7 +140,7 @@ public class StravaActivityService {
 
             final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
-            return SyncedAccount.builder()
+            return StravaSyncedAccountDto.builder()
                     .image(stravaToken.getAthlete().getProfile_medium())
                     .syncedAccountId(stravaToken.getAthlete().getId())
                     .name(stravaToken.getAthlete().getFirstname() + " " + stravaToken.getAthlete().getLastname())

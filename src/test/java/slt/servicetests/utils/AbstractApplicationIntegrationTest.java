@@ -68,7 +68,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected WeightController weightController;
 
     @Autowired
-    protected ImportService importService;
+    protected ImportController importController;
 
     @Autowired
     protected ExportService exportService;
