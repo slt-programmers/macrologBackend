@@ -9,6 +9,7 @@ import slt.connectivity.strava.StravaActivityService;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.service.SettingsService;
+import slt.util.DateUtils;
 
 
 @AllArgsConstructor
@@ -17,11 +18,10 @@ import slt.service.SettingsService;
 public class SettingsController {
 
     private SettingsService settingsService;
-
     private StravaActivityService stravaActivityService;
 
     @GetMapping(path = "/user")
-    public ResponseEntity<UserSettingsDto> getUserSetting() {
+    public ResponseEntity<UserSettingsDto> getUserSettings() {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var userSettingsDto = settingsService.getUserSettingsDto(userInfo.getUserId());
         return ResponseEntity.ok(userSettingsDto);
@@ -31,7 +31,7 @@ public class SettingsController {
     public ResponseEntity<String> getSetting(@PathVariable("name") final String name,
                                              @RequestParam(value = "date", required = false) final String toDate) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        settingsService.validateDateFormat(toDate);
+        DateUtils.validateDateFormat(toDate);
         final var settingValue = settingsService.getSetting(userInfo.getUserId(), name, toDate);
         return ResponseEntity.ok(settingValue);
     }

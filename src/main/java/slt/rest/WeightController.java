@@ -34,11 +34,8 @@ public class WeightController {
     @PostMapping
     public ResponseEntity<WeightDto> postWeight(@RequestBody final WeightDto weightDto) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var existingEntities = weightRepository.getWeightEntryForDay(userInfo.getUserId(), Date.valueOf(weightDto.getDay()));
-        final var entity = weightMapper.map(weightDto, userInfo.getUserId());
-        weightService.mapForExistingDate(entity, existingEntities);
-        final var savedWeight = weightRepository.saveWeight(entity);
-        return ResponseEntity.ok(weightMapper.map(savedWeight));
+        final var savedWeight = weightService.saveWeight(userInfo.getUserId(), weightDto);
+        return ResponseEntity.ok(savedWeight);
     }
 
     @DeleteMapping(path = "/{id}")

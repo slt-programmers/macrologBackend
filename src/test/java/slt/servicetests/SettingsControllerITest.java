@@ -138,7 +138,7 @@ public class SettingsControllerITest extends AbstractApplicationIntegrationTest 
     }
 
     private UserSettingsDto getUserSettingsDto() {
-        ResponseEntity<UserSettingsDto> userSettingEntity = settingsController.getUserSetting();
+        ResponseEntity<UserSettingsDto> userSettingEntity = settingsController.getUserSettings();
         assertThat(userSettingEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return userSettingEntity.getBody();
     }

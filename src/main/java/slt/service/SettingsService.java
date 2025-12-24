@@ -9,14 +9,10 @@ import slt.database.entities.Setting;
 import slt.dto.SettingDto;
 import slt.dto.UserSettingsDto;
 import slt.dto.WeightDto;
-import slt.exceptions.InvalidDateException;
 import slt.exceptions.NotFoundException;
 import slt.mapper.SettingsMapper;
-import slt.rest.WeightController;
 
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 @Service
@@ -25,9 +21,11 @@ public class SettingsService {
 
     private SettingsRepository settingsRepository;
     private WeightRepository weightRepository;
-    private WeightController weightController;
+    private WeightService weightService;
 
     private final SettingsMapper settingsMapper = SettingsMapper.INSTANCE;
+
+    private static final String WEIGHT = "weight";
 
     public UserSettingsDto getUserSettingsDto(final Long userId) {
         final var settings = settingsRepository.getAllSettings(userId);
@@ -52,13 +50,12 @@ public class SettingsService {
 
     public void putSetting(final Long userId, final SettingDto settingDto) {
         final var day = settingDto.getDay() == null ? LocalDate.now() : settingDto.getDay();
-        if ("weight".equals(settingDto.getName())) {
+        if (WEIGHT.equals(settingDto.getName())) {
             final var weightDto = WeightDto.builder()
                     .weight(Double.valueOf(settingDto.getValue()))
                     .day(day)
                     .build();
-            // TODO move to a service
-            weightController.postWeight(weightDto);
+            weightService.saveWeight(userId, weightDto);
         } else {
             settingDto.setDay(day);
             final var setting = settingsMapper.map(settingDto, userId);
@@ -66,15 +63,4 @@ public class SettingsService {
         }
     }
 
-    public void validateDateFormat(final String date) {
-        if (date != null) {
-            try {
-                final var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                dateFormat.setLenient(false);
-                dateFormat.parse(date);
-            } catch (ParseException pe) {
-                throw new InvalidDateException("Date format is not valid.");
-            }
-        }
-    }
 }
