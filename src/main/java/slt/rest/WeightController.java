@@ -10,7 +10,6 @@ import slt.mapper.WeightMapper;
 import slt.security.ThreadLocalHolder;
 import slt.service.WeightService;
 
-import java.sql.Date;
 import java.util.List;
 
 @AllArgsConstructor

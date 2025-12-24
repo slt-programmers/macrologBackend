@@ -151,7 +151,7 @@ public class StravaActivityService {
         }
     }
 
-    public void unRegisterStrava(final Long userId) {
+    public void unregisterStrava(final Long userId) {
         if (!isStravaConnected(userId)) {
             log.error("Strava has not been setup for this user");
             return;

@@ -154,7 +154,7 @@ class StravaActivityServiceTest {
     }
 
     @Test
-    void unRegisterStravaOK() {
+    void unregisterStravaOK() {
 
         mockSetting(1L, "STRAVA_ATHLETE_ID", "12");
         mockSetting(1L, "STRAVA_ACCESS_TOKEN", "A");
@@ -166,17 +166,17 @@ class StravaActivityServiceTest {
         settingsRepository.deleteAllForUser(eq(1L), any(String.class));
         times(8);
 
-        stravaActivityService.unRegisterStrava(1L);
+        stravaActivityService.unregisterStrava(1L);
 
         verify(settingsRepository, times(8)).deleteAllForUser(eq(1L), any(String.class));
     }
 
     @Test
-    void unRegisterStravaNietOK() {
+    void unregisterStravaNietOK() {
         // Voor ingelogd zijn:
         mockSetting(1L, "STRAVA_ATHLETE_ID", null);
 
-        stravaActivityService.unRegisterStrava(1L);
+        stravaActivityService.unregisterStrava(1L);
 
         verify(settingsRepository).getLatestSetting(eq(1L), any(String.class));
         verifyNoMoreInteractions(settingsRepository);
@@ -354,7 +354,7 @@ class StravaActivityServiceTest {
 
         when(stravaClient.refreshToken(eq("B"))).thenReturn(StravaToken.builder().expires_at(LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC)).build());
 
-        stravaActivityService.unRegisterStrava(1L);
+        stravaActivityService.unregisterStrava(1L);
 
         verify(settingsRepository, times(3)).saveSetting(eq(1L), any(Setting.class));
     }
@@ -465,7 +465,7 @@ class StravaActivityServiceTest {
 
         when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.empty());
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3l).object_type("activity").build());
+        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());

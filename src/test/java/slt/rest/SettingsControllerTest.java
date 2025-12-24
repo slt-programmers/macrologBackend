@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import slt.connectivity.strava.StravaActivityService;
 import slt.dto.SettingDto;
 import slt.dto.UserSettingsDto;
 import slt.exceptions.InvalidDateException;
@@ -24,8 +23,7 @@ public class SettingsControllerTest {
     @BeforeEach
     void setup() {
         settingsService = mock(SettingsService.class);
-        final var stravaActivityService = mock(StravaActivityService.class);
-        controller = new SettingsController(settingsService, stravaActivityService);
+        controller = new SettingsController(settingsService);
         final var userInfo = new UserInfo();
         userInfo.setUserId(1L);
         ThreadLocalHolder.getThreadLocal().set(userInfo);

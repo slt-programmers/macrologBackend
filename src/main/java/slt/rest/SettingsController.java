@@ -1,11 +1,9 @@
 package slt.rest;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import slt.connectivity.strava.StravaActivityService;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.service.SettingsService;
@@ -18,7 +16,6 @@ import slt.util.DateUtils;
 public class SettingsController {
 
     private SettingsService settingsService;
-    private StravaActivityService stravaActivityService;
 
     @GetMapping(path = "/user")
     public ResponseEntity<UserSettingsDto> getUserSettings() {
@@ -41,41 +38,6 @@ public class SettingsController {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         settingsService.putSetting(userInfo.getUserId(), settingDto);
         return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    // TODO move to connectivity controller
-    @GetMapping(path = "/connectivity/{name}")
-    public ResponseEntity<SyncedAccount> getConnectivitySetting(@PathVariable("name") final String name) {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (name.equals("STRAVA")) {
-            final var syncedAccount = stravaActivityService.getStravaConnectivity(userInfo.getUserId());
-            if (syncedAccount == null) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.ok(syncedAccount);
-            }
-        }
-        throw new NotImplementedException();
-    }
-
-    @PostMapping(path = "/connectivity/{name}")
-    public ResponseEntity<SyncedAccount> storeConnectivitySetting(@RequestBody final SettingDto code) {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (code.getName().equals("STRAVA")) {
-            final SyncedAccount syncedAccount = stravaActivityService.registerStravaConnectivity(userInfo.getUserId(), code.getValue());
-            return ResponseEntity.ok(syncedAccount);
-        }
-        throw new NotImplementedException();
-    }
-
-    @DeleteMapping(path = "/connectivity/{name}")
-    public ResponseEntity<Void> disConnectConnectivitySetting(@PathVariable("name") final String name) {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (name.equals("STRAVA")) {
-            stravaActivityService.unRegisterStrava(userInfo.getUserId());
-            return ResponseEntity.ok().build();
-        }
-        throw new NotImplementedException();
     }
 
 }
