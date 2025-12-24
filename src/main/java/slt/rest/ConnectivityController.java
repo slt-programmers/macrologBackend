@@ -28,9 +28,9 @@ public class ConnectivityController {
     }
 
     @PostMapping(path = "/{name}")
-    public ResponseEntity<SyncedAccount> postConnectivitySetting(@RequestBody final SettingDto code) {
+    public ResponseEntity<SyncedAccount> postConnectivitySetting(@PathVariable("name") final String name, @RequestBody final SettingDto code) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (code.getName().equals("STRAVA")) {
+        if (name.equals("STRAVA")) {
             final var syncedAccount = stravaActivityService.registerStravaConnectivity(userInfo.getUserId(), code.getValue());
             return ResponseEntity.ok(syncedAccount);
         }

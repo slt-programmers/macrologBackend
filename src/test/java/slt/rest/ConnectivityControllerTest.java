@@ -45,12 +45,12 @@ class ConnectivityControllerTest {
     @Test
     void postConnectivitySettingStrava() {
         final var dto = SettingDto.builder()
-                .name("STRAVA")
+                .name("code")
                 .value("somevalue")
                 .build();
         final var syncedAccount = SyncedAccount.builder().build();
         when(stravaActivityService.registerStravaConnectivity(-1L, "somevalue")).thenReturn(syncedAccount);
-        final var result = controller.postConnectivitySetting(dto);
+        final var result = controller.postConnectivitySetting("STRAVA",dto);
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
         Assertions.assertNotNull(result.getBody());
         Assertions.assertEquals(syncedAccount, result.getBody());
@@ -59,7 +59,7 @@ class ConnectivityControllerTest {
     @Test
     void postConnectivitySettingNotImplemented() {
         Assertions.assertThrows(NotImplementedException.class,
-                () -> controller.postConnectivitySetting(SettingDto.builder().name("NOT_STRAVA").build()));
+                () -> controller.postConnectivitySetting("NOT_STRAVA", SettingDto.builder().build()));
     }
 
     @Test
