@@ -11,7 +11,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogActivityDto {
+public class ActivityDto {
 
     private Long id;
 

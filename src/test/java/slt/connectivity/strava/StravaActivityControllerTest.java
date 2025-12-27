@@ -13,10 +13,10 @@ import slt.config.StravaConfig;
 import slt.connectivity.strava.dto.*;
 import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
-import slt.database.entities.LogActivity;
+import slt.database.entities.Activity;
 import slt.database.entities.Setting;
 import slt.dto.StravaSyncedAccountDto;
-import slt.rest.ActivityService;
+import slt.rest.ActivityController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,13 +33,13 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
-class StravaActivityServiceTest {
+class StravaActivityControllerTest {
 
     @Mock
     SettingsRepository settingsRepository;
 
     @Mock
-    ActivityService activityService;
+    ActivityController activityController;
 
     @Mock
     ActivityRepository activityRepository;
@@ -209,8 +209,8 @@ class StravaActivityServiceTest {
         ));
 
 
-        List<LogActivity> storedMacroLogActivities = Arrays.asList(LogActivity.builder().build());
-        final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
+        List<Activity> storedMacroLogActivities = Arrays.asList(Activity.builder().build());
+        final List<Activity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
 
         assertThat(responseActivities).hasSize(0);
     }
@@ -229,8 +229,8 @@ class StravaActivityServiceTest {
         mockSetting(1L, "STRAVA_EXPIRES_AT", "" + toEpochSecond);
 
 
-        List<LogActivity> storedMacroLogActivities = Arrays.asList(LogActivity.builder().build());
-        final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
+        List<Activity> storedMacroLogActivities = Arrays.asList(Activity.builder().build());
+        final List<Activity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
 
         assertThat(responseActivities).hasSize(0);
     }
@@ -256,9 +256,9 @@ class StravaActivityServiceTest {
                 ActivityDetailsDto.builder().id(1L).build());
 
 
-        List<LogActivity> storedMacroLogActivities = Arrays.asList(
-                LogActivity.builder().syncedId(1L).build());
-        final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
+        List<Activity> storedMacroLogActivities = Arrays.asList(
+                Activity.builder().syncedId(1L).build());
+        final List<Activity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
 
         assertThat(responseActivities).hasSize(0);
     }
@@ -283,18 +283,18 @@ class StravaActivityServiceTest {
         when(stravaClient.getActivityDetail(eq("A"), eq(1L))).thenReturn(
                 ActivityDetailsDto.builder().id(1L).build());
 
-        List<LogActivity> storedMacroLogActivities = Arrays.asList(
-                LogActivity.builder().syncedId(1L).status("DELETED").build());
-        final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), true);
+        List<Activity> storedMacroLogActivities = Arrays.asList(
+                Activity.builder().syncedId(1L).status("DELETED").build());
+        final List<Activity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), true);
 
-        when(activityRepository.saveActivity(eq(1L), any(LogActivity.class))).thenReturn(LogActivity.builder().build());
+        when(activityRepository.saveActivity(any(Activity.class))).thenReturn(Activity.builder().build());
 
         // dirty aanpassing van de parameter lijst naar niet meer gedelete
         assertThat(storedMacroLogActivities.get(0).getStatus()).isNull();
 
-        verify(activityRepository,times(1)).saveActivity(any(), any());
-        verify(stravaClient,times(1)).getActivitiesForDay(any(), any());
-        verify(stravaClient,times(1)).getActivityDetail(any(), any());
+        verify(activityRepository, times(1)).saveActivity(any());
+        verify(stravaClient, times(1)).getActivitiesForDay(any(), any());
+        verify(stravaClient, times(1)).getActivityDetail(any(), any());
 
         // already in result, not in extra results
         assertThat(responseActivities).hasSize(0);
@@ -320,21 +320,21 @@ class StravaActivityServiceTest {
         when(stravaClient.getActivityDetail(eq("A"), eq(1L))).thenReturn(
                 ActivityDetailsDto.builder().id(1L).build());
 
-        stravaActivityService.stravaSubscriptionId = 12;
+        stravaActivityService.stravaWebhookSubscriptionId = 12;
 
-        List<LogActivity> storedMacroLogActivities = Arrays.asList(
-                LogActivity.builder().syncedId(1L).status("DELETED").build());
-        final List<LogActivity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
+        List<Activity> storedMacroLogActivities = Arrays.asList(
+                Activity.builder().syncedId(1L).status("DELETED").build());
+        final List<Activity> responseActivities = stravaActivityService.getExtraStravaActivities(storedMacroLogActivities, 1L, LocalDate.parse("2001-01-01"), false);
 
-        when(activityRepository.saveActivity(eq(1L), any(LogActivity.class))).thenReturn(LogActivity.builder().build());
+        when(activityRepository.saveActivity(any(Activity.class))).thenReturn(Activity.builder().build());
 
         // De status is niet aangepast. Geen force geweest namelijk
         assertThat(storedMacroLogActivities.get(0).getStatus()).isEqualTo("DELETED");
 
         // Geen conenctie naar strava, want de webhook staat aan. Alleen by force controleren we strava
-        verify(activityRepository,times(0)).saveActivity(any(), any());
-        verify(stravaClient,times(0)).getActivitiesForDay(any(), any());
-        verify(stravaClient,times(0)).getActivityDetail(any(), any());
+        verify(activityRepository, times(0)).saveActivity(any());
+        verify(stravaClient, times(0)).getActivitiesForDay(any(), any());
+        verify(stravaClient, times(0)).getActivityDetail(any(), any());
 
         // already in result, not in extra results
         assertThat(responseActivities).hasSize(0);
@@ -407,8 +407,8 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookWrongSubscription() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(2).build());
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(2).build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verifyNoMoreInteractions(stravaClient, settingsRepository, activityRepository, stravaConfig);
@@ -417,10 +417,10 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookAthleteNotFound() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
         when(settingsRepository.findByKeyValue(any(), any())).thenReturn(Optional.empty());
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).build());
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());
@@ -431,7 +431,7 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookNotActivity() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
         when(settingsRepository.findByKeyValue(any(), any())).thenReturn(Optional.of(Setting.builder().userId(123L).build()));
 
         // Voor token:
@@ -441,7 +441,7 @@ class StravaActivityServiceTest {
         final long toEpochSecond = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
         mockSetting(123L, "STRAVA_EXPIRES_AT", "" + toEpochSecond);
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).build());
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());
@@ -453,7 +453,7 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookNoMatchingStravaActivity() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
         when(settingsRepository.findByKeyValue(any(), any())).thenReturn(Optional.of(Setting.builder().userId(123L).build()));
 
         // Voor token:
@@ -465,7 +465,7 @@ class StravaActivityServiceTest {
 
         when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.empty());
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").build());
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());
@@ -478,7 +478,7 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookUpdateActivity() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
         when(settingsRepository.findByKeyValue(any(), any())).thenReturn(Optional.of(Setting.builder().userId(123L).build()));
 
         // Voor token:
@@ -488,17 +488,17 @@ class StravaActivityServiceTest {
         final long toEpochSecond = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
         mockSetting(123L, "STRAVA_EXPIRES_AT", "" + toEpochSecond);
 
-        when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.of(LogActivity.builder().build()));
+        when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.of(Activity.builder().build()));
         when(stravaClient.getActivityDetail(any(), eq(3L))).thenReturn(ActivityDetailsDto.builder().build());
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").aspect_type("create").build());
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").aspect_type("create").build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());
         verify(settingsRepository, times(3)).getLatestSetting(any(), any());
         verify(activityRepository).findByUserIdAndSyncIdAndSyncedWith(any(), any(), anyLong());
         verify(stravaClient).getActivityDetail(any(), any());
-        verify(activityRepository).saveActivity(eq(123L), any());
+        verify(activityRepository).saveActivity(any());
 
         verifyNoMoreInteractions(stravaClient, settingsRepository, activityRepository, stravaConfig);
     }
@@ -506,7 +506,7 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookSaveNewActivity() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
         when(settingsRepository.findByKeyValue(any(), any())).thenReturn(Optional.of(Setting.builder().userId(123L).build()));
 
         // Voor token:
@@ -519,14 +519,14 @@ class StravaActivityServiceTest {
         when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.empty());
         when(stravaClient.getActivityDetail(any(), eq(3L))).thenReturn(ActivityDetailsDto.builder().start_date("2018-02-16T14:52:54Z").build());
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").aspect_type("update").build());
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").aspect_type("update").build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());
         verify(settingsRepository, times(3)).getLatestSetting(any(), any());
         verify(activityRepository).findByUserIdAndSyncIdAndSyncedWith(any(), any(), anyLong());
         verify(stravaClient).getActivityDetail(any(), any());
-        verify(activityRepository).saveActivity(eq(123L), any());
+        verify(activityRepository).saveActivity(any());
 
         verifyNoMoreInteractions(stravaClient, settingsRepository, activityRepository, stravaConfig);
     }
@@ -534,7 +534,7 @@ class StravaActivityServiceTest {
     @Test
     public void receiveWebhookDeleteKnownActivty() {
 
-        stravaActivityService.stravaSubscriptionId = 1;
+        stravaActivityService.stravaWebhookSubscriptionId = 1;
         when(settingsRepository.findByKeyValue(any(), any())).thenReturn(Optional.of(Setting.builder().userId(123L).build()));
 
         // Voor token:
@@ -544,15 +544,15 @@ class StravaActivityServiceTest {
         final long toEpochSecond = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
         mockSetting(123L, "STRAVA_EXPIRES_AT", "" + toEpochSecond);
 
-        when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.of(LogActivity.builder().id(300L).build()));
+        when(activityRepository.findByUserIdAndSyncIdAndSyncedWith(eq(123L), eq("STRAVA"), any())).thenReturn(Optional.of(Activity.builder().id(300L).build()));
 
-        stravaActivityService.receiveWebHookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").aspect_type("delete").build());
+        stravaActivityService.receiveWebhookEvent(WebhookEvent.builder().subscription_id(1).owner_id(20L).object_id(3L).object_type("activity").aspect_type("delete").build());
 
         verify(stravaConfig, times(1)).getVerifytoken(); // Initialization of StravaActivityService
         verify(settingsRepository).findByKeyValue(any(), any());
         verify(settingsRepository, times(3)).getLatestSetting(any(), any());
         verify(activityRepository).findByUserIdAndSyncIdAndSyncedWith(any(), any(), anyLong());
-        verify(activityRepository).deleteLogActivity(eq(123L), eq(300L));
+        verify(activityRepository).deleteActivity(eq(123L), eq(300L));
 
         verifyNoMoreInteractions(stravaClient, settingsRepository, activityRepository, stravaConfig);
     }

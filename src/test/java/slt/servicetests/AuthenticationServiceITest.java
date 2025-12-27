@@ -260,20 +260,20 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         createLogEntry(day, savedFood, portion1, 3.0);
 
         // add activity
-        List<LogActivityDto> newActivities = Arrays.asList(
-                LogActivityDto.builder()
+        List<ActivityDto> newActivities = Arrays.asList(
+                ActivityDto.builder()
                         .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Running")
                         .calories(20.0)
                         .build(),
-                LogActivityDto.builder()
+                ActivityDto.builder()
                         .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Cycling")
                         .calories(30.0)
                         .build()
 
         );
-        ResponseEntity<List<LogActivityDto>> result = activityService.postActivities("2003-01-01", newActivities);
+        ResponseEntity<List<ActivityDto>> result = activityController.postActivities("2003-01-01", newActivities);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add weight

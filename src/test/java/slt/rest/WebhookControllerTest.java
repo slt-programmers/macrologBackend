@@ -41,7 +41,7 @@ class WebhookControllerTest {
     @Test
     void syncStrava() {
         final var responseEntity = webhookController.syncStrava(WebhookEvent.builder().build());
-        verify(stravaActivityService).receiveWebHookEvent(isA(WebhookEvent.class));
+        verify(stravaActivityService).receiveWebhookEvent(isA(WebhookEvent.class));
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
     }

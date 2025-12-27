@@ -26,7 +26,7 @@ public class WebhookController {
 
     @PostMapping(path = "public/strava")
     public ResponseEntity<Void> syncStrava(@RequestBody final WebhookEvent event) {
-        stravaActivityService.receiveWebHookEvent(event);
+        stravaActivityService.receiveWebhookEvent(event);
         return ResponseEntity.ok().build();
     }
 

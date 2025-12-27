@@ -50,7 +50,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected GoogleMailService mailService;
 
     @Autowired
-    protected ActivityService activityService;
+    protected ActivityController activityController;
 
     @Autowired
     protected EntriesService entriesService;

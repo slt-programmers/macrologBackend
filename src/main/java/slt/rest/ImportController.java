@@ -15,8 +15,6 @@ import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.service.ImportService;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequestMapping("/import")
@@ -39,33 +37,32 @@ public class ImportController {
         log.debug("export = {}", export);
         final var allFoodDtos = export.getAllFood();
         for (FoodDto foodDto : allFoodDtos) {
-            final var food = myModelMapper.getConfiguredMapper().map(foodDto,Food.class);
+            final var food = myModelMapper.getConfiguredMapper().map(foodDto, Food.class);
             food.setId(null); // force a new entry
             final var savedFood = foodRepository.saveFood(userInfo.getUserId(), food);
             final var portionDtos = foodDto.getPortions();
-            for (PortionDto portionDto : portionDtos) {
-                Portion portion = importService.mapPortionDtoToPortion(portionDto);
+            for (final var portionDto : portionDtos) {
+                final var portion = importService.mapPortionDtoToPortion(portionDto);
                 portionRepository.savePortion(savedFood.getId(), portion);
             }
         }
 
         // To get the food_id's
-        List<Food> allFoodDB = foodRepository.getAllFood(userInfo.getUserId());
+        final var allFoodDB = foodRepository.getAllFood(userInfo.getUserId());
+        final var entryDtos = export.getAllLogEntries();
+        for (final var entryDto : entryDtos) {
+            final var logEntry = importService.mapLogEntryDtoToLogEntry(entryDto);
 
-        List<EntryDto> entryDtos = export.getAllLogEntries();
-        for (EntryDto entryDto : entryDtos) {
-            LogEntry logEntry = importService.mapLogEntryDtoToLogEntry(entryDto);
-
-            Food foodDB = importService.getFoodFromListByName(entryDto.getFood().getName(), allFoodDB);
+            final var foodDB = importService.getFoodFromListByName(entryDto.getFood().getName(), allFoodDB);
             logEntry.setFoodId(foodDB.getId());
             if (entryDto.getPortion() != null) {
-                Portion portionDB = portionRepository.getPortion(foodDB.getId(), entryDto.getPortion().getDescription());
+                final var portionDB = portionRepository.getPortion(foodDB.getId(), entryDto.getPortion().getDescription());
                 logEntry.setPortionId(portionDB.getId());
             }
             logEntryRepository.saveLogEntry(userInfo.getUserId(), logEntry);
         }
 
-        List<SettingDto> settingDtos = export.getAllSettingDtos();
+        final var settingDtos = export.getAllSettingDtos();
         settingDtos.stream()
                 .map(s -> myModelMapper.getConfiguredMapper().map(s, Setting.class))
                 .forEach(settingDomain -> {
@@ -74,28 +71,29 @@ public class ImportController {
                     settingsRepo.putSetting(settingDomain);
                 });
 
-        for (SettingDto settingDto : settingDtos) {
-            Setting setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
+        for (final var settingDto : settingDtos) {
+            final var setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
             setting.setId(null);
             setting.setUserId(userInfo.getUserId());
             settingsRepo.putSetting(setting);
         }
 
-        List<WeightDto> allWeights = export.getAllWeights();
+        final var allWeights = export.getAllWeights();
         allWeights.stream()
                 .map(w -> myModelMapper.getConfiguredMapper().map(w, Weight.class))
                 .forEach(weightDomain -> {
-                    weightDomain.setId(null);
-                    weightDomain.setUserId(userInfo.getUserId());// force add new entry
-                    weightRepository.saveWeight( weightDomain);
+                    weightDomain.setId(null);// force add new entry
+                    weightDomain.setUserId(userInfo.getUserId());
+                    weightRepository.saveWeight(weightDomain);
                 });
 
-        List<LogActivityDto> allActivities = export.getAllActivities();
-        allActivities.stream().map(a -> myModelMapper.getConfiguredMapper().map(a, LogActivity.class))
+        final var allActivities = export.getAllActivities();
+        allActivities.stream().map(a -> myModelMapper.getConfiguredMapper().map(a, Activity.class))
                 .forEach(
                         activityDomain -> {
                             activityDomain.setId(null); // force add new entry
-                            activityRepository.saveActivity(userInfo.getUserId(), activityDomain);
+                            activityDomain.setUserId(userInfo.getUserId());
+                            activityRepository.saveActivity(activityDomain);
                         });
 
         return ResponseEntity.status(HttpStatus.OK).build();

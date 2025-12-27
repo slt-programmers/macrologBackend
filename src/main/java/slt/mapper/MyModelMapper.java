@@ -75,7 +75,7 @@ public class MyModelMapper {
         modelMapper.addMappings(foodFoodDtoPropertyMap);
 
         // LogActivity
-        final PropertyMap<LogActivityDto, LogActivity> logActivityDtoLogActivityPropertyMap = geLogActivityDtoLogActivityPropertyMap();
+        final PropertyMap<ActivityDto, Activity> logActivityDtoLogActivityPropertyMap = geLogActivityDtoLogActivityPropertyMap();
         modelMapper.addMappings(logActivityDtoLogActivityPropertyMap);
 
         this.configuredMapper = modelMapper;
@@ -330,7 +330,7 @@ public class MyModelMapper {
         };
     }
 
-    private PropertyMap<LogActivityDto, LogActivity> geLogActivityDtoLogActivityPropertyMap() {
+    private PropertyMap<ActivityDto, Activity> geLogActivityDtoLogActivityPropertyMap() {
         return new PropertyMap<>() {
             @Override
             protected void configure() {

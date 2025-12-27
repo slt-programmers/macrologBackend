@@ -1,8 +1,7 @@
 package slt.rest;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,30 +21,18 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/export")
+@AllArgsConstructor
 public class ExportService {
 
-    @Autowired
     private MyModelMapper myModelMapper;
-
-    @Autowired
     private FoodRepository foodRepository;
-
-    @Autowired
     private SettingsRepository settingsRepo;
-
-    @Autowired
     private PortionRepository portionRepository;
-
-    @Autowired
     private LogEntryRepository logEntryRepository;
-
-    @Autowired
     private ActivityRepository activityRepository;
-
-    @Autowired
     private WeightRepository weightRepository;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public ResponseEntity<Export> getAll() {
         UserInfo userInfo = ThreadLocalHolder.getThreadLocal().get();
         Export export = new Export();
@@ -116,9 +103,9 @@ public class ExportService {
                 .collect(Collectors.toList());
         export.setAllSettingDtos(collectedSettingsDto);
 
-        List<LogActivity> activities = activityRepository.getAllLogActivities(userInfo.getUserId());
-        List<LogActivityDto> collectedActivityDtos = activities.stream()
-                .map(a -> myModelMapper.getConfiguredMapper().map(a, LogActivityDto.class))
+        List<Activity> activities = activityRepository.getAllActivities(userInfo.getUserId());
+        List<ActivityDto> collectedActivityDtos = activities.stream()
+                .map(a -> myModelMapper.getConfiguredMapper().map(a, ActivityDto.class))
                 .collect(Collectors.toList());
         export.setAllActivities(collectedActivityDtos);
 
@@ -132,13 +119,12 @@ public class ExportService {
     }
 
     private FoodDto createFoodDto(final Food food) {
-        FoodDto foodDto = myModelMapper.getConfiguredMapper().map(food, FoodDto.class);
-        List<Portion> foodPortions = portionRepository.getPortions(food.getId());
-        for (Portion portion : foodPortions) {
-            PortionDto currDto = myModelMapper.getConfiguredMapper().map(portion, PortionDto.class);
+        final var foodDto = myModelMapper.getConfiguredMapper().map(food, FoodDto.class);
+        final var foodPortions = portionRepository.getPortions(food.getId());
+        for (final var portion : foodPortions) {
+            final var currDto = myModelMapper.getConfiguredMapper().map(portion, PortionDto.class);
             foodDto.addPortion(currDto);
         }
-
         return foodDto;
     }
 }
