@@ -44,7 +44,7 @@ public class ImportController {
             foodDto.setId(null); // force new entry
             foodDto.getPortions().forEach(portionDto -> portionDto.setId(null));
             final var food = foodMapper.map(foodDto);
-            foodRepository.saveFood(userInfo.getUserId(), food);
+            foodRepository.saveFood(food);
         }
 
         // To get the food_id's

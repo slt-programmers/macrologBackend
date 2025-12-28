@@ -41,7 +41,7 @@ class MealplanRepositoryTest {
         food.setFat(2D);
         food.setCarbs(3D);
         food.setUserId(1L);
-        foodRepository.saveFood(1L, food);
+        foodRepository.saveFood(food);
     }
 
     @Test

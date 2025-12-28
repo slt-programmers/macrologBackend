@@ -3,19 +3,19 @@ package slt.database;
 import lombok.AllArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.Assert;
 import slt.database.entities.Food;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 interface FoodCrudRepository extends CrudRepository<Food, Long> {
 
     List<Food> findByUserIdOrderByNameAsc(final Long userId);
 
-    List<Food> findByUserIdAndName(final Long userId, String name);
+    Optional<Food> findByUserIdAndName(final Long userId, final String name);
 
-    List<Food> findByUserIdAndId(final Long userId, Long id);
+    Optional<Food> findByUserIdAndId(final Long userId, final Long id);
 
     void deleteByUserId(final Long userId);
 }
@@ -30,20 +30,16 @@ public class FoodRepository {
         return foodCrudRepository.findByUserIdOrderByNameAsc(userId);
     }
 
-    public Food saveFood(final Long userId, Food food) {
-        food.setUserId(userId);
+    public Food saveFood(final Food food) {
         return foodCrudRepository.save(food);
     }
     
-    public Food getFood(final Long userId, String name) {
-        List<Food> queryResults = foodCrudRepository.findByUserIdAndName(userId, name);
-        return queryResults.isEmpty() ? null : queryResults.getFirst();
+    public Optional<Food> getFood(final Long userId, final String name) {
+        return foodCrudRepository.findByUserIdAndName(userId, name);
     }
 
-    public Food getFoodById(final Long userId, Long id) {
-        List<Food> queryResults = foodCrudRepository.findByUserIdAndId(userId, id);
-        Assert.isTrue(queryResults.size() <= 1, "More than one food was found");
-        return queryResults.isEmpty() ? null : queryResults.getFirst();
+    public Optional<Food> getFoodById(final Long userId, final Long id) {
+        return foodCrudRepository.findByUserIdAndId(userId, id);
     }
 
     @Transactional

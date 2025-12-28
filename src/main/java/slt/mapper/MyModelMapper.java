@@ -184,8 +184,9 @@ public class MyModelMapper {
                 .setPostConverter(mappingContext -> {
                     Long foodId = mappingContext.getSource().getFoodId();
                     Long userId = mappingContext.getSource().getUserId();
-                    Food foodById = foodRepository.getFoodById(userId, foodId);
-                    FoodDto mappedFoodDto = modelMapper.map(foodById, FoodDto.class);
+                    final var optionalFood = foodRepository.getFoodById(userId, foodId);
+                    assert optionalFood.isPresent();
+                    FoodDto mappedFoodDto = modelMapper.map(optionalFood.get(), FoodDto.class);
 
                     List<Portion> foodPortions = portionRepository.getPortions(foodId);
                     for (Portion portion : foodPortions) {
@@ -201,7 +202,7 @@ public class MyModelMapper {
                         if (first.isPresent()) {
                             mappingContext.getDestination().setPortion(first.get());
                         } else {
-                            log.error("Unknown portion {} with food {}", selectedPortionId, foodById);
+                            log.error("Unknown portion {} with food {}", selectedPortionId, optionalFood.get());
                         }
                     }
 

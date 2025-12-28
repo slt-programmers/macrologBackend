@@ -59,8 +59,9 @@ public class ExportService {
                 log.info("Export: foodDto ID " + f.getId());
                 return f.getId().equals(logEntry.getFoodId());
             }).findFirst().orElseGet(() -> {
-                        Food foodById = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
-                        return myModelMapper.getConfiguredMapper().map(foodById, FoodDto.class);
+                        final var optionalFood = foodRepository.getFoodById(userInfo.getUserId(), logEntry.getFoodId());
+                        assert optionalFood.isPresent();
+                        return myModelMapper.getConfiguredMapper().map(optionalFood, FoodDto.class);
                     }
             );
 

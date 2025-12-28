@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import slt.database.FoodRepository;
 import slt.dto.*;
-import slt.mapper.FoodMapper;
 import slt.security.ThreadLocalHolder;
+import slt.service.FoodService;
+
 import java.util.List;
 
 @Slf4j
@@ -16,43 +16,27 @@ import java.util.List;
 @RequestMapping("/food")
 public class FoodController {
 
-    private FoodRepository foodRepository;
-
-    private final FoodMapper foodMapper = FoodMapper.INSTANCE;
+    private FoodService foodService;
 
     @GetMapping
     public ResponseEntity<List<FoodDto>> getAllFood() {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var allFood = foodRepository.getAllFood(userInfo.getUserId());
-        return ResponseEntity.ok(foodMapper.map(allFood));
+        final var allFood = foodService.getAllFood(userInfo.getUserId());
+        return ResponseEntity.ok(allFood);
     }
 
     @GetMapping(path = "{id}")
     public ResponseEntity<FoodDto> getFoodById(@PathVariable("id") Long id) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var food = foodRepository.getFoodById(userInfo.getUserId(), id);
-        if (food == null) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(foodMapper.map(food));
-        }
+        final var food = foodService.getFoodById(userInfo.getUserId(), id);
+        return ResponseEntity.ok(food);
     }
 
     @PostMapping
-    public ResponseEntity<FoodDto> postFood(@RequestBody FoodDto foodDto) {
+    public ResponseEntity<FoodDto> postFood(@RequestBody final FoodDto foodDto) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-
-        if (foodDto.getId() == null) {
-            final var existingFoodWithSameName = foodRepository.getFood(userInfo.getUserId(), foodDto.getName());
-            if (existingFoodWithSameName != null) {
-                log.error("This food is already in your database");
-                return ResponseEntity.badRequest().build();
-            }
-        }
-
-        final var food = foodMapper.map(foodDto);
-        final var savedFood = foodRepository.saveFood(userInfo.getUserId(), food);
-        return ResponseEntity.ok(foodMapper.map(savedFood));
+        final var savedFood = foodService.saveFood(userInfo.getUserId(), foodDto);
+        return ResponseEntity.ok(savedFood);
     }
 
 }

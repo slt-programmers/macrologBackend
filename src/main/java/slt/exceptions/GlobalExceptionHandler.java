@@ -20,4 +20,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(message), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handle(final ValidationException ex) {
+        final var message = ex.getMessage();
+        return new ResponseEntity<>(new ErrorResponse(message), HttpStatus.BAD_REQUEST);
+    }
+
 }
