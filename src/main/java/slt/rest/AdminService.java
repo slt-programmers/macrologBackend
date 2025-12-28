@@ -1,6 +1,7 @@
 package slt.rest;
 
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,30 +15,24 @@ import slt.dto.ConnectivityStatusDto;
 import slt.dto.MailDto;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
+import slt.service.AccountService;
 import slt.service.GoogleMailService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin")
 @Slf4j
+@RestController
+@AllArgsConstructor
+@RequestMapping("/admin")
 public class AdminService {
 
-    @Autowired
     private AccountService accountService;
-
-    @Autowired
     private UserAccountRepository userAccountRepository;
-
-    @Autowired
     private GoogleMailService mailService;
-
-    @Autowired
     private GoogleMailService notificationMails;
 
-
-    @GetMapping(path = "/getAllUsers", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/getAllUsers")
     public ResponseEntity<List<UserAccountDto>> getAllUsers() {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var userId = userInfo.getUserId();
@@ -52,8 +47,8 @@ public class AdminService {
         }
     }
 
-    @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> deleteAccount(@RequestParam("userId") Long deleteUserId) {
+    @PostMapping(path = "/deleteAccount")
+    public ResponseEntity<Void> deleteAccount(@RequestParam("userId") final Long deleteUserId) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var userId = userInfo.getUserId();
         final var userAccount = userAccountRepository.getUserById(userId);

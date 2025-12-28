@@ -29,7 +29,7 @@ public class Food {
     @Column(name = "user_id")
     private Long userId;
 
-    @OneToMany(mappedBy = "foodId", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Portion> portions;
 
 }

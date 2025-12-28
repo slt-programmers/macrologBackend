@@ -17,10 +17,12 @@ public class ConnectivityController {
 
     private StravaActivityService stravaActivityService;
 
+    private static final String STRAVA = "STRAVA";
+
     @GetMapping(path = "/{name}")
     public ResponseEntity<StravaSyncedAccountDto> getConnectivitySetting(@PathVariable("name") final String name) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (name.equals("STRAVA")) {
+        if (name.equals(STRAVA)) {
             final var syncedAccount = stravaActivityService.getStravaConnectivity(userInfo.getUserId());
             return ResponseEntity.ok(syncedAccount);
         }
@@ -30,7 +32,7 @@ public class ConnectivityController {
     @PostMapping(path = "/{name}")
     public ResponseEntity<StravaSyncedAccountDto> postConnectivitySetting(@PathVariable("name") final String name, @RequestBody final SettingDto code) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (name.equals("STRAVA")) {
+        if (name.equals(STRAVA)) {
             final var syncedAccount = stravaActivityService.registerStravaConnectivity(userInfo.getUserId(), code.getValue());
             return ResponseEntity.ok(syncedAccount);
         }
@@ -40,7 +42,7 @@ public class ConnectivityController {
     @DeleteMapping(path = "/{name}")
     public ResponseEntity<Void> deleteConnectivitySetting(@PathVariable("name") final String name) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        if (name.equals("STRAVA")) {
+        if (name.equals(STRAVA)) {
             stravaActivityService.unregisterStrava(userInfo.getUserId());
             return ResponseEntity.ok().build();
         }

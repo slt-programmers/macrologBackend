@@ -1,10 +1,12 @@
 package slt.security;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserInfo {
 
     private Long userId;

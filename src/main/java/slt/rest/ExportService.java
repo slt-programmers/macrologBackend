@@ -71,7 +71,7 @@ public class ExportService {
                 portionDto = foodDto.getPortions().stream().filter(p -> p.getId().equals(logEntry.getPortionId())).findFirst()
                         .orElse(null);
                 if (portionDto != null) {
-                    MacroDto calculatedMacros = FoodService.calculateMacro(foodDto, portionDto);
+                    MacroDto calculatedMacros = MacroUtils.calculateMacro(foodDto, portionDto);
                     portionDto.setMacros(calculatedMacros);
                 }
                 entryDto.setPortion(portionDto);

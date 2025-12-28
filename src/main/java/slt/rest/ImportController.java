@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
 import slt.database.entities.*;
 import slt.dto.*;
+import slt.mapper.FoodMapper;
 import slt.mapper.MyModelMapper;
 import slt.security.ThreadLocalHolder;
 import slt.service.ImportService;
@@ -29,6 +30,8 @@ public class ImportController {
     private WeightRepository weightRepository;
     private MyModelMapper myModelMapper;
 
+    private final FoodMapper foodMapper = FoodMapper.INSTANCE;
+
     private ImportService importService;
 
     @PostMapping
@@ -36,15 +39,11 @@ public class ImportController {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         log.debug("export = {}", export);
         final var allFoodDtos = export.getAllFood();
-        for (FoodDto foodDto : allFoodDtos) {
-            final var food = myModelMapper.getConfiguredMapper().map(foodDto, Food.class);
-            food.setId(null); // force a new entry
-            final var savedFood = foodRepository.saveFood(userInfo.getUserId(), food);
-            final var portionDtos = foodDto.getPortions();
-            for (final var portionDto : portionDtos) {
-                final var portion = importService.mapPortionDtoToPortion(portionDto);
-                portionRepository.savePortion(savedFood.getId(), portion);
-            }
+        for (final var foodDto : allFoodDtos) {
+            foodDto.setId(null); // force new entry
+            foodDto.getPortions().forEach(portionDto -> portionDto.setId(null));
+            final var food = foodMapper.map(foodDto);
+            foodRepository.saveFood(userInfo.getUserId(), food);
         }
 
         // To get the food_id's

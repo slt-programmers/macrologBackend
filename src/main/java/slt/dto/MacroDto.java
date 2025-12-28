@@ -24,7 +24,7 @@ public class MacroDto {
     }
 
     public MacroDto createCopy() {
-        MacroDto clone = new MacroDto();
+        final var clone = new MacroDto();
         clone.setFat(fat);
         clone.setCarbs(carbs);
         clone.setProtein(protein);

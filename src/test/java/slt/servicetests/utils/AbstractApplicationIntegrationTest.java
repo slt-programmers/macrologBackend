@@ -15,11 +15,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import slt.Application;
+import slt.database.IngredientRepository;
+import slt.database.PortionRepository;
+import slt.database.UserAccountRepository;
 import slt.dto.*;
 import slt.rest.*;
 import slt.security.SecurityConstants;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.service.AccountService;
 import slt.service.GoogleMailService;
 
 import java.nio.charset.StandardCharsets;
@@ -79,7 +83,19 @@ public abstract class AbstractApplicationIntegrationTest {
     @Autowired
     protected AdminService adminService;
 
-    protected Long createUser(String userEmail) {
+    @Autowired
+    protected AccountService accountService;
+
+    @Autowired
+    protected UserAccountRepository userAccountRepository;
+
+    @Autowired
+    protected PortionRepository portionRepository;
+
+    @Autowired
+    protected IngredientRepository ingredientRepository;
+
+    protected Long createUser(final String userEmail) {
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
@@ -118,7 +134,7 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
     protected FoodDto createFood(FoodDto foodRequestZonderPortions) {
-        ResponseEntity<Void> responseEntity = foodService.addFood(foodRequestZonderPortions);
+        ResponseEntity<FoodDto> responseEntity = foodService.postFood(foodRequestZonderPortions);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         ResponseEntity<List<FoodDto>> allFoodEntity = foodService.getAllFood();
         assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

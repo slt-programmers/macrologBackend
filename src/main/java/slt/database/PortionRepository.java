@@ -1,11 +1,12 @@
 package slt.database;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import slt.database.entities.Portion;
 
 import jakarta.transaction.Transactional;
+
 import java.util.List;
 
 interface PortionCrudRepository extends CrudRepository<Portion, Long> {
@@ -16,20 +17,14 @@ interface PortionCrudRepository extends CrudRepository<Portion, Long> {
 
     List<Portion> findByFoodId(final Long foodId);
 
-    void deleteByFoodIdIn(List<Long> foodId);
+    void deleteByFoodIdIn(final List<Long> foodId);
 }
 
 @Repository
+@AllArgsConstructor
 public class PortionRepository {
 
-    @Autowired
     private PortionCrudRepository portionCrudRepository;
-
-
-    public Portion savePortion(final Long foodId,final  Portion portion) {
-        portion.setFoodId(foodId.intValue());
-        return portionCrudRepository.save(portion);
-    }
 
     public Portion getPortion(final Long foodId, final Long portionId) {
         List<Portion> queryResults = portionCrudRepository.findByFoodIdAndId(foodId, portionId);
@@ -43,6 +38,10 @@ public class PortionRepository {
 
     public List<Portion> getPortions(final Long foodId) {
         return portionCrudRepository.findByFoodId(foodId);
+    }
+
+    public List<Portion> getAllPortions() {
+        return (List<Portion>) portionCrudRepository.findAll();
     }
 
     @Transactional

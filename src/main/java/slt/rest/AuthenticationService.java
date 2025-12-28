@@ -1,5 +1,6 @@
 package slt.rest;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -15,27 +16,24 @@ import slt.database.entities.UserAccount;
 import slt.dto.*;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
+import slt.service.AccountService;
 import slt.service.GoogleMailService;
 import slt.util.JWTBuilder;
 import slt.util.PasswordUtils;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
-@Slf4j
+@AllArgsConstructor
 public class AuthenticationService {
 
-    @Autowired
     private UserAccountRepository userAccountRepository;
-
-    @Autowired
     private GoogleMailService mailService;
-
-    @Autowired
     private AccountService accountService;
 
-    @PostMapping(path = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/authenticate")
     public ResponseEntity<UserAccountDto> authenticateUser(@RequestBody AuthenticationRequest request) {
         String username = request.getUsername();
         String hashedPassword = PasswordUtils.hashPassword(request.getPassword());
@@ -69,7 +67,7 @@ public class AuthenticationService {
         }
     }
 
-    @PostMapping(path = "/signup", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/signup")
     public ResponseEntity<UserAccountDto> signUp(@RequestBody RegistrationRequest request) {
         log.info(request.getEmail());
         String username = request.getUsername();
@@ -112,7 +110,7 @@ public class AuthenticationService {
         return new ResponseEntity<>(userDto, responseHeaders, HttpStatus.ACCEPTED);
     }
 
-    @PostMapping(path = "/resetPassword", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/resetPassword")
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
         log.info("Reset email");
         String email = request.getEmail();
@@ -132,7 +130,7 @@ public class AuthenticationService {
         }
     }
 
-    @PostMapping(path = "/changePassword", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/changePassword")
     public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
         String oldPasswordHashed = PasswordUtils.hashPassword(request.getOldPassword());
         String newPasswordHashed = PasswordUtils.hashPassword(request.getNewPassword());
@@ -163,7 +161,7 @@ public class AuthenticationService {
         }
     }
 
-    @PostMapping(path = "/deleteAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/deleteAccount")
     public ResponseEntity<Void> deleteAccount(@RequestParam("password") final String password) {
         final var passwordHashed = PasswordUtils.hashPassword(password);
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
