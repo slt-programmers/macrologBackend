@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import slt.database.*;
 import slt.database.entities.*;
 import slt.dto.*;
-import slt.mapper.FoodMapper;
-import slt.mapper.MyModelMapper;
+import slt.mapper.*;
 import slt.security.ThreadLocalHolder;
 import slt.service.ImportService;
 
@@ -28,9 +27,11 @@ public class ImportController {
     private SettingsRepository settingsRepo;
     private ActivityRepository activityRepository;
     private WeightRepository weightRepository;
-    private MyModelMapper myModelMapper;
 
     private final FoodMapper foodMapper = FoodMapper.INSTANCE;
+    private final ActivityMapper activityMapper = ActivityMapper.INSTANCE;
+    private final WeightMapper weightMapper = WeightMapper.INSTANCE;
+    private final SettingsMapper settingsMapper = SettingsMapper.INSTANCE;
 
     private ImportService importService;
 
@@ -63,35 +64,31 @@ public class ImportController {
 
         final var settingDtos = export.getAllSettingDtos();
         settingDtos.stream()
-                .map(s -> myModelMapper.getConfiguredMapper().map(s, Setting.class))
+                .map(s -> settingsMapper.map(s, userInfo.getUserId()))
                 .forEach(settingDomain -> {
-                    settingDomain.setUserId(userInfo.getUserId());
                     settingDomain.setId(null); // force add new entry
                     settingsRepo.putSetting(settingDomain);
                 });
 
         for (final var settingDto : settingDtos) {
-            final var setting = myModelMapper.getConfiguredMapper().map(settingDto, Setting.class);
+            final var setting = settingsMapper.map(settingDto, userInfo.getUserId());
             setting.setId(null);
-            setting.setUserId(userInfo.getUserId());
             settingsRepo.putSetting(setting);
         }
 
         final var allWeights = export.getAllWeights();
         allWeights.stream()
-                .map(w -> myModelMapper.getConfiguredMapper().map(w, Weight.class))
+                .map(w -> weightMapper.map(w, userInfo.getUserId()))
                 .forEach(weightDomain -> {
                     weightDomain.setId(null);// force add new entry
-                    weightDomain.setUserId(userInfo.getUserId());
                     weightRepository.saveWeight(weightDomain);
                 });
 
         final var allActivities = export.getAllActivities();
-        allActivities.stream().map(a -> myModelMapper.getConfiguredMapper().map(a, Activity.class))
+        allActivities.stream().map(a -> activityMapper.map(a, userInfo.getUserId()))
                 .forEach(
                         activityDomain -> {
                             activityDomain.setId(null); // force add new entry
-                            activityDomain.setUserId(userInfo.getUserId());
                             activityRepository.saveActivity(activityDomain);
                         });
 

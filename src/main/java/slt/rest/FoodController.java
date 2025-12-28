@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/food")
-public class FoodService {
+public class FoodController {
 
     private FoodRepository foodRepository;
 

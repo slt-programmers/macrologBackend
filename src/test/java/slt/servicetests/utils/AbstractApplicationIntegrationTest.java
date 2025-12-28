@@ -60,7 +60,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected EntriesService entriesService;
 
     @Autowired
-    protected FoodService foodService;
+    protected FoodController foodController;
 
     @Autowired
     protected AuthenticationService authenticationService;
@@ -134,9 +134,9 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
     protected FoodDto createFood(FoodDto foodRequestZonderPortions) {
-        ResponseEntity<FoodDto> responseEntity = foodService.postFood(foodRequestZonderPortions);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        ResponseEntity<List<FoodDto>> allFoodEntity = foodService.getAllFood();
+        ResponseEntity<FoodDto> responseEntity = foodController.postFood(foodRequestZonderPortions);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ResponseEntity<List<FoodDto>> allFoodEntity = foodController.getAllFood();
         assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         List<FoodDto> foodDtos = allFoodEntity.getBody();
         Assertions.assertNotNull(foodDtos);

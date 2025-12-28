@@ -36,8 +36,8 @@ public class AccountServiceITest extends AbstractApplicationIntegrationTest {
                 .carbs(3D)
                 .portions(List.of(PortionDto.builder().description("desc").grams(10D).build()))
                 .build();
-        foodService.postFood(foodDto);
-        var allFood = foodService.getAllFood();
+        foodController.postFood(foodDto);
+        var allFood = foodController.getAllFood();
         var allFoodForUser = allFood.getBody();
         Assertions.assertNotNull(allFoodForUser);
         Assertions.assertEquals(1, allFoodForUser.size());
@@ -62,7 +62,7 @@ public class AccountServiceITest extends AbstractApplicationIntegrationTest {
 
         allUsers = userAccountRepository.getAllUsers();
         Assertions.assertFalse(allUsers.stream().anyMatch(u -> u.getUsername().equals("deleteAccountTest")));
-        allFood = foodService.getAllFood();
+        allFood = foodController.getAllFood();
         allFoodForUser = allFood.getBody();
         Assertions.assertNotNull(allFoodForUser);
         Assertions.assertEquals(0, allFoodForUser.size());
