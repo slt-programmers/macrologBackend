@@ -12,9 +12,10 @@ public class MacroUtils {
 
     public static MacroDto calculateMacro(final Food food, final Portion portion) {
         final var calculatedMacros = new MacroDto();
-        calculatedMacros.setCarbs(food.getCarbs() / 100 * portion.getGrams());
-        calculatedMacros.setProtein(food.getProtein() / 100 * portion.getGrams());
-        calculatedMacros.setFat(food.getFat() / 100 * portion.getGrams());
+        final var grams = portion != null ? portion.getGrams() : 100;
+        calculatedMacros.setCarbs(food.getCarbs() / 100 * grams);
+        calculatedMacros.setProtein(food.getProtein() / 100 * grams);
+        calculatedMacros.setFat(food.getFat() / 100 * grams);
         return calculatedMacros;
     }
 

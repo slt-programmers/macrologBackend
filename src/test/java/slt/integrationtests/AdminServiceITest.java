@@ -1,4 +1,4 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import slt.database.entities.UserAccount;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

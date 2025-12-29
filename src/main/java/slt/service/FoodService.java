@@ -40,7 +40,7 @@ public class FoodService {
             }
         }
 
-        final var food = foodMapper.map(foodDto);
+        final var food = foodMapper.map(foodDto, userId);
         final var savedFood = foodRepository.saveFood(food);
         return foodMapper.map(savedFood);
     }

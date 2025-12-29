@@ -12,18 +12,20 @@ import java.sql.Date;
 @Entity
 @Table(name = "logentry")
 @Builder
-public class LogEntry {
+public class Entry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition="bigint")
     private Long id;
 
-    @Column(name = "food_id")
-    private Long foodId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "food_id")
+    private Food food;
 
-    @Column(name = "portion_id")
-    private Long portionId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "portion_id")
+    private Portion portion;
 
     private Double multiplier;
 

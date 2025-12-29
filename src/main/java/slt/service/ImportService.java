@@ -3,53 +3,72 @@ package slt.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import slt.database.entities.Food;
-import slt.database.entities.LogEntry;
-import slt.database.entities.Portion;
-import slt.dto.EntryDto;
-import slt.dto.PortionDto;
-
-import java.sql.Date;
-import java.util.List;
+import slt.database.*;
+import slt.dto.Export;
+import slt.mapper.*;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class ImportService {
 
-    public Food getFoodFromListByName(final String foodName, final List<Food> foodList) {
-        final var foodMatches = foodList.stream()
-                .filter(food -> food.getName().equals(foodName))
-                .toList();
-        if (foodMatches.size() > 1) {
-            log.error("Multiple Food with name {} found", foodName);
-            log.error("Selecting first from list");
+    private FoodRepository foodRepository;
+    private EntryRepository entryRepository;
+    private SettingsRepository settingsRepository;
+    private ActivityRepository activityRepository;
+    private WeightRepository weightRepository;
+
+    private final FoodMapper foodMapper = FoodMapper.INSTANCE;
+    private final ActivityMapper activityMapper = ActivityMapper.INSTANCE;
+    private final WeightMapper weightMapper = WeightMapper.INSTANCE;
+    private final SettingsMapper settingsMapper = SettingsMapper.INSTANCE;
+    private final EntryMapper entryMapper = EntryMapper.INSTANCE;
+
+    public void importAllForUser(final Long userId, final Export export) {
+        log.debug("Export = {}", export);
+        final var allFoodDtos = export.getAllFood();
+        for (final var foodDto : allFoodDtos) {
+            foodDto.setId(null); // force new entry
+            foodDto.getPortions().forEach(portionDto -> portionDto.setId(null));
+            final var food = foodMapper.map(foodDto, userId);
+            foodRepository.saveFood(food);
         }
-        return foodMatches.getFirst();
-    }
 
-    // TODO move to mapper
-    public LogEntry mapLogEntryDtoToLogEntry(final EntryDto entryDto) {
-        final var logEntry = new LogEntry();
-        logEntry.setId(null);
-        final var newDate = new Date(entryDto.getDay().getTime());
-        logEntry.setDay(newDate);
-        logEntry.setFoodId(entryDto.getFood().getId());
-        logEntry.setMeal(entryDto.getMeal().toString());
-        logEntry.setMultiplier(entryDto.getMultiplier());
-        if (entryDto.getPortion() != null) {
-            logEntry.setPortionId(entryDto.getPortion().getId());
+        final var entryDtos = export.getAllLogEntries();
+        for (final var entryDto : entryDtos) {
+            final var entry = entryMapper.map(entryDto, userId);
+            entry.setId(null); // force new entry
+            entryRepository.saveEntry(entry);
         }
-        return logEntry;
-    }
 
-    // TODO move to mapper
-    public Portion mapPortionDtoToPortion(final PortionDto portionDto) {
-        final var portion = new Portion();
-        portion.setId(null);
-        portion.setGrams(portionDto.getGrams());
-        portion.setDescription(portionDto.getDescription());
-        return portion;
-    }
+        final var settingDtos = export.getAllSettingDtos();
+        settingDtos.stream()
+                .map(s -> settingsMapper.map(s, userId))
+                .forEach(settingDomain -> {
+                    settingDomain.setId(null); // force add new entry
+                    settingsRepository.putSetting(settingDomain);
+                });
 
+        for (final var settingDto : settingDtos) {
+            final var setting = settingsMapper.map(settingDto, userId);
+            setting.setId(null);
+            settingsRepository.putSetting(setting);
+        }
+
+        final var allWeights = export.getAllWeights();
+        allWeights.stream()
+                .map(w -> weightMapper.map(w, userId))
+                .forEach(weightDomain -> {
+                    weightDomain.setId(null);// force add new entry
+                    weightRepository.saveWeight(weightDomain);
+                });
+
+        final var allActivities = export.getAllActivities();
+        allActivities.stream().map(a -> activityMapper.map(a, userId))
+                .forEach(
+                        activityDomain -> {
+                            activityDomain.setId(null); // force add new entry
+                            activityRepository.saveActivity(activityDomain);
+                        });
+    }
 }

@@ -180,9 +180,9 @@ public class MyModelMapper {
     }
 
     private void addLogEntryEntryDto(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(LogEntry.class, EntryDto.class)
+        modelMapper.createTypeMap(Entry.class, EntryDto.class)
                 .setPostConverter(mappingContext -> {
-                    Long foodId = mappingContext.getSource().getFoodId();
+                    Long foodId = mappingContext.getSource().getFood().getId();
                     Long userId = mappingContext.getSource().getUserId();
                     final var optionalFood = foodRepository.getFoodById(userId, foodId);
                     assert optionalFood.isPresent();
@@ -196,7 +196,7 @@ public class MyModelMapper {
                     }
                     mappingContext.getDestination().setFood(mappedFoodDto);
 
-                    Long selectedPortionId = mappingContext.getSource().getPortionId();
+                    Long selectedPortionId = mappingContext.getSource().getPortion().getId();
                     if (selectedPortionId != null) {
                         Optional<PortionDto> first = mappedFoodDto.getPortions().stream().filter(p -> p.getId().equals(selectedPortionId)).findFirst();
                         if (first.isPresent()) {
@@ -225,12 +225,12 @@ public class MyModelMapper {
     }
 
     private void addEntryDtoEntry(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(EntryDto.class, LogEntry.class)
+        modelMapper.createTypeMap(EntryDto.class, Entry.class)
                 .setPostConverter(mappingContext -> {
                     EntryDto dto = mappingContext.getSource();
                     mappingContext.getDestination().setId(dto.getId());
-                    mappingContext.getDestination().setFoodId(dto.getFood().getId());
-                    mappingContext.getDestination().setPortionId(dto.getPortion() != null ? dto.getPortion().getId() : null);
+                    mappingContext.getDestination().setFood(modelMapper.map(dto.getFood(), Food.class));
+                    mappingContext.getDestination().setPortion(modelMapper.map(dto.getPortion(), Portion.class));
                     mappingContext.getDestination().setMeal(dto.getMeal().toString());
                     mappingContext.getDestination().setMultiplier(dto.getMultiplier());
                     mappingContext.getDestination().setDay(modelMapper.map(dto.getDay(), Date.class));

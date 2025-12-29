@@ -14,6 +14,7 @@ import slt.mapper.SettingsMapper;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -33,6 +34,11 @@ public class SettingsService {
         final var userSettingsDto = settingsMapper.mapToUserSettingsDto(settings);
         currentWeight.ifPresent(value -> userSettingsDto.setCurrentWeight(value.getWeight()));
         return userSettingsDto;
+    }
+
+    public List<SettingDto> getAllUserSettings(final Long userId) {
+        final var settings = settingsRepository.getAllSettings(userId);
+        return settings.stream().map(settingsMapper::map).toList();
     }
 
     public String getSetting(final Long userId, final String name, final String date) {

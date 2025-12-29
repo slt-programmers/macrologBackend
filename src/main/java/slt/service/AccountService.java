@@ -9,7 +9,7 @@ import slt.database.*;
 public class AccountService {
 
     private ActivityRepository activityRepository;
-    private LogEntryRepository logEntryRepository;
+    private EntryRepository entryRepository;
     private DishRepository dishRepository;
     private MealplanRepository mealplanRepository;
     private SettingsRepository settingsRepository;
@@ -19,7 +19,7 @@ public class AccountService {
 
     public void deleteAccount(final Long userId) {
         activityRepository.deleteAllForUser(userId);
-        logEntryRepository.deleteAllForUser(userId);
+        entryRepository.deleteAllForUser(userId);
         dishRepository.deleteAllForUser(userId);
         mealplanRepository.deleteAllForUser(userId);
         foodRepository.deleteAllForUser(userId);

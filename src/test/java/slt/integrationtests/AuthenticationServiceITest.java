@@ -1,4 +1,4 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import slt.dto.*;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
-import slt.servicetests.utils.MyMockedMailService;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.MyMockedMailService;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -80,7 +80,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         var responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
-        setUserContextFromJWTResponseHeader(responseEntity);
+        setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -127,7 +127,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
-        setUserContextFromJWTResponseHeader(responseEntity);
+        setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -162,7 +162,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
-        setUserContextFromJWTResponseHeader(responseEntity);
+        setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -195,7 +195,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
-        setUserContextFromJWTResponseHeader(responseEntity);
+        setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
@@ -215,23 +215,23 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     void deleteFilledAccount() {
-        String userName = "filledUserToDelete";
-        String userEmail = "filledUserToDelete@test.example";
-        String password = "password1";
+        final var userName = "filledUserToDelete";
+        final var userEmail = "filledUserToDelete@test.example";
+        final var password = "password1";
 
         // 1e: keer aanmaken succesvol:
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
+        final var responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
-        setUserContextFromJWTResponseHeader(responseEntity);
+        setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // add food zonder portion
-        FoodDto foodRequestZonderPortions = FoodDto.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
-        FoodDto foodZonderPortion = createFood(foodRequestZonderPortions);
+        final var foodDtoZonderPortions = FoodDto.builder().name("exportFoodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        final var foodZonderPortion = createFood(foodDtoZonderPortions);
 
         // add food met portion
-        FoodDto foodRequestMetPortions = FoodDto.builder()
+        final var foodDtoMetPortions = FoodDto.builder()
                 .name("exportFoodWithPortion")
                 .carbs(1.0)
                 .fat(2.0)
@@ -248,16 +248,18 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
                         )
                 )
                 .build();
-        FoodDto savedFood = createFood(foodRequestMetPortions);
-        PortionDto portion1 = savedFood.getPortions().stream().filter(p ->
-                p.getDescription().equals("portion1")).findFirst().get();
+        final var savedFood = createFood(foodDtoMetPortions);
+        final var optionalPortion1 = savedFood.getPortions().stream().filter(p ->
+                p.getDescription().equals("portion1")).findFirst();
+        Assertions.assertTrue(optionalPortion1.isPresent());
+        final var portion1 = optionalPortion1.get();
 
         // add log entry without portion
-        String day = "2001-01-02";
-        createLogEntry(day, foodZonderPortion, null, 3.0);
+        final var day = "2001-01-02";
+        createEntry(day, foodZonderPortion, null, 3.0);
 
         // add log entry with portion
-        createLogEntry(day, savedFood, portion1, 3.0);
+        createEntry(day, savedFood, portion1, 3.0);
 
         // add activity
         List<ActivityDto> newActivities = Arrays.asList(

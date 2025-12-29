@@ -26,6 +26,7 @@ public class Mealplan {
     private Long userId;
 
     @OneToMany(mappedBy = "mealplan", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Builder.Default
     private List<Mealtime> mealtimes = new ArrayList<>();
 
 }

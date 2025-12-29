@@ -1,4 +1,4 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -8,13 +8,14 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.HttpStatus;
 import slt.dto.FoodDto;
 import slt.dto.PortionDto;
+import slt.exceptions.NotFoundException;
+import slt.exceptions.ValidationException;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,12 +27,12 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
 
     @BeforeAll
     public synchronized void setUserContext() {
-        log.debug("Starting with userId" + this.userId);
+        log.debug("Starting with userId [{}]", this.userId);
         if (this.userId == null) {
-            log.debug("Creating test user for test " + this.getClass().getName());
+            log.debug("Creating test user for test [{}]", this.getClass().getName());
             this.userId = createUser(this.getClass().getName());
         }
-        log.debug("Ending with userId" + this.userId);
+        log.debug("Ending with userId [{}]", this.userId);
         final var userInfo = new UserInfo();
         userInfo.setUserId(this.userId);
         ThreadLocalHolder.getThreadLocal().set(userInfo);
@@ -39,16 +40,18 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testFoodNoPortion() {
-        FoodDto foodRequestZonderPortions = FoodDto.builder().name("foodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
-        final var responseEntity = foodController.postFood(foodRequestZonderPortions);
+        final var foodDtoZonderPortions = FoodDto.builder().name("foodNoPortion").carbs(1.0).fat(2.0).protein(3.0).build();
+        final var responseEntity = foodController.postFood(foodDtoZonderPortions);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         final var allFoodEntity = foodController.getAllFood();
         assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        List<FoodDto> foodDtos = allFoodEntity.getBody();
+        final var foodDtos = allFoodEntity.getBody();
         Assertions.assertNotNull(foodDtos);
-        FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodNoPortion")).findFirst().get();
+        final var optionalFood = foodDtos.stream().filter(f -> f.getName().equals("foodNoPortion")).findFirst();
+        Assertions.assertTrue(optionalFood.isPresent());
+        final var savedFood = optionalFood.get();
 
         assertThat(savedFood.getName()).isEqualTo("foodNoPortion");
         assertThat(savedFood.getCarbs()).isEqualTo(1.0);
@@ -59,18 +62,16 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testFoodAlreadyExists() {
-        FoodDto foodOriginal = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
-        var responseEntity = foodController.postFood(foodOriginal);
+        final var foodDto = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
+        var responseEntity = foodController.postFood(foodDto);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        FoodDto foodDuplicate = FoodDto.builder().name("foodDuplicate").carbs(1.0).fat(2.0).protein(3.0).build();
-        responseEntity = foodController.postFood(foodDuplicate);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        Assertions.assertThrows(ValidationException.class, () -> foodController.postFood(foodDto));
     }
 
     @Test
     public void testFoodMultiplePortion() {
-        FoodDto foodRequestMetPortions = FoodDto.builder()
+        final var foodDtoMetPortions = FoodDto.builder()
                 .name("foodMultiplePortion")
                 .carbs(1.0)
                 .fat(2.0)
@@ -87,16 +88,17 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
                         )
                 )
                 .build();
-        final var responseEntity = foodController.postFood(foodRequestMetPortions);
+        final var responseEntity = foodController.postFood(foodDtoMetPortions);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         final var allFoodEntity = foodController.getAllFood();
         assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        List<FoodDto> foodDtos =  allFoodEntity.getBody();
-
+        final var foodDtos = allFoodEntity.getBody();
         Assertions.assertNotNull(foodDtos);
-        FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodMultiplePortion")).findFirst().get();
+        final var optionalFood = foodDtos.stream().filter(f -> f.getName().equals("foodMultiplePortion")).findFirst();
+        Assertions.assertTrue(optionalFood.isPresent());
+        final var savedFood = optionalFood.get();
 
         assertThat(savedFood.getName()).isEqualTo("foodMultiplePortion");
         assertThat(savedFood.getCarbs()).isEqualTo(1.0);
@@ -104,12 +106,16 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
         assertThat(savedFood.getProtein()).isEqualTo(3.0);
         assertThat(savedFood.getPortions()).hasSize(2);
 
-        PortionDto portion1 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion1")).findFirst().get();
+        final var optionalPortion1 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion1")).findFirst();
+        Assertions.assertTrue(optionalPortion1.isPresent());
+        final var portion1 = optionalPortion1.get();
         assertThat(portion1.getGrams()).isEqualTo(200.0);
         assertThat(portion1.getId()).isNotNull();
         assertThat(portion1.getMacros()).isNotNull();
 
-        PortionDto portion2 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion2")).findFirst().get();
+        final var optionalPortion2 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion2")).findFirst();
+        Assertions.assertTrue(optionalPortion2.isPresent());
+        final var portion2 = optionalPortion2.get();
         assertThat(portion2.getGrams()).isEqualTo(300.0);
         assertThat(portion2.getId()).isNotNull();
         assertThat(portion2.getMacros()).isNotNull();
@@ -117,7 +123,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testFoodGetById() {
-        FoodDto foodRequestZonderPortions = FoodDto.builder()
+        final var foodDtoZonderPortions = FoodDto.builder()
                 .name("foodById")
                 .carbs(1.0)
                 .fat(2.0)
@@ -134,19 +140,17 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
                         )
                 )
                 .build();
-        final var responseEntity = foodController.postFood(foodRequestZonderPortions);
+        final var responseEntity = foodController.postFood(foodDtoZonderPortions);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         final var allFoodEntity = foodController.getAllFood();
         assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        List<FoodDto> foodDtos = allFoodEntity.getBody();
-
+        final var foodDtos = allFoodEntity.getBody();
         Assertions.assertNotNull(foodDtos);
-        FoodDto savedFood = foodDtos.stream().filter(f -> f.getName().equals("foodById")).findFirst().get();
-
-        final var foodByIDEntityNotFound = foodController.getFoodById(666L);
-        assertThat(foodByIDEntityNotFound.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        var optionalFood = foodDtos.stream().filter(f -> f.getName().equals("foodById")).findFirst();
+        Assertions.assertTrue(optionalFood.isPresent());
+        var savedFood = optionalFood.get();
 
         final var foodByIDEntity = foodController.getFoodById(savedFood.getId());
         savedFood = foodByIDEntity.getBody();
@@ -158,16 +162,21 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
         assertThat(savedFood.getProtein()).isEqualTo(3.0);
         assertThat(savedFood.getPortions()).hasSize(2);
 
-        PortionDto portion1 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion3")).findFirst().get();
+        final var optionalPortion1 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion3")).findFirst();
+        Assertions.assertTrue(optionalPortion1.isPresent());
+        final var portion1 = optionalPortion1.get();
         assertThat(portion1.getGrams()).isEqualTo(200.0);
         assertThat(portion1.getId()).isNotNull();
         assertThat(portion1.getMacros()).isNotNull();
 
-        PortionDto portion2 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion4")).findFirst().get();
+        final var optionalPortion2 = savedFood.getPortions().stream().filter(p -> p.getDescription().equals("portion4")).findFirst();
+        Assertions.assertTrue(optionalPortion2.isPresent());
+        final var portion2 = optionalPortion2.get();
         assertThat(portion2.getGrams()).isEqualTo(300.0);
         assertThat(portion2.getId()).isNotNull();
         assertThat(portion2.getMacros()).isNotNull();
 
+        Assertions.assertThrows(NotFoundException.class, () -> foodController.getFoodById(666L));
     }
 
     @Test

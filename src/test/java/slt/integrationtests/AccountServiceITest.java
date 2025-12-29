@@ -1,4 +1,4 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -11,7 +11,7 @@ import slt.dto.IngredientDto;
 import slt.dto.PortionDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.util.List;
 

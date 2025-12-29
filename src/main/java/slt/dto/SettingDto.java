@@ -14,6 +14,7 @@ public class SettingDto {
     private Integer id;
     private String name;
     private String value;
+    @Builder.Default
     private LocalDate day = LocalDate.now();
 
 }

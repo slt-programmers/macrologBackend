@@ -1,6 +1,7 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -8,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import slt.dto.WeightDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -71,8 +72,10 @@ public class WeightControllerITest extends AbstractApplicationIntegrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         weightDtos = getWeightDtos();
         assertThat(weightDtos).hasSize(2);
-        final var weightDto = weightDtos.stream().filter(w ->
-                w.getDay().equals(LocalDate.parse("1980-01-02"))).findFirst().get();
+        final var optionalWeightDto = weightDtos.stream().filter(w ->
+                w.getDay().equals(LocalDate.parse("1980-01-02"))).findFirst();
+        Assertions.assertTrue(optionalWeightDto.isPresent());
+        final var weightDto = optionalWeightDto.get();
         assertThat(weightDto.getWeight()).isEqualTo(13.0);
         assertThat(weightDto.getRemark()).isEqualTo("first remark");
 
@@ -89,40 +92,47 @@ public class WeightControllerITest extends AbstractApplicationIntegrationTest {
         // weight has been updated:
         weightDtos = getWeightDtos();
         assertThat(weightDtos).hasSize(2);
-        final var weightDto2 = weightDtos.stream().filter(w -> w.getDay().equals(LocalDate.parse("1980-01-02")))
-                .findFirst().get();
+        final var optionalWeightDto2 = weightDtos.stream().filter(w -> w.getDay().equals(LocalDate.parse("1980-01-02")))
+                .findFirst();
+        Assertions.assertTrue(optionalWeightDto2.isPresent());
+        final var weightDto2 = optionalWeightDto2.get();
         assertThat(weightDto2.getWeight()).isEqualTo(14.0);
         assertThat(weightDto2.getRemark()).isEqualTo("second remark");
 
         // update weight and day on existing entity
-        WeightDto weight5 = WeightDto.builder()
+        var weight5 = WeightDto.builder()
                 .id(weightDto.getId())
                 .weight(15.0)
                 .day(LocalDate.parse("1980-01-03"))
                 .build();
         responseEntity = weightController.postWeight(weight5);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
         // weight has been updated:
         weightDtos = getWeightDtos();
         assertThat(weightDtos).hasSize(2);
-        assertThat(weightDtos.stream().filter(w ->
-                w.getDay().equals(LocalDate.parse("1980-01-03"))).findFirst().get().getWeight())
-                .isEqualTo(15.0);
+        final var optionalWeight5 = weightDtos.stream().filter(w ->
+                w.getDay().equals(LocalDate.parse("1980-01-03"))).findFirst();
+        Assertions.assertTrue(optionalWeight5.isPresent());
+        weight5 = optionalWeight5.get();
+        assertThat(weight5.getWeight()).isEqualTo(15.0);
 
         // update weight and day on existing entity with existing day
-        WeightDto weight6 = WeightDto.builder()
+        final var weight6 = WeightDto.builder()
                 .id(weightDto.getId())
                 .weight(16.0)
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
         responseEntity = weightController.postWeight(weight6);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
         // weight has been updated:
         weightDtos = getWeightDtos();
         assertThat(weightDtos).hasSize(2);
-        assertThat(weightDtos.stream().filter(w ->
-                w.getDay().equals(LocalDate.parse("1980-01-01"))).findFirst().get().getWeight())
-                .isEqualTo(16.0);
+        final var optionalWeight6 = weightDtos.stream().filter(w ->
+                w.getDay().equals(LocalDate.parse("1980-01-01"))).findFirst();
+        Assertions.assertTrue(optionalWeight6.isPresent());
+        assertThat(optionalWeight6.get().getWeight()).isEqualTo(16.0);
 
         // Delete it
         final var deleteResponseEntity = weightController.deleteWeightEntry(weightDto.getId());

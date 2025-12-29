@@ -1,4 +1,4 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import slt.dto.ActivityDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.sql.Date;
 import java.time.LocalDate;

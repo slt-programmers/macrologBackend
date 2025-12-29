@@ -20,8 +20,10 @@ public class DishDto {
 
     private String name;
 
+    @Builder.Default
     private List<IngredientDto> ingredients = new ArrayList<>();
 
+    @Builder.Default
     private MacroDto macrosCalculated = new MacroDto(0.0, 0.0, 0.0, 0);
 
 }

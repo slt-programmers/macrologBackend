@@ -36,6 +36,11 @@ public class ActivityService {
         return activityMapper.map(allActivities);
     }
 
+    public List<ActivityDto> getAllActivities(final Long userId) {
+        final var activities = activityRepository.getAllActivities(userId);
+        return activityMapper.map(activities);
+    }
+
     public void deleteActivity(final Long userId, final Long activityId) {
         final var optionalActivity = activityRepository.findById(activityId);
         if (optionalActivity.isPresent()) {

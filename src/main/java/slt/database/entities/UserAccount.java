@@ -37,6 +37,7 @@ public class UserAccount {
             fetch = FetchType.LAZY
     )
     @JoinColumn(name = "user_id")
+    @Builder.Default
     private List<Setting> settings = new ArrayList<>();
 
 }

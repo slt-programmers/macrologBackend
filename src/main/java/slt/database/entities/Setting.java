@@ -4,7 +4,6 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.sql.Date;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -27,7 +26,7 @@ public class Setting {
     private String value;
 
     @Column(name = "date")
-    private Date day = Date.valueOf(LocalDate.now());
+    private Date day;
 
     @Column(name = "user_id")
     private Long userId;

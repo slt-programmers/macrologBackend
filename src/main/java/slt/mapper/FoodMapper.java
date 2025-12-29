@@ -21,7 +21,7 @@ public interface FoodMapper {
 
     List<FoodDto> map(final List<Food> foodList);
 
-    Food map(final FoodDto foodDto);
+    Food map(final FoodDto foodDto, final Long userId);
 
     @AfterMapping
     default void addMacrosToPortions(final @MappingTarget FoodDto food) {

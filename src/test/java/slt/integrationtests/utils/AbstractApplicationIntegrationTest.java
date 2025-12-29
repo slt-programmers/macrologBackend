@@ -1,4 +1,4 @@
-package slt.servicetests.utils;
+package slt.integrationtests.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -9,8 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
@@ -57,7 +57,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected ActivityController activityController;
 
     @Autowired
-    protected EntriesService entriesService;
+    protected EntryController entryController;
 
     @Autowired
     protected FoodController foodController;
@@ -75,7 +75,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected ImportController importController;
 
     @Autowired
-    protected ExportService exportService;
+    protected ExportController exportController;
 
     @Autowired
     protected DishService dishService;
@@ -96,55 +96,58 @@ public abstract class AbstractApplicationIntegrationTest {
     protected IngredientRepository ingredientRepository;
 
     protected Long createUser(final String userEmail) {
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
+        final var responseEntity = authenticationService.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
-        return getUserIdFromResponseHeaderJWT(responseEntity);
+        final var headers = responseEntity.getHeaders();
+        return getUserIdFromResponseHeaderJWT(headers);
     }
 
-    protected Long getUserIdFromResponseHeaderJWT(ResponseEntity<UserAccountDto> responseEntity) {
-        final var jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).getFirst();
+    protected Long getUserIdFromResponseHeaderJWT(final HttpHeaders headers) {
+        final var jwtToken = Objects.requireNonNull(headers.get("token")).getFirst();
         final var claims = getClaimsJws(jwtToken);
         final var userId = claims.getBody().get("userId");
-        log.debug("User id = " + userId);
-        Assert.notNull(userId, "Geen UserID te herleiden");
+        log.debug("UserId  [{}]", userId);
+        Assert.notNull(userId, "Geen UserId te herleiden");
         return Long.valueOf(userId.toString());
     }
 
-    protected void setUserContextFromJWTResponseHeader(ResponseEntity<UserAccountDto> responseEntity) {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(getUserIdFromResponseHeaderJWT(responseEntity));
+    protected void setUserContextFromJWTResponseHeader(final HttpHeaders headers) {
+        final var userInfo = new UserInfo();
+        userInfo.setUserId(getUserIdFromResponseHeaderJWT(headers));
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
-    protected void deleteAccount(String password) {
-        ResponseEntity<Void> responseEntity = authenticationService.deleteAccount(password);
+    protected void deleteAccount(final String password) {
+        final var responseEntity = authenticationService.deleteAccount(password);
         Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
-    protected Jws<Claims> getClaimsJws(String jwtToken) {
+    protected Jws<Claims> getClaimsJws(final String jwtToken) {
         return Jwts.parser()
                 .setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8))
                 .parseClaimsJws(jwtToken);
     }
 
-    protected boolean isEqualDate(Date date, LocalDate localDate) {
+    protected boolean isEqualDate(final Date date, final LocalDate localDate) {
         return Instant.ofEpochMilli(date.getTime())
                 .atZone(ZoneId.systemDefault()).toLocalDate().equals(localDate);
     }
 
-    protected FoodDto createFood(FoodDto foodRequestZonderPortions) {
-        ResponseEntity<FoodDto> responseEntity = foodController.postFood(foodRequestZonderPortions);
+    protected FoodDto createFood(final FoodDto foodDtoZonderPortions) {
+        final var responseEntity = foodController.postFood(foodDtoZonderPortions);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        ResponseEntity<List<FoodDto>> allFoodEntity = foodController.getAllFood();
+        final var allFoodEntity = foodController.getAllFood();
         assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        List<FoodDto> foodDtos = allFoodEntity.getBody();
+        final var foodDtos = allFoodEntity.getBody();
         Assertions.assertNotNull(foodDtos);
-        return foodDtos.stream().filter(f -> f.getName().equals(foodRequestZonderPortions.getName())).findFirst().get();
+        final var optionalFoodDto = foodDtos.stream().filter(f -> f.getName().equals(foodDtoZonderPortions.getName())).findFirst();
+        Assertions.assertTrue(optionalFoodDto.isPresent());
+        return optionalFoodDto.get();
     }
 
-    protected void createLogEntry(String day, FoodDto savedFood, PortionDto portion, double multiplier) {
-        List<EntryDto> newLogEntries = List.of(
+    protected void createEntry(final String day, final FoodDto savedFood, final PortionDto portion, double multiplier) {
+        final var newEntries = List.of(
                 EntryDto.builder()
                         .day(java.sql.Date.valueOf(LocalDate.parse(day)))
                         .meal(Meal.valueOf("BREAKFAST"))
@@ -153,28 +156,28 @@ public abstract class AbstractApplicationIntegrationTest {
                         .multiplier(multiplier)
                         .build()
         );
-        ResponseEntity<List<EntryDto>> responseEntity = entriesService.postEntries(day, "BREAKFAST", newLogEntries);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK); // why not CREATED?
+        final var responseEntity = entryController.postEntries(day, "BREAKFAST", newEntries);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertNotNull(responseEntity.getBody());
-        getMatch(responseEntity.getBody(), savedFood, portion, multiplier);
+        checkForSingleMatch(responseEntity.getBody(), savedFood, portion, multiplier);
     }
 
-    private void getMatch(List<EntryDto> all, FoodDto foodDto, PortionDto portionDto, double multiplier) {
-        List<EntryDto> matches = all.stream()
+    private void checkForSingleMatch(final List<EntryDto> all, final FoodDto foodDto, final PortionDto portionDto, double multiplier) {
+        final var matches = all.stream()
                 .filter(entryDto -> entryDto.getMultiplier().equals(multiplier) &&
                         (portionDto == null || entryDto.getPortion().getId().equals(portionDto.getId())) &&
                         entryDto.getFood().getId().equals(foodDto.getId())
                 )
                 .collect(Collectors.toList());
         assertThat(matches).hasSize(1);
-        matches.getFirst();
     }
 
     protected void saveSetting(final String name, final String value) {
-        SettingDto settingDto = SettingDto.builder().name(name).value(value).build();
-        ResponseEntity<Void> responseEntity = settingsController.putSetting(settingDto);
+        final var settingDto = SettingDto.builder().name(name).value(value).build();
+        final var responseEntity = settingsController.putSetting(settingDto);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+
     protected void saveSetting(final String name, final String value, final LocalDate day) {
         final var settingDto = SettingDto.builder().name(name).value(value).day(day).build();
         final var responseEntity = settingsController.putSetting(settingDto);

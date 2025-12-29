@@ -1,4 +1,4 @@
-package slt.servicetests;
+package slt.integrationtests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,7 +13,7 @@ import slt.dto.WeightDto;
 import slt.exceptions.InvalidDateException;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
-import slt.servicetests.utils.AbstractApplicationIntegrationTest;
+import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

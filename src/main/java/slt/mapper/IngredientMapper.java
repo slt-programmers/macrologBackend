@@ -13,11 +13,11 @@ public interface IngredientMapper {
 
     @Mapping(target = "dish", ignore = true)
     @Mapping(target = "mealtime", ignore = true)
-    @Mapping(source = "portion.id", target = "portion", qualifiedByName = "portion")
+    @Mapping(source = "portion.id", target = "portion", qualifiedByName = "portionNullable")
     Ingredient map(final IngredientDto dto);
 
-    @Named("portion")
-    default Portion portionOrNull(final Long portionId) {
+    @Named("portionNullable")
+    default Portion portionNullable(final Long portionId) {
         if (portionId == null) return null;
         return Portion.builder().id(portionId).build();
     }

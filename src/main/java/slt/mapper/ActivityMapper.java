@@ -1,6 +1,7 @@
 package slt.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValueMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import slt.database.entities.Activity;
@@ -17,5 +18,6 @@ public interface ActivityMapper {
 
     List<ActivityDto> map(final List<Activity> activities);
 
+    @Mapping(target = "status", ignore = true)
     Activity map(final ActivityDto activityDto, final Long userId);
 }

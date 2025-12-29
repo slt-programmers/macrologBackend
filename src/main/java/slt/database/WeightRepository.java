@@ -34,8 +34,8 @@ public class WeightRepository {
     }
 
     @Transactional
-    public void deleteWeightByIdAndUserId(final Long entry, final Long userId) {
-        weightCrudRepository.deleteByIdAndUserId(entry, userId);
+    public void deleteWeightByIdAndUserId(final Long weightId, final Long userId) {
+        weightCrudRepository.deleteByIdAndUserId(weightId, userId);
     }
 
     @Transactional
@@ -43,11 +43,11 @@ public class WeightRepository {
         weightCrudRepository.deleteByUserId(userId);
     }
 
-    public List<Weight> getWeightEntryForDay(final Long userId, final Date day) {
+    public List<Weight> getWeightForDay(final Long userId, final Date day) {
         return weightCrudRepository.findByUserIdAndDay(userId, day);
     }
 
-    public List<Weight> getAllWeightEntries(final Long userId) {
+    public List<Weight> getAllWeights(final Long userId) {
         return weightCrudRepository.findByUserIdOrderByDayDesc(userId);
     }
 

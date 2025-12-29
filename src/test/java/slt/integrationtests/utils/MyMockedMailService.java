@@ -1,4 +1,4 @@
-package slt.servicetests.utils;
+package slt.integrationtests.utils;
 
 import slt.config.GoogleConfig;
 import slt.connectivity.google.GoogleClient;
@@ -12,8 +12,8 @@ import java.util.List;
 
 public class MyMockedMailService extends GoogleMailService {
 
-    private HashMap<String,String> resetPasswords = new HashMap<>();
-    private List<String> confirmationMailsSend = new ArrayList<>();
+    private final HashMap<String,String> resetPasswords = new HashMap<>();
+    private final List<String> confirmationMailsSend = new ArrayList<>();
 
     public MyMockedMailService(SettingsRepository settingsRepository,
                                GoogleConfig googleConfig,

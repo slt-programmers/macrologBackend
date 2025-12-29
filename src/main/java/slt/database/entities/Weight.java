@@ -5,7 +5,6 @@ import lombok.*;
 import jakarta.persistence.*;
 
 import java.sql.Date;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -21,10 +20,10 @@ public class Weight {
     private Long id;
 
     @Column(name = "weight")
-    private Double weight = 0.0;
+    private Double weight;
 
     @Column(name = "day")
-    private Date day = Date.valueOf(LocalDate.now());
+    private Date day;
 
     @Column(length = 65535, columnDefinition = "TEXT")
     private String remark;

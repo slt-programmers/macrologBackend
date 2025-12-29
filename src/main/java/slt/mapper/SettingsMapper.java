@@ -2,12 +2,16 @@ package slt.mapper;
 
 import org.apache.commons.lang.StringUtils;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import slt.database.entities.Setting;
 import slt.dto.SettingDto;
 import slt.dto.UserSettingsDto;
 import slt.util.LocalDateParser;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,7 +20,16 @@ public interface SettingsMapper {
 
     SettingsMapper INSTANCE = Mappers.getMapper(SettingsMapper.class);
 
+    @Mapping(source = "settingDto.day", target = "day", qualifiedByName = "dayDefault")
     Setting map(final SettingDto settingDto, final Long userId);
+
+    @Named("dayDefault")
+    default Date dayDefault(final LocalDate localDate) {
+        if (localDate == null) return Date.valueOf(LocalDate.now());
+        return Date.valueOf(localDate);
+    }
+
+    SettingDto map(final Setting setting);
 
     default UserSettingsDto mapToUserSettingsDto(final List<Setting> settings) {
         final var dto = new UserSettingsDto();
