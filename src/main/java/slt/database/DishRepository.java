@@ -27,8 +27,7 @@ public class DishRepository {
     @Autowired
     DishCrudRepository dishCrudRepository;
 
-    public Dish saveDish(final Long userId, final Dish dish) {
-        dish.setUserId(userId);
+    public Dish saveDish(final Dish dish) {
         return dishCrudRepository.save(dish);
     }
 

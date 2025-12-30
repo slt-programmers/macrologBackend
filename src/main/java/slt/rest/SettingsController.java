@@ -9,7 +9,6 @@ import slt.security.ThreadLocalHolder;
 import slt.service.SettingsService;
 import slt.util.DateUtils;
 
-
 @AllArgsConstructor
 @RestController
 @RequestMapping("/settings")

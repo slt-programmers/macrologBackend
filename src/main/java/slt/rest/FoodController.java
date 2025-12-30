@@ -26,7 +26,7 @@ public class FoodController {
     }
 
     @GetMapping(path = "{id}")
-    public ResponseEntity<FoodDto> getFoodById(@PathVariable("id") Long id) {
+    public ResponseEntity<FoodDto> getFoodById(@PathVariable("id") final Long id) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var food = foodService.getFoodById(userInfo.getUserId(), id);
         return ResponseEntity.ok(food);

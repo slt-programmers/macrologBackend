@@ -3,7 +3,6 @@ package slt.rest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.dto.ActivityDto;
@@ -22,7 +21,7 @@ public class ActivityController {
     private ActivityService activityService;
 
     @GetMapping(path = "/day/{date}")
-    public ResponseEntity<List<ActivityDto>> getActivitiesForDay(@PathVariable("date") String date,
+    public ResponseEntity<List<ActivityDto>> getActivitiesForDay(@PathVariable("date") final String date,
                                                                  @RequestParam(value = "forceSync", defaultValue = "false") boolean forceSync) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var localDate = LocalDateParser.parse(date);
@@ -31,7 +30,7 @@ public class ActivityController {
         return ResponseEntity.ok(allActivities);
     }
 
-    @PostMapping(path = "/day/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/day/{date}")
     public ResponseEntity<List<ActivityDto>> postActivities(@PathVariable("date") final String date, @RequestBody final List<ActivityDto> activities) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         final var localDate = LocalDateParser.parse(date);

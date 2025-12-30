@@ -51,28 +51,18 @@ public class AccountService {
 
     public void deleteAccount(final Long userId, final String password) {
         final var optionalAccount = userAccountRepository.getUserById(userId);
-        if (optionalAccount.isEmpty()) {
-            log.error("Account not found for userId [{}]", userId);
-            throw new NotFoundException("Useraccount not found.");
-        }
+        verifyNotEmpty(optionalAccount.isEmpty(), userId);
+        assert optionalAccount.isPresent();
         final var userAccount = optionalAccount.get();
-        if (!userAccount.getPassword().equals(password)) {
-            log.error("Could not delete account: password incorrect");
-            throw new UnauthorizedException("Could not delete account.");
-        }
+        verifyPasswordCorrect(!userAccount.getPassword().equals(password));
         deleteAllForUser(userId);
     }
 
     public void deleteAccountAsAdmin(final Long userId) {
         final var optionalAccount = userAccountRepository.getUserById(userId);
-        if (optionalAccount.isEmpty()) {
-            log.error("Account not found for userId [{}]", userId);
-            throw new NotFoundException("Useraccount not found.");
-        }
-        if (optionalAccount.get().isAdmin()) {
-            log.error("Cannot delete admin account.");
-            throw new ValidationException("Cannot delete admin account.");
-        }
+        verifyNotEmpty(optionalAccount.isEmpty(), userId);
+        assert optionalAccount.isPresent();
+        verifyNotAdmin(optionalAccount.get().isAdmin());
         deleteAllForUser(userId);
     }
 
@@ -104,14 +94,14 @@ public class AccountService {
             userAccountRepository.saveAccount(account);
             mailService.sendPasswordRetrievalMail(email, randomPassword, account);
         } else {
-            throw new NotFoundException("Useraccount not found.");
+            throw new NotFoundException("Account not found.");
         }
     }
 
     private UserAccount getAccountByUserId(final Long userId) {
         final var optionalUserAccount = userAccountRepository.getUserById(userId);
         if (optionalUserAccount.isEmpty()) {
-            throw new NotFoundException("Useraccount not found.");
+            throw new NotFoundException("Account not found.");
         }
         return optionalUserAccount.get();
     }
@@ -123,7 +113,7 @@ public class AccountService {
         final var optionalAccountByEmail = userAccountRepository.getUserByEmail(usernameOrEmail);
         if (optionalAccountByEmail.isPresent()) return optionalAccountByEmail.get();
 
-        throw new NotFoundException("Useraccount not found.");
+        throw new NotFoundException("Account not found.");
     }
 
     private void verifyUsernameAndEmailUnused(final String username, final String email) {
@@ -135,6 +125,27 @@ public class AccountService {
             if (optionalAccountEmail.isPresent()) {
                 throw new UnauthorizedException("Username or email already in use.");
             }
+        }
+    }
+
+    private void verifyNotEmpty(final Boolean isEmpty, final Long userId) {
+        if (isEmpty) {
+            log.error("Could not delete account - account not found for userId [{}]", userId);
+            throw new NotFoundException("Could not delete account: account not found.");
+        }
+    }
+
+    private void verifyPasswordCorrect(final Boolean isIncorrect) {
+        if (isIncorrect) {
+            log.error("Could not delete account - password incorrect");
+            throw new UnauthorizedException("Could not delete account: password incorrect.");
+        }
+    }
+
+    private void verifyNotAdmin(final Boolean isAdmin) {
+        if (isAdmin) {
+            log.error("Could not delete account - admin account");
+            throw new ValidationException("Could not delete account: admin account.");
         }
     }
 

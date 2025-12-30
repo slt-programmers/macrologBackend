@@ -33,7 +33,7 @@ public class DishController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Void> deleteDish(@PathVariable("id") Long dishId) {
+    public ResponseEntity<Void> deleteDish(@PathVariable("id") final Long dishId) {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
         dishService.deleteDish(userInfo.getUserId(), dishId);
         return ResponseEntity.ok().build();

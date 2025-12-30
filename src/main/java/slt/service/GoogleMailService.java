@@ -39,9 +39,9 @@ public class GoogleMailService {
 
     private Boolean connected;
 
-    public GoogleMailService(SettingsRepository settingsRepository,
-                             GoogleConfig googleConfig,
-                             GoogleClient googleClient) {
+    public GoogleMailService(final SettingsRepository settingsRepository,
+                             final GoogleConfig googleConfig,
+                             final GoogleClient googleClient) {
         this.settingsRepository = settingsRepository;
         this.googleConfig = googleConfig;
         this.googleClient = googleClient;
@@ -62,8 +62,8 @@ public class GoogleMailService {
                 .build();
     }
 
-    public void registerWithCode(String clientAuthorizationCode) {
-        Setting setting = Setting.builder()
+    public void registerWithCode(final String clientAuthorizationCode) {
+        final var setting = Setting.builder()
                 .userId(ADMIN_USER_ID)
                 .name(GMAIL_CLIENT_AUTHORIZATION_CODE)
                 .value(clientAuthorizationCode)
@@ -71,11 +71,9 @@ public class GoogleMailService {
                 .build();
         settingsRepository.putSetting(setting);
 
-        Oath2Token token = googleClient.getAuthorizationToken(clientAuthorizationCode);
-
+        final var token = googleClient.getAuthorizationToken(clientAuthorizationCode);
         if (token != null) {
-
-            Long expiresIn = Long.valueOf(token.getExpires_in().toString());
+            final var expiresIn = Long.valueOf(token.getExpires_in().toString());
             final long expiresAt = getExpiresAtFromExpiresIn(expiresIn);
 
             saveSetting(GMAIL_ACCESS_TOKEN, token.getAccess_token());
@@ -83,14 +81,13 @@ public class GoogleMailService {
             saveSetting(GMAIL_EXPIRES_AT, String.valueOf(expiresAt));
             connected = true;
             log.info("Connected to Google!");
-
         } else {
             log.error("Unable to get token for gmail");
         }
     }
 
-    private long getExpiresAtFromExpiresIn(Long expiresIn) {
-        Instant instant = Instant.now();
+    private long getExpiresAtFromExpiresIn(final Long expiresIn) {
+        final var instant = Instant.now();
         return instant.plusSeconds(expiresIn).getEpochSecond();
     }
 
@@ -103,9 +100,9 @@ public class GoogleMailService {
     }
 
     private Oath2Token getOath2Token() {
-        final Setting accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
-        final Setting refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
-        final Setting expiresAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
+        final var accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
+        final var refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
+        final var expiresAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
 
         if (accessToken == null ||
                 refreshToken == null ||
@@ -114,7 +111,7 @@ public class GoogleMailService {
             return null;
         }
 
-        Oath2Token token = Oath2Token.builder()
+        var token = Oath2Token.builder()
                 .access_token(accessToken.getValue())
                 .refresh_token(refreshToken.getValue())
                 .expires_at(Long.valueOf(expiresAt.getValue()))
@@ -139,9 +136,9 @@ public class GoogleMailService {
     private void storeTokenSettings(final Oath2Token oath2Token) {
         log.debug("Storing token update");
 
-        final Setting accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
-        final Setting refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
-        final Setting expireAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
+        final var accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
+        final var refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
+        final var expireAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
 
         accessToken.setValue(oath2Token.getAccess_token());
         if (StringUtils.isNotEmpty(oath2Token.getRefresh_token())) {
@@ -158,15 +155,15 @@ public class GoogleMailService {
     }
 
 
-    private boolean isExpired(Oath2Token token) {
-        Long expiresAt = token.getExpires_at();
+    private boolean isExpired(final Oath2Token token) {
+        var expiresAt = token.getExpires_at();
         if (expiresAt == null) {
             expiresAt = getExpiresAtFromExpiresIn(token.getExpires_in());
             token.setExpires_at(expiresAt);
         }
-        Instant instant = Instant.ofEpochSecond(expiresAt);
-        LocalDateTime timeTokenExpires = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(10);
+        final var instant = Instant.ofEpochSecond(expiresAt);
+        final var timeTokenExpires = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+        final var currentTime = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(10);
         log.debug("Token valid until [{}]", timeTokenExpires);
         return timeTokenExpires.isBefore(currentTime);
     }
@@ -174,8 +171,8 @@ public class GoogleMailService {
     public void sendPasswordRetrievalMail(final String email, final String unhashedTemporaryPassword, final UserAccount account) {
         if (isConnnectedToGmail()) {
             try {
-                String subject = "Macrolog Credentials";
-                String body = "<h3>Hello " + account.getUserName() + ", </h3>" +
+                final var subject = "Macrolog Credentials";
+                final var body = "<h3>Hello " + account.getUserName() + ", </h3>" +
                         "<p>A request has been made to reset your password. </p>" +
                         "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
                         "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
@@ -195,8 +192,8 @@ public class GoogleMailService {
     public void sendConfirmationMail(final String email, final UserAccount account) {
         if (isConnnectedToGmail()) {
             try {
-                String subject = "Welcome to Macrolog!";
-                String body = "<p>Hello " + account.getUserName() + ", </p>" +
+                final var subject = "Welcome to Macrolog!";
+                final var body = "<p>Hello " + account.getUserName() + ", </p>" +
                         "<p>Thank you for using Macrolog!</p>" +
                         "<p>You are now ready to use both the app and the <a href=\"https://macrolog.herokuapp.com/\"> website</a>. " +
                         "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
@@ -224,8 +221,8 @@ public class GoogleMailService {
     public void sendTestMail(final String email) {
         if (isConnnectedToGmail()) {
             try {
-                String subject = "Test mail from Macrolog!";
-                String body = "<p>Hello,</p>" +
+                final var subject = "Test mail from Macrolog!";
+                final var body = "<p>Hello,</p>" +
                         "<p>This is a testmail for Macrolog!</p>" +
                         "<p>And it works! Yay! </p>" +
                         "<p>All the best,</p>" +

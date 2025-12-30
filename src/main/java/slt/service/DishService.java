@@ -28,7 +28,7 @@ public class DishService {
         final var optionalDishWithSameName = dishRepository.findByName(userId, dishDto.getName());
         validateUniqueDishName(optionalDishWithSameName.isPresent(), dishDto.getId() == null);
         final var dish = dishMapper.map(dishDto, userId);
-        final var savedDish = dishRepository.saveDish(userId, dish);
+        final var savedDish = dishRepository.saveDish(dish);
         return dishMapper.map(savedDish);
     }
 

@@ -17,12 +17,16 @@ public class ImportService {
     private SettingsRepository settingsRepository;
     private ActivityRepository activityRepository;
     private WeightRepository weightRepository;
+    private DishRepository dishRepository;
+    private MealplanRepository mealplanRepository;
 
     private final FoodMapper foodMapper = FoodMapper.INSTANCE;
     private final ActivityMapper activityMapper = ActivityMapper.INSTANCE;
     private final WeightMapper weightMapper = WeightMapper.INSTANCE;
     private final SettingsMapper settingsMapper = SettingsMapper.INSTANCE;
     private final EntryMapper entryMapper = EntryMapper.INSTANCE;
+    private final DishMapper dishMapper = DishMapper.INSTANCE;
+    private final MealplanMapper mealplanMapper = MealplanMapper.INSTANCE;
 
     public void importAllForUser(final Long userId, final Export export) {
         log.debug("Export = {}", export);
@@ -69,6 +73,22 @@ public class ImportService {
                         activityDomain -> {
                             activityDomain.setId(null); // force add new entry
                             activityRepository.saveActivity(activityDomain);
+                        });
+
+        final var allDishes = export.getAllDishes();
+        allDishes.stream().map(d -> dishMapper.map(d, userId))
+                .forEach(
+                        dishDomain -> {
+                            dishDomain.setId(null); // force add new entry
+                            dishRepository.saveDish(dishDomain);
+                        });
+
+        final var allMealplans = export.getAllMealplans();
+        allMealplans.stream().map(m -> mealplanMapper.map(m, userId))
+                .forEach(
+                        mealplanDomain -> {
+                            mealplanDomain.setId(null); // force add new entry
+                            mealplanRepository.saveMealplan(mealplanDomain);
                         });
     }
 }
