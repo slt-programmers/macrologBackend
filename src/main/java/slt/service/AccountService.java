@@ -11,7 +11,6 @@ import slt.exceptions.NotFoundException;
 import slt.exceptions.UnauthorizedException;
 import slt.exceptions.ValidationException;
 import slt.mapper.UserAccountMapper;
-import slt.security.ThreadLocalHolder;
 import slt.util.JWTBuilder;
 import slt.util.PasswordUtils;
 
@@ -57,19 +56,24 @@ public class AccountService {
             throw new NotFoundException("Useraccount not found.");
         }
         final var userAccount = optionalAccount.get();
-        if (!isAdmin() && !userAccount.getPassword().equals(password)) {
+        if (!userAccount.getPassword().equals(password)) {
             log.error("Could not delete account: password incorrect");
             throw new UnauthorizedException("Could not delete account.");
         }
+        deleteAllForUser(userId);
+    }
 
-        activityRepository.deleteAllForUser(userId);
-        entryRepository.deleteAllForUser(userId);
-        dishRepository.deleteAllForUser(userId);
-        mealplanRepository.deleteAllForUser(userId);
-        foodRepository.deleteAllForUser(userId);
-        weightRepository.deleteAllForUser(userId);
-        settingsRepository.deleteAllForUser(userId);
-        userAccountRepository.deleteUser(userId);
+    public void deleteAccountAsAdmin(final Long userId) {
+        final var optionalAccount = userAccountRepository.getUserById(userId);
+        if (optionalAccount.isEmpty()) {
+            log.error("Account not found for userId [{}]", userId);
+            throw new NotFoundException("Useraccount not found.");
+        }
+        if (optionalAccount.get().isAdmin()) {
+            log.error("Cannot delete admin account.");
+            throw new ValidationException("Cannot delete admin account.");
+        }
+        deleteAllForUser(userId);
     }
 
     public void changePassword(final Long userId, final String oldPassword, final String newPassword, final String confirmPassword) {
@@ -104,12 +108,6 @@ public class AccountService {
         }
     }
 
-    public boolean isAdmin() {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var optionalAdminUser =  userAccountRepository.getUserById(userInfo.getUserId());
-        return optionalAdminUser.isPresent() && optionalAdminUser.get().isAdmin();
-    }
-
     private UserAccount getAccountByUserId(final Long userId) {
         final var optionalUserAccount = userAccountRepository.getUserById(userId);
         if (optionalUserAccount.isEmpty()) {
@@ -140,7 +138,6 @@ public class AccountService {
         }
     }
 
-
     private void validatePassword(final String hashedPassword, final UserAccount account) {
         boolean activePasswordOK = account.getPassword().equals(hashedPassword);
         if (!activePasswordOK) {
@@ -160,6 +157,17 @@ public class AccountService {
                 throw new UnauthorizedException("Username or password incorrect.");
             }
         }
+    }
+
+    private void deleteAllForUser(final Long userId) {
+        activityRepository.deleteAllForUser(userId);
+        entryRepository.deleteAllForUser(userId);
+        dishRepository.deleteAllForUser(userId);
+        mealplanRepository.deleteAllForUser(userId);
+        foodRepository.deleteAllForUser(userId);
+        weightRepository.deleteAllForUser(userId);
+        settingsRepository.deleteAllForUser(userId);
+        userAccountRepository.deleteUser(userId);
     }
 
 }

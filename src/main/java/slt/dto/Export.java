@@ -18,5 +18,7 @@ public class Export {
     private List<SettingDto> allSettingDtos;
     private List<WeightDto> allWeights;
     private List<ActivityDto> allActivities;
+    private List<DishDto> allDishes;
+    private List<MealplanDto> allMealplans;
 
 }

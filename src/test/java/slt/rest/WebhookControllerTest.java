@@ -1,43 +1,33 @@
 package slt.rest;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import slt.config.StravaConfig;
 import slt.connectivity.strava.StravaActivityService;
 import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.connectivity.strava.dto.WebhookEvent;
-import slt.database.UserAccountRepository;
-import slt.database.entities.UserAccount;
-import slt.security.ThreadLocalHolder;
-import slt.security.UserInfo;
-
-import java.util.Optional;
+import slt.service.AdminService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
+import static slt.rest.WebhookController.NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE;
 
 class WebhookControllerTest {
 
-    @Mock
-    StravaConfig stravaConfig;
-
-    @Mock
-    StravaActivityService stravaActivityService;
-
-    @Mock
-    UserAccountRepository userAccountRepository;
-
-    @InjectMocks
-    WebhookController webhookController;
+    private StravaConfig stravaConfig;
+    private StravaActivityService stravaActivityService;
+    private AdminService adminService;
+    private WebhookController webhookController;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        stravaConfig = mock(StravaConfig.class);
+        stravaActivityService = mock(StravaActivityService.class);
+        adminService = mock(AdminService.class);
+        webhookController = new WebhookController(stravaActivityService, adminService, stravaConfig);
     }
 
     @Test
@@ -48,25 +38,19 @@ class WebhookControllerTest {
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
     }
 
-
     @Test
     void syncStravaCallbackWrongHubmode() {
         final var responseEntity = webhookController.syncStravaCallback("hubmode", "challenge", "token");
-
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
-
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
-
 
     @Test
     void syncStravaCallbackWrongVerifyToken() {
         when(stravaConfig.getVerifytoken()).thenReturn("token");
         final var responseEntity = webhookController.syncStravaCallback("subscribe", "challenge", "verkeerd");
-
         verify(stravaConfig).getVerifytoken();
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
-
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -74,92 +58,47 @@ class WebhookControllerTest {
     void syncStravaCallback() {
         when(stravaConfig.getVerifytoken()).thenReturn("token");
         final var responseEntity = webhookController.syncStravaCallback("subscribe", "challenge", "token");
-
         verify(stravaConfig).getVerifytoken();
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
-
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("{\"hub.challenge\":\"challenge\"}");
     }
 
-
     @Test
-    void startWebhookNotAdmin() {
-        ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).build()));
+    void startWebhook() {
+        final var subscriptionInformation = SubscriptionInformation.builder().id(1).callback_url("callback").build();
+        when(stravaActivityService.startWebhookSubcription()).thenReturn(subscriptionInformation);
         final var responseEntity = webhookController.startWebhook();
-
-        verify(userAccountRepository).getUserById(any());
-        verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
-
-    @Test
-    void startWebhookAdmin() {
-        ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).isAdmin(true).build()));
-        final var responseEntity = webhookController.startWebhook();
-
-        verify(userAccountRepository).getUserById(any());
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Assertions.assertNotNull(responseEntity.getBody());
+        final var response = responseEntity.getBody();
+        Assertions.assertEquals(1, response.getId());
+        Assertions.assertEquals("callback", response.getCallback_url());
         verify(stravaActivityService).startWebhookSubcription();
-        verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-    }
-
-    @Test
-    void endWebhookNotAdmin() {
-        ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).build()));
-        final var responseEntity = webhookController.endWebhook(2);
-
-        verify(userAccountRepository).getUserById(any());
-        verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        verify(adminService).verifyAdmin(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
     }
 
     @Test
     void endWebhookAdmin() {
-        ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).isAdmin(true).build()));
         final var responseEntity = webhookController.endWebhook(2);
-
-        verify(userAccountRepository).getUserById(any());
         verify(stravaActivityService).endWebhookSubscription(eq(2));
-        verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-
-    @Test
-    void getWebhookNotAdmin() {
-        ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).build()));
-        final var responseEntity = webhookController.getWebhook();
-
-        verify(userAccountRepository).getUserById(any());
-        verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        verifyNoMoreInteractions(stravaActivityService, stravaConfig);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        verify(adminService).verifyAdmin(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
     }
 
     @Test
     void getWebhookAdmin() {
-        ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).isAdmin(true).build()));
-        when(stravaActivityService.getWebhookSubscription()).thenReturn(SubscriptionInformation.builder().build());
+        final var subscriptionInformation = SubscriptionInformation.builder().id(1).callback_url("callback").build();
+        when(stravaActivityService.getWebhookSubscription()).thenReturn(subscriptionInformation);
         final var responseEntity = webhookController.getWebhook();
-
-        verify(userAccountRepository).getUserById(any());
         verify(stravaActivityService).getWebhookSubscription();
-        verifyNoMoreInteractions(stravaActivityService, stravaConfig, userAccountRepository);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isInstanceOf(SubscriptionInformation.class);
-    }
+        verifyNoMoreInteractions(stravaActivityService, stravaConfig);
+        verify(adminService).verifyAdmin(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        final var response = responseEntity.getBody();
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(1, response.getId());
+        Assertions.assertEquals("callback", response.getCallback_url());    }
 
 }

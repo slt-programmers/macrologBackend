@@ -50,8 +50,8 @@ public class AccountServiceITest extends AbstractApplicationIntegrationTest {
                         .multiplier(2D)
                         .food(allFoodForUser.getFirst()).build()))
                 .build();
-        dishService.storeDish(dishDto);
-        var allDishes = dishService.getAllDishes();
+        dishController.postDish(dishDto);
+        var allDishes = dishController.getAllDishes();
         var allDishesForUser = allDishes.getBody();
         Assertions.assertNotNull(allDishesForUser);
         Assertions.assertEquals(1, allFoodForUser.size());
@@ -71,7 +71,7 @@ public class AccountServiceITest extends AbstractApplicationIntegrationTest {
         newPortionsListSize++;
         Assertions.assertEquals(portionsListSize, newPortionsListSize);
 
-        allDishes = dishService.getAllDishes();
+        allDishes = dishController.getAllDishes();
         allDishesForUser = allDishes.getBody();
         Assertions.assertNotNull(allDishesForUser);
         Assertions.assertEquals(0, allFoodForUser.size());

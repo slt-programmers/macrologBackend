@@ -8,6 +8,7 @@ import slt.database.entities.Dish;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 interface DishCrudRepository extends CrudRepository<Dish, Long> {
 
@@ -17,7 +18,7 @@ interface DishCrudRepository extends CrudRepository<Dish, Long> {
 
     List<Dish> findByUserId(final Long userId);
 
-    Dish findByUserIdAndName(final Long userId, final String name);
+    Optional<Dish> findByUserIdAndName(final Long userId, final String name);
 }
 
 @Repository
@@ -31,7 +32,7 @@ public class DishRepository {
         return dishCrudRepository.save(dish);
     }
 
-    public Dish findByName(final Long userId, final String name) {
+    public Optional<Dish> findByName(final Long userId, final String name) {
         return dishCrudRepository.findByUserIdAndName(userId, name);
     }
 

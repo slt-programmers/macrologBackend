@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import slt.database.UserAccountRepository;
 import slt.dto.UserAccountDto;
-import slt.exceptions.NotFoundException;
 import slt.exceptions.UnauthorizedException;
-import slt.exceptions.ValidationException;
 import slt.mapper.UserAccountMapper;
+import slt.security.ThreadLocalHolder;
 
 import java.util.List;
 
@@ -23,9 +22,14 @@ public class AdminService {
     private final UserAccountMapper userAccountMapper = UserAccountMapper.INSTANCE;
 
     public void verifyAdmin() {
-        final var isAdmin = accountService.isAdmin();
-        if (!isAdmin) {
-            throw new UnauthorizedException("Not authorized as admin");
+        verifyAdmin("Not authorized as admin");
+    }
+
+    public void verifyAdmin(final String message) {
+        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
+        final var optionalAdminUser =  userAccountRepository.getUserById(userInfo.getUserId());
+        if (!(optionalAdminUser.isPresent() && optionalAdminUser.get().isAdmin())) {
+            throw new UnauthorizedException(message);
         }
     }
 
@@ -35,16 +39,6 @@ public class AdminService {
     }
 
     public void deleteUserAccount(final Long deleteUserId) {
-        final var toBeDeletedAccount = userAccountRepository.getUserById(deleteUserId);
-        if (toBeDeletedAccount.isEmpty()) {
-            log.error("Account not found for userId [{}]", deleteUserId);
-            throw new NotFoundException("Account not found.");
-        }
-        if (toBeDeletedAccount.get().isAdmin()) {
-            log.error("Cannot delete admin account.");
-            throw new ValidationException("Cannot delete admin account.");
-        }
-
-        accountService.deleteAccount(deleteUserId, null);
+        accountService.deleteAccountAsAdmin(deleteUserId);
     }
 }

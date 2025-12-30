@@ -1,12 +1,9 @@
 package slt.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +16,5 @@ public class UserAccountDto {
     private String userName;
     private String email;
     private boolean isAdmin;
-
 
 }

@@ -78,7 +78,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected ExportController exportController;
 
     @Autowired
-    protected DishService dishService;
+    protected DishController dishController;
 
     @Autowired
     protected AdminController adminController;

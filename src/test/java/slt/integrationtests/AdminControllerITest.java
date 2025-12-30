@@ -7,11 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.HttpStatus;
 import slt.database.entities.UserAccount;
+import slt.exceptions.UnauthorizedException;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,10 +30,8 @@ public class AdminControllerITest extends AbstractApplicationIntegrationTest {
     }
 
     @Test
-    public void testGetUsers() {
-        final var allUsers = adminController.getAllUsers();
-        assertThat(allUsers.getBody()).isNull();
-        assertThat(allUsers.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    public void testGetUsersUnauthorized() {
+        Assertions.assertThrows(UnauthorizedException.class, () -> adminController.getAllUsers());
     }
 
     @Test

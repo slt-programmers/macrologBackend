@@ -1,20 +1,18 @@
 package slt.integrationtests;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import slt.dto.*;
+import slt.exceptions.NotFoundException;
+import slt.exceptions.UnauthorizedException;
 import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 import slt.integrationtests.utils.MyMockedMailService;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,28 +22,26 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
 
     @Test
     void testSignupNewUser() {
-        String userName = "newuser";
-        String userEmail = "newuser@test.example";
+        final var userName = "newuser";
+        final var userEmail = "newuser@test.example";
 
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
+        final var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
-        String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).getFirst();
-        log.debug(jwtToken);
-        Jws<Claims> claimsJws = getClaimsJws(jwtToken);
-        Integer userId = (Integer) claimsJws.getBody().get("userId");
-        log.debug("User id = " + userId);
 
+        final var jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).getFirst();
+        final var claimsJws = getClaimsJws(jwtToken);
+        final var userId = claimsJws.getBody().get("userId");
+        log.debug("UserId [{}]", userId);
     }
 
     @Test
     void testSignupUserOrEmailAlreadyKnown() {
-
-        String userName = "userknown";
-        String userEmail = "emailknown@test.example";
+        final var userName = "userknown";
+        final var userEmail = "emailknown@test.example";
 
         // 1e: keer aanmaken succesvol:
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
         var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
@@ -53,165 +49,148 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
         Assertions.assertTrue(mailSend, "Mail has been send");
 
         // 2e: keer afgekeurd op username
-        registrationRequest = RegistrationRequest.builder().email("diffemail@email.com").password("testpassword").username(userName).build();
-        responseEntity = authenticationController.signUp(registrationRequest);
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        final var registrationRequest2 = RegistrationRequest.builder().email("diffemail@email.com").password("testpassword").username(userName).build();
+        Assertions.assertThrows(UnauthorizedException.class, () -> authenticationController.signUp(registrationRequest2));
         mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertFalse(mailSend, "Mail should not be send");
 
         // 3e: keer afgekeurd op email
-        registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
-        responseEntity = authenticationController.signUp(registrationRequest);
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        final var registrationRequest3 = RegistrationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
+        Assertions.assertThrows(UnauthorizedException.class, () -> authenticationController.signUp(registrationRequest3));
         mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertFalse(mailSend, "Mail should not be send");
-
     }
 
     @Test
     void testResetPassword() {
-
-        String userName = "userResetPassword";
-        String userEmail = "userResetPassword@test.example";
-        String password = "password1";
+        final var userName = "userResetPassword";
+        final var userEmail = "userResetPassword@test.example";
+        final var password = "password1";
 
         // 1e: keer aanmaken succesvol:
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
         var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
-        AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        final var authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
         responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // wachtwoord resetten
-        ResetPasswordRequest resetPasswordRequest = ResetPasswordRequest.builder().email(userEmail).build();
+        final var resetPasswordRequest = ResetPasswordRequest.builder().email(userEmail).build();
         final var responseEntity1 = authenticationController.resetPassword(resetPasswordRequest);
         Assertions.assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
 
         // inloggen met oude kan nog:
-        authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
+        final var authRequest2 = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        responseEntity = authenticationController.authenticateUser(authRequest2);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
-        String resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
+        final var resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
         Assertions.assertNotNull(resettedPassword, "Mail has been send");
 
-        log.debug("Reset to " + resettedPassword);
+        log.debug("Reset to {}", resettedPassword);
 
         // inloggen met nieuw wachtwoord
-        authRequest = AuthenticationRequest.builder().username(userEmail).password(resettedPassword).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
+        final var authRequest3 = AuthenticationRequest.builder().username(userEmail).password(resettedPassword).build();
+        responseEntity = authenticationController.authenticateUser(authRequest3);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // inloggen met oude kan niet meer :
-        authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-
+        final var authRequest4 = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        Assertions.assertThrows(UnauthorizedException.class, () -> authenticationController.authenticateUser(authRequest4));
     }
 
     @Test
     void testChangePassword() {
-
-        String userName = "userChangePassword";
-        String userEmail = "userChangePassword@test.example";
-        String password = "password1";
-        String newPassword = "password2";
+        final var userName = "userChangePassword";
+        final var userEmail = "userChangePassword@test.example";
+        final var password = "password1";
+        final var newPassword = "password2";
 
         // 1e: keer aanmaken succesvol:
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
+        final  var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
-        AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+        final var authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        final  var responseEntity2 = authenticationController.authenticateUser(authRequest);
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity2.getStatusCode());
 
         // wachtwoord veranderen
-        ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.builder().oldPassword(password).newPassword(newPassword).confirmPassword(newPassword).build();
-        ResponseEntity<Void> result = authenticationController.changePassword(changePasswordRequest);
+        final var changePasswordRequest = ChangePasswordRequest.builder().oldPassword(password).newPassword(newPassword).confirmPassword(newPassword).build();
+       final var result = authenticationController.changePassword(changePasswordRequest);
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
         // inloggen met oude kan niet meer:
-        authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        final  var authRequest2 = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        Assertions.assertThrows(UnauthorizedException.class, () -> authenticationController.authenticateUser(authRequest2));
 
         // inloggen met nieuwe kan wel:
-        authRequest = AuthenticationRequest.builder().username(userEmail).password(newPassword).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+        final  var authRequest3 = AuthenticationRequest.builder().username(userEmail).password(newPassword).build();
+        final var responseEntity1 = authenticationController.authenticateUser(authRequest3);
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity1.getStatusCode());
     }
 
     @Test
     void testDeleteAccount() {
-
-        String userName = "userDeleteAccount";
-        String userEmail = "userDeleteAccount@test.example";
-        String password = "password1";
+        final var userName = "userDeleteAccount";
+        final var userEmail = "userDeleteAccount@test.example";
+        final var password = "password1";
 
         // 1e: keer aanmaken succesvol:
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
+        final var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
-        AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+        final var authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        final  var responseEntity1 = authenticationController.authenticateUser(authRequest);
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity1.getStatusCode());
 
         // verwijder met verkeerd wachtwoord afkeuren
-        ResponseEntity<Void> result = authenticationController.deleteAccount("verkeerd");
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+        Assertions.assertThrows(UnauthorizedException.class, () -> authenticationController.deleteAccount("verkeerd"));
 
         // verwijder met correct wachtwoord uitvoeren
         deleteAccount(password);
 
         // inloggen kan niet meer:
-        authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-
+        final  var authRequest1 = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        Assertions.assertThrows(NotFoundException.class, () -> authenticationController.authenticateUser(authRequest1));
     }
 
     @Test
     void testDeleteAccountTwice() {
-
-        String userName = "userDeleteAccount";
-        String userEmail = "userDeleteAccount@test.example";
-        String password = "password1";
+        final var userName = "userDeleteAccount";
+        final var userEmail = "userDeleteAccount@test.example";
+        final var password = "password1";
 
         // 1e: keer aanmaken succesvol:
-        RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
+        final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
+        final var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
-        AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationController.authenticateUser(authRequest);
-        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
-
+        final var authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
+        final  var responseEntity1 = authenticationController.authenticateUser(authRequest);
+        Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity1.getStatusCode());
 
         // verwijder met correct wachtwoord uitvoeren
         deleteAccount(password);
 
         // verwijder nomaals
-        ResponseEntity<Void> result = authenticationController.deleteAccount(password);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
-
+        Assertions.assertThrows(NotFoundException.class, () -> authenticationController.deleteAccount(password));
     }
-
 
     @Test
     void deleteFilledAccount() {
@@ -262,7 +241,7 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
         createEntry(day, savedFood, portion1, 3.0);
 
         // add activity
-        List<ActivityDto> newActivities = Arrays.asList(
+        final  var newActivities = Arrays.asList(
                 ActivityDto.builder()
                         .day(Date.valueOf(LocalDate.parse("2003-01-01")))
                         .name("Running")
@@ -275,23 +254,21 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
                         .build()
 
         );
-        ResponseEntity<List<ActivityDto>> result = activityController.postActivities("2003-01-01", newActivities);
+        final var result = activityController.postActivities("2003-01-01", newActivities);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add weight
         // store weight:
-        WeightDto newWeight = WeightDto.builder()
+        final var newWeight = WeightDto.builder()
                 .weight(10.0)
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
-        ResponseEntity<WeightDto> result2 = weightController.postWeight(newWeight);
+        final var result2 = weightController.postWeight(newWeight);
         assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // add settings:
         saveSetting("export1", "export1value");
-
         deleteAccount(password);
-
     }
 
 }

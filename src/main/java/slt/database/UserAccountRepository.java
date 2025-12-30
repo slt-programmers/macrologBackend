@@ -10,7 +10,9 @@ import java.util.Optional;
 
 interface UserAccountCrudRepository extends CrudRepository<UserAccount, Long> {
 
-    Optional<UserAccount> findByUsername(final String username);
+    List<UserAccount> findAllByOrderByUserNameAsc();
+
+    Optional<UserAccount> findByUserName(final String username);
 
     Optional<UserAccount> findByEmailIgnoreCase(final String email);
 
@@ -36,11 +38,11 @@ public class UserAccountRepository {
     }
 
     public List<UserAccount> getAllUsers() {
-        return (List<UserAccount>) userAccountCrudRepository.findAll();
+        return userAccountCrudRepository.findAllByOrderByUserNameAsc();
     }
 
     public Optional<UserAccount> getUserByName(final String username) {
-        return userAccountCrudRepository.findByUsername(username);
+        return userAccountCrudRepository.findByUserName(username);
     }
 
     public Optional<UserAccount> getUserByEmail(final String email) {
