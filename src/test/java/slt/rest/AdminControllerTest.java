@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import slt.database.UserAccountRepository;
 import slt.database.entities.UserAccount;
 import slt.dto.ConnectivityRequestDto;
@@ -23,6 +22,7 @@ import slt.service.GoogleMailService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
-class AdminServiceTest {
+class AdminControllerTest {
 
     @Mock
     UserAccountRepository userRepo;
@@ -42,7 +42,7 @@ class AdminServiceTest {
     GoogleMailService googleMailService;
 
     @InjectMocks
-    AdminService adminService;
+    AdminController adminController;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +58,7 @@ class AdminServiceTest {
         UserAccount adminUser = new UserAccount();
         adminUser.setId(123L);
         adminUser.setAdmin(true);
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
         UserAccount someUser = new UserAccount();
         someUser.setId(234L);
         List<UserAccount> users = new ArrayList<>();
@@ -66,7 +66,7 @@ class AdminServiceTest {
         users.add(adminUser);
         when(userRepo.getAllUsers()).thenReturn(users);
 
-        final var response = adminService.getAllUsers();
+        final var response = adminController.getAllUsers();
         Assertions.assertNotNull(response.getBody());
         List<UserAccountDto> userDtos = response.getBody();
 
@@ -80,7 +80,7 @@ class AdminServiceTest {
     void getAllUsersUnauthorized() {
         UserAccount nonAdminUser = new UserAccount();
         nonAdminUser.setId(123L);
-        when(userRepo.getUserById(123L)).thenReturn(nonAdminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(nonAdminUser));
         UserAccount someUser = new UserAccount();
         someUser.setId(234L);
         List<UserAccount> users = new ArrayList<>();
@@ -88,7 +88,7 @@ class AdminServiceTest {
         users.add(nonAdminUser);
         when(userRepo.getAllUsers()).thenReturn(users);
 
-        final var response = adminService.getAllUsers();
+        final var response = adminController.getAllUsers();
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         verify(userRepo, times(0)).getAllUsers();
     }
@@ -101,12 +101,12 @@ class AdminServiceTest {
 
         final var toBeDeletedUser = new UserAccount();
         toBeDeletedUser.setId(234L);
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
-        when(userRepo.getUserById(234L)).thenReturn(toBeDeletedUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
+        when(userRepo.getUserById(234L)).thenReturn(Optional.of(toBeDeletedUser));
 
-        final var response = adminService.deleteAccount(234L);
+        final var response = adminController.deleteAccount(234L);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(accountService).deleteAccount(234L);
+        verify(accountService).deleteAccount(234L, null);
     }
 
     @Test
@@ -115,10 +115,10 @@ class AdminServiceTest {
         adminUser.setId(123L);
         adminUser.setAdmin(true);
 
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
-        when(userRepo.getUserById(234L)).thenReturn(null);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
+        when(userRepo.getUserById(234L)).thenReturn(Optional.empty());
 
-        final var response = adminService.deleteAccount(234L);
+        final var response = adminController.deleteAccount(234L);
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
     }
@@ -130,10 +130,10 @@ class AdminServiceTest {
         adminUser.setId(123L);
         adminUser.setAdmin(true);
 
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
 
-        final var response = adminService.deleteAccount(123L);
+        final var response = adminController.deleteAccount(123L);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
     }
@@ -146,10 +146,10 @@ class AdminServiceTest {
 
         UserAccount toBeDeletedUser = new UserAccount();
         adminUser.setId(234L);
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
-        when(userRepo.getUserById(234L)).thenReturn(toBeDeletedUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
+        when(userRepo.getUserById(234L)).thenReturn(Optional.of(toBeDeletedUser));
 
-        final var response = adminService.deleteAccount(234L);
+        final var response = adminController.deleteAccount(234L);
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
     }
@@ -159,21 +159,21 @@ class AdminServiceTest {
         UserAccount nonAdminUser = new UserAccount();
         nonAdminUser.setId(123L);
 
-        when(userRepo.getUserById(123L)).thenReturn(nonAdminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(nonAdminUser));
 
-        final var response = adminService.getMailStatus();
+        final var response = adminController.getMailStatus();
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
         Mockito.verifyNoInteractions(googleMailService);
     }
     @Test
-    void storeMailSettingUnauthorized() {
+    void postMailSettingUnauthorized() {
         UserAccount nonAdminUser = new UserAccount();
         nonAdminUser.setId(123L);
 
-        when(userRepo.getUserById(123L)).thenReturn(nonAdminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(nonAdminUser));
 
-        final var response = adminService.storeMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
+        final var response = adminController.postMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
         Mockito.verifyNoInteractions(googleMailService);
@@ -183,9 +183,9 @@ class AdminServiceTest {
         UserAccount nonAdminUser = new UserAccount();
         nonAdminUser.setId(123L);
 
-        when(userRepo.getUserById(123L)).thenReturn(nonAdminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(nonAdminUser));
 
-        final var response = adminService.sendTestMail(MailDto.builder().build());
+        final var response = adminController.sendTestMail(MailDto.builder().build());
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
         Mockito.verifyNoInteractions(googleMailService);
@@ -197,10 +197,10 @@ class AdminServiceTest {
         adminUser.setId(123L);
         adminUser.setAdmin(true);
 
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
         when(googleMailService.getMailStatus()).thenReturn(ConnectivityStatusDto.builder().build());
 
-        final var response = adminService.getMailStatus();
+        final var response = adminController.getMailStatus();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
         verify(googleMailService).getMailStatus();
@@ -208,14 +208,14 @@ class AdminServiceTest {
     }
 
     @Test
-    void storeMailSettingAuthorized() {
+    void postMailSettingAuthorized() {
         UserAccount adminUser = new UserAccount();
         adminUser.setId(123L);
         adminUser.setAdmin(true);
 
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
 
-        final var response = adminService.storeMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
+        final var response = adminController.postMailSetting(ConnectivityRequestDto.builder().clientAuthorizationCode("a").build());
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
         verify(googleMailService).registerWithCode(eq("a"));
@@ -226,9 +226,9 @@ class AdminServiceTest {
         adminUser.setId(123L);
         adminUser.setAdmin(true);
 
-        when(userRepo.getUserById(123L)).thenReturn(adminUser);
+        when(userRepo.getUserById(123L)).thenReturn(Optional.of(adminUser));
 
-        final var response = adminService.sendTestMail(MailDto.builder().emailTo("a").build());
+        final var response = adminController.sendTestMail(MailDto.builder().emailTo("a").build());
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Mockito.verifyNoInteractions(accountService);
         verify(googleMailService).sendTestMail(eq("a"));

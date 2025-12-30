@@ -20,7 +20,7 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
+class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
 
     @Test
     void testSignupNewUser() {
@@ -28,7 +28,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         String userEmail = "newuser@test.example";
 
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
         String jwtToken = Objects.requireNonNull(responseEntity.getHeaders().get("token")).getFirst();
         log.debug(jwtToken);
@@ -46,7 +46,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userName).build();
-        var responseEntity = authenticationService.signUp(registrationRequest);
+        var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         boolean mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
@@ -54,14 +54,14 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 2e: keer afgekeurd op username
         registrationRequest = RegistrationRequest.builder().email("diffemail@email.com").password("testpassword").username(userName).build();
-        responseEntity = authenticationService.signUp(registrationRequest);
+        responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertFalse(mailSend, "Mail should not be send");
 
         // 3e: keer afgekeurd op email
         registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username("diffusername").build();
-        responseEntity = authenticationService.signUp(registrationRequest);
+        responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         mailSend = ((MyMockedMailService) mailService).verifyConfirmationSendTo(userEmail);
         Assertions.assertFalse(mailSend, "Mail should not be send");
@@ -77,24 +77,24 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        var responseEntity = authenticationService.signUp(registrationRequest);
+        var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // wachtwoord resetten
         ResetPasswordRequest resetPasswordRequest = ResetPasswordRequest.builder().email(userEmail).build();
-        final var responseEntity1 = authenticationService.resetPassword(resetPasswordRequest);
+        final var responseEntity1 = authenticationController.resetPassword(resetPasswordRequest);
         Assertions.assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
 
         // inloggen met oude kan nog:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         String resettedPassword = ((MyMockedMailService) mailService).getResettedPassword(userEmail);
@@ -104,12 +104,12 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // inloggen met nieuw wachtwoord
         authRequest = AuthenticationRequest.builder().username(userEmail).password(resettedPassword).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // inloggen met oude kan niet meer :
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
 
     }
@@ -124,29 +124,29 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // wachtwoord veranderen
         ChangePasswordRequest changePasswordRequest = ChangePasswordRequest.builder().oldPassword(password).newPassword(newPassword).confirmPassword(newPassword).build();
-        ResponseEntity<Void> result = authenticationService.changePassword(changePasswordRequest);
+        ResponseEntity<Void> result = authenticationController.changePassword(changePasswordRequest);
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
         // inloggen met oude kan niet meer:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
 
         // inloggen met nieuwe kan wel:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(newPassword).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
     }
 
@@ -159,18 +159,18 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         // verwijder met verkeerd wachtwoord afkeuren
-        ResponseEntity<Void> result = authenticationService.deleteAccount("verkeerd");
+        ResponseEntity<Void> result = authenticationController.deleteAccount("verkeerd");
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
 
         // verwijder met correct wachtwoord uitvoeren
@@ -178,7 +178,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // inloggen kan niet meer:
         authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
 
     }
@@ -192,14 +192,14 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         RegistrationRequest registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        ResponseEntity<UserAccountDto> responseEntity = authenticationService.signUp(registrationRequest);
+        ResponseEntity<UserAccountDto> responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());
 
         // 1e keer inloggen met wachtwoord
         AuthenticationRequest authRequest = AuthenticationRequest.builder().username(userEmail).password(password).build();
-        responseEntity = authenticationService.authenticateUser(authRequest);
+        responseEntity = authenticationController.authenticateUser(authRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
 
@@ -207,7 +207,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
         deleteAccount(password);
 
         // verwijder nomaals
-        ResponseEntity<Void> result = authenticationService.deleteAccount(password);
+        ResponseEntity<Void> result = authenticationController.deleteAccount(password);
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
 
     }
@@ -221,7 +221,7 @@ class AuthenticationServiceITest extends AbstractApplicationIntegrationTest {
 
         // 1e: keer aanmaken succesvol:
         final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
-        final var responseEntity = authenticationService.signUp(registrationRequest);
+        final var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
 
         setUserContextFromJWTResponseHeader(responseEntity.getHeaders());

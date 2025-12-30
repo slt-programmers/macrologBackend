@@ -26,4 +26,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(message), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handle(final UnauthorizedException ex) {
+        final var message = ex.getMessage();
+        return new ResponseEntity<>(new ErrorResponse(message), HttpStatus.UNAUTHORIZED);
+    }
 }

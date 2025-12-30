@@ -22,10 +22,10 @@ public class AccountServiceITest extends AbstractApplicationIntegrationTest {
     @Test
     void deleteAccount() {
         var userToBeDeleted = UserAccount.builder().isAdmin(false)
-                .username("deleteAccountTest").password("testtest").email("test@test.nl").build();
+                .userName("deleteAccountTest").password("testtest").email("test@test.nl").build();
         userToBeDeleted = userAccountRepository.saveAccount(userToBeDeleted);
         var allUsers = userAccountRepository.getAllUsers();
-        Assertions.assertTrue(allUsers.stream().anyMatch(u -> u.getUsername().equals("deleteAccountTest")));
+        Assertions.assertTrue(allUsers.stream().anyMatch(u -> u.getUserName().equals("deleteAccountTest")));
 
         ThreadLocalHolder.getThreadLocal().set(UserInfo.builder().userId(userToBeDeleted.getId()).build());
 
@@ -58,10 +58,10 @@ public class AccountServiceITest extends AbstractApplicationIntegrationTest {
         var allIngredients = ingredientRepository.getAllIngredients();
         final var ingredientsListSize = allIngredients.size();
 
-        accountService.deleteAccount(userToBeDeleted.getId());
+        accountService.deleteAccount(userToBeDeleted.getId(),"testtest");
 
         allUsers = userAccountRepository.getAllUsers();
-        Assertions.assertFalse(allUsers.stream().anyMatch(u -> u.getUsername().equals("deleteAccountTest")));
+        Assertions.assertFalse(allUsers.stream().anyMatch(u -> u.getUserName().equals("deleteAccountTest")));
         allFood = foodController.getAllFood();
         allFoodForUser = allFood.getBody();
         Assertions.assertNotNull(allFoodForUser);

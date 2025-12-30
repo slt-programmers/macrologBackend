@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AdminServiceITest extends AbstractApplicationIntegrationTest {
+public class AdminControllerITest extends AbstractApplicationIntegrationTest {
 
     private Long userId;
 
@@ -32,30 +32,30 @@ public class AdminServiceITest extends AbstractApplicationIntegrationTest {
 
     @Test
     public void testGetUsers() {
-        final var allUsers = adminService.getAllUsers();
+        final var allUsers = adminController.getAllUsers();
         assertThat(allUsers.getBody()).isNull();
         assertThat(allUsers.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     public void deleteAccount() {
-        var adminUser = UserAccount.builder().isAdmin(true).email("admin@test.nl").username("iamadmin").password("rtyufaai").build();
+        var adminUser = UserAccount.builder().isAdmin(true).email("admin@test.nl").userName("iamadmin").password("rtyufaai").build();
         adminUser = userAccountRepository.saveAccount(adminUser);
         this.userId = adminUser.getId();
         ThreadLocalHolder.getThreadLocal().set(UserInfo.builder().userId(this.userId).build());
 
-        var toBeDeletedUser = UserAccount.builder().isAdmin(false).email("test@test.nl").username("someone").password("fghjkbvc").build();
+        var toBeDeletedUser = UserAccount.builder().isAdmin(false).email("test@test.nl").userName("someone").password("fghjkbvc").build();
         toBeDeletedUser = userAccountRepository.saveAccount(toBeDeletedUser);
 
-        final var allUsers = adminService.getAllUsers();
+        final var allUsers = adminController.getAllUsers();
         final var usersAccounts = allUsers.getBody();
         Assertions.assertNotNull(usersAccounts);
         Assertions.assertTrue(usersAccounts.stream().anyMatch(u -> u.getUserName().equals("someone")));
 
-        final var response = adminService.deleteAccount(toBeDeletedUser.getId());
+        final var response = adminController.deleteAccount(toBeDeletedUser.getId());
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        final var allUsersAfterDelete = adminService.getAllUsers();
+        final var allUsersAfterDelete = adminController.getAllUsers();
         final var usersAccountsAfterDelete = allUsersAfterDelete.getBody();
         Assertions.assertNotNull(usersAccountsAfterDelete);
         Assertions.assertFalse(usersAccountsAfterDelete.stream().anyMatch(u -> u.getUserName().equals("someone")));

@@ -9,8 +9,7 @@ import slt.config.StravaConfig;
 import slt.connectivity.strava.StravaActivityService;
 import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.connectivity.strava.dto.WebhookEvent;
-import slt.database.UserAccountRepository;
-import slt.security.ThreadLocalHolder;
+import slt.service.AccountService;
 
 @Slf4j
 @RestController
@@ -21,7 +20,7 @@ public class WebhookController {
     public static final String NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE = "Not authorized to alter webhooks";
 
     private StravaActivityService stravaActivityService;
-    private UserAccountRepository userAccountRepository;
+    private AccountService accountService;
     private StravaConfig stravaConfig;
 
     @PostMapping(path = "public/strava")
@@ -45,10 +44,7 @@ public class WebhookController {
 
     @PostMapping(path = "/STRAVA")
     public ResponseEntity<SubscriptionInformation> startWebhook() {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var userId = userInfo.getUserId();
-        final var userAccount = userAccountRepository.getUserById(userId);
-        if (!userAccount.isAdmin()) {
+        if (!accountService.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
@@ -59,10 +55,7 @@ public class WebhookController {
 
     @DeleteMapping(path = "/STRAVA/{subscriptionId}")
     public ResponseEntity<Void> endWebhook(@PathVariable("subscriptionId") final Integer subscriptionId) {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var userId = userInfo.getUserId();
-        final var userAccount = userAccountRepository.getUserById(userId);
-        if (!userAccount.isAdmin()) {
+        if (!accountService.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
@@ -73,10 +66,7 @@ public class WebhookController {
 
     @GetMapping(path = "/STRAVA")
     public ResponseEntity<SubscriptionInformation> getWebhook() {
-        final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var userId = userInfo.getUserId();
-        final var userAccount = userAccountRepository.getUserById(userId);
-        if (!userAccount.isAdmin()) {
+        if (!accountService.isAdmin()) {
             log.error(NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {

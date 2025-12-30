@@ -63,7 +63,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected FoodController foodController;
 
     @Autowired
-    protected AuthenticationService authenticationService;
+    protected AuthenticationController authenticationController;
 
     @Autowired
     protected SettingsController settingsController;
@@ -81,7 +81,7 @@ public abstract class AbstractApplicationIntegrationTest {
     protected DishService dishService;
 
     @Autowired
-    protected AdminService adminService;
+    protected AdminController adminController;
 
     @Autowired
     protected AccountService accountService;
@@ -97,7 +97,7 @@ public abstract class AbstractApplicationIntegrationTest {
 
     protected Long createUser(final String userEmail) {
         final var registrationRequest = RegistrationRequest.builder().email(userEmail).password("testpassword").username(userEmail).build();
-        final var responseEntity = authenticationService.signUp(registrationRequest);
+        final var responseEntity = authenticationController.signUp(registrationRequest);
         Assertions.assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
         final var headers = responseEntity.getHeaders();
         return getUserIdFromResponseHeaderJWT(headers);
@@ -119,7 +119,7 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
     protected void deleteAccount(final String password) {
-        final var responseEntity = authenticationService.deleteAccount(password);
+        final var responseEntity = authenticationController.deleteAccount(password);
         Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 

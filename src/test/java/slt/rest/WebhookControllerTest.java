@@ -15,6 +15,8 @@ import slt.database.entities.UserAccount;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
@@ -84,7 +86,7 @@ class WebhookControllerTest {
     @Test
     void startWebhookNotAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).build());
+        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).build()));
         final var responseEntity = webhookController.startWebhook();
 
         verify(userAccountRepository).getUserById(any());
@@ -96,7 +98,7 @@ class WebhookControllerTest {
     @Test
     void startWebhookAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).isAdmin(true).build());
+        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).isAdmin(true).build()));
         final var responseEntity = webhookController.startWebhook();
 
         verify(userAccountRepository).getUserById(any());
@@ -110,7 +112,7 @@ class WebhookControllerTest {
     @Test
     void endWebhookNotAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).build());
+        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).build()));
         final var responseEntity = webhookController.endWebhook(2);
 
         verify(userAccountRepository).getUserById(any());
@@ -122,7 +124,7 @@ class WebhookControllerTest {
     @Test
     void endWebhookAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).isAdmin(true).build());
+        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).isAdmin(true).build()));
         final var responseEntity = webhookController.endWebhook(2);
 
         verify(userAccountRepository).getUserById(any());
@@ -136,7 +138,7 @@ class WebhookControllerTest {
     @Test
     void getWebhookNotAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).build());
+        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).build()));
         final var responseEntity = webhookController.getWebhook();
 
         verify(userAccountRepository).getUserById(any());
@@ -148,7 +150,7 @@ class WebhookControllerTest {
     @Test
     void getWebhookAdmin() {
         ThreadLocalHolder.getThreadLocal().set(new UserInfo());
-        when(userAccountRepository.getUserById(any())).thenReturn(UserAccount.builder().id(12L).isAdmin(true).build());
+        when(userAccountRepository.getUserById(any())).thenReturn(Optional.ofNullable(UserAccount.builder().id(12L).isAdmin(true).build()));
         when(stravaActivityService.getWebhookSubscription()).thenReturn(SubscriptionInformation.builder().build());
         final var responseEntity = webhookController.getWebhook();
 

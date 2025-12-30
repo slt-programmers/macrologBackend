@@ -32,7 +32,7 @@ class MealplanRepositoryTest {
         final var user = new UserAccount();
         user.setEmail("email@test.nl");
         user.setAdmin(false);
-        user.setUsername("test");
+        user.setUserName("test");
         user.setPassword("xyz");
         userAccountRepository.saveAccount(user);
         final var food = new Food();

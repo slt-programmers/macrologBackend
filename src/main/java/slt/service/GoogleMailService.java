@@ -175,7 +175,7 @@ public class GoogleMailService {
         if (isConnnectedToGmail()) {
             try {
                 String subject = "Macrolog Credentials";
-                String body = "<h3>Hello " + account.getUsername() + ", </h3>" +
+                String body = "<h3>Hello " + account.getUserName() + ", </h3>" +
                         "<p>A request has been made to reset your password. </p>" +
                         "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
                         "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
@@ -196,7 +196,7 @@ public class GoogleMailService {
         if (isConnnectedToGmail()) {
             try {
                 String subject = "Welcome to Macrolog!";
-                String body = "<p>Hello " + account.getUsername() + ", </p>" +
+                String body = "<p>Hello " + account.getUserName() + ", </p>" +
                         "<p>Thank you for using Macrolog!</p>" +
                         "<p>You are now ready to use both the app and the <a href=\"https://macrolog.herokuapp.com/\"> website</a>. " +
                         "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +

@@ -20,7 +20,8 @@ public class UserAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    @Column(name ="username")
+    private String userName;
     @Column(length = 65535, columnDefinition="clob")
     private String password;
     @Column(length = 65535, columnDefinition="clob")

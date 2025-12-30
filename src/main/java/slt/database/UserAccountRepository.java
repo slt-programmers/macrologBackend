@@ -10,9 +10,9 @@ import java.util.Optional;
 
 interface UserAccountCrudRepository extends CrudRepository<UserAccount, Long> {
 
-    List<UserAccount> findByUsername(final String username);
+    Optional<UserAccount> findByUsername(final String username);
 
-    List<UserAccount> findByEmailIgnoreCase(final String email);
+    Optional<UserAccount> findByEmailIgnoreCase(final String email);
 
 }
 
@@ -29,7 +29,7 @@ public class UserAccountRepository {
     public UserAccount insertUser(final String username, final String password, final String email) {
         UserAccount userAccount = UserAccount.builder()
                 .email(email)
-                .username(username)
+                .userName(username)
                 .password(password)
                 .build();
         return userAccountCrudRepository.save(userAccount);
@@ -39,19 +39,16 @@ public class UserAccountRepository {
         return (List<UserAccount>) userAccountCrudRepository.findAll();
     }
 
-    public UserAccount getUser(final String username) {
-        List<UserAccount> byUsername = userAccountCrudRepository.findByUsername(username);
-        return byUsername.isEmpty() ? null : byUsername.getFirst();
+    public Optional<UserAccount> getUserByName(final String username) {
+        return userAccountCrudRepository.findByUsername(username);
     }
 
-    public UserAccount getUserByEmail(final String email) {
-        List<UserAccount> byUsername = userAccountCrudRepository.findByEmailIgnoreCase(email);
-        return byUsername.isEmpty() ? null : byUsername.getFirst();
+    public Optional<UserAccount> getUserByEmail(final String email) {
+        return userAccountCrudRepository.findByEmailIgnoreCase(email);
     }
 
-    public UserAccount getUserById(final Long id) {
-        Optional<UserAccount> byId = userAccountCrudRepository.findById(id);
-        return byId.orElse(null);
+    public Optional<UserAccount> getUserById(final Long id) {
+        return userAccountCrudRepository.findById(id);
     }
 
     public void deleteUser(final Long id) {
