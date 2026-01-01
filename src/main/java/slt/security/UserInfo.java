@@ -1,19 +1,18 @@
 package slt.security;
 
+import lombok.*;
+
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserInfo {
 
-    private Integer userId;
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
+    private Long userId;
 
     @Override
     public String toString() {
-        return "userId = " + userId;
+        return "UserId = " + userId;
     }
 }

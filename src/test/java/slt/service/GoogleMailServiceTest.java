@@ -79,7 +79,7 @@ class GoogleMailServiceTest {
         when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(null);
         googleMailService.registerWithCode("code");
 
-        verify(settingsRepository,times(1)).putSetting(eq(-1), any());
+        verify(settingsRepository,times(1)).putSetting(any());
     }
 
     @Test
@@ -92,7 +92,7 @@ class GoogleMailServiceTest {
         googleMailService.registerWithCode("code");
         assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(true);
 
-        verify(settingsRepository,times(4)).putSetting(eq(-1), any());
+        verify(settingsRepository,times(4)).putSetting(any());
     }
 
     @Test
@@ -104,7 +104,7 @@ class GoogleMailServiceTest {
         // Niet expired token:
         Instant instant = Instant.now();
         instant = instant.plus(20, ChronoUnit.MINUTES);
-        when(settingsRepository.getLatestSetting(eq(-1), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
 
         GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         mailService.sendPasswordRetrievalMail("mail",null,UserAccount.builder().build());
@@ -122,7 +122,7 @@ class GoogleMailServiceTest {
         // Niet expired token:
         Instant instant = Instant.now();
         instant = instant.plus(20, ChronoUnit.MINUTES);
-        when(settingsRepository.getLatestSetting(eq(-1), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
 
         GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         mailService.sendConfirmationMail("mail",UserAccount.builder().build());
@@ -140,7 +140,7 @@ class GoogleMailServiceTest {
         // Niet expired token:
         Instant instant = Instant.now();
         instant = instant.plus(20, ChronoUnit.MINUTES);
-        when(settingsRepository.getLatestSetting(eq(-1), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
         GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
 
         mailService.sendTestMail("mail");

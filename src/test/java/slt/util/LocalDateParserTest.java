@@ -3,9 +3,9 @@ package slt.util;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import slt.exceptions.InvalidDateException;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,7 +25,7 @@ class LocalDateParserTest {
         assertThat(LocalDateParser.parse("15-01-2001")).isEqualTo(LocalDate.parse("2001-01-15"));
         assertThat(LocalDateParser.parse("15-1-2001")).isEqualTo(LocalDate.parse("2001-01-15"));
 
-        Assertions.assertThrows(DateTimeParseException.class, () -> LocalDateParser.parse("32-02-2001")
+        Assertions.assertThrows(InvalidDateException.class, () -> LocalDateParser.parse("32-02-2001")
         );
 
     }

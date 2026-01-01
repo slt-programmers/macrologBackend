@@ -19,7 +19,7 @@ public class FoodDto {
     private Double fat;
     private Double carbs;
 
-    @Singular
+    @Builder.Default
     private List<PortionDto> portions = new ArrayList<>();
 
     public void addPortion(PortionDto currDto) {

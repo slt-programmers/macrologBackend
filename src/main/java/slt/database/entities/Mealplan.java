@@ -23,18 +23,10 @@ public class Mealplan {
     private String title;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @OneToMany(mappedBy = "mealplan", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Builder.Default
     private List<Mealtime> mealtimes = new ArrayList<>();
 
-    public void addMealtime(final Mealtime mealtime) {
-        mealtimes.add(mealtime);
-        mealtime.setMealplan(this);
-    }
-
-    public void removeMealtime(final Mealtime mealtime) {
-        mealtimes.remove(mealtime);
-        mealtime.setMealplan(null);
-    }
 }

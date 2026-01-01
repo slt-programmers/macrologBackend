@@ -32,7 +32,7 @@ class MealplanRepositoryTest {
         final var user = new UserAccount();
         user.setEmail("email@test.nl");
         user.setAdmin(false);
-        user.setUsername("test");
+        user.setUserName("test");
         user.setPassword("xyz");
         userAccountRepository.saveAccount(user);
         final var food = new Food();
@@ -40,15 +40,15 @@ class MealplanRepositoryTest {
         food.setProtein(1D);
         food.setFat(2D);
         food.setCarbs(3D);
-        food.setUserId(1);
-        foodRepository.saveFood(1, food);
+        food.setUserId(1L);
+        foodRepository.saveFood(food);
     }
 
     @Test
     void saveMealplan() {
-        final var food = foodRepository.getAllFood(1).getFirst();
+        final var food = foodRepository.getAllFood(1L).getFirst();
         final var mealplan = Mealplan.builder()
-                .userId(1)
+                .userId(1L)
                 .title("my plan").build();
         final var mealtime = Mealtime.builder()
                 .mealplan(mealplan)
@@ -65,7 +65,7 @@ class MealplanRepositoryTest {
         mealplan.setMealtimes(List.of(mealtime));
 
         final var savedPlan = repository.saveMealplan(mealplan);
-        final var foundPlan = repository.getAllMealplans(1).getFirst();
+        final var foundPlan = repository.getAllMealplans(1L).getFirst();
         assertEquals(savedPlan.getId(), foundPlan.getId());
         assertEquals(savedPlan.getTitle(), foundPlan.getTitle());
         assertEquals(savedPlan.getUserId(), foundPlan.getUserId());

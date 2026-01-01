@@ -18,7 +18,7 @@ public interface MealtimeMapper {
     Mealtime map(final MealtimeDto dto);
 
     @AfterMapping
-    default void addParentToChildren(final MealtimeDto dto, final @MappingTarget Mealtime mealtime) {
+    default void addParentToChildren(final @MappingTarget Mealtime mealtime) {
         if (mealtime.getIngredients() != null) {
             for (Ingredient ingredient : mealtime.getIngredients()) {
                 ingredient.setMealtime(mealtime);

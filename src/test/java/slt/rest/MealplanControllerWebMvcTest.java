@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import slt.database.MealplanRepository;
-import slt.database.entities.Mealplan;
+import slt.dto.MealplanDto;
+import slt.service.MealplanService;
 import slt.util.JWTBuilder;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MealplanControllerWebMvcTest {
 
     @MockBean
-    private MealplanRepository repository;
+    private MealplanService mealplanService;
 
     private final JWTBuilder jwtBuilder = new JWTBuilder();
 
@@ -31,9 +31,9 @@ class MealplanControllerWebMvcTest {
 
     @Test
     void getAllMealplans() throws Exception {
-        final var mealplans = List.of(Mealplan.builder().id(1L).title("title").mealtimes(new ArrayList<>()).build());
-        Mockito.when(repository.getAllMealplans(any(Integer.class))).thenReturn(mealplans);
-        mockMvc.perform(get("/mealplans").header("Authorization", "Bearer " + jwtBuilder.generateJWT("test", 1)))
+        final var mealplans = List.of(MealplanDto.builder().id(1L).title("title").mealtimes(new ArrayList<>()).build());
+        Mockito.when(mealplanService.getAllMealplans(any(Long.class))).thenReturn(mealplans);
+        mockMvc.perform(get("/mealplans").header("Authorization", "Bearer " + jwtBuilder.generateJWT("test", 1L)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("[{\"id\":1,\"title\":\"title\",\"mealtimes\":[]}]"));
     }

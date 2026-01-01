@@ -1,79 +1,73 @@
 package slt.database;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import slt.database.entities.LogActivity;
+import slt.database.entities.Activity;
 
 import jakarta.transaction.Transactional;
+
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-interface LogActivityCrudRepository extends CrudRepository<LogActivity, Long> {
-    void deleteByUserIdAndId(Integer userId, Long activityId);
+interface ActivityCrudRepository extends CrudRepository<Activity, Long> {
 
-    void deleteByUserId(Integer userId);
+    void deleteByUserIdAndId(final Long userId, final Long activityId);
 
-    List<LogActivity> findByUserId(Integer userId);
+    void deleteByUserId(final Long userId);
 
-    List<LogActivity> findByUserIdAndDay(Integer userId, Date date);
+    List<Activity> findByUserId(final Long userId);
 
-    Long countByUserIdAndSyncedWith(Integer userId, String strava);
+    List<Activity> findByUserIdAndDay(final Long userId, final Date date);
 
-    Optional<LogActivity> findByUserIdAndSyncedWithAndSyncedId(Integer userId, String syncedWith, Long syncedID);
+    Long countByUserIdAndSyncedWith(final Long userId, final String strava);
+
+    Optional<Activity> findByUserIdAndSyncedWithAndSyncedId(final Long userId, final String syncedWith, final Long syncedID);
+
 }
 
-@Repository
 @Slf4j
+@Repository
+@AllArgsConstructor
 public class ActivityRepository {
 
-    @Autowired
-    private LogActivityCrudRepository logActivityCrudRepository;
+    private ActivityCrudRepository activityCrudRepository;
 
-    public LogActivity saveActivity(Integer userId, LogActivity entry) {
-        entry.setUserId(userId);
-        return logActivityCrudRepository.save(entry);
+    public Activity saveActivity(final Activity entry) {
+        return activityCrudRepository.save(entry);
+    }
+
+    public Optional<Activity> findById(final Long id) {
+        return activityCrudRepository.findById(id);
     }
 
     @Transactional
-    public void deleteLogActivity(Integer userId, Long activtyId) {
-        final Optional<LogActivity> byId = logActivityCrudRepository.findById(activtyId);
-        if (byId.isPresent()) {
-            final LogActivity logActivity = byId.get();
-            if (StringUtils.isNotEmpty(logActivity.getSyncedWith())) {
-                logActivity.setStatus("DELETED");
-                logActivityCrudRepository.save(logActivity);
-            } else {
-                logActivityCrudRepository.deleteByUserIdAndId(userId, activtyId);
-            }
-        }
+    public void deleteActivity(final Long userId, final Long activityId) {
+        activityCrudRepository.deleteByUserIdAndId(userId, activityId);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
-        logActivityCrudRepository.deleteByUserId(userId);
+    public void deleteAllForUser(final Long userId) {
+        activityCrudRepository.deleteByUserId(userId);
     }
 
-    public List<LogActivity> getAllLogActivities(Integer userId) {
-        log.debug("Getting entries for " + userId);
-        return logActivityCrudRepository.findByUserId(userId);
+    public List<Activity> getAllActivities(final Long userId) {
+        return activityCrudRepository.findByUserId(userId);
     }
 
-    public List<LogActivity> getAllLogActivities(Integer userId, LocalDate date) {
-        log.debug("Getting entries for " + date);
-        return logActivityCrudRepository.findByUserIdAndDay(userId, Date.valueOf(date));
+    public List<Activity> getAllActivities(final Long userId, final LocalDate date) {
+        return activityCrudRepository.findByUserIdAndDay(userId, Date.valueOf(date));
     }
 
-    public Long countByUserIdAndSyncedWith(Integer userId, String strava) {
-        return logActivityCrudRepository.countByUserIdAndSyncedWith(userId, strava);
+    public Long countByUserIdAndSyncedWith(final Long userId, final String strava) {
+        return activityCrudRepository.countByUserIdAndSyncedWith(userId, strava);
     }
 
-    public Optional<LogActivity> findByUserIdAndSyncIdAndSyncedWith(Integer userId, String syncedWith, Long syncedID) {
-        return logActivityCrudRepository.findByUserIdAndSyncedWithAndSyncedId(userId, syncedWith,syncedID);
+    public Optional<Activity> findByUserIdAndSyncIdAndSyncedWith(final Long userId, final String syncedWith, final Long syncedID) {
+        return activityCrudRepository.findByUserIdAndSyncedWithAndSyncedId(userId, syncedWith, syncedID);
     }
 
 }

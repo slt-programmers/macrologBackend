@@ -10,11 +10,11 @@ import java.util.List;
 
 interface MealplanCrudRepository extends CrudRepository<Mealplan, Long> {
 
-    void deleteByUserIdAndId(Integer userId, Long dishId);
+    void deleteByUserIdAndId(final Long userId, final Long dishId);
 
-    void deleteByUserId(Integer userId);
+    void deleteByUserId(final Long userId);
 
-    List<Mealplan> findByUserId(Integer userId);
+    List<Mealplan> findByUserId(final Long userId);
 
 }
 
@@ -29,16 +29,16 @@ public class MealplanRepository {
     }
 
     @Transactional
-    public void deleteMealplan(final Integer userId, final Long mealplanId) {
+    public void deleteMealplan(final Long userId, final Long mealplanId) {
         mealplanCrudRepository.deleteByUserIdAndId(userId, mealplanId);
     }
 
-    public List<Mealplan> getAllMealplans(final Integer userId) {
+    public List<Mealplan> getAllMealplans(final Long userId) {
         return mealplanCrudRepository.findByUserId(userId);
     }
 
     @Transactional
-    public void deleteAllForUser(final Integer userId) {
+    public void deleteAllForUser(final Long userId) {
         mealplanCrudRepository.deleteByUserId(userId);
     }
 }

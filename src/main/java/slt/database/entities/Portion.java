@@ -1,6 +1,5 @@
 package slt.database.entities;
 
-//import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -22,7 +21,10 @@ public class Portion {
 
     private Double grams;
 
-    @Column(name = "food_id")
-    private Integer foodId;
+//    @Column(name = "food_id")
+//    private Integer foodId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_id")
+    private Food food;
 }

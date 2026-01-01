@@ -29,7 +29,6 @@ public class StravaConfig {
         log.info("Strava configured : {}", StringUtils.isNotEmpty(clientSecret));
     }
 
-
     @Bean
     @ConditionalOnMissingBean(name = "restTemplate")
     public RestTemplate restTemplate(){

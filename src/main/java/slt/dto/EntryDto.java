@@ -16,17 +16,11 @@ import java.util.Date;
 public class EntryDto {
 
     private Long id;
-
     private FoodDto food;
-
     private PortionDto portion;
-
-    private MacroDto macrosCalculated = new MacroDto(0.0, 0.0, 0.0, 0);
-
+    private MacroDto macrosCalculated;
     private Double multiplier;
-
     private Date day;
-
     private Meal meal;
 
 }

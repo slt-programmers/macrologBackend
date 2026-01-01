@@ -23,7 +23,7 @@ class MealplanMapperTest {
         final var mealtimeDto = MealtimeDto.builder().build();
         final var mealplanId = 1L;
         final var mealplanDto = MealplanDto.builder().id(mealplanId).mealtimes(List.of(mealtimeDto)).build();
-        final var userId = 123;
+        final var userId = 123L;
         final var result = mapper.map(mealplanDto, userId);
         assertEquals(userId, result.getUserId());
         assertEquals(mealplanId, result.getMealtimes().getFirst().getMealplan().getId());

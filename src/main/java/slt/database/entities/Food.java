@@ -27,9 +27,9 @@ public class Food {
     private Double carbs;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
-    @OneToMany(mappedBy = "foodId", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Portion> portions;
 
 }

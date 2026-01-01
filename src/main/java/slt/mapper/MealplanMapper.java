@@ -10,6 +10,8 @@ import slt.database.entities.Mealplan;
 import slt.database.entities.Mealtime;
 import slt.dto.MealplanDto;
 
+import java.util.List;
+
 @Mapper(uses = MealtimeMapper.class,
         nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface MealplanMapper {
@@ -18,7 +20,9 @@ public interface MealplanMapper {
 
     MealplanDto map(final Mealplan mealplan);
 
-    Mealplan map(final MealplanDto dto, final Integer userId);
+    List<MealplanDto> map(final List<Mealplan> mealplans);
+
+    Mealplan map(final MealplanDto dto, final Long userId);
 
     @AfterMapping
     default void setParentInChildren(@MappingTarget Mealplan mealplan) {

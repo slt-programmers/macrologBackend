@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import slt.database.entities.Setting;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,25 +29,25 @@ class SettingsRepositoryTest {
     @Test
     void deleteAllForUser() {
 
-        settingsRepository.deleteAllForUser(1, "A");
-        verify(settingsCrudRepository).deleteAllByUserIdAndName(eq(1), eq("A"));
+        settingsRepository.deleteAllForUser(1L, "A");
+        verify(settingsCrudRepository).deleteAllByUserIdAndName(eq(1L), eq("A"));
         verifyNoMoreInteractions(settingsCrudRepository);
     }
 
     @Test
     void getLatestSettingNotFound() {
 
-        settingsRepository.getLatestSetting(1, "A");
-        verify(settingsCrudRepository).findByUserIdAndNameOrderByDayDesc(eq(1), eq("A"));
+        settingsRepository.getLatestSetting(1L, "A");
+        verify(settingsCrudRepository).findByUserIdAndNameOrderByDayDesc(eq(1L), eq("A"));
         verifyNoMoreInteractions(settingsCrudRepository);
     }
 
     @Test
     void getLatestSettingFound() {
 
-        when(settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(eq(1), eq("A"))).thenReturn(Arrays.asList(Setting.builder().id(1).build()));
-        final Setting setting = settingsRepository.getLatestSetting(1, "A");
-        verify(settingsCrudRepository).findByUserIdAndNameOrderByDayDesc(eq(1), eq("A"));
+        when(settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(eq(1L), eq("A"))).thenReturn(Collections.singletonList(Setting.builder().id(1L).build()));
+        final Setting setting = settingsRepository.getLatestSetting(1L, "A");
+        verify(settingsCrudRepository).findByUserIdAndNameOrderByDayDesc(eq(1L), eq("A"));
         verifyNoMoreInteractions(settingsCrudRepository);
 
         assertThat(setting.getId()).isEqualTo(1);
