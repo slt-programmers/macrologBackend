@@ -3,6 +3,7 @@ package slt.database.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -28,15 +29,7 @@ public class Mealtime {
     private Mealplan mealplan;
 
     @OneToMany(mappedBy = "mealtime", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<Ingredient> ingredients;
+    @Builder.Default
+    private List<Ingredient> ingredients = new ArrayList<>();
 
-    public void addIngredient(final Ingredient ingredient) {
-        ingredients.add((ingredient));
-        ingredient.setMealtime(this);
-    }
-
-    public void removeIngredient(final Ingredient ingredient) {
-        ingredients.remove(ingredient);
-        ingredient.setMealtime(null);
-    }
 }

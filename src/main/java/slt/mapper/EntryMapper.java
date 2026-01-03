@@ -24,8 +24,7 @@ public interface EntryMapper {
 
     @Named("macrosCalculated")
     default MacroDto macrosCalculated(final Entry entry) {
-        final var macroDto =  MacroUtils.calculateMacro(entry.getFood(), entry.getPortion());
-        return MacroUtils.multiply(macroDto, entry.getMultiplier());
+        return MacroUtils.calculateMacro(entry.getFood(), entry.getPortion(), entry.getMultiplier());
     }
 
     List<EntryDto> map(final List<Entry> entries);

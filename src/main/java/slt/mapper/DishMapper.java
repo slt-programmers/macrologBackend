@@ -1,13 +1,11 @@
 package slt.mapper;
 
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValueMappingStrategy;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import slt.database.entities.Dish;
-import slt.database.entities.Ingredient;
 import slt.dto.DishDto;
+import slt.dto.MacroDto;
+import slt.util.MacroUtils;
 
 import java.util.List;
 
@@ -17,7 +15,18 @@ public interface DishMapper {
 
     DishMapper INSTANCE = Mappers.getMapper(DishMapper.class);
 
+    @Mapping(source = "dish", target = "macrosCalculated", qualifiedByName = "macrosCalculated")
     DishDto map(final Dish dish);
+
+    @Named("macrosCalculated")
+    default MacroDto macrosCalculated(final Dish dish) {
+        var macroDto = MacroDto.builder().protein(0D).fat(0D).carbs(0D).calories(0).build();
+        for (final var ingredient : dish.getIngredients()) {
+            final var ingredientMacros = MacroUtils.calculateMacro(ingredient.getFood(), ingredient.getPortion(), ingredient.getMultiplier());
+            macroDto = MacroUtils.add(macroDto, ingredientMacros);
+        }
+        return macroDto;
+    }
 
     List<DishDto> map(final List<Dish> dishes);
 
@@ -25,10 +34,8 @@ public interface DishMapper {
 
     @AfterMapping
     default void setParentInChildren(@MappingTarget Dish dish) {
-        if (dish.getIngredients() != null) {
-            for (Ingredient ingredient : dish.getIngredients()) {
-                ingredient.setDish(dish);
-            }
+        for (final var ingredient : dish.getIngredients()) {
+            ingredient.setDish(dish);
         }
     }
 }
