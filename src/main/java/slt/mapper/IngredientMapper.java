@@ -12,6 +12,7 @@ public interface IngredientMapper {
 
     @Mapping(target = "dish", ignore = true)
     @Mapping(target = "mealtime", ignore = true)
+    @Mapping(target = "food.userId", ignore = true)
     Ingredient map(final IngredientDto dto);
 
     IngredientDto map(final Ingredient ingredient);

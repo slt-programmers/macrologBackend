@@ -60,14 +60,14 @@ public class DishMapperTest {
                 .name("dishname")
                 .userId(2L)
                 .ingredients(List.of(Ingredient.builder()
-                                .id(3L)
-                                .food(food1)
-                                .multiplier(1.5)
+                        .id(3L)
+                        .food(food1)
+                        .multiplier(1.5)
                         .build(), Ingredient.builder()
-                                .id(5L)
-                                .food(food2)
-                                .portion(portion)
-                                .multiplier(2.5)
+                        .id(5L)
+                        .food(food2)
+                        .portion(portion)
+                        .multiplier(2.5)
                         .build()))
                 .build();
         final var dto = mapper.map(dish);
@@ -161,13 +161,13 @@ public class DishMapperTest {
 
         final var ingredient1 = dish.getIngredients().getFirst();
         Assertions.assertNotNull(ingredient1);
-        Assertions.assertEquals(3L,ingredient1.getId());
-        Assertions.assertEquals(1.5,ingredient1.getMultiplier());
+        Assertions.assertEquals(3L, ingredient1.getId());
+        Assertions.assertEquals(1.5, ingredient1.getMultiplier());
         Assertions.assertNotNull(ingredient1.getFood());
 
         final var food = ingredient1.getFood();
         Assertions.assertEquals(4L, food.getId());
-//        Assertions.assertEquals(2L, food.getUserId());
+        Assertions.assertNull(food.getUserId());
         Assertions.assertEquals(2.0, food.getProtein());
         Assertions.assertEquals(4.0, food.getFat());
         Assertions.assertEquals(6.0, food.getCarbs());
@@ -186,14 +186,14 @@ public class DishMapperTest {
 
         final var ingredient2 = dish.getIngredients().getLast();
         Assertions.assertNotNull(ingredient2);
-        Assertions.assertEquals(7L,ingredient2.getId());
-        Assertions.assertEquals(2.5,ingredient2.getMultiplier());
+        Assertions.assertEquals(7L, ingredient2.getId());
+        Assertions.assertEquals(2.5, ingredient2.getMultiplier());
         Assertions.assertNotNull(ingredient2.getFood());
         Assertions.assertNull(ingredient2.getPortion());
 
         final var food2 = ingredient2.getFood();
         Assertions.assertEquals(6L, food2.getId());
-//        Assertions.assertEquals(2L, food.getUserId());
+        Assertions.assertNull(food.getUserId());
         Assertions.assertEquals(5.0, food2.getProtein());
         Assertions.assertEquals(6.0, food2.getFat());
         Assertions.assertEquals(7.0, food2.getCarbs());
