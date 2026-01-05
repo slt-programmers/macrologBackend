@@ -9,12 +9,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SuppressWarnings("all")
 public class StravaAthleteDto {
-    Long id;
-    String username;
-    String firstname;
-    String lastname;
-    String profile_medium;
-    String profile;
+
+    private Long id;
+    private String username;
+    private String firstname;
+    private String lastname;
+    private String profile_medium;
+    private String profile;
+
 }

@@ -21,9 +21,6 @@ public class Portion {
 
     private Double grams;
 
-//    @Column(name = "food_id")
-//    private Integer foodId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "food_id")
     private Food food;

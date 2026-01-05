@@ -5,12 +5,9 @@ import lombok.*;
 
 import java.util.Date;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActivityDto {
 
     private Long id;
@@ -24,4 +21,5 @@ public class ActivityDto {
     private String syncedWith;
 
     private Long syncedId;
+
 }

@@ -32,21 +32,29 @@ public class EntryService {
         final var entryDtos = entryMapper.map(allEntries);
 
         final var dateOptionalEntryMap = entryDtos.stream().collect(Collectors.groupingBy(EntryDto::getDay,
-                Collectors.reducing((EntryDto d1, EntryDto d2) -> {
-                    final var entryDto = new EntryDto();
-                    entryDto.setMacrosCalculated(MacroUtils.add(d1.getMacrosCalculated(), d2.getMacrosCalculated()));
-                    return entryDto;
-                })));
+                Collectors.reducing((EntryDto d1, EntryDto d2) ->
+                        EntryDto.builder()
+                                .macrosCalculated(MacroUtils.add(d1.getMacrosCalculated(), d2.getMacrosCalculated()))
+                                .build()
+                )));
 
+        final var macrosPerDayDto = getDayMacroDtos(dateOptionalEntryMap);
+        macrosPerDayDto.sort(Comparator.comparing(DayMacroDto::getDay));
+        return macrosPerDayDto;
+    }
+
+    private static ArrayList<DayMacroDto> getDayMacroDtos(final Map<Date, Optional<EntryDto>> dateOptionalEntryMap) {
         final var macrosPerDayDto = new ArrayList<DayMacroDto>();
         for (final var dateOptionalEntry : dateOptionalEntryMap.entrySet()) {
-            final var dayMacroDto = new DayMacroDto();
-            dayMacroDto.setDay(dateOptionalEntry.getKey());
             final var optionalEntryDto = dateOptionalEntry.getValue();
-            optionalEntryDto.ifPresent(entryDto -> dayMacroDto.setMacros(entryDto.getMacrosCalculated()));
-            macrosPerDayDto.add(dayMacroDto);
+            optionalEntryDto.ifPresent(entryDto -> {
+                final var dayMacroDto = DayMacroDto.builder()
+                        .day(dateOptionalEntry.getKey())
+                        .macros(entryDto.getMacrosCalculated())
+                        .build();
+                macrosPerDayDto.add(dayMacroDto);
+            });
         }
-        macrosPerDayDto.sort(Comparator.comparing(DayMacroDto::getDay));
         return macrosPerDayDto;
     }
 

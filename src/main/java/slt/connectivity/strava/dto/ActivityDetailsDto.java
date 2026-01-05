@@ -9,12 +9,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuppressWarnings("all")
 public class ActivityDetailsDto {
-    long id;
-    String name;
-    Double calories;
-    String type;
-    String start_date;  // e.g. "2018-02-16T14:52:54Z"
+
+    private Long id;
+    private String name;
+    private Double calories;
+    private String type;
+    private String start_date;  // e.g. "2018-02-16T14:52:54Z"
+
 }
 

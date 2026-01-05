@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * See https://developers.strava.com/docs/authentication/ for implementation used.
+ * See <a href="https://developers.strava.com/docs/authentication/">Strava Documentation</a> for implementation used.
  */
 @Slf4j
 @Component
@@ -41,11 +41,12 @@ public class StravaClient {
     public static final String CALLBACK_URL = "callback_url";
     public static final String VERIFY_TOKEN = "verify_token";
     public static final String GRANT_TYPE = "grant_type";
-    @Autowired
-    RestTemplate restTemplate;
 
     @Autowired
-    StravaConfig stravaConfig;
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private StravaConfig stravaConfig;
 
     private static final String ERROR_MESSAGE = "Fout bij versturen.";
     private static final String BEARER_MESSAGE = "Bearer %s";
@@ -54,49 +55,26 @@ public class StravaClient {
     private static final String STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/activities";
     private static final String STRAVA_AUTHENTICATION_URL = "https://www.strava.com/oauth/token";
 
+    public StravaToken getStravaToken(final String authorizationCode) {
+        final var grantType = "authorization_code";
+        final var clientId = stravaConfig.getClientId().toString();
+        final var clientSecret = stravaConfig.getClientSecret();
 
-    public StravaToken getStravaToken(String authorizationCode) {
-        String grantType = "authorization_code";
-
-        String clientId = stravaConfig.getClientId().toString();
-        String clientSecret = stravaConfig.getClientSecret();
-        Map<String, String> reqPayload = new HashMap<>();
+        final var reqPayload = new HashMap<String, String>();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("code", authorizationCode);
         reqPayload.put(GRANT_TYPE, grantType);
 
         return getStravaToken(reqPayload);
-
     }
 
-    private StravaToken getStravaToken(Map<String, String> reqPayload) {
-        try {
-            final HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+    public StravaToken refreshToken(final String refreshToken) {
+        final var grantType = "refresh_token";
+        final var clientId = stravaConfig.getClientId().toString();
+        final var clientSecret = stravaConfig.getClientSecret();
 
-            final HttpEntity<Map<String, String>> entity = new HttpEntity<>(reqPayload, headers);
-            ResponseEntity<StravaToken> responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
-
-            return responseEntity.getBody();
-
-        } catch (HttpClientErrorException httpClientErrorException) {
-            log.error(httpClientErrorException.getResponseBodyAsString());
-            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return null;
-        } catch (RestClientException restClientException) {
-            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return null;
-        }
-    }
-
-    public StravaToken refreshToken(String refreshToken) {
-        String grantType = "refresh_token";
-
-        String clientId = stravaConfig.getClientId().toString();
-        String clientSecret = stravaConfig.getClientSecret();
-
-        Map<String, String> reqPayload = new HashMap<>();
+        final var reqPayload = new HashMap<String, String>();
         reqPayload.put(CLIENT_ID, clientId);
         reqPayload.put(CLIENT_SECRET, clientSecret);
         reqPayload.put("refresh_token", refreshToken);
@@ -105,63 +83,51 @@ public class StravaClient {
         return getStravaToken(reqPayload);
     }
 
-    private long getUTCEpoch(LocalDateTime localDateTime) {
-        ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.systemDefault());
-        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
-        return utcZoned.toEpochSecond();
-    }
-
-    public List<ListedActivityDto> getActivitiesForDay(String token, LocalDate date) {
+    public List<ListedActivityDto> getActivitiesForDay(final String token, final LocalDate date) {
         try {
+            final var localDateTimeStartOfDay = date.atStartOfDay();
+            final var localDateTimeEndOfDay = date.atStartOfDay().plusDays(1);
 
-            final LocalDateTime localDateTimeStartOfDay = date.atStartOfDay();
-            final LocalDateTime localDateTimeEndOfDay = date.atStartOfDay().plusDays(1);
-
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL)
+            final var builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL)
                     .queryParam("before", getUTCEpoch(localDateTimeEndOfDay))
                     .queryParam("after", getUTCEpoch(localDateTimeStartOfDay));
 
-            final HttpHeaders headers = new HttpHeaders();
+            final var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token));
 
-            final HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
-            ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<>() {
+            final var entity = new HttpEntity<>(headers);
+            final var parameterizedTypeReference = new ParameterizedTypeReference<List<ListedActivityDto>>() {
             };
-            ResponseEntity<List<ListedActivityDto>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
-
+            final var responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
             return responseEntity.getBody();
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
             return new ArrayList<>();
         } catch (RestClientException restClientException) {
-
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
             return new ArrayList<>();
         }
     }
 
-    public ActivityDetailsDto getActivityDetail(String token, Long activityDetailId) {
+    public ActivityDetailsDto getActivityDetail(final String token, final Long activityDetailId) {
         try {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL + "/" + activityDetailId);
-
-            final HttpHeaders headers = new HttpHeaders();
+            final var builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL + "/" + activityDetailId);
+            final var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token));
 
-            final HttpEntity<ActivityDetailsDto> entity = new HttpEntity<>(headers);
-            ResponseEntity<ActivityDetailsDto> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, ActivityDetailsDto.class);
+            final var entity = new HttpEntity<>(headers);
+            final var responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, ActivityDetailsDto.class);
 
-            ActivityDetailsDto gevondenActivity = responseEntity.getBody();
+            final var gevondenActivity = responseEntity.getBody();
             if (gevondenActivity != null) {
-                log.debug(gevondenActivity.getStart_date() + " - " + gevondenActivity.getCalories() + " - " + gevondenActivity.getName() + " " + gevondenActivity.getType() + " " + gevondenActivity.getId());
+                log.debug("{} - {} - {} {} {}", gevondenActivity.getStart_date(), gevondenActivity.getCalories(), gevondenActivity.getName(), gevondenActivity.getType(), gevondenActivity.getId());
             } else {
                 log.debug("Gevonden activity: " + null);
             }
-
             return gevondenActivity;
-
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
@@ -172,18 +138,15 @@ public class StravaClient {
         }
     }
 
-    public boolean unregister(StravaToken token) {
+    public boolean unregister(final StravaToken token) {
         try {
-            final HttpHeaders headers = new HttpHeaders();
+            final var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add(HttpHeaders.AUTHORIZATION, String.format(BEARER_MESSAGE, token.getAccess_token()));
-
-            final HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<String> responseEntity = restTemplate.exchange("https://www.strava.com/oauth/deauthorize", HttpMethod.POST, entity, String.class);
-
-            String gevondenToken = responseEntity.getBody();
+            final var entity = new HttpEntity<>(headers);
+            final var responseEntity = restTemplate.exchange("https://www.strava.com/oauth/deauthorize", HttpMethod.POST, entity, String.class);
+            final var gevondenToken = responseEntity.getBody();
             return gevondenToken != null;
-
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
@@ -194,30 +157,28 @@ public class StravaClient {
         }
     }
 
-    public SubscriptionInformation startWebhookSubscription(Integer clientId, String clientSecret, String callbackUrl, String subscribeVerifyToken) {
-
-        MultiValueMap<String, String> reqPayload = new LinkedMultiValueMap<>();
-
+    public SubscriptionInformation startWebhookSubscription(final Integer clientId,
+                                                            final String clientSecret,
+                                                            final String callbackUrl,
+                                                            final String subscribeVerifyToken) {
+        final var reqPayload = new LinkedMultiValueMap<String, String>();
         reqPayload.add(CLIENT_ID, clientId.toString());
         reqPayload.add(CLIENT_SECRET, clientSecret);
         reqPayload.add(CALLBACK_URL, callbackUrl);
         reqPayload.add(VERIFY_TOKEN, subscribeVerifyToken);
 
         try {
-            final HttpHeaders headers = new HttpHeaders();
+            final var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-            final HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(reqPayload, headers);
-            ResponseEntity<SubscriptionInformation> responseEntity = restTemplate.exchange(STRAVA_WEBHOOK_URL, HttpMethod.POST, entity, SubscriptionInformation.class);
-
-            SubscriptionInformation subscription = responseEntity.getBody();
-            if (subscription != null){
+            final var entity = new HttpEntity<MultiValueMap<String, String>>(reqPayload, headers);
+            final var responseEntity = restTemplate.exchange(STRAVA_WEBHOOK_URL, HttpMethod.POST, entity, SubscriptionInformation.class);
+            final var subscription = responseEntity.getBody();
+            if (subscription != null) {
                 log.debug("Aangemaakte subscription {}", subscription.getId());
             } else {
                 log.debug("Subscription: " + null);
             }
             return subscription;
-
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
@@ -228,22 +189,20 @@ public class StravaClient {
         }
     }
 
-    public SubscriptionInformation viewWebhookSubscription(Integer clientId, String clientSecret) {
+    public SubscriptionInformation viewWebhookSubscription(final Integer clientId, final String clientSecret) {
         try {
-
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL)
+            final var builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL)
                     .queryParam(CLIENT_ID, clientId)
                     .queryParam(CLIENT_SECRET, clientSecret);
-
-            final HttpHeaders headers = new HttpHeaders();
+            final var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            final HttpEntity<HttpHeaders> entity = new HttpEntity<>(headers);
-            ParameterizedTypeReference<List<SubscriptionInformation>> parameterizedTypeReference = new ParameterizedTypeReference<>() {
+            final var entity = new HttpEntity<HttpHeaders>(headers);
+            final var parameterizedTypeReference = new ParameterizedTypeReference<List<SubscriptionInformation>>() {
             };
 
-            ResponseEntity<List<SubscriptionInformation>> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
-            final List<SubscriptionInformation> body = responseEntity.getBody();
+            final var responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
+            final var body = responseEntity.getBody();
             if (body != null && !body.isEmpty()) {
                 return body.getFirst();
             }
@@ -253,33 +212,53 @@ public class StravaClient {
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
             return null;
         } catch (RestClientException restClientException) {
-
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
             return null;
         }
     }
 
-    public void deleteWebhookSubscription(Integer clientId, String clientSecret, Integer subscriptionId) {
+    public void deleteWebhookSubscription(final Integer clientId, final String clientSecret, final Integer subscriptionId) {
         try {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL + "/" + subscriptionId);
-
-            MultiValueMap<String, Object> reqPayload = new LinkedMultiValueMap<>();
+            final var builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL + "/" + subscriptionId);
+            final var reqPayload = new LinkedMultiValueMap<String, Object>();
             reqPayload.add(CLIENT_ID, clientId);
             reqPayload.add(CLIENT_SECRET, clientSecret);
 
-            final HttpHeaders headers = new HttpHeaders();
+            final var headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            final HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(reqPayload, headers);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, String.class);
+            final var entity = new HttpEntity<>(reqPayload, headers);
+            final var responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, String.class);
             log.debug("Received response for delete subscription : {}", responseEntity.getStatusCode());
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
         } catch (RestClientException restClientException) {
-
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
         }
+    }
+
+    private StravaToken getStravaToken(final Map<String, String> reqPayload) {
+        try {
+            final var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            final var entity = new HttpEntity<>(reqPayload, headers);
+            final var responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
+            return responseEntity.getBody();
+        } catch (HttpClientErrorException httpClientErrorException) {
+            log.error(httpClientErrorException.getResponseBodyAsString());
+            log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
+            return null;
+        } catch (RestClientException restClientException) {
+            log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
+            return null;
+        }
+    }
+
+    private long getUTCEpoch(LocalDateTime localDateTime) {
+        ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.systemDefault());
+        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+        return utcZoned.toEpochSecond();
     }
 
 }

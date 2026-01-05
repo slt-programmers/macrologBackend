@@ -6,15 +6,14 @@ import org.mapstruct.Named;
 import org.mapstruct.NullValueMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import slt.database.entities.Entry;
-import slt.database.entities.Portion;
 import slt.dto.EntryDto;
 import slt.dto.MacroDto;
-import slt.dto.PortionDto;
 import slt.util.MacroUtils;
 
 import java.util.List;
 
-@Mapper(nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
+@Mapper(uses = {FoodMapper.class, PortionMapper.class},
+        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface EntryMapper {
 
     EntryMapper INSTANCE = Mappers.getMapper(EntryMapper.class);
@@ -24,19 +23,11 @@ public interface EntryMapper {
 
     @Named("macrosCalculated")
     default MacroDto macrosCalculated(final Entry entry) {
-        final var macroDto =  MacroUtils.calculateMacro(entry.getFood(), entry.getPortion());
-        return MacroUtils.multiply(macroDto, entry.getMultiplier());
+        return MacroUtils.calculateMacro(entry.getFood(), entry.getPortion(), entry.getMultiplier());
     }
 
     List<EntryDto> map(final List<Entry> entries);
 
-    @Mapping(source = "entryDto.portion", target = "portion", qualifiedByName = "portionNullable")
     Entry map(final EntryDto entryDto, final Long userId);
-
-    @Named("portionNullable")
-    default Portion portionNullable(final PortionDto portionDto) {
-        if (portionDto == null) return null;
-        return Portion.builder().id(portionDto.getId()).build();
-    }
 
 }

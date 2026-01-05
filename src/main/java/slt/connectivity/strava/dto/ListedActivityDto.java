@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuppressWarnings("all")
 public class ListedActivityDto {
-    long id;
-    String name;
-    String type;
+
+    private Long id;
+    private String name;
+    private String type;
+
 }

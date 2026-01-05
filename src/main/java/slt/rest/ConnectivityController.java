@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import slt.connectivity.strava.StravaActivityService;
 import slt.dto.SettingDto;
-import slt.dto.StravaSyncedAccountDto;
+import slt.connectivity.strava.dto.StravaSyncedAccountDto;
 import slt.security.ThreadLocalHolder;
 
 @RestController

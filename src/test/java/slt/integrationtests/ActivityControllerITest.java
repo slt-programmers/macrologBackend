@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import slt.dto.ActivityDto;
 import slt.security.ThreadLocalHolder;
@@ -17,8 +16,6 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +39,7 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
 
     @Test
     public void testActivities() {
-        List<ActivityDto> newActivities = Arrays.asList(
+        final var newActivities = Arrays.asList(
                 ActivityDto.builder()
                         .day(Date.valueOf(LocalDate.parse("2001-01-01")))
                         .name("Running")
@@ -55,14 +52,14 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
                         .build()
 
         );
-        ResponseEntity<List<ActivityDto>> responseEntity = activityController.postActivities("2001-01-01", newActivities);
+        final var responseEntity = activityController.postActivities("2001-01-01", newActivities);
 
         // Check response object from store call
-        List<ActivityDto> newEntries = responseEntity.getBody();
-        assert newEntries != null;
+        final var newEntries = responseEntity.getBody();
+        Assertions.assertNotNull(newEntries);
         assertEquals(2, newEntries.size());
 
-        Optional<ActivityDto> running = newEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
+       final var running = newEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(running.isPresent(), "Running");
 
         assertEquals(20.0, running.get().getCalories().doubleValue());
@@ -70,7 +67,7 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
         assertTrue(isEqualDate(running.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(running.get().getId());
 
-        Optional<ActivityDto> cycling = newEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
+        final var cycling = newEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
         assertTrue(cycling.isPresent(), "Cycling");
 
         assertEquals(30.0, cycling.get().getCalories().doubleValue());
@@ -79,14 +76,14 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
         Assertions.assertNotNull(cycling.get().getId());
 
         // Check response object from get activities for day
-        ResponseEntity<List<ActivityDto>> activitiesForDay = activityController.getActivitiesForDay("2001-01-01", false);
+        final var activitiesForDay = activityController.getActivitiesForDay("2001-01-01", false);
         assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
 
-        List<ActivityDto> newResponseEntries = activitiesForDay.getBody();
-        assert newResponseEntries != null;
+        final var newResponseEntries = activitiesForDay.getBody();
+        Assertions.assertNotNull(newResponseEntries);
         assertEquals(2, newResponseEntries.size());
 
-        Optional<ActivityDto> runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
+        final var runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse.isPresent(), "Running");
 
         assertEquals(20.0, runningResponse.get().getCalories().doubleValue());
@@ -94,7 +91,7 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
         assertTrue(isEqualDate(runningResponse.get().getDay(), LocalDate.parse("2001-01-01")));
         Assertions.assertNotNull(runningResponse.get().getId());
 
-        Optional<ActivityDto> cyclingResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
+        final var cyclingResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Cycling")).findFirst();
         assertTrue(cyclingResponse.isPresent(), "Cycling");
 
         assertEquals(30.0, cyclingResponse.get().getCalories().doubleValue());
@@ -107,32 +104,40 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
         assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
 
         // Check response object from get activities for day.
-        activitiesForDay = activityController.getActivitiesForDay("2001-01-01", false);
-        assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
+        final var getActivitiesResponse = activityController.getActivitiesForDay("2001-01-01", false);
+        assertEquals(HttpStatus.OK, getActivitiesResponse.getStatusCode());
 
-        newResponseEntries = activitiesForDay.getBody();
-        assert newResponseEntries != null;
-        assertEquals(1, newResponseEntries.size());
+        final var newResponseEntries1 = getActivitiesResponse.getBody();
+        Assertions.assertNotNull(newResponseEntries1);
+        assertEquals(1, newResponseEntries1.size());
 
-        runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
-        assertTrue(runningResponse.isPresent(), "Running");
+        final var runningResponse2 = newResponseEntries1.stream().filter(a -> a.getName().equals("Running")).findFirst();
+        assertTrue(runningResponse2.isPresent(), "Running");
 
         // Update Running
-        runningResponse.get().setCalories(44.0);
-        responseEntity = activityController.postActivities("2001-01-01", Collections.singletonList(runningResponse.get()));
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        newResponseEntries = responseEntity.getBody();
-        assert newResponseEntries != null;
-        assertEquals(1, newResponseEntries.size());
+        final var running3 = runningResponse2.get();
+        final var updatedRunning = ActivityDto.builder()
+                .id(running3.getId())
+                .calories(44.0)
+                .syncedId(running3.getSyncedId())
+                .day(running3.getDay())
+                .name(running3.getName())
+                .syncedWith(running3.getSyncedWith())
+                .build();
+        final var responseEntity1 = activityController.postActivities("2001-01-01", Collections.singletonList(updatedRunning));
+        assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
+        final var newResponseEntries2 = responseEntity1.getBody();
+        Assertions.assertNotNull(newResponseEntries2);
+        assertEquals(1, newResponseEntries2.size());
 
-        activitiesForDay = activityController.getActivitiesForDay("2001-01-01", false);
-        assertEquals(HttpStatus.OK, activitiesForDay.getStatusCode());
-        newResponseEntries = activitiesForDay.getBody();
-        assert newResponseEntries != null;
-        assertEquals(1, newResponseEntries.size());
-        runningResponse = newResponseEntries.stream().filter(a -> a.getName().equals("Running")).findFirst();
-        assertTrue(runningResponse.isPresent(), "Running");
-        assertEquals(44.0, runningResponse.get().getCalories().doubleValue());
+        final var activitiesForDay1 = activityController.getActivitiesForDay("2001-01-01", false);
+        assertEquals(HttpStatus.OK, activitiesForDay1.getStatusCode());
+        final var newResponseEntries3 = activitiesForDay1.getBody();
+        Assertions.assertNotNull(newResponseEntries3);
+        assertEquals(1, newResponseEntries3.size());
+        final var runningResponse3 = newResponseEntries3.stream().filter(a -> a.getName().equals("Running")).findFirst();
+        assertTrue(runningResponse3.isPresent(), "Running");
+        assertEquals(44.0, runningResponse3.get().getCalories().doubleValue());
 
     }
 }

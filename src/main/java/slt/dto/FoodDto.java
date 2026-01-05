@@ -6,13 +6,12 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+@Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FoodDto {
 
+    @Setter
     private Long id;
     private String name;
     private Double protein;
@@ -21,9 +20,5 @@ public class FoodDto {
 
     @Builder.Default
     private List<PortionDto> portions = new ArrayList<>();
-
-    public void addPortion(PortionDto currDto) {
-        portions.add(currDto);
-    }
 
 }

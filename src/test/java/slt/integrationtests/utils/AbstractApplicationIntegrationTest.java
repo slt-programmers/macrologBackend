@@ -137,13 +137,9 @@ public abstract class AbstractApplicationIntegrationTest {
     protected FoodDto createFood(final FoodDto foodDtoZonderPortions) {
         final var responseEntity = foodController.postFood(foodDtoZonderPortions);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final var allFoodEntity = foodController.getAllFood();
-        assertThat(allFoodEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        final var foodDtos = allFoodEntity.getBody();
-        Assertions.assertNotNull(foodDtos);
-        final var optionalFoodDto = foodDtos.stream().filter(f -> f.getName().equals(foodDtoZonderPortions.getName())).findFirst();
-        Assertions.assertTrue(optionalFoodDto.isPresent());
-        return optionalFoodDto.get();
+        final var foodDto = responseEntity.getBody();
+        Assertions.assertNotNull(foodDto);
+        return foodDto;
     }
 
     protected void createEntry(final String day, final FoodDto savedFood, final PortionDto portion, double multiplier) {

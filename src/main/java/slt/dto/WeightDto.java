@@ -5,10 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
-@Setter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeightDto {

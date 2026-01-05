@@ -9,14 +9,14 @@ import java.util.HashMap;
 @Builder
 @Getter
 @Setter
-@SuppressWarnings("all")
 public class WebhookEvent {
 
-    String object_type;
-    Long object_id;
-    String aspect_type;
-    Long owner_id;
-    Integer subscription_id;
-    Long event_time;
-    HashMap<String,String> updates;
+    private String object_type;
+    private Long object_id;
+    private String aspect_type;
+    private Long owner_id;
+    private Integer subscription_id;
+    private Long event_time;
+    private HashMap<String, String> updates;
+
 }

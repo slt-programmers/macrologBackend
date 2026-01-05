@@ -10,13 +10,12 @@ import slt.connectivity.strava.dto.StravaAthleteDto;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SuppressWarnings("all")
 public class StravaToken {
 
-    Long expires_at;
-    Long expires_in;
-    String refresh_token;
-    String access_token;
-    StravaAthleteDto athlete;
+    private Long expires_at;
+    private Long expires_in;
+    private String refresh_token;
+    private String access_token;
+    private StravaAthleteDto athlete;
 
 }

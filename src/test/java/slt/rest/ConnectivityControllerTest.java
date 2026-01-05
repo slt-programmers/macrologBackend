@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import slt.connectivity.strava.StravaActivityService;
 import slt.dto.SettingDto;
-import slt.dto.StravaSyncedAccountDto;
+import slt.connectivity.strava.dto.StravaSyncedAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import static org.mockito.Mockito.*;
