@@ -1,22 +1,15 @@
 package slt.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
 @Builder
 public class MacroDto {
 
     private Double protein;
-
     private Double fat;
-
     private Double carbs;
-
+    @Setter
     private Integer calories;
 
 }

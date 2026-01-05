@@ -1,13 +1,11 @@
 package slt.connectivity.google;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -17,7 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import slt.config.GoogleConfig;
-import slt.connectivity.oath2.Oath2Token;
+import slt.connectivity.google.dto.Oath2Token;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -25,6 +23,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,12 +54,12 @@ class GoogleClientTest {
         when(googleConfig.getClientId()).thenReturn("1");
         when(googleConfig.getClientSecret()).thenReturn("2");
 
-        ResponseEntity<Oath2Token> response = mock(ResponseEntity.class);
+        final var response = mock(ResponseEntity.class);
         when(response.getBody()).thenReturn(Oath2Token.builder().build());
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Oath2Token.class))).thenReturn(response);
 
-        final Oath2Token refreshedToken = googleClient.refreshToken("r");
-        assertThat(refreshedToken).isNotNull();
+        final var refreshedToken = googleClient.refreshToken("r");
+        Assertions.assertTrue(refreshedToken.isPresent());
     }
 
     @Test
@@ -70,8 +69,8 @@ class GoogleClientTest {
 
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Oath2Token.class))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
-        final Oath2Token refreshedToken = googleClient.refreshToken("r");
-        assertThat(refreshedToken).isNull();
+        final var refreshedToken = googleClient.refreshToken("r");
+        Assertions.assertTrue(refreshedToken.isPresent());
     }
 
     @Test
@@ -82,9 +81,9 @@ class GoogleClientTest {
         ArgumentCaptor<HttpEntity<HashMap>> argumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), argumentCaptor.capture(), eq(Oath2Token.class))).thenThrow(new RestClientException("a"));
 
-        final Oath2Token refreshedToken = googleClient.refreshToken("r");
-        assertThat(refreshedToken).isNull();
-        assertThat(argumentCaptor.getValue().getBody().get("grant_type")).isEqualTo("refresh_token");
+        final var refreshedToken = googleClient.refreshToken("r");
+        Assertions.assertTrue(refreshedToken.isEmpty());
+        assertThat(Objects.requireNonNull(argumentCaptor.getValue().getBody()).get("grant_type")).isEqualTo("refresh_token");
         assertThat(argumentCaptor.getValue().getBody().get("refresh_token")).isEqualTo("r");
     }
 
@@ -96,27 +95,23 @@ class GoogleClientTest {
         ArgumentCaptor<HttpEntity<HashMap>> argumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), argumentCaptor.capture(), eq(Oath2Token.class))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
-        final Oath2Token refreshedToken = googleClient.getAuthorizationToken("r");
-        assertThat(refreshedToken).isNull();
-        assertThat(argumentCaptor.getValue().getBody().get("grant_type")).isEqualTo("authorization_code");
+        final var refreshedToken = googleClient.getAuthorizationToken("r");
+        Assertions.assertTrue(refreshedToken.isPresent());
+        assertThat(Objects.requireNonNull(argumentCaptor.getValue().getBody()).get("grant_type")).isEqualTo("authorization_code");
         assertThat(argumentCaptor.getValue().getBody().get("code")).isEqualTo("r");
     }
 
     @Test
     void sendMailNoToken() throws IOException, GeneralSecurityException {
-        Message message = mock(Message.class);
+        final var message = mock(Message.class);
         googleClient.sendMail(null, message);
         verify(googleConfig, times(0)).getApplicationName();
     }
 
     @Test
     void sendMailWithToken() {
-        Message message = mock(Message.class);
-
-
-        assertThrows(GoogleJsonResponseException.class, () -> {
-            googleClient.sendMail(Oath2Token.builder().build(),message);
-        });
+        final var message = mock(Message.class);
+        assertThrows(GoogleJsonResponseException.class, () -> googleClient.sendMail(Oath2Token.builder().build(),message));
     }
 
     @Test
@@ -128,9 +123,8 @@ class GoogleClientTest {
 
     @Test
     void createGoogleMail() throws IOException, MessagingException {
-        Message message = mock(MimeMessage.class);
+        final var message = mock(MimeMessage.class);
         final com.google.api.services.gmail.model.Message messageWithEmail = googleClient.createMessageWithEmail(message);
-
         assertThat(messageWithEmail.getRaw()).isNotNull();
     }
 }

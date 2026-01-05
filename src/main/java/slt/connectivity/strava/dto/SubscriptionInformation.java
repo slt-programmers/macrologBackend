@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-@SuppressWarnings("all")
 public class SubscriptionInformation {
 
-    Integer id;
-    String callback_url;
+    private Integer id;
+    private String callback_url;
 
 }

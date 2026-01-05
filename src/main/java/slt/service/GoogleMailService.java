@@ -5,13 +5,11 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import slt.config.GoogleConfig;
 import slt.connectivity.google.GoogleClient;
-import slt.connectivity.oath2.Oath2Token;
+import slt.connectivity.google.dto.Oath2Token;
 import slt.database.SettingsRepository;
 import slt.database.entities.Setting;
 import slt.database.entities.UserAccount;
 import slt.dto.ConnectivityStatusDto;
-
-import javax.mail.internet.MimeMessage;
 
 import jakarta.transaction.Transactional;
 
@@ -20,6 +18,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -71,8 +70,9 @@ public class GoogleMailService {
                 .build();
         settingsRepository.putSetting(setting);
 
-        final var token = googleClient.getAuthorizationToken(clientAuthorizationCode);
-        if (token != null) {
+        final var optionalToken = googleClient.getAuthorizationToken(clientAuthorizationCode);
+        if (optionalToken.isPresent()) {
+            final var token = optionalToken.get();
             final var expiresIn = Long.valueOf(token.getExpires_in().toString());
             final long expiresAt = getExpiresAtFromExpiresIn(expiresIn);
 
@@ -84,6 +84,85 @@ public class GoogleMailService {
         } else {
             log.error("Unable to get token for gmail");
         }
+    }
+
+
+    public void sendPasswordRetrievalMail(final String email, final String unhashedTemporaryPassword, final UserAccount account) {
+        if (isConnnectedToGmail()) {
+            try {
+                final var subject = "Macrolog Credentials";
+                final var body = "<h3>Hello " + account.getUserName() + ", </h3>" +
+                        "<p>A request has been made to reset your password. </p>" +
+                        "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
+                        "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
+                        "<p>If you did not request this password change, you can ignore this messsage. </p>" +
+                        "<p>See you soon! </p>" +
+                        "<p>Carmen and Arjan from Macrolog </p>";
+
+                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
+                final var email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
+                final var optionalToken = getOath2Token();
+                assert optionalToken.isPresent();
+                final var token = optionalToken.get();
+                googleClient.sendMail(token, email1);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
+        }
+    }
+
+    public void sendConfirmationMail(final String email, final UserAccount account) {
+        if (isConnnectedToGmail()) {
+            try {
+                final var subject = "Welcome to Macrolog!";
+                final var body = "<p>Hello " + account.getUserName() + ", </p>" +
+                        "<p>Thank you for using Macrolog!</p>" +
+                        "<p>You are now ready to use both the app and the <a href=\"https://macrolog.herokuapp.com/\"> website</a>. " +
+                        "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
+                        "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
+                        "<p>All the best,</p>" +
+                        "<p>Carmen and Arjan from Macrolog</p>";
+
+                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
+                final var email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
+                final var optionalToken = getOath2Token();
+                assert optionalToken.isPresent();
+                final var token = optionalToken.get();
+                googleClient.sendMail(token, email1);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
+        }
+    }
+
+    public void sendTestMail(final String email) {
+        if (isConnnectedToGmail()) {
+            try {
+                final var subject = "Test mail from Macrolog!";
+                final var body = "<p>Hello,</p>" +
+                        "<p>This is a testmail for Macrolog!</p>" +
+                        "<p>And it works! Yay! </p>" +
+                        "<p>All the best,</p>" +
+                        "<p>Carmen and Arjan from Macrolog</p>";
+
+                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
+                final var email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
+                final var optionalToken = getOath2Token();
+                assert optionalToken.isPresent();
+                final var token = optionalToken.get();
+                googleClient.sendMail(token, email1);
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
+            }
+        }
+    }
+
+    private boolean isConnnectedToGmail() {
+        if (!connected) {
+            log.error("Uable to send mail. Google Mail is not connected.'");
+            return false;
+        }
+        return true;
     }
 
     private long getExpiresAtFromExpiresIn(final Long expiresIn) {
@@ -99,7 +178,7 @@ public class GoogleMailService {
                 .day(Date.valueOf(LocalDate.now())).build());
     }
 
-    private Oath2Token getOath2Token() {
+    private Optional<Oath2Token> getOath2Token() {
         final var accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
         final var refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
         final var expiresAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
@@ -108,10 +187,10 @@ public class GoogleMailService {
                 refreshToken == null ||
                 expiresAt == null) {
             log.error("Gmail session not initialized");
-            return null;
+            return Optional.empty();
         }
 
-        var token = Oath2Token.builder()
+        final var token = Oath2Token.builder()
                 .access_token(accessToken.getValue())
                 .refresh_token(refreshToken.getValue())
                 .expires_at(Long.valueOf(expiresAt.getValue()))
@@ -119,17 +198,23 @@ public class GoogleMailService {
 
         if (isExpired(token)) {
             log.debug("Token is expired. Refreshing..");
-            token = googleClient.refreshToken(token.getRefresh_token());
-            if (token == null) {
+            final var optionalToken = googleClient.refreshToken(token.getRefresh_token());
+            if (optionalToken.isEmpty()) {
                 log.error("Unable to get new token");
-                return null;
-            } else if (isExpired(token)) {
-                log.error("New token also expired. wtf...");
-                return null;
+                return Optional.empty();
+            } else {
+                final var newToken = optionalToken.get();
+                if (isExpired(newToken)) {
+                    log.error("New token also expired. wtf...");
+                    return Optional.empty();
+                } else {
+                    storeTokenSettings(newToken);
+                    return Optional.of(newToken);
+                }
             }
-            storeTokenSettings(token);
+        } else {
+            return Optional.of(token);
         }
-        return token;
     }
 
     @Transactional
@@ -154,7 +239,6 @@ public class GoogleMailService {
         settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, expireAt);
     }
 
-
     private boolean isExpired(final Oath2Token token) {
         var expiresAt = token.getExpires_at();
         if (expiresAt == null) {
@@ -168,73 +252,5 @@ public class GoogleMailService {
         return timeTokenExpires.isBefore(currentTime);
     }
 
-    public void sendPasswordRetrievalMail(final String email, final String unhashedTemporaryPassword, final UserAccount account) {
-        if (isConnnectedToGmail()) {
-            try {
-                final var subject = "Macrolog Credentials";
-                final var body = "<h3>Hello " + account.getUserName() + ", </h3>" +
-                        "<p>A request has been made to reset your password. </p>" +
-                        "<p>We have generated a new password for you: <i>" + unhashedTemporaryPassword + "</i>. </p>" +
-                        "<p>You can use this within 30 minutes to log in and choose a new password of your own. </p>" +
-                        "<p>If you did not request this password change, you can ignore this messsage. </p>" +
-                        "<p>See you soon! </p>" +
-                        "<p>Carmen and Arjan from Macrolog </p>";
-
-                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
-                final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(), email1);
-            } catch (Exception ex) {
-                log.error(ex.getMessage());
-            }
-        }
-    }
-
-    public void sendConfirmationMail(final String email, final UserAccount account) {
-        if (isConnnectedToGmail()) {
-            try {
-                final var subject = "Welcome to Macrolog!";
-                final var body = "<p>Hello " + account.getUserName() + ", </p>" +
-                        "<p>Thank you for using Macrolog!</p>" +
-                        "<p>You are now ready to use both the app and the <a href=\"https://macrolog.herokuapp.com/\"> website</a>. " +
-                        "Our aim is to make it as easy as possible to log your food intake on a daily basis. " +
-                        "We hope this app ultimately helps you to achieve your goals, whatever they may be. </p>" +
-                        "<p>All the best,</p>" +
-                        "<p>Carmen and Arjan from Macrolog</p>";
-
-                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
-                final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(), email1);
-            } catch (Exception ex) {
-                log.error(ex.getMessage());
-            }
-        }
-    }
-
-    private boolean isConnnectedToGmail() {
-        if (!connected) {
-            log.error("Uable to send mail. Google Mail is not connected.'");
-            return false;
-        }
-        return true;
-    }
-
-    public void sendTestMail(final String email) {
-        if (isConnnectedToGmail()) {
-            try {
-                final var subject = "Test mail from Macrolog!";
-                final var body = "<p>Hello,</p>" +
-                        "<p>This is a testmail for Macrolog!</p>" +
-                        "<p>And it works! Yay! </p>" +
-                        "<p>All the best,</p>" +
-                        "<p>Carmen and Arjan from Macrolog</p>";
-
-                log.debug(MAIL_SEND_TO_DEBUGLINE + email);
-                final MimeMessage email1 = googleClient.createEmail(email, MACROLOG_FROM_ADDRESS, subject, body);
-                googleClient.sendMail(getOath2Token(), email1);
-            } catch (Exception ex) {
-                log.error(ex.getMessage());
-            }
-        }
-    }
 
 }

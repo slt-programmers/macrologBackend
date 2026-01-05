@@ -9,7 +9,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import slt.config.GoogleConfig;
 import slt.connectivity.google.GoogleClient;
-import slt.connectivity.oath2.Oath2Token;
+import slt.connectivity.google.dto.Oath2Token;
 import slt.database.SettingsRepository;
 import slt.database.entities.Setting;
 import slt.database.entities.UserAccount;
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,7 +89,7 @@ class GoogleMailServiceTest {
         when(googleConfig.getClientSecret()).thenReturn("s");
         assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(false);
 
-        when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(Oath2Token.builder().expires_in(200L).build());
+        when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(Optional.of(Oath2Token.builder().expires_in(200L).build()));
         googleMailService.registerWithCode("code");
         assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(true);
 

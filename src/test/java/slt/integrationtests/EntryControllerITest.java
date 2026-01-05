@@ -27,7 +27,7 @@ public class EntryControllerITest extends AbstractApplicationIntegrationTest {
     @BeforeAll
     public void setUserContext() {
         if (this.userId == null) {
-            log.debug("Creating test user for test " + this.getClass().getName());
+            log.debug("Creating test user for test {}", this.getClass().getName());
             this.userId = createUser(this.getClass().getName());
         }
         final var userInfo = new UserInfo();

@@ -20,29 +20,14 @@ public class ExportService {
 
     public Export exportAllForUser(final Long userId) {
         log.info("Exporting all data for user [{}]", userId);
-        final var export = new Export();
-
-        final var allFood = foodService.getAllFood(userId);
-        export.setAllFood(allFood);
-
-        final var allEntries = entryService.getAllEntries(userId);
-        export.setAllLogEntries(allEntries);
-
-        final var settings = settingsService.getAllUserSettings(userId);
-        export.setAllSettingDtos(settings);
-
-        final var activities = activityService.getAllActivities(userId);
-        export.setAllActivities(activities);
-
-        final var allWeights = weightService.getAllWeights(userId);
-        export.setAllWeights(allWeights);
-
-        final var allDishes = dishService.getAllDishes(userId);
-        export.setAllDishes(allDishes);
-
-        final var allMealplans = mealplanService.getAllMealplans(userId);
-        export.setAllMealplans(allMealplans);
-
-        return export;
+        return Export.builder()
+                .allFood(foodService.getAllFood(userId))
+                .allLogEntries(entryService.getAllEntries(userId))
+                .allSettingDtos(settingsService.getAllUserSettings(userId))
+                .allActivities(activityService.getAllActivities(userId))
+                .allWeights(weightService.getAllWeights(userId))
+                .allDishes(dishService.getAllDishes(userId))
+                .allMealplans(mealplanService.getAllMealplans(userId))
+                .build();
     }
 }

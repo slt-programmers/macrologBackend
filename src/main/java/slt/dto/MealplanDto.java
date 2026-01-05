@@ -6,8 +6,8 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder
 @Getter
+@Builder
 public class MealplanDto {
 
     private Long id;

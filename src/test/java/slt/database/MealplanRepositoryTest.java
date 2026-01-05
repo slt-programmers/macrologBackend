@@ -35,12 +35,13 @@ class MealplanRepositoryTest {
         user.setUserName("test");
         user.setPassword("xyz");
         userAccountRepository.saveAccount(user);
-        final var food = new Food();
-        food.setName("food");
-        food.setProtein(1D);
-        food.setFat(2D);
-        food.setCarbs(3D);
-        food.setUserId(1L);
+        final var food =  Food.builder()
+                .name("food")
+                .protein(1D)
+                .fat(2D)
+                .carbs(3D)
+                .userId(1L)
+                .build();
         foodRepository.saveFood(food);
     }
 

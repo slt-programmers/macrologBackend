@@ -6,9 +6,6 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserSettingsDto {
@@ -18,6 +15,7 @@ public class UserSettingsDto {
     private Integer age;
     private LocalDate birthday;
     private Integer height;
+    @Setter
     private Double currentWeight;
     private Double activity;
 

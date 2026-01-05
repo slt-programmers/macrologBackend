@@ -32,27 +32,25 @@ public interface SettingsMapper {
     SettingDto map(final Setting setting);
 
     default UserSettingsDto mapToUserSettingsDto(final List<Setting> settings) {
-        final var dto = new UserSettingsDto();
-
-        dto.setName(getLatestSetting(settings, "name"));
-        dto.setGender(getLatestSetting(settings, "gender"));
         final var ageSetting = getLatestSetting(settings, "age");
-        dto.setAge(StringUtils.isEmpty(ageSetting) ? null : Integer.valueOf(ageSetting));
         final var birthdaySetting = getLatestSetting(settings, "birthday");
-        dto.setBirthday(StringUtils.isEmpty(birthdaySetting) ? null : LocalDateParser.parse(birthdaySetting));
         final var heightSetting = getLatestSetting(settings, "height");
-        dto.setHeight(StringUtils.isEmpty(heightSetting) ? null : Integer.valueOf(heightSetting));
         final var activitySetting = getLatestSetting(settings, "activity");
-        dto.setActivity(StringUtils.isEmpty(activitySetting) ? null : Double.valueOf(activitySetting));
-
         final var goalProteinSetting = getLatestSetting(settings, "goalProtein");
-        dto.setGoalProtein(StringUtils.isEmpty(goalProteinSetting) ? null : Integer.valueOf(goalProteinSetting));
         final var goalFatSetting = getLatestSetting(settings, "goalFat");
-        dto.setGoalFat(StringUtils.isEmpty(goalFatSetting) ? null : Integer.valueOf(goalFatSetting));
         final var goalCarbsSetting = getLatestSetting(settings, "goalCarbs");
-        dto.setGoalCarbs(StringUtils.isEmpty(goalCarbsSetting) ? null : Integer.valueOf(goalCarbsSetting));
 
-        return dto;
+        return UserSettingsDto.builder()
+                .name(getLatestSetting(settings, "name"))
+                .gender(getLatestSetting(settings, "gender"))
+                .age(StringUtils.isEmpty(ageSetting) ? null : Integer.valueOf(ageSetting))
+                .birthday(StringUtils.isEmpty(birthdaySetting) ? null : LocalDateParser.parse(birthdaySetting))
+                .height(StringUtils.isEmpty(heightSetting) ? null : Integer.valueOf(heightSetting))
+                .activity(StringUtils.isEmpty(activitySetting) ? null : Double.valueOf(activitySetting))
+                .goalProtein(StringUtils.isEmpty(goalProteinSetting) ? null : Integer.valueOf(goalProteinSetting))
+                .goalFat(StringUtils.isEmpty(goalFatSetting) ? null : Integer.valueOf(goalFatSetting))
+                .goalCarbs(StringUtils.isEmpty(goalCarbsSetting) ? null : Integer.valueOf(goalCarbsSetting))
+                .build();
     }
 
     private String getLatestSetting(final List<Setting> settings, final String identifier) {

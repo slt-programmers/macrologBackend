@@ -1,4 +1,4 @@
-package slt.dto;
+package slt.connectivity.strava.dto;
 
 import lombok.Builder;
 import lombok.Getter;

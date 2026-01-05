@@ -1,4 +1,4 @@
-package slt.connectivity.oath2;
+package slt.connectivity.google.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SuppressWarnings("all")
 public class Oath2Token {
 
     private Long expires_at;

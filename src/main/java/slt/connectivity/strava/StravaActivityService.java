@@ -3,7 +3,6 @@ package slt.connectivity.strava;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import slt.config.StravaConfig;
-import slt.connectivity.strava.dto.ActivityDetailsDto;
 import slt.connectivity.strava.dto.ListedActivityDto;
 import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.connectivity.strava.dto.WebhookEvent;
@@ -11,7 +10,7 @@ import slt.database.ActivityRepository;
 import slt.database.SettingsRepository;
 import slt.database.entities.Activity;
 import slt.database.entities.Setting;
-import slt.dto.StravaSyncedAccountDto;
+import slt.connectivity.strava.dto.StravaSyncedAccountDto;
 import slt.util.LocalDateParser;
 
 import jakarta.transaction.Transactional;
@@ -23,8 +22,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-@Service
 @Slf4j
+@Service
 public class StravaActivityService {
 
     private final SettingsRepository settingsRepository;
@@ -49,12 +48,12 @@ public class StravaActivityService {
 
     private static final String ACTIVITY = "activity";
 
-    Integer stravaWebhookSubscriptionId = null;
+    protected Integer stravaWebhookSubscriptionId = null;
 
-    public StravaActivityService(SettingsRepository settingsRepository,
-                                 ActivityRepository activityRepository,
-                                 StravaConfig stravaConfig,
-                                 StravaClient stravaClient) {
+    public StravaActivityService(final SettingsRepository settingsRepository,
+                                 final ActivityRepository activityRepository,
+                                 final StravaConfig stravaConfig,
+                                 final StravaClient stravaClient) {
         this.settingsRepository = settingsRepository;
         this.activityRepository = activityRepository;
         this.stravaConfig = stravaConfig;
@@ -81,8 +80,8 @@ public class StravaActivityService {
 
     public void endWebhookSubscription(Integer subscriptionId) {
         this.stravaWebhookSubscriptionId = null;
-        final Integer clientId = stravaConfig.getClientId();
-        final String clientSecret = stravaConfig.getClientSecret();
+        final var clientId = stravaConfig.getClientId();
+        final var clientSecret = stravaConfig.getClientSecret();
         stravaClient.deleteWebhookSubscription(clientId, clientSecret, subscriptionId);
     }
 
@@ -109,7 +108,7 @@ public class StravaActivityService {
             final var athleteId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
             final var image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
 
-            final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
+            final var stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
             // TODO proper optional checks
             return StravaSyncedAccountDto.builder()
@@ -135,7 +134,7 @@ public class StravaActivityService {
     // scope=read,activity:read_all --> moet
     public StravaSyncedAccountDto registerStravaConnectivity(final Long userId, final String clientAuthorizationCode) {
         // store user settings for this user:
-        Setting setting = Setting.builder()
+        final var setting = Setting.builder()
                 .userId(userId)
                 .name(STRAVA_CLIENT_AUTHORIZATION_CODE)
                 .value(clientAuthorizationCode)
@@ -143,7 +142,7 @@ public class StravaActivityService {
                 .build();
         settingsRepository.putSetting(setting);
 
-        StravaToken stravaToken = stravaClient.getStravaToken(clientAuthorizationCode);
+        final var stravaToken = stravaClient.getStravaToken(clientAuthorizationCode);
 
         if (stravaToken != null) {
             // Initial save of all settings.
@@ -155,7 +154,7 @@ public class StravaActivityService {
             saveSetting(userId, STRAVA_FIRSTNAME, stravaToken.getAthlete().getFirstname());
             saveSetting(userId, STRAVA_ATHLETE_ID, stravaToken.getAthlete().getId().toString());
 
-            final Long stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
+            final var stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
             return StravaSyncedAccountDto.builder()
                     .image(stravaToken.getAthlete().getProfile_medium())
@@ -174,7 +173,7 @@ public class StravaActivityService {
             return;
         }
         try {
-            StravaToken token = getStravaToken(userId);
+            final var token = getStravaToken(userId);
             if (token != null) {
                 stravaClient.unregister(token);
             }
@@ -190,7 +189,6 @@ public class StravaActivityService {
         settingsRepository.deleteAllForUser(userId, STRAVA_LASTNAME);
         settingsRepository.deleteAllForUser(userId, STRAVA_PROFILE);
         settingsRepository.deleteAllForUser(userId, STRAVA_REFRESH_TOKEN);
-
     }
 
     @Transactional
@@ -198,9 +196,9 @@ public class StravaActivityService {
         log.debug("Storing token update");
 
         // TODO fix nullpointer
-        final Setting accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
-        final Setting refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
-        final Setting expireAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
+        final var accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
+        final var refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
+        final var expireAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
 
         accessToken.setValue(stravaToken.getAccess_token());
         refreshToken.setValue(stravaToken.getRefresh_token());
@@ -278,7 +276,7 @@ public class StravaActivityService {
         log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
         final var stravaActivityId = stravaActivity.getId();
         final var optionalMatchingActivity = dayActivities.stream()
-                .filter(a -> a.getSyncedId() != null && a.getSyncedId() == stravaActivityId)
+                .filter(a -> a.getSyncedId() != null && a.getSyncedId().equals(stravaActivityId))
                 .findAny();
 
         if (optionalMatchingActivity.isPresent()) {
@@ -300,11 +298,11 @@ public class StravaActivityService {
     }
 
     public SubscriptionInformation startWebhookSubcription() {
-        final Integer clientId = stravaConfig.getClientId();
-        final String clientSecret = stravaConfig.getClientSecret();
-        final String subscribeVerifyToken = stravaConfig.getVerifytoken();
-        final String callbackUrl = stravaConfig.getCallbackUrl();
-        final SubscriptionInformation subscriptionInformation = stravaClient.startWebhookSubscription(clientId, clientSecret, callbackUrl, subscribeVerifyToken);
+        final var clientId = stravaConfig.getClientId();
+        final var clientSecret = stravaConfig.getClientSecret();
+        final var subscribeVerifyToken = stravaConfig.getVerifytoken();
+        final var callbackUrl = stravaConfig.getCallbackUrl();
+        final var subscriptionInformation = stravaClient.startWebhookSubscription(clientId, clientSecret, callbackUrl, subscribeVerifyToken);
         if (subscriptionInformation != null) {
             log.debug("Starting webhook subscription {}", subscriptionInformation.getId());
             this.stravaWebhookSubscriptionId = subscriptionInformation.getId();
@@ -320,13 +318,13 @@ public class StravaActivityService {
             log.error("Webhook event received from another subscription. Expected {}, but received {}", stravaWebhookSubscriptionId, event.getSubscription_id());
             return;
         }
-        final HashMap<String, String> updates = event.getUpdates();
+        final var updates = event.getUpdates();
         if (event.getUpdates() != null) {
             for (Map.Entry<String, String> stringStringEntry : updates.entrySet()) {
-                log.debug(stringStringEntry.getKey() + " - " + stringStringEntry.getValue());
+                log.debug("{} - {}", stringStringEntry.getKey(), stringStringEntry.getValue());
             }
         }
-        final Optional<Setting> foundStravaUserMatch = settingsRepository.findByKeyValue(STRAVA_ATHLETE_ID, event.getOwner_id().toString());
+        final var foundStravaUserMatch = settingsRepository.findByKeyValue(STRAVA_ATHLETE_ID, event.getOwner_id().toString());
         if (foundStravaUserMatch.isPresent()) {
             log.debug("User found " + foundStravaUserMatch.get().getUserId());
             final StravaToken stravaToken = getStravaToken(foundStravaUserMatch.get().getUserId());
@@ -344,7 +342,6 @@ public class StravaActivityService {
         } else {
             log.error("Unable to process webhook event from Strava. No user found with Strava id {}", event.getOwner_id());
         }
-
     }
 
     private void processStravaActivityEvent(final WebhookEvent event, final Setting foundStravaUserMatch, final StravaToken stravaToken) {
@@ -354,11 +351,11 @@ public class StravaActivityService {
         if ("create".equals(event.getAspect_type()) ||
                 "update".equals(event.getAspect_type())) {
             if (optionalStoredStravaActivity.isPresent()) {
-                Activity storedActivity = syncActivity(stravaToken, stravaActivityId, optionalStoredStravaActivity.get());
+                final var storedActivity = syncActivity(stravaToken, stravaActivityId, optionalStoredStravaActivity.get());
                 activityRepository.saveActivity( storedActivity);
                 log.debug("Strava activity updated");
             } else {
-                final Activity newMacrologActivity = createNewMacrologActivity(stravaToken, stravaActivityId);
+                final var newMacrologActivity = createNewMacrologActivity(stravaToken, stravaActivityId);
                 activityRepository.saveActivity(newMacrologActivity);
                 log.debug("New activity added via strava {}", stravaActivityId);
             }
@@ -373,10 +370,10 @@ public class StravaActivityService {
     }
 
     private Activity createNewMacrologActivity(final StravaToken token, final Long stravaActivityId) {
-        final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
-        final String startDateString = activityDetail.getStart_date();
+        final var activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
+        final var startDateString = activityDetail.getStart_date();
         // To avoid timezone issues we take the date part only and convert it to localdate
-        final LocalDate startDateLocalDate = LocalDateParser.parse(startDateString.substring(0, startDateString.indexOf('T')));
+        final var startDateLocalDate = LocalDateParser.parse(startDateString.substring(0, startDateString.indexOf('T')));
         return Activity.builder()
                 .day(Date.valueOf(startDateLocalDate))
                 .name(makeUTF8(activityDetail.getType() + ": " + activityDetail.getName()))
@@ -392,11 +389,8 @@ public class StravaActivityService {
     }
 
     private Activity syncActivity(final StravaToken token, final Long stravaActivityId, final Activity storedActivity) {
-
-        final ActivityDetailsDto activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
-
-        String name = activityDetail.getType() + ": " + activityDetail.getName();
-
+        final var activityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
+        final var name = activityDetail.getType() + ": " + activityDetail.getName();
         storedActivity.setName(makeUTF8(name));
         storedActivity.setCalories(activityDetail.getCalories());
         return storedActivity;
@@ -405,8 +399,8 @@ public class StravaActivityService {
     private boolean isExpired(final StravaToken token) {
         final var expires_at = token.getExpires_at();
         final var instant = Instant.ofEpochSecond(expires_at);
-        LocalDateTime timeTokenExpires = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(10);
+        final var timeTokenExpires = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+        final var currentTime = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(10);
         log.debug("Token valid until [{}]", timeTokenExpires);
         return timeTokenExpires.isBefore(currentTime);
     }
