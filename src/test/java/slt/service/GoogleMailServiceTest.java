@@ -13,7 +13,6 @@ import slt.connectivity.google.dto.Oath2Token;
 import slt.database.SettingsRepository;
 import slt.database.entities.Setting;
 import slt.database.entities.UserAccount;
-import slt.dto.ConnectivityStatusDto;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -44,33 +43,33 @@ class GoogleMailServiceTest {
     GoogleMailService googleMailService;
 
     @BeforeEach
-    void beforEach(){
+    void beforEach() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     void mailStatusStaatUit() {
         when(googleConfig.getClientSecret()).thenReturn("uit");
-        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-        final ConnectivityStatusDto mailStatus = mailService.getMailStatus();
+        final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        final var mailStatus = mailService.getMailStatus();
         assertThat(mailStatus.isConnected()).isEqualTo(false);
     }
 
     @Test
     void getMailStatusUitMaarGeenSetting() {
-            when(googleConfig.getClientSecret()).thenReturn("a");
-            when(settingsRepository.getLatestSetting(any(), any())).thenReturn(null);
-            GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-            final ConnectivityStatusDto mailStatus = mailService.getMailStatus();
-            assertThat(mailStatus.isConnected()).isEqualTo(false);
+        when(googleConfig.getClientSecret()).thenReturn("a");
+        when(settingsRepository.getLatestSetting(any(), any())).thenReturn(null);
+        final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        final var mailStatus = mailService.getMailStatus();
+        assertThat(mailStatus.isConnected()).isEqualTo(false);
     }
 
     @Test
     void getMailStatusAanMetSetting() {
         when(googleConfig.getClientSecret()).thenReturn("a");
         when(settingsRepository.getLatestSetting(any(), any())).thenReturn(Setting.builder().build());
-        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-        final ConnectivityStatusDto mailStatus = mailService.getMailStatus();
+        final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        final var mailStatus = mailService.getMailStatus();
         assertThat(mailStatus.isConnected()).isEqualTo(true);
     }
 
@@ -78,74 +77,61 @@ class GoogleMailServiceTest {
     void registerWithCodeNoSetting() {
         when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(Optional.empty());
         googleMailService.registerWithCode("code");
-        verify(settingsRepository,times(1)).putSetting(any());
+        verify(settingsRepository, times(1)).putSetting(any());
     }
 
     @Test
     void registerWithCodeWithSetting() {
-
         when(googleConfig.getClientSecret()).thenReturn("s");
         assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(false);
-
         when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(Optional.of(Oath2Token.builder().expires_in(200L).build()));
         googleMailService.registerWithCode("code");
         assertThat(googleMailService.getMailStatus().isConnected()).isEqualTo(true);
-
-        verify(settingsRepository,times(4)).putSetting(any());
+        verify(settingsRepository, times(4)).putSetting(any());
     }
 
     @Test
     void sendPasswordRetrievalMail() throws MessagingException, IOException, GeneralSecurityException {
         when(googleConfig.getClientSecret()).thenReturn("secret");
-        MimeMessage mimemessage = mock(MimeMessage.class);
+        final var mimemessage = mock(MimeMessage.class);
         when(googleClient.createEmail(any(), any(), any(), any())).thenReturn(mimemessage);
 
         // Niet expired token:
-        Instant instant = Instant.now();
-        instant = instant.plus(20, ChronoUnit.MINUTES);
+        final var instant = Instant.now().plus(20, ChronoUnit.MINUTES);
         when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
-
-        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-        mailService.sendPasswordRetrievalMail("mail",null,UserAccount.builder().build());
-
-        verify(settingsRepository,times(5)).getLatestSetting(any(), any());
-
-        verify(googleClient,times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));    }
+        final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        mailService.sendPasswordRetrievalMail("mail", null, UserAccount.builder().build());
+        verify(settingsRepository, times(5)).getLatestSetting(any(), any());
+        verify(googleClient, times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));
+    }
 
     @Test
     void sendConfirmationMail() throws MessagingException, IOException, GeneralSecurityException {
         when(googleConfig.getClientSecret()).thenReturn("secret");
-        MimeMessage mimemessage = mock(MimeMessage.class);
+        final var mimemessage = mock(MimeMessage.class);
         when(googleClient.createEmail(any(), any(), any(), any())).thenReturn(mimemessage);
 
         // Niet expired token:
-        Instant instant = Instant.now();
-        instant = instant.plus(20, ChronoUnit.MINUTES);
+        final var instant = Instant.now().plus(20, ChronoUnit.MINUTES);
         when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
-
-        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-        mailService.sendConfirmationMail("mail",UserAccount.builder().build());
-
-        verify(settingsRepository,times(5)).getLatestSetting(any(), any());
-
-        verify(googleClient,times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));    }
+        final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
+        mailService.sendConfirmationMail("mail", UserAccount.builder().build());
+        verify(settingsRepository, times(5)).getLatestSetting(any(), any());
+        verify(googleClient, times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));
+    }
 
     @Test
     void sendTestMail() throws MessagingException, IOException, GeneralSecurityException {
-
         when(googleConfig.getClientSecret()).thenReturn("secret");
-        MimeMessage mimemessage = mock(MimeMessage.class);
+        final var mimemessage = mock(MimeMessage.class);
         when(googleClient.createEmail(any(), any(), any(), any())).thenReturn(mimemessage);
+
         // Niet expired token:
-        Instant instant = Instant.now();
-        instant = instant.plus(20, ChronoUnit.MINUTES);
+        final var instant = Instant.now().plus(20, ChronoUnit.MINUTES);
         when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
-        GoogleMailService mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
-
+        final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         mailService.sendTestMail("mail");
-
-        verify(settingsRepository,times(5)).getLatestSetting(any(), any());
-
-        verify(googleClient,times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));
+        verify(settingsRepository, times(5)).getLatestSetting(any(), any());
+        verify(googleClient, times(1)).sendMail(any(Oath2Token.class), any(MimeMessage.class));
     }
 }
