@@ -66,11 +66,9 @@ class GoogleClientTest {
     void refreshTokenClientError() {
         when(googleConfig.getClientId()).thenReturn("1");
         when(googleConfig.getClientSecret()).thenReturn("2");
-
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Oath2Token.class))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
-
         final var refreshedToken = googleClient.refreshToken("r");
-        Assertions.assertTrue(refreshedToken.isPresent());
+        Assertions.assertTrue(refreshedToken.isEmpty());
     }
 
     @Test
@@ -96,7 +94,7 @@ class GoogleClientTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), argumentCaptor.capture(), eq(Oath2Token.class))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
         final var refreshedToken = googleClient.getAuthorizationToken("r");
-        Assertions.assertTrue(refreshedToken.isPresent());
+        Assertions.assertTrue(refreshedToken.isEmpty());
         assertThat(Objects.requireNonNull(argumentCaptor.getValue().getBody()).get("grant_type")).isEqualTo("authorization_code");
         assertThat(argumentCaptor.getValue().getBody().get("code")).isEqualTo("r");
     }
