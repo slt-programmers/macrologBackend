@@ -5,17 +5,17 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import slt.database.entities.UserAccount;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-interface UserAccountCrudRepository extends CrudRepository<slt.database.entities.UserAccount,Integer> {
+interface UserAccountCrudRepository extends CrudRepository<UserAccount, Long> {
 
-    List<UserAccount> findByUsername(String username);
+    List<UserAccount> findAllByOrderByUserNameAsc();
 
-    List<UserAccount> findByEmailIgnoreCase(String email);
+    Optional<UserAccount> findByUserName(final String username);
 
-    List<UserAccount> findAll();
+    Optional<UserAccount> findByEmailIgnoreCase(final String email);
+
 }
 
 @Repository
@@ -24,43 +24,36 @@ public class UserAccountRepository {
     @Autowired
     UserAccountCrudRepository userAccountCrudRepository;
 
-    public UserAccount saveAccount(UserAccount account) {
+    public UserAccount saveAccount(final UserAccount account) {
         return userAccountCrudRepository.save(account);
     }
-    public UserAccount insertUser(String username, String password, String email) {
+
+    public UserAccount insertUser(final String username, final String password, final String email) {
         UserAccount userAccount = UserAccount.builder()
                 .email(email)
-                .username(username)
+                .userName(username)
                 .password(password)
                 .build();
-        return  userAccountCrudRepository.save(userAccount);
+        return userAccountCrudRepository.save(userAccount);
     }
 
     public List<UserAccount> getAllUsers() {
-        List<slt.database.entities.UserAccount> all = userAccountCrudRepository.findAll();
-        List<UserAccount> allAccounts = new ArrayList<>();
-        for(UserAccount account : all) {
-            allAccounts.add(account);
-        }
-        return allAccounts;
+        return userAccountCrudRepository.findAllByOrderByUserNameAsc();
     }
 
-    public UserAccount getUser(String username) {
-        List<slt.database.entities.UserAccount> byUsername = userAccountCrudRepository.findByUsername(username);
-        return byUsername.isEmpty() ? null : byUsername.get(0);
+    public Optional<UserAccount> getUserByName(final String username) {
+        return userAccountCrudRepository.findByUserName(username);
     }
 
-    public UserAccount getUserByEmail(String email) {
-        List<slt.database.entities.UserAccount> byUsername = userAccountCrudRepository.findByEmailIgnoreCase(email);
-        return byUsername.isEmpty() ? null : byUsername.get(0);
+    public Optional<UserAccount> getUserByEmail(final String email) {
+        return userAccountCrudRepository.findByEmailIgnoreCase(email);
     }
 
-    public UserAccount getUserById(Integer id) {
-        Optional<slt.database.entities.UserAccount> byId = userAccountCrudRepository.findById(id);
-        return byId.isPresent() ? byId.get():null;
+    public Optional<UserAccount> getUserById(final Long id) {
+        return userAccountCrudRepository.findById(id);
     }
 
-    public void deleteUser(Integer id) {
+    public void deleteUser(final Long id) {
         userAccountCrudRepository.deleteById(id);
     }
 }

@@ -1,6 +1,5 @@
 package slt.database.entities;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -18,14 +17,11 @@ public class Portion {
     @Column(columnDefinition="bigint")
     private Long id;
 
-    @ApiModelProperty(notes = "bord oid", required = true, example = "bord")
     private String description;
 
-    @ApiModelProperty(notes = "Als je op food niveau grams hebt gekozen dan is dit de hoeveelheid gram", example = "100.0")
     private Double grams;
 
-    @Column(name = "food_id")
-    private Integer foodId;
-
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_id")
+    private Food food;
 }

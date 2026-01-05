@@ -1,9 +1,6 @@
 package slt.database.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -14,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 public class Dish {
 
     @Id
@@ -25,9 +23,10 @@ public class Dish {
     private String name;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @OneToMany(mappedBy = "dish", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Ingredient> ingredients = new ArrayList<>();
 
 }

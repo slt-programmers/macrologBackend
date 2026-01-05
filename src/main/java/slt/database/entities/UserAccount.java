@@ -18,25 +18,23 @@ public class UserAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private String username;
-    @Column(length = 65535, columnDefinition="clob")
+    @Column(name = "username")
+    private String userName;
+    @Column(length = 65535, columnDefinition = "clob")
     private String password;
-    @Column(length = 65535, columnDefinition="clob")
+    @Column(length = 65535, columnDefinition = "clob")
     private String email;
-    @Column(length = 65535, columnDefinition="clob")
+    @Column(length = 65535, columnDefinition = "clob")
     private String resetPassword;
     private LocalDateTime resetDate;
     @Column(name = "is_admin")
     private boolean isAdmin;
 
-    @OneToMany (
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @Builder.Default
     private List<Setting> settings = new ArrayList<>();
 
 }

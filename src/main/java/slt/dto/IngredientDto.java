@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public class IngredientDto {
@@ -15,4 +12,5 @@ public class IngredientDto {
     private Double multiplier;
     private FoodDto food;
     private PortionDto portion;
+
 }

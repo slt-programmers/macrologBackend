@@ -24,13 +24,13 @@ public class SecurityFilter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) {
+    public void init(final FilterConfig filterConfig) {
         if (allowOrigin == null) {
-            String allowOriginEnv = getFromEnvironment();
+            final var allowOriginEnv = getFromEnvironment();
             allowOrigin = StringUtils.isEmpty(allowOriginEnv) ? "http://localhost:4200" : allowOriginEnv;
         }
         log.debug("Security filter init");
-        log.debug("Only accepting requests form " + allowOrigin);
+        log.debug("Only accepting requests form {}", allowOrigin);
     }
 
     protected String getFromEnvironment() {
@@ -38,7 +38,7 @@ public class SecurityFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         if ("OPTIONS".equalsIgnoreCase(((HttpServletRequest) request).getMethod())) {
             ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_OK);
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", getAllowOrigin());
@@ -51,17 +51,16 @@ public class SecurityFilter implements Filter {
             ((HttpServletResponse) response).setHeader("Access-Control-Max-Age", "3600");
             ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Access-Control-Allow-Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
-            HttpServletRequest req = (HttpServletRequest) request;
+            final var req = (HttpServletRequest) request;
             log.debug("Starting req : {}", req.getRequestURI());
-            String token = req.getHeader("Authorization");
+            final var token = req.getHeader("Authorization");
             if (token != null && token.startsWith("Bearer")) {
-                String jwtToken = token.substring("Bearer".length() + 1);
-                Object userId;
+                final var jwtToken = token.substring("Bearer".length() + 1);
                 try {
                     Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
-                    userId = claimsJws.getBody().get("userId");
+                    final var userId = claimsJws.getBody().get("userId");
                     UserInfo userInfo = new UserInfo();
-                    userInfo.setUserId(Integer.valueOf(userId.toString()));
+                    userInfo.setUserId(Long.valueOf(userId.toString()));
                     ThreadLocalHolder.getThreadLocal().set(userInfo);
                     chain.doFilter(request, response);
                 } catch (ExpiredJwtException expiredEx) {
@@ -80,14 +79,13 @@ public class SecurityFilter implements Filter {
         }
     }
 
-    protected boolean isPublicResourceURL(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/swagger-resources") ||
-                request.getRequestURI().startsWith("/webjars/") ||
-                request.getRequestURI().startsWith("/api/") ||
-                request.getRequestURI().startsWith("/healthcheck") ||
-                request.getRequestURI().startsWith("/v2/api-docs") ||
-                request.getRequestURI().startsWith("/swagger-ui.html") ||
-                request.getRequestURI().startsWith("/webhooks/public");
+    protected boolean isPublicResourceURL(final HttpServletRequest request) {
+        return request.getRequestURI().contains("/healthcheck") ||
+                request.getRequestURI().contains("/api/authenticate") ||
+                request.getRequestURI().contains("/swagger-ui/") ||
+                request.getRequestURI().contains("/v3/api-docs") ||
+                request.getRequestURI().contains("/h2-console") ||
+                request.getRequestURI().contains("/webhooks/public");
     }
 
     @Override

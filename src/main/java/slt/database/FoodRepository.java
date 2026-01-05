@@ -1,53 +1,49 @@
 package slt.database;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.Assert;
 import slt.database.entities.Food;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
-interface FoodCrudRepository extends CrudRepository<Food, Integer> {
+interface FoodCrudRepository extends CrudRepository<Food, Long> {
 
-    List<Food> findByUserId(Integer userId);
+    List<Food> findByUserIdOrderByNameAsc(final Long userId);
 
-    List<Food> findByUserIdAndName(Integer userId, String name);
+    Optional<Food> findByUserIdAndName(final Long userId, final String name);
 
-    List<Food> findByUserIdAndId(Integer userId, Long id);
+    Optional<Food> findByUserIdAndId(final Long userId, final Long id);
 
-    void deleteByUserId(Integer userId);
+    void deleteByUserId(final Long userId);
 }
 
 @Repository
+@AllArgsConstructor
 public class FoodRepository {
 
-    @Autowired
     private FoodCrudRepository foodCrudRepository;
 
-    public List<Food> getAllFood(Integer userId) {
-        return foodCrudRepository.findByUserId(userId);
+    public List<Food> getAllFood(final Long userId) {
+        return foodCrudRepository.findByUserIdOrderByNameAsc(userId);
     }
 
-    public Food saveFood(Integer userId, Food food) {
-        food.setUserId(userId);
+    public Food saveFood(final Food food) {
         return foodCrudRepository.save(food);
     }
     
-    public Food getFood(Integer userId, String name) {
-        List<Food> queryResults = foodCrudRepository.findByUserIdAndName(userId, name);
-        return queryResults.isEmpty() ? null : queryResults.get(0);
+    public Optional<Food> getFood(final Long userId, final String name) {
+        return foodCrudRepository.findByUserIdAndName(userId, name);
     }
 
-    public Food getFoodById(Integer userId, Long id) {
-        List<Food> queryResults = foodCrudRepository.findByUserIdAndId(userId, id);
-        Assert.isTrue(queryResults.size() <= 1, "More than one food was found");
-        return queryResults.isEmpty() ? null : queryResults.get(0);
+    public Optional<Food> getFoodById(final Long userId, final Long id) {
+        return foodCrudRepository.findByUserIdAndId(userId, id);
     }
 
     @Transactional
-    public void deleteAllForUser(Integer userId) {
+    public void deleteAllForUser(final Long userId) {
         foodCrudRepository.deleteByUserId(userId);
     }
 }

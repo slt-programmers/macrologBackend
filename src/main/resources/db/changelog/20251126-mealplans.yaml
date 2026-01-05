@@ -1,0 +1,94 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20251126-mealplans
+      author: carmen
+      changes:
+        - createTable:
+            tableName: mealplan
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: title
+                  type: TEXT
+        - createTable:
+            tableName: mealtime
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: mealplan_id
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: meal
+                  type: TEXT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: weekday
+                  type: TEXT
+        - addColumn:
+            tableName: ingredient
+            columns:
+              - column:
+                  name: mealplan_id
+                  type: INT
+
+  - changeSet:
+      id: 20251127-renamecolumnwithtypo
+      author: carmen
+      changes:
+        - renameColumn:
+            newColumnName: mealtime_id
+            oldColumnName: mealplan_id
+            columnDataType: INT
+            tableName: ingredient
+
+  - changeSet:
+      id: 20251130-foreignkey-mealtimeid
+      author: carmen
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: mealtime_id
+            indexName: mealtime_id
+            tableName: ingredient
+        - addForeignKeyConstraint:
+            constraintName: ingredient_ibfk_4
+            baseColumnNames: mealtime_id
+            baseTableName: ingredient
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: mealtime
+            validate: true
+  - changeSet:
+      id: 20251201-dropnullcontraintdishid
+      author: carmen
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: int
+            columnName: dish_id
+            tableName: ingredient
