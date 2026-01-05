@@ -76,10 +76,8 @@ class GoogleMailServiceTest {
 
     @Test
     void registerWithCodeNoSetting() {
-
-        when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(null);
+        when(googleClient.getAuthorizationToken(eq("code"))).thenReturn(Optional.empty());
         googleMailService.registerWithCode("code");
-
         verify(settingsRepository,times(1)).putSetting(any());
     }
 
