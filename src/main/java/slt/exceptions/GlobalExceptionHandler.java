@@ -31,4 +31,10 @@ public class GlobalExceptionHandler {
         final var message = ex.getMessage();
         return new ResponseEntity<>(new ErrorResponse(message), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(ConnectivityException.class)
+    public ResponseEntity<ErrorResponse> handle(final ConnectivityException ex) {
+        final var message = ex.getMessage();
+        return new ResponseEntity<>(new ErrorResponse(message), HttpStatus.FAILED_DEPENDENCY);
+    }
 }

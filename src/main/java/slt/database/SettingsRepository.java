@@ -68,10 +68,6 @@ public class SettingsRepository {
         settingsCrudRepository.deleteAllByUserIdAndName(userId, name);
     }
 
-//    public Optional<Setting> getLatestSetting(final Long userId, final String setting) {
-//        return settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting).stream().findFirst();
-//    }
-
     public Setting getLatestSetting(final Long userId, final String setting) {
         final var byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
         log.debug("Number of hits for setting {}: {}", setting, byUserIdAndName.size());

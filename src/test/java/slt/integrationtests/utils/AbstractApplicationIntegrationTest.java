@@ -113,8 +113,7 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
     protected void setUserContextFromJWTResponseHeader(final HttpHeaders headers) {
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(getUserIdFromResponseHeaderJWT(headers));
+        final var userInfo = UserInfo.builder().userId(getUserIdFromResponseHeaderJWT(headers)).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

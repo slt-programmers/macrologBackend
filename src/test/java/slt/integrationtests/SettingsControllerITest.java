@@ -30,12 +30,11 @@ public class SettingsControllerITest extends AbstractApplicationIntegrationTest 
     public void setUserContext() {
         synchronized (this) {
             if (this.userId == null) {
-                log.debug("Creating test user for test " + this.getClass().getName());
+                log.debug("Creating test user for test {}", this.getClass().getName());
                 this.userId = createUser(this.getClass().getName());
             }
         }
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

@@ -33,8 +33,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
             this.userId = createUser(this.getClass().getName());
         }
         log.debug("Ending with userId [{}]", this.userId);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

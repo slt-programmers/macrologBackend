@@ -25,13 +25,11 @@ public class ImportExportControllerITest extends AbstractApplicationIntegrationT
 
     @BeforeEach
     public void setUserContext() {
-
         if (this.userId == null) {
-            log.debug("Creating test user for test " + this.getClass());
+            log.debug("Creating test user for test {}", this.getClass());
             this.userId = createUser("logEntryUser");
         }
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

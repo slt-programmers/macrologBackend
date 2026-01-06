@@ -30,8 +30,7 @@ public class WeightControllerITest extends AbstractApplicationIntegrationTest {
                 this.userId = createUser(this.getClass().getName());
             }
         }
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

@@ -27,8 +27,7 @@ class AdminControllerTest {
         adminService = mock(AdminService.class);
         GoogleMailService mailService = mock(GoogleMailService.class);
         controller = new AdminController(adminService, mailService);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(123L);
+        final var userInfo = UserInfo.builder().userId(123L).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
