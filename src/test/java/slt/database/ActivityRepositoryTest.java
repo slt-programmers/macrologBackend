@@ -2,26 +2,18 @@ package slt.database;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 class ActivityRepositoryTest {
 
-    @Mock
-    ActivityCrudRepository activityCrudRepository;
-
-    @InjectMocks
-    ActivityRepository activityRepository;
+    private ActivityCrudRepository activityCrudRepository;
+    private ActivityRepository activityRepository;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
+        activityCrudRepository = mock(ActivityCrudRepository.class);
+        activityRepository = new ActivityRepository(activityCrudRepository);
     }
 
     @Test

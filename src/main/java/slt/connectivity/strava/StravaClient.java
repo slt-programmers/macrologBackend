@@ -243,16 +243,16 @@ public class StravaClient {
             headers.setContentType(MediaType.APPLICATION_JSON);
             final var entity = new HttpEntity<>(reqPayload, headers);
             final var responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
-            assert responseEntity.getBody() != null;
-            return Optional.of(responseEntity.getBody());
+            if (responseEntity.getBody() != null) {
+                return Optional.of(responseEntity.getBody());
+            }
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return Optional.empty();
         } catch (RestClientException restClientException) {
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     private long getUTCEpoch(final LocalDateTime localDateTime) {

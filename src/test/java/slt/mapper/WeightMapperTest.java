@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public class WeightMapperTest {
 
-    private WeightMapper mapper = WeightMapper.INSTANCE;
+    private final WeightMapper mapper = WeightMapper.INSTANCE;
 
     @Test
     void testMapToWeight() {

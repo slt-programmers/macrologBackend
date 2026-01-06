@@ -1,6 +1,6 @@
 package slt.security;
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import slt.util.JWTBuilder;
@@ -24,7 +24,7 @@ class SecurityFilterTest {
     void testInitZonderAllowGezet() {
         final var securityFilter = new SecurityFilter();
         securityFilter.init(null);
-        Assertions.assertThat(securityFilter.getAllowOrigin()).isEqualTo("http://localhost:4200");
+        Assertions.assertEquals("http://localhost:4200",securityFilter.getAllowOrigin());
     }
 
     @Test
@@ -32,7 +32,7 @@ class SecurityFilterTest {
         final var ssecurityFilter = Mockito.spy(SecurityFilter.class);
         when(ssecurityFilter.getFromEnvironment()).thenReturn("server1");
         ssecurityFilter.init(null);
-        Assertions.assertThat(ssecurityFilter.getAllowOrigin()).isEqualTo("server1");
+        Assertions.assertEquals("server1", ssecurityFilter.getAllowOrigin());
     }
 
     @Test

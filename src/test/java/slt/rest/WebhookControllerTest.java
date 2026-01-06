@@ -10,7 +10,6 @@ import slt.connectivity.strava.dto.SubscriptionInformation;
 import slt.connectivity.strava.dto.WebhookEvent;
 import slt.service.AdminService;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 import static slt.rest.WebhookController.NOT_AUTHORIZED_TO_ALTER_WEBHOOKS_MESSAGE;
@@ -34,7 +33,7 @@ class WebhookControllerTest {
     void syncStrava() {
         final var responseEntity = webhookController.syncStrava(WebhookEvent.builder().build());
         verify(stravaActivityService).receiveWebhookEvent(isA(WebhookEvent.class));
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
     }
 
@@ -42,7 +41,7 @@ class WebhookControllerTest {
     void syncStravaCallbackWrongHubmode() {
         final var responseEntity = webhookController.syncStravaCallback("hubmode", "challenge", "token");
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
     }
 
     @Test
@@ -51,7 +50,7 @@ class WebhookControllerTest {
         final var responseEntity = webhookController.syncStravaCallback("subscribe", "challenge", "verkeerd");
         verify(stravaConfig).getVerifytoken();
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
     }
 
     @Test
@@ -60,8 +59,8 @@ class WebhookControllerTest {
         final var responseEntity = webhookController.syncStravaCallback("subscribe", "challenge", "token");
         verify(stravaConfig).getVerifytoken();
         verifyNoMoreInteractions(stravaActivityService, stravaConfig);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo("{\"hub.challenge\":\"challenge\"}");
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Assertions.assertEquals("{\"hub.challenge\":\"challenge\"}", responseEntity.getBody());
     }
 
     @Test
@@ -99,6 +98,7 @@ class WebhookControllerTest {
         final var response = responseEntity.getBody();
         Assertions.assertNotNull(response);
         Assertions.assertEquals(1, response.getId());
-        Assertions.assertEquals("callback", response.getCallback_url());    }
+        Assertions.assertEquals("callback", response.getCallback_url());
+    }
 
 }

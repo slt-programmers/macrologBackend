@@ -1,12 +1,9 @@
 package slt.connectivity;
 
-import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -19,41 +16,37 @@ import slt.connectivity.strava.dto.ActivityDetailsDto;
 import slt.connectivity.strava.dto.ListedActivityDto;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Slf4j
-@RunWith(MockitoJUnitRunner.class)
 class StravaClientClientTest {
 
-    @Mock
-    StravaConfig stravaConfig;
+    private StravaConfig stravaConfig;
 
-    @Mock
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    @InjectMocks
-    StravaClient stravaClient;
+    private StravaClient stravaClient;
+
+    @BeforeEach
+    void setup() {
+        stravaConfig = mock(StravaConfig.class);
+        restTemplate = mock(RestTemplate.class);
+        stravaClient = new StravaClient(restTemplate, stravaConfig);
+    }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testStravaToken() {
-
-        MockitoAnnotations.initMocks(this);
-
         when(stravaConfig.getClientId()).thenReturn(1);
         when(stravaConfig.getClientSecret()).thenReturn("SECRET");
 
-        ArgumentCaptor<HttpEntity> varArgs = ArgumentCaptor.forClass(HttpEntity.class);
-
-        ResponseEntity<StravaToken> retToken = Mockito.mock(ResponseEntity.class);
+        final var varArgs = ArgumentCaptor.forClass(HttpEntity.class);
+        final var retToken = (ResponseEntity<StravaToken>) mock(ResponseEntity.class);
         when(retToken.getStatusCode()).thenReturn(HttpStatus.OK);
         when(retToken.getBody()).thenReturn(StravaToken.builder()
                 .access_token("A")
@@ -68,54 +61,50 @@ class StravaClientClientTest {
         final String code = "mysecretcode";
         final var stravaToken = stravaClient.getStravaToken(code);
         Assertions.assertTrue(stravaToken.isPresent());
-        log.debug("token {}", stravaToken.get().getAccess_token());
 
-        final HttpEntity<HashMap> value = varArgs.getValue();
-        Assert.assertNotNull(value.getBody());
-        assertThat(value.getBody().get("client_id")).isEqualTo("1");
-        assertThat(value.getBody().get("client_secret")).isEqualTo("SECRET");
-        assertThat(value.getBody().get("code")).isEqualTo(code);
-        assertThat(value.getBody().get("grant_type")).isEqualTo("authorization_code");
-
-        assertThat(stravaToken.get().getAccess_token()).isEqualTo("A");
+        final var value = varArgs.getValue();
+        final var body = (HashMap<String, String>) value.getBody();
+        Assertions.assertNotNull(body);
+        Assertions.assertEquals("1", body.get("client_id"));
+        Assertions.assertEquals("SECRET", body.get("client_secret"));
+        Assertions.assertEquals(code, body.get("code"));
+        Assertions.assertEquals("authorization_code", body.get("grant_type"));
+        Assertions.assertEquals("A", stravaToken.get().getAccess_token());
     }
 
     @Test
     public void testStravaTokenRestClientException() {
-        MockitoAnnotations.initMocks(this);
         when(stravaConfig.getClientId()).thenReturn(1);
         when(stravaConfig.getClientSecret()).thenReturn("SECRET");
-        when(restTemplate.exchange(eq("https://www.strava.com/oauth/token"), eq(HttpMethod.POST), any(), eq(StravaToken.class)))
-                .thenThrow(new RestClientException("da"));
+        when(restTemplate.exchange(eq("https://www.strava.com/oauth/token"), eq(HttpMethod.POST), any(HttpEntity.class),
+                eq(StravaToken.class))).thenThrow(new RestClientException("da"));
 
         final var stravaToken = stravaClient.getStravaToken("secretCode");
-        assertThat(stravaToken).isEmpty();
+        Assertions.assertTrue(stravaToken.isEmpty());
     }
 
     @Test
     public void testStravaTokenHttpClientException() {
-        MockitoAnnotations.initMocks(this);
         when(stravaConfig.getClientId()).thenReturn(1);
         when(stravaConfig.getClientSecret()).thenReturn("SECRET");
-        when(restTemplate.exchange(eq("https://www.strava.com/oauth/token"), eq(HttpMethod.POST), any(), eq(StravaToken.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "da"));
+        when(restTemplate.exchange(eq("https://www.strava.com/oauth/token"), eq(HttpMethod.POST), any(),
+                eq(StravaToken.class))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "da"));
 
         final var stravaToken = stravaClient.getStravaToken("secretCode");
-        assertThat(stravaToken).isEmpty();
+        Assertions.assertTrue(stravaToken.isEmpty());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void refreshToken() {
-        String refreshToken = "ABRACADABRA";
-
-        MockitoAnnotations.initMocks(this);
+        final var refreshToken = "ABRACADABRA";
 
         when(stravaConfig.getClientId()).thenReturn(1);
         when(stravaConfig.getClientSecret()).thenReturn("SECRET");
 
-        ArgumentCaptor<HttpEntity> varArgs = ArgumentCaptor.forClass(HttpEntity.class);
+        final var varArgs = ArgumentCaptor.forClass(HttpEntity.class);
 
-        ResponseEntity<StravaToken> retToken = Mockito.mock(ResponseEntity.class);
+        final var retToken = mock(ResponseEntity.class);
         when(retToken.getStatusCode()).thenReturn(HttpStatus.OK);
         when(retToken.getBody()).thenReturn(StravaToken.builder()
                 .access_token("A")
@@ -124,120 +113,109 @@ class StravaClientClientTest {
                 .expires_at(2L)
                 .build());
 
-        when(restTemplate.exchange(eq("https://www.strava.com/oauth/token"), eq(HttpMethod.POST), varArgs.capture(), eq(StravaToken.class)))
-                .thenReturn(retToken);
+        when(restTemplate.exchange(eq("https://www.strava.com/oauth/token"), eq(HttpMethod.POST), varArgs.capture(),
+                eq(StravaToken.class))).thenReturn(retToken);
 
         final var stravaToken = stravaClient.refreshToken(refreshToken);
         Assertions.assertTrue(stravaToken.isPresent());
-        log.debug("token {}", stravaToken.get().getAccess_token());
 
-        final HttpEntity<HashMap<String, String>> value = varArgs.getValue();
-        Assert.assertNotNull(value.getBody());
-        assertThat(value.getBody().get("client_id")).isEqualTo("1");
-        assertThat(value.getBody().get("client_secret")).isEqualTo("SECRET");
-        assertThat(value.getBody().get("refresh_token")).isEqualTo(refreshToken);
-        assertThat(value.getBody().get("grant_type")).isEqualTo("refresh_token");
+        final var value = varArgs.getValue();
+        final var body = (HashMap<String, String>) value.getBody();
+        Assertions.assertNotNull(body);
 
-        assertThat(stravaToken.get().getAccess_token()).isEqualTo("A");
+        Assertions.assertEquals("1", body.get("client_id"));
+        Assertions.assertEquals("SECRET", body.get("client_secret"));
+        Assertions.assertEquals(refreshToken, body.get("refresh_token"));
+        Assertions.assertEquals("refresh_token", body.get("grant_type"));
+        Assertions.assertEquals("A", stravaToken.get().getAccess_token());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getAthleteActivities() {
-
-        MockitoAnnotations.initMocks(this);
-
-        ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<List<ListedActivityDto>>() {
-        };
-
-        ResponseEntity<List<ListedActivityDto>> mockEntitity = mock(ResponseEntity.class);
-        List<ListedActivityDto> retList = Arrays.asList(ListedActivityDto.builder().build());
+        final var mockEntitity = mock(ResponseEntity.class);
+        final var retList = List.of(ListedActivityDto.builder().build());
         when(mockEntitity.getBody()).thenReturn(retList);
 
-        ArgumentCaptor<HttpEntity> capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
-        ArgumentCaptor<String> capturedUrl = ArgumentCaptor.forClass(String.class);
+        final var capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
+        final var capturedUrl = ArgumentCaptor.forClass(String.class);
 
-        when(restTemplate.exchange(capturedUrl.capture(), eq(HttpMethod.GET), capturedHttpEntity.capture(), eq(parameterizedTypeReference)))
+        when(restTemplate.exchange(capturedUrl.capture(), eq(HttpMethod.GET), capturedHttpEntity.capture(), any(ParameterizedTypeReference.class)))
                 .thenReturn(mockEntitity);
 
-        final List<ListedActivityDto> retActivities = stravaClient.getActivitiesForDay("myToken", LocalDate.parse("2001-01-04"));
+        final var retActivities = stravaClient.getActivitiesForDay("myToken", LocalDate.parse("2001-01-04"));
+        Assertions.assertEquals(1, retActivities.size());
 
-        assertThat(retActivities).hasSize(1);
-
-        log.debug(capturedUrl.getValue());
-        final HttpHeaders headers = capturedHttpEntity.getValue().getHeaders();
-        assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer myToken");
+        final var headers = capturedHttpEntity.getValue().getHeaders();
+        final var authHeader = headers.get("Authorization");
+        Assertions.assertNotNull(authHeader);
+        Assertions.assertEquals("Bearer myToken", authHeader.getFirst());
 
         // problems with UTC on server and local CET :(
-//        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // UTC
-//        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // of andersom?
+//        Assertions.assertTrue(capturedUrl.getValue().endsWith("?before=978649200&after=978562800"));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getAthleteActivitiesWithError() {
-        MockitoAnnotations.initMocks(this);
-
-        ParameterizedTypeReference<List<ListedActivityDto>> parameterizedTypeReference = new ParameterizedTypeReference<List<ListedActivityDto>>() {
-        };
-
-        ResponseEntity<List<ListedActivityDto>> mockEntitity = mock(ResponseEntity.class);
-        List<ListedActivityDto> retList = Arrays.asList(ListedActivityDto.builder().build());
+        final var mockEntitity = mock(ResponseEntity.class);
+        final var retList = List.of(ListedActivityDto.builder().build());
         when(mockEntitity.getBody()).thenReturn(retList);
 
-        ArgumentCaptor<HttpEntity> capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
-        ArgumentCaptor<String> capturedUrl = ArgumentCaptor.forClass(String.class);
+        final var capturedUrl = ArgumentCaptor.forClass(String.class);
+        final var capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
 
-        when(restTemplate.exchange(capturedUrl.capture(), eq(HttpMethod.GET), capturedHttpEntity.capture(), eq(parameterizedTypeReference)))
+        when(restTemplate.exchange(capturedUrl.capture(), eq(HttpMethod.GET), capturedHttpEntity.capture(), any(ParameterizedTypeReference.class)))
                 .thenThrow(new RestClientException("oops"));
 
-        final List<ListedActivityDto> retActivities = stravaClient.getActivitiesForDay("myToken", LocalDate.parse("2001-01-04"));
-
-        assertThat(retActivities).isEmpty();
-
-        log.debug(capturedUrl.getValue());
-        final HttpHeaders headers = capturedHttpEntity.getValue().getHeaders();
-        assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer myToken");
+        final var retActivities = stravaClient.getActivitiesForDay("myToken", LocalDate.parse("2001-01-04"));
+        Assertions.assertTrue(retActivities.isEmpty());
+        final var headers = capturedHttpEntity.getValue().getHeaders();
+        final var authheader = headers.get("Authorization");
+        Assertions.assertNotNull(authheader);
+        Assertions.assertEquals("Bearer myToken", authheader.getFirst());
 
         // problems with UTC on server and local CET :(
-//        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // UTC
-//        assertThat(capturedUrl.getValue()).endsWith("?before=978649200&after=978562800"); // of andersom?
+//        Assertions.assertTrue(capturedUrl.getValue().endsWith("?before=978649200&after=978562800"));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getActivityDetails() {
         final var userToken = "47e01e81a381081d4f0cf1b67df25c5080ceb8b4";
-        final var activityDetailId = 2558518162l;
-        MockitoAnnotations.initMocks(this);
+        final var activityDetailId = 2558518162L;
         final var mockEntitity = mock(ResponseEntity.class);
         when(mockEntitity.getBody()).thenReturn(ActivityDetailsDto.builder().id(activityDetailId).build());
-        ArgumentCaptor<HttpEntity> capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
-        ArgumentCaptor<String> capturedUrl = ArgumentCaptor.forClass(String.class);
+        final var capturedHttpEntity = ArgumentCaptor.forClass(HttpEntity.class);
+        final var capturedUrl = ArgumentCaptor.forClass(String.class);
         when(restTemplate.exchange(capturedUrl.capture(), eq(HttpMethod.GET), capturedHttpEntity.capture(), eq(ActivityDetailsDto.class)))
                 .thenReturn(mockEntitity);
 
         final var retActivity = stravaClient.getActivityDetail(userToken, activityDetailId);
         Assertions.assertTrue(retActivity.isPresent());
-        assertThat(retActivity.get().getId()).isEqualTo(activityDetailId);
+        Assertions.assertEquals(activityDetailId, retActivity.get().getId());
         final var headers = capturedHttpEntity.getValue().getHeaders();
-        assertThat(Objects.requireNonNull(headers.get("Authorization")).getFirst()).isEqualTo("Bearer " +userToken);
-        assertThat(capturedUrl.getValue()).endsWith("/" + activityDetailId);
+        final var authheader = headers.get("Authorization");
+        Assertions.assertNotNull(authheader);
+        Assertions.assertEquals("Bearer " + userToken, authheader.getFirst());
+        Assertions.assertTrue(capturedUrl.getValue().endsWith("/" + activityDetailId));
     }
 
     @Test
-    public void unregister(){
-        MockitoAnnotations.initMocks(this);
-        ArgumentCaptor<HttpEntity> varArgs = ArgumentCaptor.forClass(HttpEntity.class);
-
-        ResponseEntity<String> mockEntitity = mock(ResponseEntity.class);
+    @SuppressWarnings("unchecked")
+    public void unregister() {
+        final var varArgs = ArgumentCaptor.forClass(HttpEntity.class);
+        final var mockEntitity = mock(ResponseEntity.class);
         when(mockEntitity.getBody()).thenReturn("jammer");
 
         when(restTemplate.exchange(eq("https://www.strava.com/oauth/deauthorize"), eq(HttpMethod.POST), varArgs.capture(), eq(String.class)))
                 .thenReturn(mockEntitity);
 
         final boolean success = stravaClient.unregister(StravaToken.builder().access_token("A").build());
-
-        final HttpHeaders headers = varArgs.getValue().getHeaders();
-        assertThat(headers.get("Authorization").get(0)).isEqualTo("Bearer A");
-        assertThat(success).isTrue();
-
+        Assertions.assertTrue(success);
+        final var headers = varArgs.getValue().getHeaders();
+        final var authheader = headers.get("Authorization");
+        Assertions.assertNotNull(authheader);
+        Assertions.assertEquals("Bearer A", authheader.getFirst());
     }
 }

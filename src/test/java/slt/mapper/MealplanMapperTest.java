@@ -1,9 +1,7 @@
 package slt.mapper;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mapstruct.factory.Mappers;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import slt.database.entities.Mealplan;
 import slt.database.entities.Mealtime;
 import slt.dto.*;
@@ -13,7 +11,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 class MealplanMapperTest {
 
     private final MealplanMapper mapper = Mappers.getMapper(MealplanMapper.class);
