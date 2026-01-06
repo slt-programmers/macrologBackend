@@ -15,8 +15,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Slf4j
 class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
 
@@ -255,7 +253,7 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
 
         );
         final var result = activityController.postActivities("2003-01-01", newActivities);
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
 
         // add weight
         // store weight:
@@ -264,7 +262,7 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
         final var result2 = weightController.postWeight(newWeight);
-        assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, result2.getStatusCode());
 
         // add settings:
         saveSetting("export1", "export1value");

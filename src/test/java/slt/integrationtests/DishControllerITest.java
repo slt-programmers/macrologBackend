@@ -11,9 +11,8 @@ import slt.exceptions.ValidationException;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
 import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
-import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Arrays;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,20 +35,20 @@ public class DishControllerITest extends AbstractApplicationIntegrationTest {
         final var dishName = "emptyDish";
         final var dishDto = DishDto.builder().name(dishName).build();
         final var responseEntity = dishController.postDish(dishDto);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         final var responseEntity2 = dishController.getAllDishes();
-        assertThat(responseEntity2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity2.getStatusCode());
 
         final var foundDishes = responseEntity2.getBody();
         Assertions.assertNotNull(foundDishes);
         final var emptyDish = foundDishes.stream().filter(m -> m.getName().equals(dishName)).findFirst();
-        assertThat(emptyDish.isPresent()).isTrue();
-        assertThat(emptyDish.get().getId()).isNotNull();
-        assertThat(emptyDish.get().getIngredients()).isEmpty();
+        Assertions.assertTrue(emptyDish.isPresent());
+        Assertions.assertNotNull(emptyDish.get().getId());
+        Assertions.assertTrue(emptyDish.get().getIngredients().isEmpty());
 
-        final  var responseEntity3 = dishController.deleteDish(emptyDish.get().getId());
-        assertThat(responseEntity3.getStatusCode()).isEqualTo(HttpStatus.OK);
+        final var responseEntity3 = dishController.deleteDish(emptyDish.get().getId());
+        Assertions.assertEquals(HttpStatus.OK, responseEntity3.getStatusCode());
     }
 
     @Test
@@ -57,15 +56,15 @@ public class DishControllerITest extends AbstractApplicationIntegrationTest {
         final var dishName = "sameDish";
         final var newDish = DishDto.builder().name(dishName).build();
         final var responseEntity = dishController.postDish(newDish);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         final var responseEntity2 = dishController.getAllDishes();
         final var foundDishes = responseEntity2.getBody();
         Assertions.assertNotNull(foundDishes);
         final var emptyDish = foundDishes.stream().filter(m -> m.getName().equals(dishName)).findFirst();
-        assertThat(emptyDish.isPresent()).isTrue();
-        assertThat(emptyDish.get().getId()).isNotNull();
-        assertThat(emptyDish.get().getIngredients()).isEmpty();
+        Assertions.assertTrue(emptyDish.isPresent());
+        Assertions.assertNotNull(emptyDish.get().getId());
+        Assertions.assertTrue(emptyDish.get().getIngredients().isEmpty());
 
         final var sameDish = DishDto.builder().name(dishName).build();
         Assertions.assertThrows(ValidationException.class, () -> dishController.postDish(sameDish));
@@ -88,28 +87,28 @@ public class DishControllerITest extends AbstractApplicationIntegrationTest {
                 .build();
 
         final var responseEntity = dishController.postDish(newDish);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         final var responseEntity1 = dishController.getAllDishes();
-        final  var foundDishes = responseEntity1.getBody();
+        final var foundDishes = responseEntity1.getBody();
         Assertions.assertNotNull(foundDishes);
         final var matchedDish = foundDishes.stream().filter(m -> m.getName().equals(dishName)).findFirst();
-        assertThat(matchedDish.isPresent()).isTrue();
-        assertThat(matchedDish.get().getId()).isNotNull();
-        assertThat(matchedDish.get().getIngredients()).hasSize(2);
-        assertThat(matchedDish.get().getIngredients().get(0).getFood()).isNotNull();
-        assertThat(matchedDish.get().getIngredients().get(1).getFood()).isNotNull();
+        Assertions.assertTrue(matchedDish.isPresent());
+        Assertions.assertNotNull(matchedDish.get().getId());
+        Assertions.assertEquals(2, matchedDish.get().getIngredients().size());
+        Assertions.assertNotNull(matchedDish.get().getIngredients().get(0).getFood());
+        Assertions.assertNotNull(matchedDish.get().getIngredients().get(1).getFood());
         final var food1Optional = matchedDish.get().getIngredients().stream()
                 .filter(i -> i.getFood().getName().equals("food1")).findFirst();
         final var food2Optional = matchedDish.get().getIngredients().stream()
                 .filter(i -> i.getFood().getName().equals("food2")).findFirst();
         Assertions.assertTrue(food1Optional.isPresent());
-        assertThat(food1Optional.get().getMultiplier()).isEqualTo(1.0);
+        Assertions.assertEquals(1.0, food1Optional.get().getMultiplier());
         Assertions.assertTrue(food2Optional.isPresent());
-        assertThat(food2Optional.get().getMultiplier()).isEqualTo(3.0);
+        Assertions.assertEquals(3.0, food2Optional.get().getMultiplier());
 
-        final  var responseEntity2 = dishController.deleteDish(matchedDish.get().getId());
-        assertThat(responseEntity2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        final var responseEntity2 = dishController.deleteDish(matchedDish.get().getId());
+        Assertions.assertEquals(HttpStatus.OK, responseEntity2.getStatusCode());
     }
 
     @Test
@@ -137,26 +136,25 @@ public class DishControllerITest extends AbstractApplicationIntegrationTest {
                 ).build();
 
         final var responseEntity = dishController.postDish(newDish);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         final var responseEntity1 = dishController.getAllDishes();
         final var foundDishes = responseEntity1.getBody();
         Assertions.assertNotNull(foundDishes);
-         final var matchedDish = foundDishes.stream().filter(m -> m.getName().equals(dishName)).findFirst();
-        assertThat(matchedDish.isPresent()).isTrue();
-        assertThat(matchedDish.get().getId()).isNotNull();
-        assertThat(matchedDish.get().getIngredients()).hasSize(2);
-        assertThat(matchedDish.get().getIngredients().get(0).getFood()).isNotNull();
-        assertThat(matchedDish.get().getIngredients().get(1).getFood()).isNotNull();
+        final var matchedDish = foundDishes.stream().filter(m -> m.getName().equals(dishName)).findFirst();
+        Assertions.assertTrue(matchedDish.isPresent());
+        Assertions.assertNotNull(matchedDish.get().getId());
+        Assertions.assertEquals(2, matchedDish.get().getIngredients().size());
+        Assertions.assertNotNull(matchedDish.get().getIngredients().get(0).getFood());
+        Assertions.assertNotNull(matchedDish.get().getIngredients().get(1).getFood());
 
-        final  var ingredient1Food1 = matchedDish.get().getIngredients().stream()
+        final var ingredient1Food1 = matchedDish.get().getIngredients().stream()
                 .filter(i -> i.getFood().getName().equals("food3")).findFirst();
-        assertThat(ingredient1Food1.isPresent()).isTrue();
-        assertThat(ingredient1Food1.get().getMultiplier()).isEqualTo(1.0);
-        assertThat(ingredient1Food1.get().getPortion().getId()).isEqualTo(food1Portion1.getId());
+        Assertions.assertTrue(ingredient1Food1.isPresent());
+        Assertions.assertEquals(1.0, ingredient1Food1.get().getMultiplier());
+        Assertions.assertEquals(food1Portion1.getId(), ingredient1Food1.get().getPortion().getId());
         final var responseEntity2 = dishController.deleteDish(matchedDish.get().getId());
-        assertThat(responseEntity2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity2.getStatusCode());
     }
-
 
 }
