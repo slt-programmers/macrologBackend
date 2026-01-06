@@ -15,7 +15,7 @@ import slt.security.UserInfo;
 import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -199,7 +199,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
                 .fat(30.0)
                 .protein(40.0)
                 .name("newName")
-                .portions(Collections.singletonList(PortionDto.builder()
+                .portions(List.of(PortionDto.builder()
                         .description("newPortion")
                         .grams(2.0)
                         .build()))
@@ -236,7 +236,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
                 .fat(30.0)
                 .protein(40.0)
                 .name("newName")
-                .portions(Collections.singletonList(PortionDto.builder()
+                .portions(List.of(PortionDto.builder()
                         .description("newPortionName")
                         .grams(3.0)
                         .id(portion2.getId())

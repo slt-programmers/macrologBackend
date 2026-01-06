@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import slt.database.entities.Setting;
 
-import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -37,7 +37,8 @@ class SettingsRepositoryTest {
 
     @Test
     void getLatestSettingFound() {
-        when(settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(eq(1L), eq("A"))).thenReturn(Collections.singletonList(Setting.builder().id(1L).build()));
+        when(settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(eq(1L), eq("A"))).thenReturn(
+                List.of(Setting.builder().id(1L).build()));
         final Setting setting = settingsRepository.getLatestSetting(1L, "A");
         verify(settingsCrudRepository).findByUserIdAndNameOrderByDayDesc(eq(1L), eq("A"));
         verifyNoMoreInteractions(settingsCrudRepository);

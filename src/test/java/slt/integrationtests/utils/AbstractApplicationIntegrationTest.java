@@ -173,8 +173,8 @@ public abstract class AbstractApplicationIntegrationTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    protected void saveSetting(final String name, final String value, final LocalDate day) {
-        final var settingDto = SettingDto.builder().name(name).value(value).day(day).build();
+    protected void saveNameSetting(final String value, final LocalDate day) {
+        final var settingDto = SettingDto.builder().name("name").value(value).day(day).build();
         final var responseEntity = settingsController.putSetting(settingDto);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

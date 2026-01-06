@@ -15,7 +15,7 @@ import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +29,7 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
     @BeforeEach
     public void setUserContext() {
         if (this.userId == null) {
-            log.debug("Creating test user for test " + this.getClass().getName());
+            log.debug("Creating test user for test {}", this.getClass().getName());
             this.userId = createUser(this.getClass().getName());
         }
         final var userInfo = UserInfo.builder().userId(this.userId).build();
@@ -123,7 +123,7 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
                 .name(running3.getName())
                 .syncedWith(running3.getSyncedWith())
                 .build();
-        final var responseEntity1 = activityController.postActivities("2001-01-01", Collections.singletonList(updatedRunning));
+        final var responseEntity1 = activityController.postActivities("2001-01-01", List.of(updatedRunning));
         assertEquals(HttpStatus.OK, responseEntity1.getStatusCode());
         final var newResponseEntries2 = responseEntity1.getBody();
         Assertions.assertNotNull(newResponseEntries2);
@@ -137,6 +137,5 @@ public class ActivityControllerITest extends AbstractApplicationIntegrationTest 
         final var runningResponse3 = newResponseEntries3.stream().filter(a -> a.getName().equals("Running")).findFirst();
         assertTrue(runningResponse3.isPresent(), "Running");
         assertEquals(44.0, runningResponse3.get().getCalories().doubleValue());
-
     }
 }

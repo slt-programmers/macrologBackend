@@ -142,7 +142,7 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
     void testDeleteAccount() {
         final var userName = "userDeleteAccount";
         final var userEmail = "userDeleteAccount@test.example";
-        final var password = "password1";
+        final var password = "password2";
 
         // 1e: keer aanmaken succesvol:
         final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
@@ -171,7 +171,7 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
     void testDeleteAccountTwice() {
         final var userName = "userDeleteAccount";
         final var userEmail = "userDeleteAccount@test.example";
-        final var password = "password1";
+        final var password = "password2";
 
         // 1e: keer aanmaken succesvol:
         final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();
@@ -196,7 +196,7 @@ class AuthenticationControllerITest extends AbstractApplicationIntegrationTest {
     void deleteFilledAccount() {
         final var userName = "filledUserToDelete";
         final var userEmail = "filledUserToDelete@test.example";
-        final var password = "password1";
+        final var password = "password3";
 
         // 1e: keer aanmaken succesvol:
         final var registrationRequest = RegistrationRequest.builder().email(userEmail).password(password).username(userName).build();

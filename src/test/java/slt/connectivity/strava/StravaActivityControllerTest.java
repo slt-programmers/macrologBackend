@@ -267,7 +267,7 @@ class StravaActivityControllerTest {
         final long toEpochSecond = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
         mockSetting(1L, "STRAVA_EXPIRES_AT", "" + toEpochSecond);
 
-        when(stravaClient.getActivitiesForDay(eq("A"), any(LocalDate.class))).thenReturn(Collections.singletonList(
+        when(stravaClient.getActivitiesForDay(eq("A"), any(LocalDate.class))).thenReturn(List.of(
                 ListedActivityDto.builder().id(1L).build()
         ));
 

@@ -109,8 +109,8 @@ public class SettingsControllerITest extends AbstractApplicationIntegrationTest 
         assertThat(userSettingsDto.getGoalCarbs()).isNull();
 
         // Vullen met data:
-        saveSetting("name", "t1", LocalDate.of(2025,6,1));
-        saveSetting("name", "previous", LocalDate.of(2025,1,1));
+        saveNameSetting("t1", LocalDate.of(2025, 6, 1));
+        saveNameSetting("previous", LocalDate.of(2025, 1, 1));
         saveSetting("gender", "m");
         saveSetting("age", "99");
         saveSetting("birthday", "18-06-1978");
@@ -119,8 +119,8 @@ public class SettingsControllerITest extends AbstractApplicationIntegrationTest 
         saveSetting("goalProtein", "50");
         saveSetting("goalFat", "60");
         saveSetting("goalCarbs", "70");
-        weightController.postWeight(WeightDto.builder().weight(76D).day(LocalDate.of(2025,1,1)).build());
-        weightController.postWeight(WeightDto.builder().weight(75D).day(LocalDate.of(2024, 1,1)).build());
+        weightController.postWeight(WeightDto.builder().weight(76D).day(LocalDate.of(2025, 1, 1)).build());
+        weightController.postWeight(WeightDto.builder().weight(75D).day(LocalDate.of(2024, 1, 1)).build());
 
         UserSettingsDto newSettingsDto = getUserSettingsDto();
         assertThat(newSettingsDto.getName()).isEqualTo("t1");
