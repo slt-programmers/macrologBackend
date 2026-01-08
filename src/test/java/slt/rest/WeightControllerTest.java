@@ -23,8 +23,7 @@ public class WeightControllerTest {
     void setup() {
         service = mock(WeightService.class);
         controller = new WeightController(service);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(1L);
+        final var userInfo = UserInfo.builder().userId(1L).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

@@ -21,8 +21,7 @@ class ConnectivityControllerTest {
     void setup() {
         stravaActivityService = mock(StravaActivityService.class);
         controller = new ConnectivityController(stravaActivityService);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(-1L);
+        final var userInfo = UserInfo.builder().userId(-1L).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

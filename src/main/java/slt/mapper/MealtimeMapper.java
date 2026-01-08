@@ -19,10 +19,8 @@ public interface MealtimeMapper {
 
     @AfterMapping
     default void addParentToChildren(final @MappingTarget Mealtime mealtime) {
-        if (mealtime.getIngredients() != null) {
-            for (Ingredient ingredient : mealtime.getIngredients()) {
-                ingredient.setMealtime(mealtime);
-            }
+        for (Ingredient ingredient : mealtime.getIngredients()) {
+            ingredient.setMealtime(mealtime);
         }
     }
 

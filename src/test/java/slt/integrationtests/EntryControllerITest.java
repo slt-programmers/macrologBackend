@@ -30,8 +30,7 @@ public class EntryControllerITest extends AbstractApplicationIntegrationTest {
             log.debug("Creating test user for test {}", this.getClass().getName());
             this.userId = createUser(this.getClass().getName());
         }
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

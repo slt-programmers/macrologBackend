@@ -15,8 +15,6 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class ImportExportControllerITest extends AbstractApplicationIntegrationTest {
@@ -25,13 +23,11 @@ public class ImportExportControllerITest extends AbstractApplicationIntegrationT
 
     @BeforeEach
     public void setUserContext() {
-
         if (this.userId == null) {
-            log.debug("Creating test user for test " + this.getClass());
+            log.debug("Creating test user for test {}", this.getClass());
             this.userId = createUser("logEntryUser");
         }
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
@@ -86,7 +82,7 @@ public class ImportExportControllerITest extends AbstractApplicationIntegrationT
 
         );
         final var responseEntity = activityController.postActivities("2003-01-01", newActivities);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         // add weight
         // store weight:
@@ -95,32 +91,31 @@ public class ImportExportControllerITest extends AbstractApplicationIntegrationT
                 .day(LocalDate.parse("1980-01-01"))
                 .build();
         final var weightResponse = weightController.postWeight(newWeight);
-        assertThat(weightResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, weightResponse.getStatusCode());
 
         // add settings:
         saveSetting("export1", "export1value");
 
         final var exportEntity = exportController.getAll();
-        assertThat(exportEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, exportEntity.getStatusCode());
         final var export = exportEntity.getBody();
 
         Assertions.assertNotNull(export);
-        assertThat(export.getAllFood()).hasSize(2);
+        Assertions.assertEquals(2, export.getAllFood().size());
         final var optionalFood = export.getAllFood().stream().filter(f -> f.getName().equals("exportFoodWithPortion")).findFirst();
         Assertions.assertTrue(optionalFood.isPresent());
-        assertThat(optionalFood.get().getPortions()).hasSize(2);
+        Assertions.assertEquals(2, optionalFood.get().getPortions().size());
         final var optionalFood2 = export.getAllFood().stream().filter(f -> f.getName().equals("exportFoodNoPortion")).findFirst();
         Assertions.assertTrue(optionalFood2.isPresent());
-        assertThat(optionalFood2.get().getPortions()).hasSize(0);
+        Assertions.assertEquals(0, optionalFood2.get().getPortions().size());
 
-        assertThat(export.getAllLogEntries()).hasSize(1);
-        assertThat(export.getAllActivities()).hasSize(2);
-        assertThat(export.getAllWeights()).hasSize(1);
-        assertThat(export.getAllSettingDtos()).hasSize(1);
+        Assertions.assertEquals(1, export.getAllLogEntries().size());
+        Assertions.assertEquals(2, export.getAllActivities().size());
+        Assertions.assertEquals(1, export.getAllWeights().size());
+        Assertions.assertEquals(1, export.getAllSettingDtos().size());
 
         final var importEntity = importController.setAll(export);
-        assertThat(importEntity.getStatusCode()).isEqualTo(HttpStatus.OK); // why not CREATED?
-
+        Assertions.assertEquals(HttpStatus.OK, importEntity.getStatusCode());
     }
 
 }

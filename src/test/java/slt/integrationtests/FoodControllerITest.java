@@ -15,7 +15,7 @@ import slt.security.UserInfo;
 import slt.integrationtests.utils.AbstractApplicationIntegrationTest;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,8 +33,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
             this.userId = createUser(this.getClass().getName());
         }
         log.debug("Ending with userId [{}]", this.userId);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(this.userId);
+        final var userInfo = UserInfo.builder().userId(this.userId).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
@@ -200,7 +199,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
                 .fat(30.0)
                 .protein(40.0)
                 .name("newName")
-                .portions(Collections.singletonList(PortionDto.builder()
+                .portions(List.of(PortionDto.builder()
                         .description("newPortion")
                         .grams(2.0)
                         .build()))
@@ -237,7 +236,7 @@ public class FoodControllerITest extends AbstractApplicationIntegrationTest {
                 .fat(30.0)
                 .protein(40.0)
                 .name("newName")
-                .portions(Collections.singletonList(PortionDto.builder()
+                .portions(List.of(PortionDto.builder()
                         .description("newPortionName")
                         .grams(3.0)
                         .id(portion2.getId())

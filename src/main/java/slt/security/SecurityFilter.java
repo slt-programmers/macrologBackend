@@ -57,14 +57,15 @@ public class SecurityFilter implements Filter {
             if (token != null && token.startsWith("Bearer")) {
                 final var jwtToken = token.substring("Bearer".length() + 1);
                 try {
-                    Jws<Claims> claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
+                    final var claimsJws = Jwts.parser().setSigningKey(SecurityConstants.SECRET.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(jwtToken);
                     final var userId = claimsJws.getBody().get("userId");
-                    UserInfo userInfo = new UserInfo();
-                    userInfo.setUserId(Long.valueOf(userId.toString()));
+                    final var userInfo =  UserInfo.builder()
+                            .userId(Long.valueOf(userId.toString()))
+                            .build();
                     ThreadLocalHolder.getThreadLocal().set(userInfo);
                     chain.doFilter(request, response);
                 } catch (ExpiredJwtException expiredEx) {
-                    log.debug("ExpiredJWT token.");
+                    log.debug("Expired JWT token.");
                     ((HttpServletResponse) response).sendError(403, "Expired session");
                 } catch (MalformedJwtException malformedJwt) {
                     log.debug("Incorrect token");
