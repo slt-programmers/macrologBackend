@@ -1,9 +1,6 @@
 package slt.rest;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import slt.dto.UserAccountDto;
 import slt.security.ThreadLocalHolder;
 import slt.security.UserInfo;
@@ -14,9 +11,6 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-@Slf4j
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@RunWith(MockitoJUnitRunner.class)
 class AdminControllerTest {
 
     private AdminController controller;
@@ -27,8 +21,7 @@ class AdminControllerTest {
         adminService = mock(AdminService.class);
         GoogleMailService mailService = mock(GoogleMailService.class);
         controller = new AdminController(adminService, mailService);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(123L);
+        final var userInfo = UserInfo.builder().userId(123L).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

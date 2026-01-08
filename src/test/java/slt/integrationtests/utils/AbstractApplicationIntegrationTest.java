@@ -33,10 +33,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -113,8 +109,7 @@ public abstract class AbstractApplicationIntegrationTest {
     }
 
     protected void setUserContextFromJWTResponseHeader(final HttpHeaders headers) {
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(getUserIdFromResponseHeaderJWT(headers));
+        final var userInfo = UserInfo.builder().userId(getUserIdFromResponseHeaderJWT(headers)).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 
@@ -136,7 +131,7 @@ public abstract class AbstractApplicationIntegrationTest {
 
     protected FoodDto createFood(final FoodDto foodDtoZonderPortions) {
         final var responseEntity = foodController.postFood(foodDtoZonderPortions);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         final var foodDto = responseEntity.getBody();
         Assertions.assertNotNull(foodDto);
         return foodDto;
@@ -153,7 +148,7 @@ public abstract class AbstractApplicationIntegrationTest {
                         .build()
         );
         final var responseEntity = entryController.postEntries(day, "BREAKFAST", newEntries);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         Assertions.assertNotNull(responseEntity.getBody());
         checkForSingleMatch(responseEntity.getBody(), savedFood, portion, multiplier);
     }
@@ -164,19 +159,19 @@ public abstract class AbstractApplicationIntegrationTest {
                         (portionDto == null || entryDto.getPortion().getId().equals(portionDto.getId())) &&
                         entryDto.getFood().getId().equals(foodDto.getId())
                 )
-                .collect(Collectors.toList());
-        assertThat(matches).hasSize(1);
+                .toList();
+        Assertions.assertEquals(1, matches.size());
     }
 
     protected void saveSetting(final String name, final String value) {
         final var settingDto = SettingDto.builder().name(name).value(value).build();
         final var responseEntity = settingsController.putSetting(settingDto);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
-    protected void saveSetting(final String name, final String value, final LocalDate day) {
-        final var settingDto = SettingDto.builder().name(name).value(value).day(day).build();
+    protected void saveNameSetting(final String value, final LocalDate day) {
+        final var settingDto = SettingDto.builder().name("name").value(value).day(day).build();
         final var responseEntity = settingsController.putSetting(settingDto);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 }

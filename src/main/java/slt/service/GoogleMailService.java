@@ -49,7 +49,7 @@ public class GoogleMailService {
             this.connected = false;
         } else {
             log.debug("Setting up Mail");
-            this.connected = (settingsRepository.getLatestSetting(ADMIN_USER_ID, GMAIL_ACCESS_TOKEN) != null);
+            this.connected = (settingsRepository.getLatestSetting(ADMIN_USER_ID, GMAIL_ACCESS_TOKEN).isPresent());
             log.debug("Status Google Mail {}", this.connected);
         }
     }
@@ -179,17 +179,18 @@ public class GoogleMailService {
     }
 
     private Optional<Oath2Token> getOath2Token() {
-        final var accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
-        final var refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
-        final var expiresAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
+        final var optionalAccessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
+        final var optionalRefreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
+        final var optionalExpiresAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
 
-        if (accessToken == null ||
-                refreshToken == null ||
-                expiresAt == null) {
+        if (optionalAccessToken.isEmpty() || optionalRefreshToken.isEmpty() || optionalExpiresAt.isEmpty()) {
             log.error("Gmail session not initialized");
             return Optional.empty();
         }
 
+        final var accessToken = optionalAccessToken.get();
+        final var refreshToken = optionalRefreshToken.get();
+        final var expiresAt = optionalExpiresAt.get();
         final var token = Oath2Token.builder()
                 .access_token(accessToken.getValue())
                 .refresh_token(refreshToken.getValue())
@@ -221,22 +222,32 @@ public class GoogleMailService {
     private void storeTokenSettings(final Oath2Token oath2Token) {
         log.debug("Storing token update");
 
-        final var accessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
-        final var refreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
-        final var expireAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
+        final var optionalAccessToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_ACCESS_TOKEN);
+        final var optionalRefreshToken = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_REFRESH_TOKEN);
+        final var optionalExpireAt = settingsRepository.getLatestSetting(GoogleMailService.ADMIN_USER_ID, GMAIL_EXPIRES_AT);
 
-        accessToken.setValue(oath2Token.getAccess_token());
-        if (StringUtils.isNotEmpty(oath2Token.getRefresh_token())) {
-            refreshToken.setValue(oath2Token.getRefresh_token());
+        if (optionalAccessToken.isPresent()) {
+            final var accessToken = optionalAccessToken.get();
+            accessToken.setValue(oath2Token.getAccess_token());
+            settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, accessToken);
         }
-        if (oath2Token.getExpires_at() == null) {
-            oath2Token.setExpires_at(getExpiresAtFromExpiresIn(oath2Token.getExpires_in()));
-        }
-        expireAt.setValue(oath2Token.getExpires_at().toString());
 
-        settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, accessToken);
-        settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, refreshToken);
-        settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, expireAt);
+        if (optionalRefreshToken.isPresent()) {
+            final var refreshToken = optionalRefreshToken.get();
+            if (StringUtils.isNotEmpty(oath2Token.getRefresh_token())) {
+                refreshToken.setValue(oath2Token.getRefresh_token());
+                settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, refreshToken);
+            }
+        }
+
+        if (optionalExpireAt.isPresent()) {
+            final var expireAt = optionalExpireAt.get();
+            if (oath2Token.getExpires_at() == null) {
+                oath2Token.setExpires_at(getExpiresAtFromExpiresIn(oath2Token.getExpires_in()));
+                expireAt.setValue(oath2Token.getExpires_at().toString());
+                settingsRepository.saveSetting(GoogleMailService.ADMIN_USER_ID, expireAt);
+            }
+        }
     }
 
     private boolean isExpired(final Oath2Token token) {

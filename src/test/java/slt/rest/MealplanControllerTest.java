@@ -23,8 +23,7 @@ class MealplanControllerTest {
     void setup() {
         service = mock(MealplanService.class);
         controller = new MealplanController(service);
-        final var userInfo = new UserInfo();
-        userInfo.setUserId(1L);
+        final var userInfo = UserInfo.builder().userId(1L).build();
         ThreadLocalHolder.getThreadLocal().set(userInfo);
     }
 

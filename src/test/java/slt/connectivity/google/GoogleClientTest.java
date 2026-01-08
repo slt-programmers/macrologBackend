@@ -4,9 +4,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -23,33 +21,27 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
-import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 class GoogleClientTest {
 
-    @Mock
-    GoogleConfig googleConfig;
-
-    @Mock
-    RestTemplate restTemplate;
-
-    @InjectMocks
-    GoogleClient googleClient;
+    private GoogleConfig googleConfig;
+    private RestTemplate restTemplate;
+    private GoogleClient googleClient;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        restTemplate = mock(RestTemplate.class);
+        googleConfig = mock(GoogleConfig.class);
+        googleClient = new GoogleClient(restTemplate, googleConfig);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void refreshToken() {
         when(googleConfig.getClientId()).thenReturn("1");
         when(googleConfig.getClientSecret()).thenReturn("2");
@@ -72,31 +64,38 @@ class GoogleClientTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void refreshTokenRestError() {
         when(googleConfig.getClientId()).thenReturn("1");
         when(googleConfig.getClientSecret()).thenReturn("2");
 
-        ArgumentCaptor<HttpEntity<HashMap>> argumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), argumentCaptor.capture(), eq(Oath2Token.class))).thenThrow(new RestClientException("a"));
+        final var argumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), argumentCaptor.capture(),
+                eq(Oath2Token.class))).thenThrow(new RestClientException("a"));
 
         final var refreshedToken = googleClient.refreshToken("r");
         Assertions.assertTrue(refreshedToken.isEmpty());
-        assertThat(Objects.requireNonNull(argumentCaptor.getValue().getBody()).get("grant_type")).isEqualTo("refresh_token");
-        assertThat(argumentCaptor.getValue().getBody().get("refresh_token")).isEqualTo("r");
+        final var body = (HashMap<String, String>) argumentCaptor.getValue().getBody();
+        Assertions.assertNotNull(body);
+        Assertions.assertEquals("refresh_token", body.get("grant_type"));
+        Assertions.assertEquals("r", body.get("refresh_token"));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void getAuthorizationToken() {
         when(googleConfig.getClientId()).thenReturn("1");
         when(googleConfig.getClientSecret()).thenReturn("2");
 
-        ArgumentCaptor<HttpEntity<HashMap>> argumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+        final var argumentCaptor = ArgumentCaptor.forClass(HttpEntity.class);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), argumentCaptor.capture(), eq(Oath2Token.class))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
 
         final var refreshedToken = googleClient.getAuthorizationToken("r");
         Assertions.assertTrue(refreshedToken.isEmpty());
-        assertThat(Objects.requireNonNull(argumentCaptor.getValue().getBody()).get("grant_type")).isEqualTo("authorization_code");
-        assertThat(argumentCaptor.getValue().getBody().get("code")).isEqualTo("r");
+        final var body = (HashMap<String, String>) argumentCaptor.getValue().getBody();
+        Assertions.assertNotNull(body);
+        Assertions.assertEquals("authorization_code", body.get("grant_type"));
+        Assertions.assertEquals("r", body.get("code"));
     }
 
     @Test
@@ -109,20 +108,20 @@ class GoogleClientTest {
     @Test
     void sendMailWithToken() {
         final var message = mock(Message.class);
-        assertThrows(GoogleJsonResponseException.class, () -> googleClient.sendMail(Oath2Token.builder().build(),message));
+        Assertions.assertThrows(GoogleJsonResponseException.class, () -> googleClient.sendMail(Oath2Token.builder().build(), message));
     }
 
     @Test
     void createMail() throws MessagingException {
         final MimeMessage email = googleClient.createEmail("to", "from", "subject", "body");
-        assertThat(email.getFrom().length).isEqualTo(1);
-        assertThat(email.getAllRecipients().length).isEqualTo(1);
+        Assertions.assertEquals(1, email.getFrom().length);
+        Assertions.assertEquals(1, email.getAllRecipients().length);
     }
 
     @Test
     void createGoogleMail() throws IOException, MessagingException {
         final var message = mock(MimeMessage.class);
         final com.google.api.services.gmail.model.Message messageWithEmail = googleClient.createMessageWithEmail(message);
-        assertThat(messageWithEmail.getRaw()).isNotNull();
+        Assertions.assertNotNull(messageWithEmail.getRaw());
     }
 }

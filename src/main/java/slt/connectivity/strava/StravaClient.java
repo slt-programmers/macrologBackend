@@ -21,11 +21,7 @@ import slt.connectivity.strava.dto.SubscriptionInformation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * See <a href="https://developers.strava.com/docs/authentication/">Strava Documentation</a> for implementation used.
@@ -55,7 +51,7 @@ public class StravaClient {
     private static final String STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/activities";
     private static final String STRAVA_AUTHENTICATION_URL = "https://www.strava.com/oauth/token";
 
-    public StravaToken getStravaToken(final String authorizationCode) {
+    public Optional<StravaToken> getStravaToken(final String authorizationCode) {
         final var grantType = "authorization_code";
         final var clientId = stravaConfig.getClientId().toString();
         final var clientSecret = stravaConfig.getClientSecret();
@@ -69,7 +65,7 @@ public class StravaClient {
         return getStravaToken(reqPayload);
     }
 
-    public StravaToken refreshToken(final String refreshToken) {
+    public Optional<StravaToken> refreshToken(final String refreshToken) {
         final var grantType = "refresh_token";
         final var clientId = stravaConfig.getClientId().toString();
         final var clientSecret = stravaConfig.getClientSecret();
@@ -111,7 +107,7 @@ public class StravaClient {
         }
     }
 
-    public ActivityDetailsDto getActivityDetail(final String token, final Long activityDetailId) {
+    public Optional<ActivityDetailsDto> getActivityDetail(final String token, final Long activityDetailId) {
         try {
             final var builder = UriComponentsBuilder.fromHttpUrl(STRAVA_ACTIVITIES_URL + "/" + activityDetailId);
             final var headers = new HttpHeaders();
@@ -124,17 +120,18 @@ public class StravaClient {
             final var gevondenActivity = responseEntity.getBody();
             if (gevondenActivity != null) {
                 log.debug("{} - {} - {} {} {}", gevondenActivity.getStart_date(), gevondenActivity.getCalories(), gevondenActivity.getName(), gevondenActivity.getType(), gevondenActivity.getId());
+                return Optional.of(gevondenActivity);
             } else {
                 log.debug("Gevonden activity: " + null);
+                return Optional.empty();
             }
-            return gevondenActivity;
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return null;
+            return Optional.empty();
         } catch (RestClientException restClientException) {
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -157,10 +154,10 @@ public class StravaClient {
         }
     }
 
-    public SubscriptionInformation startWebhookSubscription(final Integer clientId,
-                                                            final String clientSecret,
-                                                            final String callbackUrl,
-                                                            final String subscribeVerifyToken) {
+    public Optional<SubscriptionInformation> startWebhookSubscription(final Integer clientId,
+                                                                      final String clientSecret,
+                                                                      final String callbackUrl,
+                                                                      final String subscribeVerifyToken) {
         final var reqPayload = new LinkedMultiValueMap<String, String>();
         reqPayload.add(CLIENT_ID, clientId.toString());
         reqPayload.add(CLIENT_SECRET, clientSecret);
@@ -175,21 +172,22 @@ public class StravaClient {
             final var subscription = responseEntity.getBody();
             if (subscription != null) {
                 log.debug("Aangemaakte subscription {}", subscription.getId());
+                return Optional.of(subscription);
             } else {
                 log.debug("Subscription: " + null);
+                return Optional.empty();
             }
-            return subscription;
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return null;
+            return Optional.empty();
         } catch (RestClientException restClientException) {
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return null;
+            return Optional.empty();
         }
     }
 
-    public SubscriptionInformation viewWebhookSubscription(final Integer clientId, final String clientSecret) {
+    public Optional<SubscriptionInformation> viewWebhookSubscription(final Integer clientId, final String clientSecret) {
         try {
             final var builder = UriComponentsBuilder.fromHttpUrl(STRAVA_WEBHOOK_URL)
                     .queryParam(CLIENT_ID, clientId)
@@ -204,16 +202,17 @@ public class StravaClient {
             final var responseEntity = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, parameterizedTypeReference);
             final var body = responseEntity.getBody();
             if (body != null && !body.isEmpty()) {
-                return body.getFirst();
+                return Optional.of(body.getFirst());
+            } else {
+                return Optional.empty();
             }
-            return null;
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return null;
+            return Optional.empty();
         } catch (RestClientException restClientException) {
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -238,26 +237,27 @@ public class StravaClient {
         }
     }
 
-    private StravaToken getStravaToken(final Map<String, String> reqPayload) {
+    private Optional<StravaToken> getStravaToken(final Map<String, String> reqPayload) {
         try {
             final var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             final var entity = new HttpEntity<>(reqPayload, headers);
             final var responseEntity = restTemplate.exchange(STRAVA_AUTHENTICATION_URL, HttpMethod.POST, entity, StravaToken.class);
-            return responseEntity.getBody();
+            if (responseEntity.getBody() != null) {
+                return Optional.of(responseEntity.getBody());
+            }
         } catch (HttpClientErrorException httpClientErrorException) {
             log.error(httpClientErrorException.getResponseBodyAsString());
             log.error(ERROR_MESSAGE + " {}", httpClientErrorException.getLocalizedMessage(), httpClientErrorException);
-            return null;
         } catch (RestClientException restClientException) {
             log.error(ERROR_MESSAGE + " {}", restClientException.getLocalizedMessage(), restClientException);
-            return null;
         }
+        return Optional.empty();
     }
 
-    private long getUTCEpoch(LocalDateTime localDateTime) {
-        ZonedDateTime ldtZoned = localDateTime.atZone(ZoneId.systemDefault());
-        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+    private long getUTCEpoch(final LocalDateTime localDateTime) {
+        final var ldtZoned = localDateTime.atZone(ZoneId.systemDefault());
+        final var utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
         return utcZoned.toEpochSecond();
     }
 
