@@ -101,28 +101,32 @@ public class StravaActivityService {
 
     // User activities
     public boolean isStravaConnected(final Long userId) {
-        return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID) != null);
+        return (settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID).isPresent());
     }
 
     public StravaSyncedAccountDto getStravaConnectivity(final Long userId) {
         if (isStravaConnected(userId)) {
-            final var firstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
-            final var lastname = settingsRepository.getLatestSetting(userId, STRAVA_LASTNAME);
-            final var athleteId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
-            final var image = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
+            final var optionalAthleteId = settingsRepository.getLatestSetting(userId, STRAVA_ATHLETE_ID);
+            final var optionalFirstname = settingsRepository.getLatestSetting(userId, STRAVA_FIRSTNAME);
+            final var optionalLastname = settingsRepository.getLatestSetting(userId, STRAVA_LASTNAME);
+            final var optionalImage = settingsRepository.getLatestSetting(userId, STRAVA_PROFILE);
 
-            final var stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
+            if (optionalAthleteId.isPresent() && optionalFirstname.isPresent() && optionalLastname.isPresent() && optionalImage.isPresent()) {
+                final var athleteId = optionalAthleteId.get();
+                final var firstname = optionalFirstname.get();
+                final var lastname = optionalLastname.get();
+                final var image = optionalImage.get();
+                final var stravaCount = activityRepository.countByUserIdAndSyncedWith(userId, STRAVA);
 
-            // TODO proper optional checks
-            return StravaSyncedAccountDto.builder()
-                    .syncedAccountId(Long.valueOf(athleteId.getValue()))
-                    .image(image.getValue())
-                    .name(firstname.getValue() + " " + lastname.getValue())
-                    .numberActivitiesSynced(stravaCount)
-                    .build();
-        } else {
-            return StravaSyncedAccountDto.builder().syncedApplicationId(stravaConfig.getClientId()).build();
+                return StravaSyncedAccountDto.builder()
+                        .syncedAccountId(Long.valueOf(athleteId.getValue()))
+                        .image(image.getValue())
+                        .name(firstname.getValue() + " " + lastname.getValue())
+                        .numberActivitiesSynced(stravaCount)
+                        .build();
+            }
         }
+        return StravaSyncedAccountDto.builder().syncedApplicationId(stravaConfig.getClientId()).build();
     }
 
     private void saveSetting(final Long userId, final String name, final String value) {
@@ -197,18 +201,25 @@ public class StravaActivityService {
     private void storeTokenSettings(final Long userId, final StravaToken stravaToken) {
         log.debug("Storing token update");
 
-        // TODO fix nullpointer
-        final var accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
-        final var refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
-        final var expireAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
+        final var optionalAccessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
+        final var optionalRefreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
+        final var optionalExpiredAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
 
-        accessToken.setValue(stravaToken.getAccess_token());
-        refreshToken.setValue(stravaToken.getRefresh_token());
-        expireAt.setValue(stravaToken.getExpires_at().toString());
-
-        settingsRepository.saveSetting(userId, accessToken);
-        settingsRepository.saveSetting(userId, refreshToken);
-        settingsRepository.saveSetting(userId, expireAt);
+        if (optionalAccessToken.isPresent()) {
+            final var accessToken = optionalAccessToken.get();
+            accessToken.setValue(stravaToken.getAccess_token());
+            settingsRepository.saveSetting(userId, accessToken);
+        }
+        if (optionalRefreshToken.isPresent()) {
+            final var refreshToken = optionalRefreshToken.get();
+            refreshToken.setValue(stravaToken.getRefresh_token());
+            settingsRepository.saveSetting(userId, refreshToken);
+        }
+        if (optionalExpiredAt.isPresent()) {
+            final var expiredAt = optionalExpiredAt.get();
+            expiredAt.setValue(stravaToken.getExpires_at().toString());
+            settingsRepository.saveSetting(userId, expiredAt);
+        }
     }
 
     public List<ListedActivityDto> getStravaActivitiesForDay(StravaToken token, LocalDate date) {
@@ -216,14 +227,17 @@ public class StravaActivityService {
     }
 
     private Optional<StravaToken> getStravaToken(final Long userId) {
-        final var accessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
-        final var refreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
-        final var expiresAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
+        final var optionalAccessToken = settingsRepository.getLatestSetting(userId, STRAVA_ACCESS_TOKEN);
+        final var optionalRefreshToken = settingsRepository.getLatestSetting(userId, STRAVA_REFRESH_TOKEN);
+        final var optionalExpiresAt = settingsRepository.getLatestSetting(userId, STRAVA_EXPIRES_AT);
 
-        if (accessToken == null || refreshToken == null || expiresAt == null) {
+        if (optionalAccessToken.isEmpty() || optionalRefreshToken.isEmpty() || optionalExpiresAt.isEmpty()) {
             log.error("Strava session not initialized");
             return Optional.empty();
         } else {
+            final var accessToken = optionalAccessToken.get();
+            final var refreshToken = optionalRefreshToken.get();
+            final var expiresAt = optionalExpiresAt.get();
             final var token = StravaToken.builder()
                     .access_token(accessToken.getValue())
                     .refresh_token(refreshToken.getValue())
@@ -253,7 +267,7 @@ public class StravaActivityService {
                                                    boolean forceUpdate) {
         final var newActivities = new ArrayList<Activity>();
         boolean webhookDisabled = this.stravaWebhookSubscriptionId == null;
-        // TODO test this if
+
         if ((webhookDisabled || forceUpdate) && isStravaConnected(userId)) {
             log.debug("Strava is connected. Syncing");
             final var token = getStravaToken(userId);

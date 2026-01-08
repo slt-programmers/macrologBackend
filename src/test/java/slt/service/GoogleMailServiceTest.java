@@ -49,7 +49,7 @@ class GoogleMailServiceTest {
     @Test
     void getMailStatusUitMaarGeenSetting() {
         when(googleConfig.getClientSecret()).thenReturn("a");
-        when(settingsRepository.getLatestSetting(any(), any())).thenReturn(null);
+        when(settingsRepository.getLatestSetting(any(), any())).thenReturn(Optional.empty());
         final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         final var mailStatus = mailService.getMailStatus();
         Assertions.assertFalse(mailStatus.isConnected());
@@ -58,7 +58,7 @@ class GoogleMailServiceTest {
     @Test
     void getMailStatusAanMetSetting() {
         when(googleConfig.getClientSecret()).thenReturn("a");
-        when(settingsRepository.getLatestSetting(any(), any())).thenReturn(Setting.builder().build());
+        when(settingsRepository.getLatestSetting(any(), any())).thenReturn(Optional.ofNullable(Setting.builder().build()));
         final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         final var mailStatus = mailService.getMailStatus();
         Assertions.assertTrue(mailStatus.isConnected());
@@ -89,7 +89,7 @@ class GoogleMailServiceTest {
 
         // Niet expired token:
         final var instant = Instant.now().plus(20, ChronoUnit.MINUTES);
-        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Optional.ofNullable(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build()));
         final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         mailService.sendPasswordRetrievalMail("mail", null, UserAccount.builder().build());
         verify(settingsRepository, times(5)).getLatestSetting(any(), any());
@@ -104,7 +104,7 @@ class GoogleMailServiceTest {
 
         // Niet expired token:
         final var instant = Instant.now().plus(20, ChronoUnit.MINUTES);
-        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Optional.ofNullable(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build()));
         final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         mailService.sendConfirmationMail("mail", UserAccount.builder().build());
         verify(settingsRepository, times(5)).getLatestSetting(any(), any());
@@ -119,7 +119,7 @@ class GoogleMailServiceTest {
 
         // Niet expired token:
         final var instant = Instant.now().plus(20, ChronoUnit.MINUTES);
-        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build());
+        when(settingsRepository.getLatestSetting(eq(-1L), any())).thenReturn(Optional.ofNullable(Setting.builder().value(String.valueOf(instant.getEpochSecond())).build()));
         final var mailService = new GoogleMailService(settingsRepository, googleConfig, googleClient);
         mailService.sendTestMail("mail");
         verify(settingsRepository, times(5)).getLatestSetting(any(), any());

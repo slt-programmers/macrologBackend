@@ -42,14 +42,14 @@ class StravaActivityControllerTest {
 
     @Test
     void isStravaConnectedTrue() {
-        when(settingsRepository.getLatestSetting(eq(1L), eq("STRAVA_ATHLETE_ID"))).thenReturn(Setting.builder().value("dad").build());
+        when(settingsRepository.getLatestSetting(eq(1L), eq("STRAVA_ATHLETE_ID"))).thenReturn(Optional.ofNullable(Setting.builder().value("dad").build()));
         final boolean stravaConnected = stravaActivityService.isStravaConnected(1L);
         Assertions.assertTrue(stravaConnected);
     }
 
     @Test
     void isStravaConnectedFalse() {
-        when(settingsRepository.getLatestSetting(eq(1L), eq("STRAVA_ATHLETE_ID"))).thenReturn(null);
+        when(settingsRepository.getLatestSetting(eq(1L), eq("STRAVA_ATHLETE_ID"))).thenReturn(Optional.empty());
         final boolean stravaConnected = stravaActivityService.isStravaConnected(1L);
         Assertions.assertFalse(stravaConnected);
     }
@@ -285,7 +285,7 @@ class StravaActivityControllerTest {
         // De status is niet aangepast. Geen force geweest namelijk
         Assertions.assertEquals("DELETED", storedMacroLogActivities.getFirst().getStatus());
 
-        // Geen conenctie naar strava, want de webhook staat aan. Alleen by force controleren we strava
+        // Geen connectie naar strava, want de webhook staat aan. Alleen by force controleren we strava
         verify(activityRepository, times(0)).saveActivity(any());
         verify(stravaClient, times(0)).getActivitiesForDay(any(), any());
         verify(stravaClient, times(0)).getActivityDetail(any(), any());
@@ -513,9 +513,9 @@ class StravaActivityControllerTest {
 
     private void mockSetting(final Long userId, final String name, final String value) {
         if (value == null) {
-            when(settingsRepository.getLatestSetting(eq(userId), eq(name))).thenReturn(null);
+            when(settingsRepository.getLatestSetting(eq(userId), eq(name))).thenReturn(Optional.empty());
         } else {
-            when(settingsRepository.getLatestSetting(eq(userId), eq(name))).thenReturn(Setting.builder().value(value).build());
+            when(settingsRepository.getLatestSetting(eq(userId), eq(name))).thenReturn(Optional.ofNullable(Setting.builder().value(value).build()));
         }
     }
 

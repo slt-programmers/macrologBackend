@@ -15,6 +15,7 @@ import slt.mapper.SettingsMapper;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -42,16 +43,16 @@ public class SettingsService {
     }
 
     public String getSetting(final Long userId, final String name, final String date) {
-        Setting setting;
+        Optional<Setting> setting;
         if (StringUtils.isEmpty(date)) {
             setting = settingsRepository.getLatestSetting(userId, name);
         } else {
             setting = settingsRepository.getValidSetting(userId, name, Date.valueOf(date));
         }
-        if (setting == null) {
+        if (setting.isEmpty()) {
             throw new NotFoundException("Setting [" + name + "] for userId [" + userId + "] not found.");
         }
-        return setting.getValue();
+        return setting.get().getValue();
     }
 
     public void putSetting(final Long userId, final SettingDto settingDto) {

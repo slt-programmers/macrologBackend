@@ -40,14 +40,15 @@ public class SettingsRepository {
     private SettingsCrudRepository settingsCrudRepository;
 
     public void putSetting(final Setting setting) {
-        final var currentSetting = getValidSetting(setting.getUserId(), setting.getName(), setting.getDay());
-        if (currentSetting == null) { // geen records
+        final var optionalSetting = getValidSetting(setting.getUserId(), setting.getName(), setting.getDay());
+        if (optionalSetting.isEmpty()) { // geen records
             log.debug("Insert");
             // new settings cant have id's. clear it:
             setting.setId(null);
             saveSetting(setting.getUserId(), setting);
         } else {
             log.debug("Update");
+            final var currentSetting = optionalSetting.get();
             boolean settingSameDay = currentSetting.getDay().toLocalDate().equals(setting.getDay().toLocalDate());
             if (settingSameDay) {
                 currentSetting.setValue(setting.getValue());
@@ -68,22 +69,22 @@ public class SettingsRepository {
         settingsCrudRepository.deleteAllByUserIdAndName(userId, name);
     }
 
-    public Setting getLatestSetting(final Long userId, final String setting) {
+    public Optional<Setting> getLatestSetting(final Long userId, final String setting) {
         final var byUserIdAndName = settingsCrudRepository.findByUserIdAndNameOrderByDayDesc(userId, setting);
         log.debug("Number of hits for setting {}: {}", setting, byUserIdAndName.size());
-        return byUserIdAndName.isEmpty() ? null : byUserIdAndName.getFirst();
+        return byUserIdAndName.stream().findFirst();
     }
 
-    public Setting getValidSetting(final Long userId, final String setting, final Date date) {
+    public Optional<Setting> getValidSetting(final Long userId, final String setting, final Date date) {
         final var byUserIdAndNameWithDayBeforeDay = settingsCrudRepository.findByUserIdAndNameWithDayBeforeDay(userId, setting, date);
         log.debug("Number of hits for setting on or before date {}: {}", setting, byUserIdAndNameWithDayBeforeDay.size());
 
         if (byUserIdAndNameWithDayBeforeDay.isEmpty()) {
             final var byUserIdAndNameWithDayAfterDay = settingsCrudRepository.findByUserIdAndNameWithDayAfterDay(userId, setting, date);
             log.debug("Number of hits for setting on or after date {}: {}", setting, byUserIdAndNameWithDayAfterDay.size());
-            return byUserIdAndNameWithDayAfterDay.isEmpty() ? null : byUserIdAndNameWithDayAfterDay.getFirst();
+            return byUserIdAndNameWithDayAfterDay.stream().findFirst();
         } else {
-            return byUserIdAndNameWithDayBeforeDay.getFirst();
+            return byUserIdAndNameWithDayBeforeDay.stream().findFirst();
         }
     }
 
