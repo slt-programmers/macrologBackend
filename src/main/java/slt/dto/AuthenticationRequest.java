@@ -7,6 +7,8 @@ import lombok.*;
 public class AuthenticationRequest {
 
     private String username; // Or email
+    @Deprecated
+    private String email;
     private String password;
 
 }

@@ -274,7 +274,7 @@ public class StravaActivityService {
             if (token.isPresent()) {
                 final var stravaActivitiesForDay = getStravaActivitiesForDay(token.get(), date);
                 for (final var stravaActivity : stravaActivitiesForDay) {
-                    checkMatchingActivities(stravaActivity, dayActivities, newActivities, token.get(), forceUpdate);
+                    checkMatchingActivities(stravaActivity, dayActivities, newActivities, token.get(), userId, forceUpdate);
                 }
             } else {
                 log.debug("No valid token");
@@ -287,6 +287,7 @@ public class StravaActivityService {
                                          final List<Activity> dayActivities,
                                          final List<Activity> newActivities,
                                          final StravaToken token,
+                                         final Long userId,
                                          boolean forceUpdate) {
         log.debug("Checking to sync {}-{} ", stravaActivity.getName(), stravaActivity.getId());
         final var stravaActivityId = stravaActivity.getId();
@@ -306,7 +307,7 @@ public class StravaActivityService {
             }
         } else {
             log.debug("Activity [{}] not known", stravaActivity.getName());
-            final var newMacrologActivity = createNewMacrologActivity(token, stravaActivityId);
+            final var newMacrologActivity = createNewMacrologActivity(token, stravaActivityId, userId);
             if (newMacrologActivity.isPresent()) {
                 final var savedNewActivity = activityRepository.saveActivity(newMacrologActivity.get());
                 newActivities.add(savedNewActivity);
@@ -338,7 +339,7 @@ public class StravaActivityService {
         }
         final var updates = event.getUpdates();
         if (event.getUpdates() != null) {
-            for (Map.Entry<String, String> stringStringEntry : updates.entrySet()) {
+            for (final var stringStringEntry : updates.entrySet()) {
                 log.debug("{} - {}", stringStringEntry.getKey(), stringStringEntry.getValue());
             }
         }
@@ -373,7 +374,7 @@ public class StravaActivityService {
                     log.debug("Strava activity updated");
                 }
             } else {
-                final var newMacrologActivity = createNewMacrologActivity(stravaToken, stravaActivityId);
+                final var newMacrologActivity = createNewMacrologActivity(stravaToken, stravaActivityId, foundStravaUserMatch.getUserId());
                 if (newMacrologActivity.isPresent()) {
                     activityRepository.saveActivity(newMacrologActivity.get());
                     log.debug("New activity added via strava {}", stravaActivityId);
@@ -389,7 +390,7 @@ public class StravaActivityService {
         }
     }
 
-    private Optional<Activity> createNewMacrologActivity(final StravaToken token, final Long stravaActivityId) {
+    private Optional<Activity> createNewMacrologActivity(final StravaToken token, final Long stravaActivityId, final Long userId) {
         final var optionalActivityDetail = stravaClient.getActivityDetail(token.getAccess_token(), stravaActivityId);
         if (optionalActivityDetail.isPresent()) {
             final var activityDetail = optionalActivityDetail.get();
@@ -397,6 +398,7 @@ public class StravaActivityService {
             // To avoid timezone issues we take the date part only and convert it to localdate
             final var startDateLocalDate = LocalDateParser.parse(startDateString.substring(0, startDateString.indexOf('T')));
             return Optional.of(Activity.builder()
+                    .userId(userId)
                     .day(Date.valueOf(startDateLocalDate))
                     .name(makeUTF8(activityDetail.getType() + ": " + activityDetail.getName()))
                     .calories(activityDetail.getCalories())

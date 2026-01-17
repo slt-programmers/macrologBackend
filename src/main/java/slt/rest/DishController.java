@@ -21,7 +21,7 @@ public class DishController {
     @GetMapping
     public ResponseEntity<List<DishDto>> getAllDishes() {
         final var userInfo = ThreadLocalHolder.getThreadLocal().get();
-        final var allDishDtos= dishService.getAllDishes(userInfo.getUserId());
+        final var allDishDtos = dishService.getAllDishes(userInfo.getUserId());
         return ResponseEntity.ok(allDishDtos);
     }
 
